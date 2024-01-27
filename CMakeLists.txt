@@ -12,5 +12,6 @@ endif()
 project ("NodeBrain")
 
 # Include sub-projects.
-add_subdirectory ("NodeBrain")
-add_subdirectory ("thirdparty/glm")
+add_subdirectory("NodeBrain")
+add_subdirectory("thirdparty/glm")
+add_subdirectory("thirdparty/glfw")

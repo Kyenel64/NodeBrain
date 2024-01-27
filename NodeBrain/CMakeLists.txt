@@ -12,12 +12,14 @@ endif()
 # Include paths
 target_include_directories(${PROJECT_NAME} 
     PUBLIC thirdparty/glm
+    PUBLIC thirdparty/glfw/include
 )
 
 # Library paths
 target_link_directories(${PROJECT_NAME}
     PRIVATE thirdparty/glm/glm 
+    PRIVATE thrdparty/glfw/src
 )
 
 # Library
-target_link_libraries(${PROJECT_NAME} glm)
+target_link_libraries(${PROJECT_NAME} glm glfw)
