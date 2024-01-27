@@ -1,0 +1,8 @@
+# Visual Studio cache
+.vs/
+
+# Output
+out/
+
+# Cmake
+CMakeUserPresets.json
