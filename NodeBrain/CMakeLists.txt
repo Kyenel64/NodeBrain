@@ -13,13 +13,15 @@ endif()
 target_include_directories(${PROJECT_NAME} 
     PUBLIC thirdparty/glm
     PUBLIC thirdparty/glfw/include
+    PUBLIC thirdparty/spdlog/include
 )
 
 # Library paths
 target_link_directories(${PROJECT_NAME}
     PRIVATE thirdparty/glm/glm 
     PRIVATE thrdparty/glfw/src
+    PRIVATE thirdparty/spdlog/src
 )
 
 # Library
-target_link_libraries(${PROJECT_NAME} glm glfw)
+target_link_libraries(${PROJECT_NAME} glm glfw spdlog)

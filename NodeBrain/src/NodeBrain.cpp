@@ -4,6 +4,7 @@
 #include "NodeBrain.h"
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
 
 static void error_callback(int error, const char* description)
 {
@@ -48,6 +49,7 @@ int TestWindow()
 
 int main()
 {
+    spdlog::info("Welcome to spdlog!");
     glm::vec3 vec = { 0.5f, 0.8f, 1.0f };
     std::cout << vec.x << " " << vec.y << " " << vec.z << std::endl;
     TestWindow();
