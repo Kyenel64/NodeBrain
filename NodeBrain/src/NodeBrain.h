@@ -1,8 +1,12 @@
-﻿// NodeBrain.h : Include file for standard system include files,
-// or project specific include files.
+﻿#include <string>
 
-#pragma once
+namespace NodeBrain
+{
+    class TestClass
+    {
+        public:
+        TestClass() = default;
 
-#include <iostream>
-
-// TODO: Reference additional headers your program requires here.
+        int TestWindow();
+    };
+}
