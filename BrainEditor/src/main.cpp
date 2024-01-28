@@ -1,4 +1,4 @@
-#include <NodeBrain.h>
+#include <NodeBrain/NodeBrain.h>
 
 int main()
 {
