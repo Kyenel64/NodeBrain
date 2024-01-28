@@ -7,7 +7,7 @@
 [submodule "thirdparty/spdlog"]
 	path = NodeBrain/thirdparty/spdlog
 	url = https://github.com/gabime/spdlog
-[submodule "thirdparty/ImGui"]
+[submodule "ImGui"]
 	path = NodeBrain/thirdparty/ImGui
-	url = https://github.com/ocornut/ImGui
-	branch = docking
+	url = https://github.com/kyenel64/ImGui
+	branch = docking_NodeBrain
