@@ -1,11 +1,32 @@
 # Visual Studio cache
-.vs/
+.vs
 
 # Output
-out/
+out
+[Bb][Uu][Ii][Ll][Dd]
 
 # Cmake
 CMakeUserPresets.json
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
 
-# Mac
-.DS_Store
+# Compiled Object files
+**/.DS_Store
+*.slo
+*.lo
+*.o
+*.obj
+
+# Executables
+*.exe
+*.out
+*.app
