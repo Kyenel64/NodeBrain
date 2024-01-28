@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
+#include <imgui.h>
+#include "vulkan/vulkan.h"
 
 static void error_callback(int error, const char* description)
 {

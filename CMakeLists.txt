@@ -16,3 +16,10 @@ add_subdirectory("NodeBrain")
 add_subdirectory("thirdparty/glm")
 add_subdirectory("thirdparty/glfw")
 add_subdirectory("thirdparty/spdlog")
+
+# ImGui TODO: put in ImGui CMakeLists.txt
+set(IMGUI "thirdparty/ImGui")
+add_library (ImGui STATIC "${IMGUI}/imconfig.h" "${IMGUI}/imgui.h" "${IMGUI}/imgui.cpp" "${IMGUI}/imgui_demo.cpp" "${IMGUI}/imgui_draw.cpp"
+    "${IMGUI}/imgui_internal.h" "${IMGUI}/imgui_tables.cpp" "${IMGUI}/imgui_widgets.cpp" "${IMGUI}/imstb_rectpack.h" "${IMGUI}/imstb_textedit.h"
+    "${IMGUI}/imstb_truetype.h")
+target_include_directories(ImGui PUBLIC ${IMGUI})
