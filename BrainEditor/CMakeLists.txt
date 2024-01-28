@@ -1,7 +1,7 @@
 project ("BrainEditor")
 
 # Source files
-add_executable(${PROJECT_NAME} "src/main.cpp")
+add_executable(${PROJECT_NAME} "src/main.cpp" "src/BrainEditor.h" "src/BrainEditor.cpp")
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 
