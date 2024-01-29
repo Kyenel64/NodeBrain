@@ -6,6 +6,8 @@ namespace NodeBrain
 	App::App()
 	{
 		m_Timer.StartTimer();
+
+		m_Window = std::make_unique<Window>("NodeBrain");
 	}
 
 	App::~App()
@@ -32,12 +34,19 @@ namespace NodeBrain
 			// Update GUI
 			for (Layer* layer : m_Layers)
 				layer->OnUpdateGUI();
+
+			// Window 
+			m_Window->SwapBuffers();
+			m_Window->PollEvents();
 		}
 		
 	}
 
 	void App::PushLayer(Layer* layer)
 	{
+		if (!layer)
+			return;
+
 		m_Layers.push_back(layer);
 		layer->OnAttach();
 	}
