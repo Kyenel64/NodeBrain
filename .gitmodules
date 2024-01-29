@@ -11,6 +11,6 @@
 	path = NodeBrain/thirdparty/ImGui
 	url = https://github.com/kyenel64/ImGui
 	branch = docking_NodeBrain
-[submodule "tests/thirdparty/googletest"]
-	path = tests/thirdparty/googletest
+[submodule "test/thirdparty/googletest"]
+	path = test/thirdparty/googletest
 	url = https://github.com/google/googletest
