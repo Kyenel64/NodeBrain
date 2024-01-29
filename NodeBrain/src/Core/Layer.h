@@ -1,6 +1,6 @@
 // Class interface for user-written code.
 // Use: Create a class derived from Layer -> Create NodeBrain app ->
-//	Push layer -> call app->Run() -> delete app
+//	Push layer to app -> call app->Run() -> delete app
 #pragma once
 
 namespace NodeBrain
@@ -13,7 +13,7 @@ namespace NodeBrain
 
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
-		virtual void OnUpdate() {}
+		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnUpdateGUI() {}
 	};
 }

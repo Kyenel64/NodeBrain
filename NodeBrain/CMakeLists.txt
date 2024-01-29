@@ -1,7 +1,7 @@
 ﻿project ("NodeBrain")
 
 # Source files
-add_library (${PROJECT_NAME}    "src/Core/App.h" "src/Core/App.cpp" "src/nbpch.h" "src/nbpch.cpp" "src/Core/Layer.h")
+add_library (${PROJECT_NAME} "src/Core/App.h" "src/Core/App.cpp" "src/nbpch.h" "src/nbpch.cpp" "src/Core/Layer.h" "src/Core/Timer.h" )
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 

@@ -14,9 +14,9 @@ namespace NodeBrain
 
 	}
 
-	void BrainEditor::OnUpdate()
+	void BrainEditor::OnUpdate(float deltaTime)
 	{
-
+		
 	}
 
 	void BrainEditor::OnUpdateGUI()

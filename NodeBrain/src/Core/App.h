@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Layer.h"
+#include "Core/Timer.h"
+#include "Core/Layer.h"
 
 namespace NodeBrain
 {
@@ -15,5 +16,7 @@ namespace NodeBrain
 
 	private:
 		std::vector<Layer*> m_Layers;
+		float m_LastFrameTime = 0.0f;
+		Timer m_Timer;
 	};
 }
