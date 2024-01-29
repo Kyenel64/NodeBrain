@@ -6,7 +6,7 @@ namespace NodeBrain
 {
 	void BrainEditor::OnAttach()
 	{
-		std::cout << "BrainEditor Initialized" << std::endl;
+		NB_INFO("Attached Brain Editor layer");
 	}
 
 	void BrainEditor::OnDetach()

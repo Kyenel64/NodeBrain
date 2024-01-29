@@ -17,6 +17,8 @@
 #include <stack>
 #include <queue>
 
+#include "Core/Log.h"
+
 #ifdef NB_WINDOWS
 #include <windows.h>
 #endif

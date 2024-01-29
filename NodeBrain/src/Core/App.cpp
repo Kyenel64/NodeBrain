@@ -1,11 +1,15 @@
 #include "NBpch.h"
 #include "App.h"
 
+#include "Core/Log.h"
+
 namespace NodeBrain
 {
 	App::App()
 	{
 		m_Timer.StartTimer();
+
+		Log::Init();
 
 		m_Window = std::make_unique<Window>("NodeBrain");
 	}
@@ -39,7 +43,6 @@ namespace NodeBrain
 			m_Window->SwapBuffers();
 			m_Window->PollEvents();
 		}
-		
 	}
 
 	void App::PushLayer(Layer* layer)

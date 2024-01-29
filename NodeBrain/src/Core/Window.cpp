@@ -3,54 +3,58 @@
 
 #include <GLFW/glfw3.h>
 
+#include "Core/Log.h"
+
 namespace NodeBrain
 {
-    static void GLFWErrorCallback(int error, const char* description)
+	static void GLFWErrorCallback(int error, const char* description)
 	{
-		std::cout << "GLFW Error" << error << ": " << description << std::endl;
+		NB_ERROR("GLFW Error {0}: {1}", error, description);
 	}
 
-    Window::Window(const std::string& windowName)
-        : m_WindowName(windowName)
-    {
-        Init();
-    }
+	Window::Window(const std::string& windowName)
+		: m_WindowName(windowName)
+	{
+		Init();
+	}
 
-    Window::~Window()
-    {
-        glfwDestroyWindow(m_Window);
-        glfwTerminate();
-    }
+	Window::~Window()
+	{
+		glfwDestroyWindow(m_Window);
+		glfwTerminate();
+	}
 
-    bool Window::Init()
-    {
-        if (!glfwInit())
-            return false;
+	bool Window::Init()
+	{
+		if (!glfwInit())
+			return false;
 
-        glfwSetErrorCallback(GLFWErrorCallback);
-        
-        m_Window = glfwCreateWindow(m_WindowSize.x, m_WindowSize.y, m_WindowName.c_str(), NULL, NULL);
-        
-        if (!m_Window)
-        {
-            glfwTerminate();
-            return false;
-        }
+		glfwSetErrorCallback(GLFWErrorCallback);
+		
+		m_Window = glfwCreateWindow(m_WindowSize.x, m_WindowSize.y, m_WindowName.c_str(), NULL, NULL);
+		
+		if (!m_Window)
+		{
+			glfwTerminate();
+			return false;
+		}
 
-        glfwMakeContextCurrent(m_Window);
+		NB_INFO("Created Window {0}, size: {1}, {2}", m_WindowName, m_WindowSize.x, m_WindowSize.y);
 
-        // TODO: Setup window callbacks
+		glfwMakeContextCurrent(m_Window);
 
-        return true;
-    }
+		// TODO: Setup window callbacks
 
-    void Window::SwapBuffers()
-    {
-        glfwSwapBuffers(m_Window);
-    }
+		return true;
+	}
 
-    void Window::PollEvents()
-    {
-        glfwPollEvents();
-    }
+	void Window::SwapBuffers()
+	{
+		glfwSwapBuffers(m_Window);
+	}
+
+	void Window::PollEvents()
+	{
+		glfwPollEvents();
+	}
 }
