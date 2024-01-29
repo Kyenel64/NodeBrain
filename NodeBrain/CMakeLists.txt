@@ -5,7 +5,7 @@ add_library (${PROJECT_NAME} "src/Core/App.h" "src/Core/App.cpp" "src/nbpch.h" "
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 
-target_precompile_headers(${PROJECT_NAME} PUBLIC "src/nbpch.h")
+target_precompile_headers(${PROJECT_NAME} PUBLIC "src/NBpch.h")
 
 # Dependencies
 find_package(Vulkan REQUIRED)

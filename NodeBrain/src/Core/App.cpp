@@ -1,4 +1,4 @@
-#include "nbpch.h"
+#include "NBpch.h"
 #include "App.h"
 
 namespace NodeBrain

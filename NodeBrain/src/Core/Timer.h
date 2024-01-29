@@ -7,7 +7,7 @@ namespace NodeBrain
     class Timer
     {
     public:
-		Timer() = default;
+		Timer() { StartTimer(); };
 		~Timer() = default;
 
 		void StartTimer() { m_StartTime = std::chrono::system_clock::now(); m_Running = true; }
