@@ -5,6 +5,11 @@ project ("NodeBrain")
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT BrainEditor)
 enable_testing()
 
+# Disable warnings
+if (MSVC)
+    add_definitions("/wd4996")
+ENDIF()
+
 # Variables
 set(NODEBRAIN_PATH ${CMAKE_CURRENT_SOURCE_DIR}/NodeBrain)
 set(IMGUI_PATH ${CMAKE_CURRENT_SOURCE_DIR}/NodeBrain/thirdparty/ImGui)
