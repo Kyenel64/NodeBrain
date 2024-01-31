@@ -3,6 +3,8 @@
 //	Push layer to app -> call app->Run() -> delete app
 #pragma once
 
+#include "Core/Event.h"
+
 namespace NodeBrain
 {
 	class Layer
@@ -13,6 +15,7 @@ namespace NodeBrain
 
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
+		virtual void OnEvent(Event& e) {}
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnUpdateGUI() {}
 	};

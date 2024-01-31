@@ -12,6 +12,7 @@ namespace NodeBrain
 		Log::Init();
 
 		m_Window = std::make_unique<Window>("NodeBrain");
+		m_Window->SetEventCallback(std::bind(&App::OnEvent, this, std::placeholders::_1));
 	}
 
 	App::~App()
@@ -24,7 +25,7 @@ namespace NodeBrain
 
 	void App::Run()
 	{
-		while (true)
+		while (m_Running)
 		{
 			// Calculate deltaTime
 			float time = m_Timer.GetElapsedSeconds(); // TODO: Change to GLFW time
@@ -45,6 +46,15 @@ namespace NodeBrain
 		}
 	}
 
+	void App::OnEvent(Event& event)
+	{
+		for (Layer* layer : m_Layers)
+			layer->OnEvent(event);
+
+		// Bind our functions to an event
+		event.AttachEventFunction<WindowClosedEvent>(std::bind(&App::OnWindowClose, this, std::placeholders::_1));
+	}
+
 	void App::PushLayer(Layer* layer)
 	{
 		if (!layer)
@@ -52,5 +62,11 @@ namespace NodeBrain
 
 		m_Layers.push_back(layer);
 		layer->OnAttach();
+	}
+
+	void App::OnWindowClose(WindowClosedEvent& e)
+	{
+		NB_INFO("Closing Application");
+		m_Running = false;
 	}
 }

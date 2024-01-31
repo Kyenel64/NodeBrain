@@ -3,6 +3,7 @@
 #include "Core/Timer.h"
 #include "Core/Layer.h"
 #include "Core/Window.h"
+#include "Core/Event.h"
 
 namespace NodeBrain
 {
@@ -18,6 +19,12 @@ namespace NodeBrain
 		size_t GetLayersSize() const { return m_Layers.size(); }
 
 	private:
+		// Events
+		void OnEvent(Event& event);
+		void OnWindowClose(WindowClosedEvent& e);
+
+	private:
+		bool m_Running = true;
 		std::vector<Layer*> m_Layers;
 		std::unique_ptr<Window> m_Window;
 		float m_LastFrameTime = 0.0f;
