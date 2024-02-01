@@ -3,6 +3,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include "Core/Input.h"
 #include "Core/KeyCode.h"
 
 namespace NodeBrain
@@ -64,12 +65,14 @@ namespace NodeBrain
 					KeyPressedEvent event(static_cast<Key>(key));
 					WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 					data.EventCallback(event);
+					Input::SetKeyState(static_cast<Key>(key), InputState::Pressed);
 				}
 				else if (action == GLFW_RELEASE)
 				{
 					KeyReleasedEvent event(static_cast<Key>(key));
 					WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 					data.EventCallback(event);
+					Input::SetKeyState(static_cast<Key>(key), InputState::Released);
 				}
 			});
 
@@ -81,12 +84,14 @@ namespace NodeBrain
 					MousePressedEvent event(static_cast<MouseButton>(button));
 					WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 					data.EventCallback(event);
+					Input::SetMouseButtonState(static_cast<MouseButton>(button), InputState::Pressed);
 				}
 				else if (action == GLFW_RELEASE)
 				{
 					MouseReleasedEvent event(static_cast<MouseButton>(button));
 					WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 					data.EventCallback(event);
+					Input::SetMouseButtonState(static_cast<MouseButton>(button), InputState::Released);
 				}
 			});
 

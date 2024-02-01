@@ -18,6 +18,6 @@ namespace NodeBrain
 
 	private:
 		void OnKeyPressed(KeyPressedEvent& event);
-		void OnMouseMoved(MouseMovedEvent& event);
+		void OnMousePressed(MousePressedEvent& event);
 	};
 }

@@ -10,8 +10,8 @@ namespace NodeBrain
 {
 	struct WindowData
 	{
-		int Width = 1920;
-		int Height = 1080;
+		int Width = 1280;
+		int Height = 720;
 		std::function<void(Event&)> EventCallback = nullptr;
 	};
 
@@ -25,6 +25,8 @@ namespace NodeBrain
 		void SetEventCallback(std::function<void(Event&)> func) { m_Data.EventCallback = func; }
 		void SwapBuffers();
 		void PollEvents();
+
+		GLFWwindow* GetGLFWWindow() const { return m_Window; }
 
 	private:
 		GLFWwindow* m_Window = nullptr;

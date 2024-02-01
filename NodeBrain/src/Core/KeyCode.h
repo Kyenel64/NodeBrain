@@ -3,6 +3,8 @@
 
 namespace NodeBrain
 {
+	enum class InputState { None = 0, Pressed, Held, Released };
+
 	enum Key
 	{
 		// From GLFW3

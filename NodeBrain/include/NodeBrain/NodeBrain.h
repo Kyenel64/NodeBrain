@@ -4,5 +4,6 @@
 #include "Core/Layer.h"
 #include "Core/KeyCode.h"
 #include "Core/Event.h"
+#include "Core/Input.h"
 #include "Core/Timer.h"
 #include "Core/Log.h"

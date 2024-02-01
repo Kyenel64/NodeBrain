@@ -2,11 +2,16 @@
 #include "App.h"
 
 #include "Core/Log.h"
+#include "Core/Input.h"
 
 namespace NodeBrain
 {
+	App* s_Instance = nullptr;
+
 	App::App()
 	{
+		s_Instance = this;
+
 		m_Timer.StartTimer();
 
 		Log::Init();
@@ -40,6 +45,9 @@ namespace NodeBrain
 			for (Layer* layer : m_Layers)
 				layer->OnUpdateGUI();
 
+			// Process input polling
+			Input::ProcessStates();
+
 			// Window 
 			m_Window->SwapBuffers();
 			m_Window->PollEvents();
@@ -68,5 +76,10 @@ namespace NodeBrain
 	{
 		NB_INFO("Closing Application");
 		m_Running = false;
+	}
+
+	App* App::GetInstance() 
+	{ 
+		return s_Instance; 
 	}
 }

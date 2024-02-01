@@ -17,6 +17,8 @@ namespace NodeBrain
 		void PushLayer(Layer* layer);
 
 		size_t GetLayersSize() const { return m_Layers.size(); }
+		Window& GetWindow() const { return *m_Window; }
+		static App* GetInstance();
 
 	private:
 		// Events
