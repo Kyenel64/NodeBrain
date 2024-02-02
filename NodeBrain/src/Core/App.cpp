@@ -3,6 +3,7 @@
 
 #include "Core/Log.h"
 #include "Core/Input.h"
+#include "Renderer/Renderer.h"
 
 namespace NodeBrain
 {
@@ -11,13 +12,9 @@ namespace NodeBrain
 	App::App()
 	{
 		s_Instance = this;
-
 		m_Timer.StartTimer();
 
-		Log::Init();
-
-		m_Window = std::make_unique<Window>("NodeBrain");
-		m_Window->SetEventCallback(std::bind(&App::OnEvent, this, std::placeholders::_1));
+		StartupSubSystems();
 	}
 
 	App::~App()
@@ -26,6 +23,18 @@ namespace NodeBrain
 			layer->OnDetach();
 
 		m_Timer.EndTimer();
+	}
+
+	bool App::StartupSubSystems()
+	{
+		Log::Init();
+
+		m_Window = std::make_unique<Window>("NodeBrain");
+		m_Window->SetEventCallback(std::bind(&App::OnEvent, this, std::placeholders::_1));
+
+		Renderer::Init();
+
+		return true;
 	}
 
 	void App::Run()

@@ -25,6 +25,8 @@ namespace NodeBrain
 		void OnEvent(Event& event);
 		void OnWindowClose(WindowClosedEvent& e);
 
+		bool StartupSubSystems();
+
 	private:
 		bool m_Running = true;
 		std::vector<Layer*> m_Layers;
