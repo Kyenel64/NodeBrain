@@ -28,10 +28,14 @@ namespace NodeBrain
 
 		GLFWwindow* GetGLFWWindow() const { return m_Window; }
 
+		std::vector<const char*> GetExtensions() const { return m_Extensions; }
+
 	private:
 		GLFWwindow* m_Window = nullptr;
 		std::string m_WindowName;
 
 		WindowData m_Data;
+
+		std::vector<const char*> m_Extensions;
 	};
 }

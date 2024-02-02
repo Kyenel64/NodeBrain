@@ -38,8 +38,13 @@ namespace NodeBrain
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		glfwMakeContextCurrent(m_Window);
 
-		// --- Callbacks ---
+		// Vulkan extensions
+		uint32_t extensionCount = 0;
+		const char** extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
+		for (size_t i = 0; i < extensionCount; i++)
+			m_Extensions.push_back(extensions[i]);
 
+		// --- Callbacks ---
 		// Window events
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) 
 			{
