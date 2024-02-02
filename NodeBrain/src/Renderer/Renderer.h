@@ -9,6 +9,7 @@ namespace NodeBrain
 	{
 	public:
 		static void Init();
+		static void Shutdown();
 
 		static GAPI GetGAPI();
 

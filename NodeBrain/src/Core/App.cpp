@@ -19,6 +19,8 @@ namespace NodeBrain
 
 	App::~App()
 	{
+		Renderer::Shutdown();
+		
 		for (Layer* layer : m_Layers)
 			layer->OnDetach();
 

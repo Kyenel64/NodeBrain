@@ -11,5 +11,10 @@ namespace NodeBrain
 		s_RendererAPI->Init();
 	}
 
+	void Renderer::Shutdown()
+	{
+		s_RendererAPI->Shutdown();
+	}
+
 	GAPI Renderer::GetGAPI() { return s_GAPI; }
 }
