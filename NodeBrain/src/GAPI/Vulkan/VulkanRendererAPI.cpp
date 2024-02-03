@@ -16,7 +16,7 @@ namespace NodeBrain
 	{
 		#ifdef NB_DEBUG
 			m_EnableValidationLayers = true;
-			m_ValidationLayer = std::make_unique<ValidationLayer>();
+			m_ValidationLayer = std::make_unique<VulkanValidationLayer>();
 		#endif
 
 		VkResult result = CreateInstance();
@@ -24,6 +24,8 @@ namespace NodeBrain
 
 		if (m_EnableValidationLayers)
 			m_ValidationLayer->Setup(m_VkInstance);
+
+		m_PhysicalDevice = std::make_shared<VulkanPhysicalDevice>(m_VkInstance);
 	}
 
 	VulkanRendererAPI::~VulkanRendererAPI()

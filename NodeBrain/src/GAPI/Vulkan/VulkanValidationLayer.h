@@ -4,11 +4,11 @@
 
 namespace NodeBrain
 {
-	class ValidationLayer
+	class VulkanValidationLayer
 	{
 	public:
-		ValidationLayer();
-		~ValidationLayer();
+		VulkanValidationLayer();
+		~VulkanValidationLayer();
 
 		void Setup(VkInstance instance);
 

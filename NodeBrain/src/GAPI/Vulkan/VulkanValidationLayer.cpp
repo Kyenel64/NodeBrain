@@ -1,5 +1,5 @@
 #include "NBpch.h"
-#include "ValidationLayer.h"
+#include "VulkanValidationLayer.h"
 
 namespace NodeBrain
 {
@@ -39,17 +39,17 @@ namespace NodeBrain
 		createInfo.pfnUserCallback = DebugCallback;
 	}
 
-	ValidationLayer::ValidationLayer()
+	VulkanValidationLayer::VulkanValidationLayer()
 	{
 		m_ValidationLayers.push_back("VK_LAYER_KHRONOS_validation");
 	}
 
-	ValidationLayer::~ValidationLayer()
+	VulkanValidationLayer::~VulkanValidationLayer()
 	{
 		DestroyDebugUtilsMessengerEXT(m_VkInstance, m_DebugMessenger, nullptr);
 	}
 
-	void ValidationLayer::Setup(VkInstance instance)
+	void VulkanValidationLayer::Setup(VkInstance instance)
 	{
 		m_VkInstance = instance;
 
@@ -60,7 +60,7 @@ namespace NodeBrain
 		NB_ASSERT(result == VK_SUCCESS, "Failed to setup debug messenger");
 	}
 
-	bool ValidationLayer::CheckValidationLayerSupport()
+	bool VulkanValidationLayer::CheckValidationLayerSupport()
 	{
 		uint32_t layerCount = 0;
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -84,7 +84,7 @@ namespace NodeBrain
 		return true;
 	}
 
-	void ValidationLayer::PopulateCreateInfo(VkInstanceCreateInfo& createInfo, std::vector<const char*>& extensions, VkDebugUtilsMessengerCreateInfoEXT& debugCreateInfo)
+	void VulkanValidationLayer::PopulateCreateInfo(VkInstanceCreateInfo& createInfo, std::vector<const char*>& extensions, VkDebugUtilsMessengerCreateInfoEXT& debugCreateInfo)
 	{
 		NB_ASSERT(CheckValidationLayerSupport(), "Validation layers unavailable");
 		createInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayers.size());

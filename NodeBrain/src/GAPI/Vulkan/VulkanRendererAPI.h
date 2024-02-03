@@ -3,7 +3,8 @@
 #include <vulkan/vulkan.h>
 
 #include "Renderer/RendererAPI.h"
-#include "GAPI/Vulkan/ValidationLayer.h"
+#include "GAPI/Vulkan/VulkanValidationLayer.h"
+#include "GAPI/Vulkan/VulkanPhysicalDevice.h"
 
 namespace NodeBrain
 {
@@ -19,8 +20,9 @@ namespace NodeBrain
 		bool CheckExtensionSupport(std::vector<const char*> extensions);
 
 	private:
-		VkInstance m_VkInstance = nullptr;
+		VkInstance m_VkInstance = VK_NULL_HANDLE;
 		bool m_EnableValidationLayers = false;
-		std::unique_ptr<ValidationLayer> m_ValidationLayer;
+		std::unique_ptr<VulkanValidationLayer> m_ValidationLayer;
+		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
 	};
 }
