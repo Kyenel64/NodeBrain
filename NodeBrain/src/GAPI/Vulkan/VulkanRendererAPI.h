@@ -5,6 +5,7 @@
 #include "Renderer/RendererAPI.h"
 #include "GAPI/Vulkan/VulkanValidationLayer.h"
 #include "GAPI/Vulkan/VulkanPhysicalDevice.h"
+#include "GAPI/Vulkan/VulkanDevice.h"
 
 namespace NodeBrain
 {
@@ -22,7 +23,7 @@ namespace NodeBrain
 	private:
 		VkInstance m_VkInstance = VK_NULL_HANDLE;
 		bool m_EnableValidationLayers = false;
-		std::unique_ptr<VulkanValidationLayer> m_ValidationLayer;
+		std::shared_ptr<VulkanValidationLayer> m_ValidationLayer;
 		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
 	};
 }

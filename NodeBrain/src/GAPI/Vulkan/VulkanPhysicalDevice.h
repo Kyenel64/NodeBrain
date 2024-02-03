@@ -14,19 +14,22 @@ namespace NodeBrain
 		}
 	};
 
-    class VulkanPhysicalDevice
-    {
-    public:
-        VulkanPhysicalDevice(VkInstance instance, uint32_t deviceNumber = 0);
-        ~VulkanPhysicalDevice() = default;
+	class VulkanPhysicalDevice
+	{
+	public:
+		VulkanPhysicalDevice(VkInstance instance, uint32_t deviceNumber = 0);
+		~VulkanPhysicalDevice() = default;
 
-    private:
-        void PickPhysicalDevice(uint32_t deviceHandle);
-        bool IsDeviceSuitable(VkPhysicalDevice device);
+		QueueFamilyIndices GetQueueFamilyIndices() { return FindQueueFamilies(m_PhysicalDevice); }
+		VkPhysicalDevice GetVkPhysicalDevice() const { return m_PhysicalDevice; }
+
+	private:
+		void PickPhysicalDevice(uint32_t deviceHandle);
 		QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
+		bool IsDeviceSuitable(VkPhysicalDevice device);
 		
-    private:
-        VkInstance m_VkInstance = VK_NULL_HANDLE;
-        VkPhysicalDevice m_Device = VK_NULL_HANDLE;
-    };
+	private:
+		VkInstance m_VkInstance = VK_NULL_HANDLE;
+		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
+	};
 }
