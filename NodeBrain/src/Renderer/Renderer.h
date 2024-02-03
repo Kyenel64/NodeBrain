@@ -12,9 +12,5 @@ namespace NodeBrain
 		static void Shutdown();
 
 		static GAPI GetGAPI();
-
-	private:
-		static std::unique_ptr<RendererAPI> s_RendererAPI;
-		static GAPI s_GAPI;
 	};
 }

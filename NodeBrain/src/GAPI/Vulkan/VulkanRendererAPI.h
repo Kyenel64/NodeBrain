@@ -3,26 +3,24 @@
 #include <vulkan/vulkan.h>
 
 #include "Renderer/RendererAPI.h"
+#include "GAPI/Vulkan/ValidationLayer.h"
 
 namespace NodeBrain
 {
 	class VulkanRendererAPI : public RendererAPI
 	{
 	public:
-		virtual void Init() override;
-
-		virtual void Shutdown() override;
+		VulkanRendererAPI();
+		virtual ~VulkanRendererAPI();
 
 	private:
+		void Init();
 		VkResult CreateInstance();
-		void SetupDebugger();
 		bool CheckExtensionSupport(std::vector<const char*> extensions);
-		bool CheckValidationLayerSupport();
 
 	private:
 		VkInstance m_VkInstance = nullptr;
-		VkDebugUtilsMessengerEXT m_DebugMessenger = nullptr;
 		bool m_EnableValidationLayers = false;
-		std::vector<const char*> m_ValidationLayers;
+		std::unique_ptr<ValidationLayer> m_ValidationLayer;
 	};
 }

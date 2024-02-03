@@ -25,6 +25,8 @@ namespace NodeBrain
 			layer->OnDetach();
 
 		m_Timer.EndTimer();
+
+		NB_INFO("Shutdown Application");
 	}
 
 	bool App::StartupSubSystems()
@@ -85,7 +87,6 @@ namespace NodeBrain
 
 	void App::OnWindowClose(WindowClosedEvent& e)
 	{
-		NB_INFO("Closing Application");
 		m_Running = false;
 	}
 

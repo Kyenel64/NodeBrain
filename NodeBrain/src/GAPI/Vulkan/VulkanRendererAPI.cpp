@@ -7,60 +7,28 @@
 
 namespace NodeBrain
 {
-	static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity, 
-		VkDebugUtilsMessageTypeFlagsEXT type, const VkDebugUtilsMessengerCallbackDataEXT* callbackData, void* userData)
+	VulkanRendererAPI::VulkanRendererAPI()
 	{
-
-		if (severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
-			NB_ERROR("Validation error: {0}", callbackData->pMessage);
-		return VK_FALSE;
-	}
-
-	static VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, 
-		const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) 
-	{
-		auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-		if (func != nullptr) 
-			return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-		else
-			return VK_ERROR_EXTENSION_NOT_PRESENT;
-	}
-
-	static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) 
-	{
-		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-		if (func)
-			func(instance, debugMessenger, pAllocator);
-	}
-
-	static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) 
-	{
-		createInfo = {};
-		createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-		createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-		createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-		createInfo.pfnUserCallback = DebugCallback;
+		Init();
 	}
 
 	void VulkanRendererAPI::Init()
 	{
-		NB_INFO("Initializing Vulkan Renderer");
-
 		#ifdef NB_DEBUG
 			m_EnableValidationLayers = true;
-			m_ValidationLayers.push_back("VK_LAYER_KHRONOS_validation");
+			m_ValidationLayer = std::make_unique<ValidationLayer>();
 		#endif
 
 		VkResult result = CreateInstance();
 		NB_ASSERT(result == VK_SUCCESS, result);
 
-		SetupDebugger();
+		if (m_EnableValidationLayers)
+			m_ValidationLayer->Setup(m_VkInstance);
 	}
 
-	void VulkanRendererAPI::Shutdown()
+	VulkanRendererAPI::~VulkanRendererAPI()
 	{
-		if (m_EnableValidationLayers)
-			DestroyDebugUtilsMessengerEXT(m_VkInstance, m_DebugMessenger, nullptr);
+		m_ValidationLayer.reset(); // Destroy validation layer before instance
 		vkDestroyInstance(m_VkInstance, nullptr);
 	}
 
@@ -68,17 +36,17 @@ namespace NodeBrain
 	{
 		// --- App info ---
 		VkApplicationInfo appInfo = {};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "BrainEditor"; // TODO:
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName = "NodeBrain";
-        appInfo.engineVersion = VK_MAKE_VERSION(0, 0, 1); // TODO:
-        appInfo.apiVersion = VK_API_VERSION_1_0;
+		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+		appInfo.pApplicationName = "BrainEditor"; // TODO:
+		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+		appInfo.pEngineName = "NodeBrain";
+		appInfo.engineVersion = VK_MAKE_VERSION(0, 0, 1); // TODO:
+		appInfo.apiVersion = VK_API_VERSION_1_0;
 
 		// --- Create info ---
-        VkInstanceCreateInfo createInfo = {};
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        createInfo.pApplicationInfo = &appInfo;
+		VkInstanceCreateInfo createInfo = {};
+		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+		createInfo.pApplicationInfo = &appInfo;
 
 		// Extensions
 		std::vector<const char*> extensions;
@@ -90,44 +58,19 @@ namespace NodeBrain
 			createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 		#endif
 
-        createInfo.enabledExtensionCount = extensions.size();
-        createInfo.ppEnabledExtensionNames = &extensions[0];
-        createInfo.enabledLayerCount = 0;
+		createInfo.enabledExtensionCount = extensions.size();
+		createInfo.ppEnabledExtensionNames = &extensions[0];
+		createInfo.enabledLayerCount = 0;
 		createInfo.pNext = nullptr;
 
 		// Validation layer
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = {};
 		if (m_EnableValidationLayers)
-		{
-			NB_ASSERT(CheckValidationLayerSupport(), "Validation layers unavailable");
-			createInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayers.size());
-			createInfo.ppEnabledLayerNames = &m_ValidationLayers[0];
-
-			// Add debug utils extension
-			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-			createInfo.enabledExtensionCount = extensions.size();
-			createInfo.ppEnabledExtensionNames = &extensions[0];
-
-			populateDebugMessengerCreateInfo(debugCreateInfo);
-			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &debugCreateInfo;
-		}
+			m_ValidationLayer->PopulateCreateInfo(createInfo, extensions, debugCreateInfo);
 
 		CheckExtensionSupport(extensions);
 
-
-        return vkCreateInstance(&createInfo, nullptr, &m_VkInstance);
-	}
-
-	void VulkanRendererAPI::SetupDebugger()
-	{
-		if (!m_EnableValidationLayers)
-			return;
-		
-		VkDebugUtilsMessengerCreateInfoEXT createInfo = {};
-		populateDebugMessengerCreateInfo(createInfo);
-
-		VkResult result = CreateDebugUtilsMessengerEXT(m_VkInstance, &createInfo, nullptr, &m_DebugMessenger);
-		NB_ASSERT(result == VK_SUCCESS, "Failed to setup debug messenger");
+		return vkCreateInstance(&createInfo, nullptr, &m_VkInstance);
 	}
 
 	bool VulkanRendererAPI::CheckExtensionSupport(const std::vector<const char*> extensions)
@@ -153,30 +96,6 @@ namespace NodeBrain
 			for (int i = 0; i < availableExtensionCount; i++)
 				NB_INFO("\t{0}", availableExtensions[i].extensionName);
 		#endif
-
-		return true;
-	}
-
-	bool VulkanRendererAPI::CheckValidationLayerSupport()
-	{
-		uint32_t layerCount = 0;
-		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-		std::vector<VkLayerProperties> availableLayers(layerCount);
-		vkEnumerateInstanceLayerProperties(&layerCount, &availableLayers[0]);
-
-		// Check layers are available
-		for (int i = 0; i < m_ValidationLayers.size(); i++)
-		{
-			bool layerIsAvailable = false;
-			for (int j = 0; j < layerCount; j++)
-				if (strcmp(m_ValidationLayers[i], availableLayers[j].layerName) == 0)
-					layerIsAvailable = true;
-
-			if (!layerIsAvailable)
-			{
-				return false;
-			}
-		}
 
 		return true;
 	}
