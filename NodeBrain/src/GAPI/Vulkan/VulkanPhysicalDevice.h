@@ -2,22 +2,25 @@
 
 #include <vulkan/vulkan.h>
 
+#include "GAPI/Vulkan/VulkanSurface.h"
+
 namespace NodeBrain
 {
 	struct QueueFamilyIndices
 	{
 		std::optional<uint32_t> Graphics;
+		std::optional<uint32_t> Presentation;
 
-		bool IsComplete()
+		bool IsComplete() const
 		{
-			return Graphics.has_value();
+			return Graphics.has_value() && Presentation.has_value();
 		}
 	};
 
 	class VulkanPhysicalDevice
 	{
 	public:
-		VulkanPhysicalDevice(VkInstance instance, uint32_t deviceNumber = 0);
+		VulkanPhysicalDevice(VkInstance instance, uint32_t deviceNumber, std::shared_ptr<VulkanSurface> surface);
 		~VulkanPhysicalDevice() = default;
 
 		QueueFamilyIndices GetQueueFamilyIndices() { return FindQueueFamilies(m_PhysicalDevice); }
@@ -31,5 +34,6 @@ namespace NodeBrain
 	private:
 		VkInstance m_VkInstance = VK_NULL_HANDLE;
 		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
+		std::shared_ptr<VulkanSurface> m_Surface;
 	};
 }

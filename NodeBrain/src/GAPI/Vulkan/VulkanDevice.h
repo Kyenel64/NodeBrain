@@ -19,6 +19,7 @@ namespace NodeBrain
 	private:
 		VkDevice m_Device = VK_NULL_HANDLE;
 		VkQueue m_GraphicsQueue = VK_NULL_HANDLE;
+		VkQueue m_PresentationQueue = VK_NULL_HANDLE;	
 		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
 		std::shared_ptr<VulkanValidationLayer> m_ValidationLayer;
 		bool m_EnableValidationLayers = false;

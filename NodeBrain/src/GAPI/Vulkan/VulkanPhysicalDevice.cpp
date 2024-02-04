@@ -3,8 +3,8 @@
 
 namespace NodeBrain
 {
-	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance, uint32_t deviceHandle)
-		: m_VkInstance(instance)
+	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance, uint32_t deviceHandle, std::shared_ptr<VulkanSurface> surface)
+		: m_VkInstance(instance), m_Surface(surface)
 	{
 		PickPhysicalDevice(deviceHandle);
 	}
@@ -26,13 +26,13 @@ namespace NodeBrain
 				break;
 			}
 		}
-		NB_ASSERT(m_PhysicalDevice != VK_NULL_HANDLE, "Could not find suitable GPU");
+		NB_ASSERT(m_PhysicalDevice, "Could not find suitable GPU");
 
 	}
 
 	bool VulkanPhysicalDevice::IsDeviceSuitable(VkPhysicalDevice device)
 	{
-		if (device == VK_NULL_HANDLE)
+		if (!device)
 			return false;
 		QueueFamilyIndices indices = FindQueueFamilies(device);
 		return indices.IsComplete();
@@ -49,7 +49,14 @@ namespace NodeBrain
 		for (int i = 0; i < queueFamilyCount; i++)
 		{
 			if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+			{
+				VkBool32 presentationSupport = false;
+				vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_Surface->GetVkSurface(), &presentationSupport);
+				if (presentationSupport)
+					indices.Presentation = i;
+
 				indices.Graphics = i;
+			}
 		}
 
 		return indices;

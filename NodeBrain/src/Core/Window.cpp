@@ -31,6 +31,7 @@ namespace NodeBrain
 			return false;
 
 		glfwSetErrorCallback(GLFWErrorCallback);
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_WindowName.c_str(), NULL, NULL);
 		NB_ASSERT(m_Window, "Failed to create GLFW window");
 		NB_INFO("Created Window {0}, size: {1}, {2}", m_WindowName, m_Data.Width, m_Data.Height);

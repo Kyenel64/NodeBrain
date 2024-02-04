@@ -22,15 +22,21 @@ namespace NodeBrain
 		VkResult result = CreateInstance();
 		NB_ASSERT(result == VK_SUCCESS, result);
 
+		m_Surface = std::make_shared<VulkanSurface>(m_VkInstance);
+
 		if (m_EnableValidationLayers)
 			m_ValidationLayer->Setup(m_VkInstance);
 
-		m_PhysicalDevice = std::make_shared<VulkanPhysicalDevice>(m_VkInstance);
+		m_PhysicalDevice = std::make_shared<VulkanPhysicalDevice>(m_VkInstance, 0, m_Surface);
+		m_Device = std::make_shared<VulkanDevice>(m_PhysicalDevice, m_ValidationLayer);
 	}
 
 	VulkanRendererAPI::~VulkanRendererAPI()
 	{
-		m_ValidationLayer.reset(); // Destroy validation layer before instance
+		m_PhysicalDevice.reset();
+		m_Device.reset();
+		m_Surface.reset();
+		m_ValidationLayer.reset();
 		vkDestroyInstance(m_VkInstance, nullptr);
 	}
 
