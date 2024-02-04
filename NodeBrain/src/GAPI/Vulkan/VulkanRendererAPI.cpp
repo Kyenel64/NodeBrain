@@ -29,10 +29,13 @@ namespace NodeBrain
 
 		m_PhysicalDevice = std::make_shared<VulkanPhysicalDevice>(m_VkInstance, 0, m_Surface);
 		m_Device = std::make_shared<VulkanDevice>(m_PhysicalDevice, m_ValidationLayer);
+
+		m_SwapChain = std::make_shared<VulkanSwapChain>(m_PhysicalDevice, m_Device, m_Surface);
 	}
 
 	VulkanRendererAPI::~VulkanRendererAPI()
 	{
+		m_SwapChain.reset();
 		m_PhysicalDevice.reset();
 		m_Device.reset();
 		m_Surface.reset();

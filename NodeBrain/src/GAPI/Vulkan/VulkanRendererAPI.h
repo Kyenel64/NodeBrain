@@ -7,6 +7,7 @@
 #include "GAPI/Vulkan/VulkanPhysicalDevice.h"
 #include "GAPI/Vulkan/VulkanDevice.h"
 #include "GAPI/Vulkan/VulkanSurface.h"
+#include "GAPI/Vulkan/VulkanSwapChain.h"
 
 namespace NodeBrain
 {
@@ -28,5 +29,6 @@ namespace NodeBrain
 		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
 		std::shared_ptr<VulkanDevice> m_Device;
 		std::shared_ptr<VulkanSurface> m_Surface;
+		std::shared_ptr<VulkanSwapChain> m_SwapChain;
 	};
 }

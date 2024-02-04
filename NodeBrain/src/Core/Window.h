@@ -29,6 +29,7 @@ namespace NodeBrain
 		GLFWwindow* GetGLFWWindow() const { return m_Window; }
 
 		std::vector<const char*> GetExtensions() const { return m_Extensions; }
+		glm::vec2 GetFramebufferSize() const;
 
 	private:
 		GLFWwindow* m_Window = nullptr;

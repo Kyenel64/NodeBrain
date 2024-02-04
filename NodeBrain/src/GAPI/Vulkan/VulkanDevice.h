@@ -13,6 +13,8 @@ namespace NodeBrain
 		VulkanDevice(std::shared_ptr<VulkanPhysicalDevice> physicalDevice, std::shared_ptr<VulkanValidationLayer> validationLayer);
 		~VulkanDevice();
 
+		VkDevice GetVkDevice() const { return m_Device; }
+
 	private:
 		void Init();
 

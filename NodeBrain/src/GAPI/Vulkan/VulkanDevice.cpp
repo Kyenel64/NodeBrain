@@ -1,8 +1,6 @@
 #include "NBpch.h"
 #include "VulkanDevice.h"
 
-#include <set>
-
 namespace NodeBrain
 {
 	VulkanDevice::VulkanDevice(std::shared_ptr<VulkanPhysicalDevice> physicalDevice, std::shared_ptr<VulkanValidationLayer> validationLayer)
@@ -47,7 +45,8 @@ namespace NodeBrain
 		createInfo.pEnabledFeatures = &deviceFeatures;
 
 		// Extensions
-		createInfo.enabledExtensionCount = 0; // TODO:
+		createInfo.enabledExtensionCount = m_PhysicalDevice->GetDeviceExtensions().size();
+		createInfo.ppEnabledExtensionNames = m_PhysicalDevice->GetDeviceExtensions().data();
 
 		// Layers
 		createInfo.enabledLayerCount = 0;

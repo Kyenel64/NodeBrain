@@ -6,7 +6,8 @@ add_library (${PROJECT_NAME} "src/Core/App.h" "src/Core/App.cpp" "src/Core/Layer
     "src/Core/Input.cpp"  "src/Renderer/Renderer.h" "src/Renderer/Renderer.cpp" "src/Renderer/RendererAPI.h" 
     "src/Renderer/RendererAPI.cpp" "src/GAPI/Vulkan/VulkanRendererAPI.h" "src/GAPI/Vulkan/VulkanRendererAPI.cpp" 
     "src/GAPI/Vulkan/VulkanValidationLayer.h" "src/GAPI/Vulkan/VulkanValidationLayer.cpp" "src/GAPI/Vulkan/VulkanPhysicalDevice.h"
-    "src/GAPI/Vulkan/VulkanPhysicalDevice.cpp"  "src/GAPI/Vulkan/VulkanDevice.h" "src/GAPI/Vulkan/VulkanDevice.cpp"  "src/GAPI/Vulkan/VulkanSurface.cpp" "src/GAPI/Vulkan/VulkanSurface.h")
+    "src/GAPI/Vulkan/VulkanPhysicalDevice.cpp"  "src/GAPI/Vulkan/VulkanDevice.h" "src/GAPI/Vulkan/VulkanDevice.cpp"  
+    "src/GAPI/Vulkan/VulkanSurface.cpp" "src/GAPI/Vulkan/VulkanSurface.h" "src/GAPI/Vulkan/VulkanSwapChain.h" "src/GAPI/Vulkan/VulkanSwapChain.cpp")
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 

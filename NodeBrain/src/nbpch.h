@@ -17,6 +17,7 @@
 #include <unordered_set>
 #include <stack>
 #include <queue>
+#include <set>
 
 #include "Core/Log.h"
 

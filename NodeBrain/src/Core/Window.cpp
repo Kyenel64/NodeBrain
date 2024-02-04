@@ -127,4 +127,12 @@ namespace NodeBrain
 	{
 		glfwPollEvents();
 	}
+
+	glm::vec2 Window::GetFramebufferSize() const
+	{
+		int width, height;
+		glfwGetFramebufferSize(m_Window, &width, &height);
+
+		return { width, height };
+	}
 }
