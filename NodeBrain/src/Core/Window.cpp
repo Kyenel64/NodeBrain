@@ -45,7 +45,33 @@ namespace NodeBrain
 		for (size_t i = 0; i < extensionCount; i++)
 			m_Extensions.push_back(extensions[i]);
 
-		// --- Callbacks ---
+		m_RenderContext = RenderContext::Create(this);
+
+		RegisterCallbacks();
+
+		return true;
+	}
+
+	void Window::SwapBuffers()
+	{
+		m_RenderContext->SwapBuffers();
+	}
+
+	void Window::PollEvents()
+	{
+		glfwPollEvents();
+	}
+
+	glm::vec2 Window::GetFramebufferSize() const
+	{
+		int width, height;
+		glfwGetFramebufferSize(m_Window, &width, &height);
+
+		return { width, height };
+	}
+
+	void Window::RegisterCallbacks()
+	{
 		// Window events
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) 
 			{
@@ -114,25 +140,5 @@ namespace NodeBrain
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				data.EventCallback(event);
 			});
-
-		return true;
-	}
-
-	void Window::SwapBuffers()
-	{
-		glfwSwapBuffers(m_Window);
-	}
-
-	void Window::PollEvents()
-	{
-		glfwPollEvents();
-	}
-
-	glm::vec2 Window::GetFramebufferSize() const
-	{
-		int width, height;
-		glfwGetFramebufferSize(m_Window, &width, &height);
-
-		return { width, height };
 	}
 }

@@ -3,13 +3,14 @@
 
 #include "GLFW/glfw3.h"
 
-#include "Core/App.h"
+#include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
 {
-	VulkanSurface::VulkanSurface(VkInstance instance)
-		: m_VkInstance(instance)
+	VulkanSurface::VulkanSurface(Window* window)
+		: m_Window(window)
 	{
+		m_VkInstance = VulkanRenderContext::GetInstance()->GetVkInstance();
 		Init();
 	}
 
@@ -20,7 +21,7 @@ namespace NodeBrain
 
 	void VulkanSurface::Init()
 	{
-		VkResult result = glfwCreateWindowSurface(m_VkInstance, App::GetInstance()->GetWindow().GetGLFWWindow(), nullptr, &m_Surface);
+		VkResult result = glfwCreateWindowSurface(m_VkInstance, m_Window->GetGLFWWindow(), nullptr, &m_Surface);
 		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan surface");
 	}
 }

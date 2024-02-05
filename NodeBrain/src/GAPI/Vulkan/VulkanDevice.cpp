@@ -1,14 +1,14 @@
 #include "NBpch.h"
 #include "VulkanDevice.h"
 
+#include "GAPI/Vulkan/VulkanRenderContext.h"
+
 namespace NodeBrain
 {
-	VulkanDevice::VulkanDevice(std::shared_ptr<VulkanPhysicalDevice> physicalDevice, std::shared_ptr<VulkanValidationLayer> validationLayer)
-		: m_PhysicalDevice(physicalDevice), m_ValidationLayer(validationLayer)
+	VulkanDevice::VulkanDevice(std::shared_ptr<VulkanPhysicalDevice> physicalDevice)
+		: m_PhysicalDevice(physicalDevice)
 	{
-		if (validationLayer)
-			m_EnableValidationLayers = true;
-
+		m_ValidationLayers = VulkanRenderContext::GetInstance()->GetValidationLayers();
 		Init();
 	}
 
@@ -50,10 +50,10 @@ namespace NodeBrain
 
 		// Layers
 		createInfo.enabledLayerCount = 0;
-		if (m_EnableValidationLayers)
+		if (!m_ValidationLayers.empty())
 		{
-			createInfo.enabledLayerCount = m_ValidationLayer->GetLayerCount();
-			createInfo.ppEnabledLayerNames = m_ValidationLayer->GetLayers().data();
+			createInfo.enabledLayerCount = m_ValidationLayers.size();
+			createInfo.ppEnabledLayerNames = &m_ValidationLayers[0];
 		}
 
 		// Create device

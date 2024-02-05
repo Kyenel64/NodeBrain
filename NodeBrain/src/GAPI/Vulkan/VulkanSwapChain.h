@@ -11,7 +11,7 @@ namespace NodeBrain
 	class VulkanSwapChain
 	{
 	public:
-		VulkanSwapChain(std::shared_ptr<VulkanPhysicalDevice> physicalDevice, std::shared_ptr<VulkanDevice> device, std::shared_ptr<VulkanSurface> surface);
+		VulkanSwapChain(std::shared_ptr<VulkanDevice> device);
 		~VulkanSwapChain();
 
 	private:

@@ -1,11 +1,15 @@
 #include "NBpch.h"
 #include "VulkanSwapChain.h"
 
+#include "GAPI/Vulkan/VulkanRenderContext.h"
+
 namespace NodeBrain
 {
-	VulkanSwapChain::VulkanSwapChain(std::shared_ptr<VulkanPhysicalDevice> physicalDevice, std::shared_ptr<VulkanDevice> device, std::shared_ptr<VulkanSurface> surface)
-		: m_PhysicalDevice(physicalDevice), m_Surface(surface), m_Device(device)
+	VulkanSwapChain::VulkanSwapChain(std::shared_ptr<VulkanDevice> device)
+		: m_Device(device)
 	{
+		m_PhysicalDevice = m_Device->GetPhysicalDevice();
+		m_Surface = VulkanRenderContext::GetInstance()->GetSurface();
 		Init();
 	}
 

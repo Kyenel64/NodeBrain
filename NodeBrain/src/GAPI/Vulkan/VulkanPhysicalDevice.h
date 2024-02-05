@@ -27,7 +27,7 @@ namespace NodeBrain
 	class VulkanPhysicalDevice
 	{
 	public:
-		VulkanPhysicalDevice(VkInstance instance, uint32_t deviceNumber, std::shared_ptr<VulkanSurface> surface);
+		VulkanPhysicalDevice(uint32_t deviceNumber);
 		~VulkanPhysicalDevice() = default;
 
 		QueueFamilyIndices GetQueueFamilyIndices() { return FindQueueFamilies(m_PhysicalDevice); }

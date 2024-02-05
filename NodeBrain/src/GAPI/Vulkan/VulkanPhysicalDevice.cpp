@@ -6,13 +6,16 @@
 #include <glm/glm.hpp>
 
 #include "Core/App.h"
+#include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
 {
-	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance, uint32_t deviceHandle, std::shared_ptr<VulkanSurface> surface)
-		: m_VkInstance(instance), m_Surface(surface)
+	VulkanPhysicalDevice::VulkanPhysicalDevice(uint32_t deviceNumber)
 	{
-		PickPhysicalDevice(deviceHandle);
+		m_VkInstance = VulkanRenderContext::GetInstance()->GetVkInstance();
+		m_Surface = VulkanRenderContext::GetInstance()->GetSurface();
+
+		PickPhysicalDevice(deviceNumber);
 
 		m_DeviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 	}

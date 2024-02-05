@@ -2,7 +2,6 @@
 
 #include <vulkan/vulkan.h>
 
-#include "GAPI/Vulkan/VulkanValidationLayer.h"
 #include "GAPI/Vulkan/VulkanPhysicalDevice.h"
 
 namespace NodeBrain
@@ -10,20 +9,20 @@ namespace NodeBrain
 	class VulkanDevice
 	{
 	public:
-		VulkanDevice(std::shared_ptr<VulkanPhysicalDevice> physicalDevice, std::shared_ptr<VulkanValidationLayer> validationLayer);
+		VulkanDevice(std::shared_ptr<VulkanPhysicalDevice> physicalDevice);
 		~VulkanDevice();
 
 		VkDevice GetVkDevice() const { return m_Device; }
+		std::shared_ptr<VulkanPhysicalDevice> GetPhysicalDevice() const { return m_PhysicalDevice; }
 
 	private:
 		void Init();
 
 	private:
+		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
 		VkDevice m_Device = VK_NULL_HANDLE;
 		VkQueue m_GraphicsQueue = VK_NULL_HANDLE;
 		VkQueue m_PresentationQueue = VK_NULL_HANDLE;	
-		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
-		std::shared_ptr<VulkanValidationLayer> m_ValidationLayer;
-		bool m_EnableValidationLayers = false;
+		std::vector<const char*> m_ValidationLayers;
 	};
 }
