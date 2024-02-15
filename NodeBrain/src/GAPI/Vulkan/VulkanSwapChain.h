@@ -5,6 +5,7 @@
 #include "GAPI/Vulkan/VulkanPhysicalDevice.h"
 #include "GAPI/Vulkan/VulkanDevice.h"
 #include "GAPI/Vulkan/VulkanSurface.h"
+#include "GAPI/Vulkan/VulkanImage.h"
 
 namespace NodeBrain
 {
@@ -23,7 +24,7 @@ namespace NodeBrain
 		std::shared_ptr<VulkanDevice> m_Device;
 		std::shared_ptr<VulkanSurface> m_Surface;
 
-		std::vector<VkImage> m_SwapChainImages;
+		std::vector<std::shared_ptr<VulkanImage>> m_SwapChainImages;
 		VkFormat m_ImageFormat;
 		VkExtent2D m_Extent;
 	};
