@@ -22,7 +22,10 @@ namespace NodeBrain
 		Renderer::Shutdown();
 		
 		for (Layer* layer : m_Layers)
+		{
 			layer->OnDetach();
+			delete layer;
+		}
 
 		m_Timer.EndTimer();
 
