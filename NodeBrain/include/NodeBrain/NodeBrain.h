@@ -7,6 +7,7 @@
 #include "Core/Input.h"
 #include "Core/Timer.h"
 #include "Core/Log.h"
+#include "Core/Instrumentor.h"
 
 // Renderer
 #include "Renderer/Renderer.h"

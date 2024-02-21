@@ -20,6 +20,7 @@
 #include <set>
 
 #include "Core/Log.h"
+#include "Core/Instrumentor.h"
 
 #ifdef NB_WINDOWS
 #include <windows.h>

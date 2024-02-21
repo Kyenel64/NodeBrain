@@ -14,7 +14,7 @@ add_library ( ${PROJECT_NAME}
     "src/GAPI/Vulkan/VulkanPhysicalDevice.h" "src/GAPI/Vulkan/VulkanPhysicalDevice.cpp"  "src/GAPI/Vulkan/VulkanDevice.h" 
     "src/GAPI/Vulkan/VulkanDevice.cpp" "src/GAPI/Vulkan/VulkanSurface.cpp" "src/GAPI/Vulkan/VulkanSurface.h" "src/GAPI/Vulkan/VulkanSwapChain.h" 
     "src/GAPI/Vulkan/VulkanSwapChain.cpp" "src/Renderer/RenderContext.h" "src/Renderer/RenderContext.cpp" "src/GAPI/Vulkan/VulkanRenderContext.h" 
-    "src/GAPI/Vulkan/VulkanRenderContext.cpp" "src/GAPI/Vulkan/VulkanImage.h" "src/GAPI/Vulkan/VulkanImage.cpp" )
+    "src/GAPI/Vulkan/VulkanRenderContext.cpp" "src/GAPI/Vulkan/VulkanImage.h" "src/GAPI/Vulkan/VulkanImage.cpp"  "src/Core/Instrumentor.h" "src/Core/Instrumentor.cpp")
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 

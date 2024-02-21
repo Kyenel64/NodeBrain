@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
 #include <NodeBrain/NodeBrain.h>
 
+struct GLFWwindow;
+
 TEST(Window, Init) 
 {
     NodeBrain::Window window;
-    bool initSuccess = window.Init();
-    EXPECT_EQ(initSuccess, true);
+    EXPECT_FALSE(window.GetGLFWWindow() == nullptr);
 }

@@ -45,6 +45,8 @@ namespace NodeBrain
 	{
 		while (m_Running)
 		{
+			NB_PROFILE_SCOPE("Frame");
+
 			// Calculate deltaTime
 			float time = m_Timer.GetElapsedSeconds(); // TODO: Change to GLFW time
 			float deltaTime = time - m_LastFrameTime;
