@@ -16,17 +16,23 @@ namespace NodeBrain
 	Window::Window(const std::string& windowName)
 		: m_WindowName(windowName)
 	{
+		NB_PROFILE_FN();
+
 		Init();
 	}
 
 	Window::~Window()
 	{
+		NB_PROFILE_FN();
+
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 	}
 
 	bool Window::Init()
 	{
+		NB_PROFILE_FN();
+
 		if (!glfwInit())
 			return false;
 
@@ -54,16 +60,22 @@ namespace NodeBrain
 
 	void Window::SwapBuffers()
 	{
+		NB_PROFILE_FN();
+
 		m_RenderContext->SwapBuffers();
 	}
 
 	void Window::PollEvents()
 	{
+		NB_PROFILE_FN();
+
 		glfwPollEvents();
 	}
 
 	glm::vec2 Window::GetFramebufferSize() const
 	{
+		NB_PROFILE_FN();
+
 		int width, height;
 		glfwGetFramebufferSize(m_Window, &width, &height);
 
@@ -72,6 +84,8 @@ namespace NodeBrain
 
 	void Window::RegisterCallbacks()
 	{
+		NB_PROFILE_FN();
+
 		// Window events
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) 
 			{

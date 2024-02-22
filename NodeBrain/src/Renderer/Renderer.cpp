@@ -8,12 +8,16 @@ namespace NodeBrain
 
 	void Renderer::Init()
 	{
+		NB_PROFILE_FN();
+
 		s_RendererAPI = RendererAPI::Create();
 		NB_INFO("Initialized renderer");
 	}
 
 	void Renderer::Shutdown()
 	{
+		NB_PROFILE_FN();
+
 		s_RendererAPI.reset();
 		NB_INFO("Shutdown renderer");
 	}

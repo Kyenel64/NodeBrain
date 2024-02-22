@@ -12,6 +12,8 @@ namespace NodeBrain
 {
 	VulkanPhysicalDevice::VulkanPhysicalDevice(uint32_t deviceNumber)
 	{
+		NB_PROFILE_FN();
+
 		m_VkInstance = VulkanRenderContext::GetInstance()->GetVkInstance();
 		m_Surface = VulkanRenderContext::GetInstance()->GetSurface();
 
@@ -22,6 +24,8 @@ namespace NodeBrain
 
 	void VulkanPhysicalDevice::PickPhysicalDevice(uint32_t deviceNumber)
 	{
+		NB_PROFILE_FN();
+
 		uint32_t deviceCount = 0;
 		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, nullptr);
 		NB_ASSERT(deviceCount, "Could not find any GPUs with Vulkan support");
@@ -43,6 +47,8 @@ namespace NodeBrain
 
 	bool VulkanPhysicalDevice::IsDeviceSuitable(VkPhysicalDevice device)
 	{
+		NB_PROFILE_FN();
+
 		if (!device)
 			return false;
 		QueueFamilyIndices indices = FindQueueFamilies(device);
@@ -59,6 +65,8 @@ namespace NodeBrain
 
 	QueueFamilyIndices VulkanPhysicalDevice::FindQueueFamilies(VkPhysicalDevice device)
 	{
+		NB_PROFILE_FN();
+
 		QueueFamilyIndices indices = {};
 		uint32_t queueFamilyCount = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
@@ -83,6 +91,8 @@ namespace NodeBrain
 
 	SwapChainSupportDetails VulkanPhysicalDevice::QuerySwapChainSupport(VkPhysicalDevice device)
 	{
+		NB_PROFILE_FN();
+
 		// Capabilities
 		SwapChainSupportDetails supportDetails = {};
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_Surface->GetVkSurface(), &supportDetails.Capabilities);
@@ -111,6 +121,8 @@ namespace NodeBrain
 
 	bool VulkanPhysicalDevice::CheckDeviceExtensionSupport(VkPhysicalDevice device)
 	{
+		NB_PROFILE_FN();
+
 		uint32_t extensionCount = 0;
 		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
@@ -126,6 +138,8 @@ namespace NodeBrain
 
 	VkSurfaceFormatKHR VulkanPhysicalDevice::ChooseSwapChainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
 	{
+		NB_PROFILE_FN();
+
 		for (const auto& format : availableFormats)
 		{
 			if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)
@@ -137,6 +151,8 @@ namespace NodeBrain
 
 	VkPresentModeKHR VulkanPhysicalDevice::ChooseSwapChainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes)
 	{
+		NB_PROFILE_FN();
+
 		for (const auto& presentationMode : availablePresentationModes)
 		{
 			if (presentationMode == VK_PRESENT_MODE_MAILBOX_KHR)
@@ -147,6 +163,8 @@ namespace NodeBrain
 
 	VkExtent2D VulkanPhysicalDevice::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 	{
+		NB_PROFILE_FN();
+
 		if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
 		{
 			return capabilities.currentExtent;

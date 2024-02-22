@@ -7,11 +7,11 @@
 
 namespace NodeBrain
 {
-    class Input
-    {
-    public:
+	class Input
+	{
+	public:
 		// Poll-based. Checks first key press.
-        static bool IsKeyPressed(Key key);
+		static bool IsKeyPressed(Key key);
 		// Poll-based. 
 		static bool IsKeyHeld(Key key);
 		// Poll-based. 
@@ -36,5 +36,5 @@ namespace NodeBrain
 		// Poll-based. 
 		// Returns screen-space coordinates of the cursor relative to the top left corner of the application window.
 		static glm::vec2 GetMousePosition();
-    };
+	};
 }

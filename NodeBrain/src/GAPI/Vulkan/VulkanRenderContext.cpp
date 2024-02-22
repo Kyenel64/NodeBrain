@@ -22,6 +22,8 @@ namespace NodeBrain
 		static VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
 			const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
 		{
+			NB_PROFILE_FN();
+
 			auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
 			if (func != nullptr)
 				return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
@@ -31,6 +33,8 @@ namespace NodeBrain
 
 		static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
 		{
+			NB_PROFILE_FN();
+
 			auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
 			if (func)
 				func(instance, debugMessenger, pAllocator);
@@ -38,6 +42,8 @@ namespace NodeBrain
 
 		static void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
 		{
+			NB_PROFILE_FN();
+
 			createInfo = {};
 			createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 			createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
@@ -52,6 +58,8 @@ namespace NodeBrain
 	VulkanRenderContext::VulkanRenderContext(Window* window)
 		: m_Window(window)
 	{
+		NB_PROFILE_FN();
+
 		s_Instance = this;
 
 		#ifdef NB_DEBUG
@@ -69,6 +77,8 @@ namespace NodeBrain
 
 	VulkanRenderContext::~VulkanRenderContext()
 	{
+		NB_PROFILE_FN();
+
 		m_SwapChain.reset();
 		m_Device.reset();
 		m_PhysicalDevice.reset();
@@ -79,6 +89,8 @@ namespace NodeBrain
 
 	void VulkanRenderContext::Init()
 	{
+		NB_PROFILE_FN();
+
 		VkResult result = CreateInstance();
 		NB_ASSERT(result == VK_SUCCESS, result);
 
@@ -94,6 +106,8 @@ namespace NodeBrain
 
 	VkResult VulkanRenderContext::CreateInstance()
 	{
+		NB_PROFILE_FN();
+
 		// --- App info ---
 		VkApplicationInfo appInfo = {};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -147,6 +161,8 @@ namespace NodeBrain
 
 	VkResult VulkanRenderContext::CreateDebugUtilsMessenger()
 	{
+		NB_PROFILE_FN();
+
 		VkDebugUtilsMessengerCreateInfoEXT createInfo = {};
 		Utils::PopulateDebugMessengerCreateInfo(createInfo);
 
@@ -155,6 +171,8 @@ namespace NodeBrain
 
 	bool VulkanRenderContext::CheckExtensionSupport(const std::vector<const char*> extensions)
 	{
+		NB_PROFILE_FN();
+
 		uint32_t availableExtensionCount = 0;
 		vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, nullptr);
 		std::vector<VkExtensionProperties> availableExtensions(availableExtensionCount);
@@ -182,6 +200,8 @@ namespace NodeBrain
 
 	bool VulkanRenderContext::CheckValidationLayerSupport()
 	{
+		NB_PROFILE_FN();
+
 		uint32_t layerCount = 0;
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 		std::vector<VkLayerProperties> availableLayers(layerCount);

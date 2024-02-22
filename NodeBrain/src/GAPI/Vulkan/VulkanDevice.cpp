@@ -8,17 +8,23 @@ namespace NodeBrain
 	VulkanDevice::VulkanDevice(std::shared_ptr<VulkanPhysicalDevice> physicalDevice)
 		: m_PhysicalDevice(physicalDevice)
 	{
+		NB_PROFILE_FN();
+
 		m_ValidationLayers = VulkanRenderContext::GetInstance()->GetValidationLayers();
 		Init();
 	}
 
 	VulkanDevice::~VulkanDevice()
 	{
+		NB_PROFILE_FN();
+
 		vkDestroyDevice(m_Device, nullptr);
 	}
 
 	void VulkanDevice::Init()
 	{
+		NB_PROFILE_FN();
+
 		// --- Queue info ---
 		QueueFamilyIndices indices = m_PhysicalDevice->GetQueueFamilyIndices();
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;

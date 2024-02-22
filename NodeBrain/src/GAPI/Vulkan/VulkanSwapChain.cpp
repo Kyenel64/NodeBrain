@@ -8,6 +8,8 @@ namespace NodeBrain
 	VulkanSwapChain::VulkanSwapChain(std::shared_ptr<VulkanDevice> device)
 		: m_Device(device)
 	{
+		NB_PROFILE_FN();
+
 		m_PhysicalDevice = m_Device->GetPhysicalDevice();
 		m_Surface = VulkanRenderContext::GetInstance()->GetSurface();
 		Init();
@@ -15,11 +17,15 @@ namespace NodeBrain
 
 	VulkanSwapChain::~VulkanSwapChain()
 	{
+		NB_PROFILE_FN();
+
 		vkDestroySwapchainKHR(m_Device->GetVkDevice(), m_VkSwapChain, nullptr);
 	}
 
 	void VulkanSwapChain::Init()
 	{
+		NB_PROFILE_FN();
+
 		SwapChainSupportDetails swapChainSupport = m_PhysicalDevice->GetSwapChainSupportDetails();
 
 		VkSurfaceFormatKHR surfaceFormat = VulkanPhysicalDevice::ChooseSwapChainFormat(swapChainSupport.Formats);

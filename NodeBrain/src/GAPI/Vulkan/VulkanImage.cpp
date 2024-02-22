@@ -3,19 +3,23 @@
 
 namespace NodeBrain
 {
-    VulkanImage::VulkanImage(std::shared_ptr<VulkanDevice> device, VkImage image, VkFormat imageFormat)
-        : m_Device(device), m_Image(image)
-    {
-        
-    }
+	VulkanImage::VulkanImage(std::shared_ptr<VulkanDevice> device, VkImage image, VkFormat imageFormat)
+		: m_Device(device), m_Image(image)
+	{
+		NB_PROFILE_FN();
+	}
 
 	VulkanImage::~VulkanImage()
 	{
+		NB_PROFILE_FN();
+
 		vkDestroyImageView(m_Device->GetVkDevice(), m_ImageView, nullptr);
 	}
 
-    void VulkanImage::Init()
-    {
+	void VulkanImage::Init()
+	{
+		NB_PROFILE_FN();
+
 		VkImageViewCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		createInfo.image = m_Image;
@@ -36,5 +40,5 @@ namespace NodeBrain
 
 		VkResult result = vkCreateImageView(m_Device->GetVkDevice(), &createInfo, nullptr, &m_ImageView);
 		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view");
-    }
+	}
 }

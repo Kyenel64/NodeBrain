@@ -9,6 +9,8 @@ namespace NodeBrain
 {
 	VulkanRendererAPI::VulkanRendererAPI()
 	{
+		NB_PROFILE_FN();
+
 		Init();
 	}
 

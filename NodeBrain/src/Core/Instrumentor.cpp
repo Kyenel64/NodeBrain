@@ -23,7 +23,7 @@ namespace NodeBrain
 		s_InstrumentorData.Name = name;
 		s_InstrumentorData.OuptutStream.open(path);
 
-		s_InstrumentorData.OuptutStream << "{\n \"traceEvents\": \n[\n";
+		s_InstrumentorData.OuptutStream << "{\n \"traceEvents\": \n[\n{}";
 		s_InstrumentorData.OuptutStream.flush();
 	}
 
@@ -32,7 +32,7 @@ namespace NodeBrain
 		if (s_InstrumentorData.Name == std::string())
 			return;
 
-		s_InstrumentorData.OuptutStream << "\n]\n}";
+		s_InstrumentorData.OuptutStream << "]\n}";
 		s_InstrumentorData.OuptutStream.flush();
 
 		s_InstrumentorData.OuptutStream.close();
@@ -45,9 +45,7 @@ namespace NodeBrain
 		if (s_InstrumentorData.Name == std::string())
 			return;
 
-		if (s_InstrumentorData.FramesTraced > 0)
-			s_InstrumentorData.OuptutStream << ",";
-		s_InstrumentorData.OuptutStream << "\n{ ";
+		s_InstrumentorData.OuptutStream << ",\n{ ";
 		s_InstrumentorData.OuptutStream << "\"name\": \"" << eventData.Name << "\", ";
 		s_InstrumentorData.OuptutStream << "\"cat\": \"" << "Function\", ";
 		s_InstrumentorData.OuptutStream << "\"ph\": \"" << "X\", ";
@@ -59,7 +57,8 @@ namespace NodeBrain
 
 		s_InstrumentorData.OuptutStream.flush();
 
-		s_InstrumentorData.FramesTraced++;
+		if (eventData.Name == "Frame")
+			s_InstrumentorData.FramesTraced++;
 		if (s_InstrumentorData.FramesTraced >= s_InstrumentorData.MaxFramesToTrace)
 			EndTrace();
 	}

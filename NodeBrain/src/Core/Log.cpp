@@ -9,6 +9,8 @@ namespace NodeBrain
 
 	void Log::Init()
 	{
+		NB_PROFILE_FN();
+
 		spdlog::set_pattern("[%T] [%n]: %v %$");
 		s_Logger = spdlog::stdout_color_mt("NodeBrain");
 	}

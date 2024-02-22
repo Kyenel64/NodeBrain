@@ -11,6 +11,8 @@ namespace NodeBrain
 
 	App::App()
 	{
+		NB_PROFILE_FN();
+
 		s_Instance = this;
 		m_Timer.StartTimer();
 
@@ -19,6 +21,8 @@ namespace NodeBrain
 
 	App::~App()
 	{
+		NB_PROFILE_FN();
+
 		Renderer::Shutdown();
 		
 		for (Layer* layer : m_Layers)
@@ -34,6 +38,8 @@ namespace NodeBrain
 
 	bool App::StartupSubSystems()
 	{
+		NB_PROFILE_FN();
+
 		Log::Init();
 
 		m_Window = std::make_unique<Window>("NodeBrain");
@@ -74,6 +80,8 @@ namespace NodeBrain
 
 	void App::OnEvent(Event& event)
 	{
+		NB_PROFILE_FN();
+
 		for (Layer* layer : m_Layers)
 			layer->OnEvent(event);
 
@@ -83,6 +91,8 @@ namespace NodeBrain
 
 	void App::PushLayer(Layer* layer)
 	{
+		NB_PROFILE_FN();
+
 		if (!layer)
 			return;
 
@@ -92,11 +102,15 @@ namespace NodeBrain
 
 	void App::OnWindowClose(WindowClosedEvent& e)
 	{
+		NB_PROFILE_FN();
+
 		m_Running = false;
 	}
 
 	App* App::GetInstance() 
 	{ 
+		NB_PROFILE_FN();
+
 		return s_Instance; 
 	}
 }
