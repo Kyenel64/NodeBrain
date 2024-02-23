@@ -24,6 +24,7 @@ namespace NodeBrain
 		VkInstance GetVkInstance() const { return m_VkInstance; }
 		const std::vector<const char*>& GetValidationLayers() const { return m_ValidationLayers; }
 		std::shared_ptr<VulkanSurface> GetSurface() const { return m_Surface; }
+		std::shared_ptr<VulkanDevice> GetDevice() const { return m_Device; }
 		bool IsValidationLayersEnabled() const { return m_EnableValidationLayers; }
 
 	private:
