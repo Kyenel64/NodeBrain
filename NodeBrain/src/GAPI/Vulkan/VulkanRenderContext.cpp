@@ -38,6 +38,8 @@ namespace NodeBrain
 			auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
 			if (func)
 				func(instance, debugMessenger, pAllocator);
+
+			debugMessenger = VK_NULL_HANDLE;
 		}
 
 		static void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
@@ -63,7 +65,6 @@ namespace NodeBrain
 		s_Instance = this;
 
 		#ifdef NB_DEBUG
-			m_EnableValidationLayers = true;
 			m_ValidationLayers.push_back("VK_LAYER_KHRONOS_validation");
 		#endif
 
@@ -79,12 +80,14 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		m_SwapChain.reset();
-		m_Device.reset();
-		m_PhysicalDevice.reset();
-		m_Surface.reset();
+		// Destroy in order
+		m_SwapChain->Destroy();
+		m_Device->Destroy();
 		Utils::DestroyDebugUtilsMessengerEXT(m_VkInstance, m_DebugMessenger, nullptr);
+		vkDestroySurfaceKHR(m_VkInstance, m_VkSurface, nullptr);
 		vkDestroyInstance(m_VkInstance, nullptr);
+		m_VkSurface = VK_NULL_HANDLE;
+		m_VkInstance = VK_NULL_HANDLE;
 	}
 
 	void VulkanRenderContext::Init()
@@ -94,14 +97,37 @@ namespace NodeBrain
 		VkResult result = CreateInstance();
 		NB_ASSERT(result == VK_SUCCESS, result);
 
-		m_Surface = std::make_shared<VulkanSurface>(m_Window);
+		result = glfwCreateWindowSurface(m_VkInstance, m_Window->GetGLFWWindow(), nullptr, &m_VkSurface);
+		NB_ASSERT(result == VK_SUCCESS, result);
 
 		result = CreateDebugUtilsMessenger();
 		NB_ASSERT(result == VK_SUCCESS, result);
 
-		m_PhysicalDevice = std::make_shared<VulkanPhysicalDevice>(0);
+		m_PhysicalDevice = FindFirstSuitablePhysicalDevice();
 		m_Device = std::make_shared<VulkanDevice>(m_PhysicalDevice);
-		m_SwapChain = std::make_shared<VulkanSwapChain>(m_Device);
+		m_SwapChain = std::make_shared<VulkanSwapChain>(m_VkSurface, m_Device);
+	}
+
+	std::shared_ptr<VulkanPhysicalDevice> VulkanRenderContext::FindFirstSuitablePhysicalDevice()
+	{
+		NB_PROFILE_FN();
+
+		uint32_t deviceCount = 0;
+		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, nullptr);
+		NB_ASSERT(deviceCount, "Could not find any GPUs with Vulkan support");
+		std::vector<VkPhysicalDevice> devices(deviceCount);
+		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, &devices[0]);
+
+		int deviceIndex = -1;
+		for (int i = 0; i < devices.size(); i++)
+		{
+			std::shared_ptr<VulkanPhysicalDevice> physicalDevice = std::make_shared<VulkanPhysicalDevice>(m_VkInstance, i, m_VkSurface);
+			if (physicalDevice->IsSuitable())
+				return physicalDevice;
+		}
+
+		NB_ASSERT(deviceIndex == -1, "Could not find suitable GPU");
+		return nullptr;
 	}
 
 	VkResult VulkanRenderContext::CreateInstance()
@@ -139,7 +165,7 @@ namespace NodeBrain
 
 		// Validation layer
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = {};
-		if (m_EnableValidationLayers)
+		if (!m_ValidationLayers.empty())
 		{
 			NB_ASSERT(CheckValidationLayerSupport(), "Validation layers unavailable");
 			createInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayers.size());

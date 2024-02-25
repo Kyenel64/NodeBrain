@@ -7,37 +7,45 @@
 namespace NodeBrain
 {
 	VulkanShader::VulkanShader(const std::filesystem::path& path)
+		: m_ShaderPath(path)
 	{
 		NB_PROFILE_FN();
 
 		m_Device = VulkanRenderContext::GetInstance()->GetDevice();
 
-		std::vector<char> buffer = Utils::ReadFile(path);
-
-		m_VkShaderModule = CreateShaderModule(buffer);
-		NB_INFO("Created shader module of size: {0}", buffer.size());
+		Init();
 	}
 
 	VulkanShader::~VulkanShader()
 	{
 		NB_PROFILE_FN();
 
-		vkDestroyShaderModule(m_Device->GetVkDevice(), m_VkShaderModule, nullptr);
+		if (m_VkShaderModule)
+			Destroy();
 	}
 
-	VkShaderModule VulkanShader::CreateShaderModule(const std::vector<char>& buffer)
+	void VulkanShader::Destroy()
 	{
 		NB_PROFILE_FN();
+
+		vkDestroyShaderModule(m_Device->GetVkDevice(), m_VkShaderModule, nullptr);
+		m_VkShaderModule = VK_NULL_HANDLE;
+	}
+
+	void VulkanShader::Init()
+	{
+		NB_PROFILE_FN();
+
+		std::vector<char> buffer = Utils::ReadFile(m_ShaderPath);
 
 		VkShaderModuleCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		createInfo.codeSize = buffer.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(buffer.data());
 
-		VkShaderModule shaderModule;
-		VkResult result = vkCreateShaderModule(m_Device->GetVkDevice(), &createInfo, nullptr, &shaderModule);
+		VkResult result = vkCreateShaderModule(m_Device->GetVkDevice(), &createInfo, nullptr, &m_VkShaderModule);
 		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan shader module");
 
-		return shaderModule;
+		NB_INFO("Created shader module of size: {0}", buffer.size());
 	}
 }

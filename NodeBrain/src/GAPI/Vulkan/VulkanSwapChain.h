@@ -4,7 +4,6 @@
 
 #include "GAPI/Vulkan/VulkanPhysicalDevice.h"
 #include "GAPI/Vulkan/VulkanDevice.h"
-#include "GAPI/Vulkan/VulkanSurface.h"
 #include "GAPI/Vulkan/VulkanImage.h"
 
 namespace NodeBrain
@@ -12,20 +11,29 @@ namespace NodeBrain
 	class VulkanSwapChain
 	{
 	public:
-		VulkanSwapChain(std::shared_ptr<VulkanDevice> device);
+		VulkanSwapChain(VkSurfaceKHR surface, std::shared_ptr<VulkanDevice> device);
 		~VulkanSwapChain();
+
+		void Destroy();
 
 	private:
 		void Init();
 
+		VkSurfaceFormatKHR ChooseSwapChainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+		VkPresentModeKHR ChooseSwapChainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes);
+		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+
 	private:
 		VkSwapchainKHR m_VkSwapChain = VK_NULL_HANDLE;
-		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
+		VkSurfaceKHR m_VkSurface = VK_NULL_HANDLE;
 		std::shared_ptr<VulkanDevice> m_Device;
-		std::shared_ptr<VulkanSurface> m_Surface;
 
 		std::vector<std::shared_ptr<VulkanImage>> m_SwapChainImages;
-		VkFormat m_ImageFormat;
+
+		// Configuration
+		VkFormat m_ColorFormat;
+		VkColorSpaceKHR m_ColorSpace;
 		VkExtent2D m_Extent;
+		VkPresentModeKHR m_PresentationMode;
 	};
 }

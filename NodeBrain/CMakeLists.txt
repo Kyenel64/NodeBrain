@@ -12,9 +12,12 @@ add_library ( ${PROJECT_NAME}
     "src/Core/Input.cpp"  "src/Renderer/Renderer.h" "src/Renderer/Renderer.cpp" "src/Renderer/RendererAPI.h" 
     "src/Renderer/RendererAPI.cpp" "src/GAPI/Vulkan/VulkanRendererAPI.h" "src/GAPI/Vulkan/VulkanRendererAPI.cpp" 
     "src/GAPI/Vulkan/VulkanPhysicalDevice.h" "src/GAPI/Vulkan/VulkanPhysicalDevice.cpp"  "src/GAPI/Vulkan/VulkanDevice.h" 
-    "src/GAPI/Vulkan/VulkanDevice.cpp" "src/GAPI/Vulkan/VulkanSurface.cpp" "src/GAPI/Vulkan/VulkanSurface.h" "src/GAPI/Vulkan/VulkanSwapChain.h" 
-    "src/GAPI/Vulkan/VulkanSwapChain.cpp" "src/Renderer/RenderContext.h" "src/Renderer/RenderContext.cpp" "src/GAPI/Vulkan/VulkanRenderContext.h" 
-    "src/GAPI/Vulkan/VulkanRenderContext.cpp" "src/GAPI/Vulkan/VulkanImage.h" "src/GAPI/Vulkan/VulkanImage.cpp"  "src/Core/Instrumentor.h" "src/Core/Instrumentor.cpp" "src/Renderer/GraphicsPipeline.h" "src/Renderer/GraphicsPipeline.cpp" "src/GAPI/Vulkan/VulkanGraphicsPipeline.h" "src/GAPI/Vulkan/VulkanGraphicsPipeline.cpp" "src/Renderer/Shader.h" "src/Renderer/Shader.cpp" "src/GAPI/Vulkan/VulkanShader.h" "src/GAPI/Vulkan/VulkanShader.cpp" "src/Utils/FileUtils.h" "src/Utils/FileUtils.cpp")
+    "src/GAPI/Vulkan/VulkanDevice.cpp" "src/GAPI/Vulkan/VulkanSwapChain.h" "src/GAPI/Vulkan/VulkanSwapChain.cpp" "src/Renderer/RenderContext.h"
+    "src/Renderer/RenderContext.cpp" "src/GAPI/Vulkan/VulkanRenderContext.h" "src/GAPI/Vulkan/VulkanRenderContext.cpp" "src/GAPI/Vulkan/VulkanImage.h" 
+    "src/GAPI/Vulkan/VulkanImage.cpp"  "src/Core/Instrumentor.h" "src/Core/Instrumentor.cpp" "src/Renderer/GraphicsPipeline.h" 
+    "src/Renderer/GraphicsPipeline.cpp" "src/GAPI/Vulkan/VulkanGraphicsPipeline.h" "src/GAPI/Vulkan/VulkanGraphicsPipeline.cpp" 
+    "src/Renderer/Shader.h" "src/Renderer/Shader.cpp" "src/GAPI/Vulkan/VulkanShader.h" "src/GAPI/Vulkan/VulkanShader.cpp" 
+    "src/Utils/FileUtils.h" "src/Utils/FileUtils.cpp")
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 

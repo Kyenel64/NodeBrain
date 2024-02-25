@@ -13,13 +13,18 @@ namespace NodeBrain
 		VulkanShader(const std::filesystem::path& path);
 		virtual ~VulkanShader();
 
+		void Destroy();
+
+		virtual const std::filesystem::path& GetShaderPath() const override { return m_ShaderPath; }
+
 		VkShaderModule GetVkShaderModule() const { return m_VkShaderModule; }
 
 	private:
-		VkShaderModule CreateShaderModule(const std::vector<char>& buffer);
+		void Init();
 
 	private:
 		VkShaderModule m_VkShaderModule = VK_NULL_HANDLE;
 		std::shared_ptr<VulkanDevice> m_Device;
+		const std::filesystem::path& m_ShaderPath;
 	};
 }

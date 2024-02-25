@@ -6,26 +6,25 @@
 #include "Renderer/RenderContext.h"
 #include "GAPI/Vulkan/VulkanPhysicalDevice.h"
 #include "GAPI/Vulkan/VulkanDevice.h"
-#include "GAPI/Vulkan/VulkanSurface.h"
 #include "GAPI/Vulkan/VulkanSwapChain.h"
 
 namespace NodeBrain
 {
-    class VulkanRenderContext : public RenderContext
-    {
-    public:
+	class VulkanRenderContext : public RenderContext
+	{
+	public:
 		VulkanRenderContext(Window* window);
 		~VulkanRenderContext();
 
 		virtual void Init() override;
 		virtual void SwapBuffers() override;
 
-		static VulkanRenderContext* GetInstance();
+		// Getters
 		VkInstance GetVkInstance() const { return m_VkInstance; }
-		const std::vector<const char*>& GetValidationLayers() const { return m_ValidationLayers; }
-		std::shared_ptr<VulkanSurface> GetSurface() const { return m_Surface; }
 		std::shared_ptr<VulkanDevice> GetDevice() const { return m_Device; }
-		bool IsValidationLayersEnabled() const { return m_EnableValidationLayers; }
+		const std::vector<const char*>& GetValidationLayers() const { return m_ValidationLayers; }
+
+		static VulkanRenderContext* GetInstance();
 
 	private:
 		VkResult CreateInstance();
@@ -34,16 +33,19 @@ namespace NodeBrain
 		bool CheckExtensionSupport(std::vector<const char*> extensions);
 		bool CheckValidationLayerSupport();
 
-    private:
+		std::shared_ptr<VulkanPhysicalDevice> FindFirstSuitablePhysicalDevice();
+
+	private:
 		Window* m_Window = nullptr;
 		VkInstance m_VkInstance = VK_NULL_HANDLE;
-		VkDebugUtilsMessengerEXT m_DebugMessenger = nullptr;
-		bool m_EnableValidationLayers = false;
-		std::vector<const char*> m_ValidationLayers;
+		VkSurfaceKHR m_VkSurface = VK_NULL_HANDLE;
 
 		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
 		std::shared_ptr<VulkanDevice> m_Device;
-		std::shared_ptr<VulkanSurface> m_Surface;
 		std::shared_ptr<VulkanSwapChain> m_SwapChain;
-    };
+
+		// Debug
+		VkDebugUtilsMessengerEXT m_DebugMessenger = nullptr;
+		std::vector<const char*> m_ValidationLayers;
+	};
 }

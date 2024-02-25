@@ -6,18 +6,22 @@
 
 namespace NodeBrain
 {
-    class VulkanImage
-    {
-    public:
-		VulkanImage(std::shared_ptr<VulkanDevice> device, VkImage image, VkFormat format);
+	class VulkanImage
+	{
+	public:
+		VulkanImage(std::shared_ptr<VulkanDevice> device, VkImage image, VkFormat imageFormat);
 		~VulkanImage();
 
+		void Destroy();
+
+	private:
 		void Init();
 
-    private:
+	private:
 		std::shared_ptr<VulkanDevice> m_Device;
+
 		VkImage m_Image = VK_NULL_HANDLE;
 		VkImageView m_ImageView = VK_NULL_HANDLE;
-		VkFormat m_Format;
-    };
+		VkFormat m_ImageFormat;
+	};
 }

@@ -2,8 +2,6 @@
 
 #include <vulkan/vulkan.h>
 
-#include "GAPI/Vulkan/VulkanSurface.h"
-
 namespace NodeBrain
 {
 	struct QueueFamilyIndices
@@ -27,30 +25,32 @@ namespace NodeBrain
 	class VulkanPhysicalDevice
 	{
 	public:
-		VulkanPhysicalDevice(uint32_t deviceNumber);
+		VulkanPhysicalDevice(VkInstance instance, uint32_t deviceIndex, VkSurfaceKHR surface = VK_NULL_HANDLE);
 		~VulkanPhysicalDevice() = default;
 
-		QueueFamilyIndices GetQueueFamilyIndices() { return FindQueueFamilies(m_PhysicalDevice); }
-		SwapChainSupportDetails GetSwapChainSupportDetails() { return QuerySwapChainSupport(m_PhysicalDevice); }
-		VkPhysicalDevice GetVkPhysicalDevice() const { return m_PhysicalDevice; }
+		bool IsSuitable();
+
+		VkPhysicalDevice GetVkPhysicalDevice() const { return m_VkPhysicalDevice; }
 		const std::vector<const char*>& GetDeviceExtensions() const { return m_DeviceExtensions; }
-
-		static VkSurfaceFormatKHR ChooseSwapChainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-		static VkPresentModeKHR ChooseSwapChainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes);
-		static VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+		const QueueFamilyIndices& GetQueueFamilyIndices() const { return m_QueueFamilyIndices; }
+		const SwapChainSupportDetails& GetSwapChainSupportDetails() const { return m_SwapChainSupportDetails; }
 
 	private:
-		void PickPhysicalDevice(uint32_t deviceHandle);
-		bool IsDeviceSuitable(VkPhysicalDevice device);
-		bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
-		QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
+		void Init();
 
-		SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
-		
+		QueueFamilyIndices FindQueueFamilies();
+		bool CheckDeviceExtensionSupport();
+		SwapChainSupportDetails QuerySwapChainSupport();
+
 	private:
+		VkPhysicalDevice m_VkPhysicalDevice = VK_NULL_HANDLE;
 		VkInstance m_VkInstance = VK_NULL_HANDLE;
-		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
-		std::shared_ptr<VulkanSurface> m_Surface;
+		VkSurfaceKHR m_VkSurfaceKHR = VK_NULL_HANDLE;
+
+		QueueFamilyIndices m_QueueFamilyIndices;
+		SwapChainSupportDetails m_SwapChainSupportDetails;
+
 		std::vector<const char*> m_DeviceExtensions;
+		uint32_t m_DeviceIndex;
 	};
 }

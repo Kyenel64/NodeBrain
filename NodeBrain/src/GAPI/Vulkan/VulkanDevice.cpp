@@ -10,7 +10,6 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		m_ValidationLayers = VulkanRenderContext::GetInstance()->GetValidationLayers();
 		Init();
 	}
 
@@ -18,7 +17,16 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		if (m_Device)
+			Destroy();
+	}
+
+	void VulkanDevice::Destroy()
+	{
+		NB_PROFILE_FN();
+
 		vkDestroyDevice(m_Device, nullptr);
+		m_Device = VK_NULL_HANDLE;
 	}
 
 	void VulkanDevice::Init()
@@ -54,12 +62,13 @@ namespace NodeBrain
 		createInfo.enabledExtensionCount = m_PhysicalDevice->GetDeviceExtensions().size();
 		createInfo.ppEnabledExtensionNames = m_PhysicalDevice->GetDeviceExtensions().data();
 
-		// Layers
+		// Validation layers
 		createInfo.enabledLayerCount = 0;
-		if (!m_ValidationLayers.empty())
+		const std::vector<const char*>& validationLayers = VulkanRenderContext::GetInstance()->GetValidationLayers();
+		if (!validationLayers.empty())
 		{
-			createInfo.enabledLayerCount = m_ValidationLayers.size();
-			createInfo.ppEnabledLayerNames = &m_ValidationLayers[0];
+			createInfo.enabledLayerCount = validationLayers.size();
+			createInfo.ppEnabledLayerNames = &validationLayers[0];
 		}
 
 		// Create device
