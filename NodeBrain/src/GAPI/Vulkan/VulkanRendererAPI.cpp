@@ -19,8 +19,8 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		std::shared_ptr<Shader> vertShader = Shader::Create("rsc/Shaders/Compiled/triangle.vert.spv");
-		std::shared_ptr<Shader> fragShader = Shader::Create("rsc/Shaders/Compiled/triangle.frag.spv");
+		std::shared_ptr<Shader> vertShader = Shader::Create("Assets/Shaders/Compiled/triangle.vert.spv");
+		std::shared_ptr<Shader> fragShader = Shader::Create("Assets/Shaders/Compiled/triangle.frag.spv");
 		std::shared_ptr<GraphicsPipeline> pipeline = GraphicsPipeline::Create(vertShader, fragShader);
 	}
 
