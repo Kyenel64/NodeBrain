@@ -118,7 +118,6 @@ namespace NodeBrain
 		std::vector<VkPhysicalDevice> devices(deviceCount);
 		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, &devices[0]);
 
-		int deviceIndex = -1;
 		for (int i = 0; i < devices.size(); i++)
 		{
 			std::shared_ptr<VulkanPhysicalDevice> physicalDevice = std::make_shared<VulkanPhysicalDevice>(m_VkInstance, i, m_VkSurface);
@@ -126,7 +125,7 @@ namespace NodeBrain
 				return physicalDevice;
 		}
 
-		NB_ASSERT(deviceIndex == -1, "Could not find suitable GPU");
+		NB_ASSERT(false, "Could not find suitable GPU");
 		return nullptr;
 	}
 
@@ -155,6 +154,7 @@ namespace NodeBrain
 
 		#if NB_APPLE
 			extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+			extensions.push_back("VK_KHR_get_physical_device_properties2");
 			createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 		#endif
 

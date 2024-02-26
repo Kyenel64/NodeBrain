@@ -16,6 +16,9 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		m_DeviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+		#if NB_APPLE
+			m_DeviceExtensions.push_back("VK_KHR_portability_subset");
+		#endif
 
 		Init();
 	}
