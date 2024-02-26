@@ -8,7 +8,7 @@
 	path = NodeBrain/thirdparty/spdlog
 	url = https://github.com/gabime/spdlog
 [submodule "test/thirdparty/googletest"]
-	path = test/thirdparty/googletest
+	path = Test/thirdparty/googletest
 	url = https://github.com/google/googletest
 [submodule "NodeBrain/thirdparty/ImGui"]
 	path = NodeBrain/thirdparty/ImGui

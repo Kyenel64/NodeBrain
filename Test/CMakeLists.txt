@@ -2,8 +2,8 @@ add_subdirectory("thirdparty/googletest")
 
 project("NBTest")
 
-add_executable(${PROJECT_NAME} "Core/Test_Timer.cc" "Core/Test_App.cc" "Core/Test_Window.cc" "Core/Test_Event.cc"
-    "Core/Test_Input.cc" )
+add_executable(${PROJECT_NAME} "src/Core/Test_Timer.cc" "src/Core/Test_App.cc" "src/Core/Test_Window.cc" "src/Core/Test_Event.cc"
+    "src/Core/Test_Input.cc" )
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 
