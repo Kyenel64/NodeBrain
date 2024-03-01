@@ -33,23 +33,26 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		if (!glfwInit())
-			return false;
+		{
+			NB_PROFILE_SCOPE("Init GLFW");
+			if (!glfwInit())
+				return false;
 
-		glfwSetErrorCallback(GLFWErrorCallback);
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_WindowName.c_str(), NULL, NULL);
-		NB_ASSERT(m_Window, "Failed to create GLFW window");
-		NB_INFO("Created Window {0}, size: {1}, {2}", m_WindowName, m_Data.Width, m_Data.Height);
-		// Set data when calling glfwGetWindowUserPointer
-		glfwSetWindowUserPointer(m_Window, &m_Data);
-		glfwMakeContextCurrent(m_Window);
+			glfwSetErrorCallback(GLFWErrorCallback);
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_WindowName.c_str(), NULL, NULL);
+			NB_ASSERT(m_Window, "Failed to create GLFW window");
+			NB_INFO("Created Window {0}, size: {1}, {2}", m_WindowName, m_Data.Width, m_Data.Height);
+			// Set data when calling glfwGetWindowUserPointer
+			glfwSetWindowUserPointer(m_Window, &m_Data);
+			glfwMakeContextCurrent(m_Window);
 
-		// Vulkan extensions
-		uint32_t extensionCount = 0;
-		const char** extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
-		for (size_t i = 0; i < extensionCount; i++)
-			m_Extensions.push_back(extensions[i]);
+			// Vulkan extensions
+			uint32_t extensionCount = 0;
+			const char** extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
+			for (size_t i = 0; i < extensionCount; i++)
+				m_Extensions.push_back(extensions[i]);
+		}
 
 		m_RenderContext = RenderContext::Create(this);
 
