@@ -11,11 +11,13 @@ namespace NodeBrain
 	{
 	public:
 		VulkanGraphicsPipeline(std::shared_ptr<Shader> vertShader, std::shared_ptr<Shader> fragShader);
-		virtual ~VulkanGraphicsPipeline() = default;
+		virtual ~VulkanGraphicsPipeline();
 	private:
 		void Init();
 
 	private:
+		VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;
+
 		std::shared_ptr<VulkanShader> m_VertexShader;
 		std::shared_ptr<VulkanShader> m_FragmentShader;
 	};
