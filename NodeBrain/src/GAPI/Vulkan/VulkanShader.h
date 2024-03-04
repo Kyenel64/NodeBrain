@@ -2,7 +2,6 @@
 
 #include <vulkan/vulkan.h>
 
-#include "GAPI/Vulkan/VulkanDevice.h"
 #include "Renderer/Shader.h"
 
 namespace NodeBrain
@@ -24,7 +23,7 @@ namespace NodeBrain
 
 	private:
 		VkShaderModule m_VkShaderModule = VK_NULL_HANDLE;
-		std::shared_ptr<VulkanDevice> m_Device;
+		VkDevice m_Device;
 		const std::filesystem::path& m_ShaderPath;
 	};
 }

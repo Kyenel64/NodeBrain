@@ -15,7 +15,7 @@ namespace NodeBrain
 
 	VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
 	{
-		vkDestroyPipelineLayout(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), m_PipelineLayout, nullptr);
+		vkDestroyPipelineLayout(VulkanRenderContext::GetInstance()->GetVkDevice(), m_PipelineLayout, nullptr);
 	}
 
 	void VulkanGraphicsPipeline::Init()
@@ -122,7 +122,7 @@ namespace NodeBrain
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
 		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
-		VkResult result = vkCreatePipelineLayout(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
+		VkResult result = vkCreatePipelineLayout(VulkanRenderContext::GetInstance()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
 		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan pipeline layout");
 
 	}

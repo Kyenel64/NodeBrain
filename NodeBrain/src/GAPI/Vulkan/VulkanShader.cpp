@@ -11,7 +11,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		m_Device = VulkanRenderContext::GetInstance()->GetDevice();
+		m_Device = VulkanRenderContext::GetInstance()->GetVkDevice();
 
 		Init();
 	}
@@ -28,7 +28,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		vkDestroyShaderModule(m_Device->GetVkDevice(), m_VkShaderModule, nullptr);
+		vkDestroyShaderModule(m_Device, m_VkShaderModule, nullptr);
 		m_VkShaderModule = VK_NULL_HANDLE;
 	}
 
@@ -43,7 +43,7 @@ namespace NodeBrain
 		createInfo.codeSize = buffer.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(buffer.data());
 
-		VkResult result = vkCreateShaderModule(m_Device->GetVkDevice(), &createInfo, nullptr, &m_VkShaderModule);
+		VkResult result = vkCreateShaderModule(m_Device, &createInfo, nullptr, &m_VkShaderModule);
 		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan shader module");
 
 		NB_INFO("Created shader module of size: {0}", buffer.size());
