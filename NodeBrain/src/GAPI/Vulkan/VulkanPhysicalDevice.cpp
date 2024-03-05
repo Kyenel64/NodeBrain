@@ -10,8 +10,8 @@
 
 namespace NodeBrain
 {
-	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance, uint32_t deviceIndex, VkSurfaceKHR surface)
-		: m_VkInstance(instance), m_DeviceIndex(deviceIndex), m_VkSurfaceKHR(surface)
+	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, uint32_t deviceIndex)
+		: m_VkInstance(instance), m_VkSurfaceKHR(surface), m_DeviceIndex(deviceIndex)
 	{
 		NB_PROFILE_FN();
 

@@ -30,9 +30,6 @@ namespace NodeBrain
 		VkResult CreateInstance();
 		VkResult CreateDebugUtilsMessenger();
 
-		bool CheckExtensionSupport(std::vector<const char*> extensions);
-		bool CheckValidationLayerSupport();
-
 		std::shared_ptr<VulkanPhysicalDevice> FindFirstSuitablePhysicalDevice();
 
 	private:

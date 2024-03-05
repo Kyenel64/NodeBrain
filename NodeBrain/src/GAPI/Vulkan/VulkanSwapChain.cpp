@@ -16,16 +16,13 @@ namespace NodeBrain
 
 	VulkanSwapChain::~VulkanSwapChain()
 	{
-		if (m_VkSwapChain)
-			Destroy();
-	}
-
-	void VulkanSwapChain::Destroy()
-	{
 		NB_PROFILE_FN();
-
-		vkDestroySwapchainKHR(m_Device->GetVkDevice(), m_VkSwapChain, nullptr);
-		m_VkSwapChain = VK_NULL_HANDLE;
+		
+		if (m_VkSwapChain)
+		{
+			vkDestroySwapchainKHR(m_Device->GetVkDevice(), m_VkSwapChain, nullptr);
+			m_VkSwapChain = VK_NULL_HANDLE;
+		}
 	}
 
 	void VulkanSwapChain::Init()

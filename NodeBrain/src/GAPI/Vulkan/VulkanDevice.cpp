@@ -16,17 +16,12 @@ namespace NodeBrain
 	VulkanDevice::~VulkanDevice()
 	{
 		NB_PROFILE_FN();
-
-		if (m_Device)
-			Destroy();
-	}
-
-	void VulkanDevice::Destroy()
-	{
-		NB_PROFILE_FN();
-
-		vkDestroyDevice(m_Device, nullptr);
-		m_Device = VK_NULL_HANDLE;
+		
+		if (m_VkDevice)
+		{
+			vkDestroyDevice(m_VkDevice, nullptr);
+			m_VkDevice = VK_NULL_HANDLE;
+		}
 	}
 
 	void VulkanDevice::Init()
@@ -72,11 +67,11 @@ namespace NodeBrain
 		}
 
 		// Create device
-		VkResult result = vkCreateDevice(m_PhysicalDevice->GetVkPhysicalDevice(), &createInfo, nullptr, &m_Device);
+		VkResult result = vkCreateDevice(m_PhysicalDevice->GetVkPhysicalDevice(), &createInfo, nullptr, &m_VkDevice);
 		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan device");
 
 		// Create graphics queue
-		vkGetDeviceQueue(m_Device, indices.Graphics.value(), 0, &m_GraphicsQueue);
-		vkGetDeviceQueue(m_Device, indices.Presentation.value(), 0, &m_PresentationQueue);
+		vkGetDeviceQueue(m_VkDevice, indices.Graphics.value(), 0, &m_GraphicsQueue);
+		vkGetDeviceQueue(m_VkDevice, indices.Presentation.value(), 0, &m_PresentationQueue);
 	}
 }

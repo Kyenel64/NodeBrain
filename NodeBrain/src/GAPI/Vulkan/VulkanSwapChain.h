@@ -14,8 +14,6 @@ namespace NodeBrain
 		VulkanSwapChain(VkSurfaceKHR surface, std::shared_ptr<VulkanDevice> device);
 		~VulkanSwapChain();
 
-		void Destroy();
-
 	private:
 		void Init();
 

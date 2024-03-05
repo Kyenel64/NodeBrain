@@ -25,7 +25,7 @@ namespace NodeBrain
 	class VulkanPhysicalDevice
 	{
 	public:
-		VulkanPhysicalDevice(VkInstance instance, uint32_t deviceIndex, VkSurfaceKHR surface = VK_NULL_HANDLE);
+		VulkanPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, uint32_t deviceIndex);
 		~VulkanPhysicalDevice() = default;
 
 		bool IsSuitable();

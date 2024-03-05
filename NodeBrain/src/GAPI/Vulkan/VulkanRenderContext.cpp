@@ -19,42 +19,73 @@ namespace NodeBrain
 			return VK_FALSE;
 		}
 
-		static VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
-			const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
-		{
-			NB_PROFILE_FN();
-
-			auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-			if (func != nullptr)
-				return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-			else
-				return VK_ERROR_EXTENSION_NOT_PRESENT;
-		}
-
-		static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
-		{
-			NB_PROFILE_FN();
-
-			auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-			if (func)
-				func(instance, debugMessenger, pAllocator);
-
-			debugMessenger = VK_NULL_HANDLE;
-		}
-
 		static void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
 		{
-			NB_PROFILE_FN();
-
 			createInfo = {};
 			createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 			createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 			createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 			createInfo.pfnUserCallback = DebugCallback;
 		}
+
+		static bool CheckInstanceExtensionSupport(const std::vector<const char*> extensions)
+		{
+			NB_PROFILE_FN();
+
+			uint32_t availableExtensionCount = 0;
+			vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, nullptr);
+			std::vector<VkExtensionProperties> availableExtensions(availableExtensionCount);
+			vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, &availableExtensions[0]);
+
+			for (int i = 0; i < extensions.size(); i++)
+			{
+				bool extensionIsAvailable = false;
+				for (int j = 0; j < availableExtensionCount; j++)
+					if (strcmp(extensions[i], availableExtensions[j].extensionName) == 0)
+						extensionIsAvailable = true;
+
+				if (!extensionIsAvailable)
+					return false;
+			}
+			
+			#ifdef NB_LIST_AVAILABLE_VK_EXTENSTIONS
+				NB_INFO("Available Vulkan Extensions:");
+				for (int i = 0; i < availableExtensionCount; i++)
+					NB_INFO("\t{0}", availableExtensions[i].extensionName);
+			#endif
+
+			return true;
+		}
+
+		static bool CheckValidationLayerSupport(const std::vector<const char*>& validationLayers)
+		{
+			NB_PROFILE_FN();
+
+			uint32_t layerCount = 0;
+			vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+			std::vector<VkLayerProperties> availableLayers(layerCount);
+			vkEnumerateInstanceLayerProperties(&layerCount, &availableLayers[0]);
+
+			// Check layers are available
+			for (int i = 0; i < validationLayers.size(); i++)
+			{
+				bool layerIsAvailable = false;
+				for (int j = 0; j < layerCount; j++)
+					if (strcmp(validationLayers[i], availableLayers[j].layerName) == 0)
+						layerIsAvailable = true;
+
+				if (!layerIsAvailable)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 	
 
+
+	// --- VulkanRenderContext ------------------------------------------------
 	static VulkanRenderContext* s_Instance;
 
 	VulkanRenderContext::VulkanRenderContext(Window* window)
@@ -71,25 +102,6 @@ namespace NodeBrain
 		Init();
 	}
 
-	VulkanRenderContext* VulkanRenderContext::GetInstance() 
-	{ 
-		return s_Instance; 
-	}
-
-	VulkanRenderContext::~VulkanRenderContext()
-	{
-		NB_PROFILE_FN();
-
-		// Destroy in order
-		m_SwapChain->Destroy();
-		m_Device->Destroy();
-		Utils::DestroyDebugUtilsMessengerEXT(m_VkInstance, m_DebugMessenger, nullptr);
-		vkDestroySurfaceKHR(m_VkInstance, m_VkSurface, nullptr);
-		vkDestroyInstance(m_VkInstance, nullptr);
-		m_VkSurface = VK_NULL_HANDLE;
-		m_VkInstance = VK_NULL_HANDLE;
-	}
-
 	void VulkanRenderContext::Init()
 	{
 		NB_PROFILE_FN();
@@ -100,12 +112,40 @@ namespace NodeBrain
 		result = glfwCreateWindowSurface(m_VkInstance, m_Window->GetGLFWWindow(), nullptr, &m_VkSurface);
 		NB_ASSERT(result == VK_SUCCESS, result);
 
-		result = CreateDebugUtilsMessenger();
-		NB_ASSERT(result == VK_SUCCESS, result);
+		#ifdef NB_DEBUG
+			result = CreateDebugUtilsMessenger();
+			NB_ASSERT(result == VK_SUCCESS, result);
+		#endif
 
 		m_PhysicalDevice = FindFirstSuitablePhysicalDevice();
 		m_Device = std::make_shared<VulkanDevice>(m_PhysicalDevice);
 		m_SwapChain = std::make_shared<VulkanSwapChain>(m_VkSurface, m_Device);
+	}
+
+	VulkanRenderContext::~VulkanRenderContext()
+	{
+		NB_PROFILE_FN();
+
+		// Destroy in order
+		m_SwapChain.reset();
+
+		m_Device.reset();
+
+		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VkInstance, "vkDestroyDebugUtilsMessengerEXT");
+		NB_ASSERT(func, "Could not destroy Vulkan debug messenger");
+		func(m_VkInstance, m_DebugMessenger, nullptr);
+		m_DebugMessenger = VK_NULL_HANDLE;
+
+		vkDestroySurfaceKHR(m_VkInstance, m_VkSurface, nullptr);
+		m_VkSurface = VK_NULL_HANDLE;
+
+		vkDestroyInstance(m_VkInstance, nullptr);
+		m_VkInstance = VK_NULL_HANDLE;
+	}
+
+	VulkanRenderContext* VulkanRenderContext::GetInstance() 
+	{ 
+		return s_Instance; 
 	}
 
 	std::shared_ptr<VulkanPhysicalDevice> VulkanRenderContext::FindFirstSuitablePhysicalDevice()
@@ -120,7 +160,7 @@ namespace NodeBrain
 
 		for (int i = 0; i < devices.size(); i++)
 		{
-			std::shared_ptr<VulkanPhysicalDevice> physicalDevice = std::make_shared<VulkanPhysicalDevice>(m_VkInstance, i, m_VkSurface);
+			std::shared_ptr<VulkanPhysicalDevice> physicalDevice = std::make_shared<VulkanPhysicalDevice>(m_VkInstance, m_VkSurface, i);
 			if (physicalDevice->IsSuitable())
 				return physicalDevice;
 		}
@@ -167,7 +207,7 @@ namespace NodeBrain
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = {};
 		if (!m_ValidationLayers.empty())
 		{
-			NB_ASSERT(CheckValidationLayerSupport(), "Validation layers unavailable");
+			NB_ASSERT(Utils::CheckValidationLayerSupport(m_ValidationLayers), "Validation layers unavailable");
 			createInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayers.size());
 			createInfo.ppEnabledLayerNames = &m_ValidationLayers[0];
 
@@ -180,7 +220,7 @@ namespace NodeBrain
 			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
 		}
 
-		CheckExtensionSupport(extensions);
+		NB_ASSERT(Utils::CheckInstanceExtensionSupport(extensions), "Extensions unavailable");
 
 		return vkCreateInstance(&createInfo, nullptr, &m_VkInstance);
 	}
@@ -189,64 +229,13 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		VkDebugUtilsMessengerCreateInfoEXT createInfo = {};
-		Utils::PopulateDebugMessengerCreateInfo(createInfo);
+		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = {};
+		Utils::PopulateDebugMessengerCreateInfo(debugCreateInfo);
 
-		return Utils::CreateDebugUtilsMessengerEXT(m_VkInstance, &createInfo, nullptr, &m_DebugMessenger);
-	}
+		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VkInstance, "vkCreateDebugUtilsMessengerEXT");
+		NB_ASSERT(func, "Failed to create Vulkan debug messenger");
 
-	bool VulkanRenderContext::CheckExtensionSupport(const std::vector<const char*> extensions)
-	{
-		NB_PROFILE_FN();
-
-		uint32_t availableExtensionCount = 0;
-		vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, nullptr);
-		std::vector<VkExtensionProperties> availableExtensions(availableExtensionCount);
-		vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, &availableExtensions[0]);
-
-		for (int i = 0; i < extensions.size(); i++)
-		{
-			bool extensionIsAvailable = false;
-			for (int j = 0; j < availableExtensionCount; j++)
-				if (strcmp(extensions[i], availableExtensions[j].extensionName) == 0)
-					extensionIsAvailable = true;
-
-			if (!extensionIsAvailable)
-				return false;
-		}
-		
-		#ifdef NB_LIST_AVAILABLE_VK_EXTENSTIONS
-			NB_INFO("Available Vulkan Extensions:");
-			for (int i = 0; i < availableExtensionCount; i++)
-				NB_INFO("\t{0}", availableExtensions[i].extensionName);
-		#endif
-
-		return true;
-	}
-
-	bool VulkanRenderContext::CheckValidationLayerSupport()
-	{
-		NB_PROFILE_FN();
-
-		uint32_t layerCount = 0;
-		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-		std::vector<VkLayerProperties> availableLayers(layerCount);
-		vkEnumerateInstanceLayerProperties(&layerCount, &availableLayers[0]);
-
-		// Check layers are available
-		for (int i = 0; i < m_ValidationLayers.size(); i++)
-		{
-			bool layerIsAvailable = false;
-			for (int j = 0; j < layerCount; j++)
-				if (strcmp(m_ValidationLayers[i], availableLayers[j].layerName) == 0)
-					layerIsAvailable = true;
-
-			if (!layerIsAvailable)
-			{
-				return false;
-			}
-		}
-		return true;
+		return func(m_VkInstance, &debugCreateInfo, nullptr, &m_DebugMessenger);
 	}
 
 	void VulkanRenderContext::SwapBuffers()
