@@ -22,6 +22,7 @@ namespace NodeBrain
 		// Getters
 		VkInstance GetVkInstance() const { return m_VkInstance; }
 		std::shared_ptr<VulkanDevice> GetDevice() const { return m_Device; }
+		std::shared_ptr<VulkanSwapChain> GetSwapchain() const { return m_SwapChain; }
 		const std::vector<const char*>& GetValidationLayers() const { return m_ValidationLayers; }
 
 		static VulkanRenderContext* GetInstance();

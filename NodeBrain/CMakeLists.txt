@@ -4,19 +4,27 @@ set (ImGuiSrcFiles "thirdparty/ImGui/imconfig.h" "thirdparty/ImGui/imgui.h" "thi
 "thirdparty/ImGui/imgui_draw.cpp" "thirdparty/ImGui/imgui_internal.h" "thirdparty/ImGui/imgui_tables.cpp" 
 "thirdparty/ImGui/imgui_widgets.cpp" "thirdparty/ImGui/imstb_rectpack.h" "thirdparty/ImGui/imstb_textedit.h" "thirdparty/ImGui/imstb_truetype.h")
 
+set (CoreFiles "src/Core/App.h" "src/Core/App.cpp" "src/Core/Layer.h" "src/Core/Timer.h" "src/Core/Window.h" 
+"src/Core/Window.cpp"  "src/Core/Log.h" "src/Core/Log.cpp" "src/Core/Event.h" "src/Core/KeyCode.h" "src/Core/Input.h" "src/Core/Input.cpp" 
+"src/Core/Instrumentor.h" "src/Core/Instrumentor.cpp")
+
+set (VulkanFiles "src/GAPI/Vulkan/VulkanRendererAPI.h" "src/GAPI/Vulkan/VulkanRendererAPI.cpp" 
+"src/GAPI/Vulkan/VulkanPhysicalDevice.h" "src/GAPI/Vulkan/VulkanPhysicalDevice.cpp"  "src/GAPI/Vulkan/VulkanDevice.h" 
+"src/GAPI/Vulkan/VulkanDevice.cpp" "src/GAPI/Vulkan/VulkanSwapChain.h" "src/GAPI/Vulkan/VulkanSwapChain.cpp" 
+"src/GAPI/Vulkan/VulkanRenderContext.h" "src/GAPI/Vulkan/VulkanRenderContext.cpp" "src/GAPI/Vulkan/VulkanImage.h" 
+"src/GAPI/Vulkan/VulkanImage.cpp" "src/GAPI/Vulkan/VulkanPipelineLayout.h" "src/GAPI/Vulkan/VulkanPipelineLayout.cpp"
+"src/GAPI/Vulkan/VulkanShader.h" "src/GAPI/Vulkan/VulkanShader.cpp" "src/GAPI/Vulkan/VulkanRenderPass.h" "src/GAPI/Vulkan/VulkanRenderPass.cpp")
+
+set (RendererFiles "src/Renderer/Renderer.h" "src/Renderer/Renderer.cpp" "src/Renderer/RendererAPI.h" "src/Renderer/RendererAPI.cpp" 
+"src/Renderer/RenderContext.h" "src/Renderer/RenderContext.cpp" "src/Renderer/Shader.h" "src/Renderer/Shader.cpp" 
+"src/Renderer/RenderPass.h" "src/Renderer/RenderPass.cpp" )
+
 # Source files
 add_library ( ${PROJECT_NAME} 
     ${ImGuiFiles} 
-    "src/Core/App.h" "src/Core/App.cpp" "src/Core/Layer.h" "src/Core/Timer.h" "src/Core/Window.h" 
-    "src/Core/Window.cpp"  "src/Core/Log.h" "src/Core/Log.cpp" "src/Core/Event.h" "src/Core/KeyCode.h" "src/Core/Input.h" 
-    "src/Core/Input.cpp"  "src/Renderer/Renderer.h" "src/Renderer/Renderer.cpp" "src/Renderer/RendererAPI.h" 
-    "src/Renderer/RendererAPI.cpp" "src/GAPI/Vulkan/VulkanRendererAPI.h" "src/GAPI/Vulkan/VulkanRendererAPI.cpp" 
-    "src/GAPI/Vulkan/VulkanPhysicalDevice.h" "src/GAPI/Vulkan/VulkanPhysicalDevice.cpp"  "src/GAPI/Vulkan/VulkanDevice.h" 
-    "src/GAPI/Vulkan/VulkanDevice.cpp" "src/GAPI/Vulkan/VulkanSwapChain.h" "src/GAPI/Vulkan/VulkanSwapChain.cpp" "src/Renderer/RenderContext.h"
-    "src/Renderer/RenderContext.cpp" "src/GAPI/Vulkan/VulkanRenderContext.h" "src/GAPI/Vulkan/VulkanRenderContext.cpp" "src/GAPI/Vulkan/VulkanImage.h" 
-    "src/GAPI/Vulkan/VulkanImage.cpp"  "src/Core/Instrumentor.h" "src/Core/Instrumentor.cpp" "src/Renderer/GraphicsPipeline.h" 
-    "src/Renderer/GraphicsPipeline.cpp" "src/GAPI/Vulkan/VulkanGraphicsPipeline.h" "src/GAPI/Vulkan/VulkanGraphicsPipeline.cpp" 
-    "src/Renderer/Shader.h" "src/Renderer/Shader.cpp" "src/GAPI/Vulkan/VulkanShader.h" "src/GAPI/Vulkan/VulkanShader.cpp" 
+    ${CoreFiles}
+    ${RendererFiles}
+    ${VulkanFiles}
     "src/Utils/FileUtils.h" "src/Utils/FileUtils.cpp")
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)

@@ -14,6 +14,8 @@ namespace NodeBrain
 		VulkanSwapChain(VkSurfaceKHR surface, std::shared_ptr<VulkanDevice> device);
 		~VulkanSwapChain();
 
+		VkFormat GetFormat() const { return m_ColorFormat; }
+
 	private:
 		void Init();
 

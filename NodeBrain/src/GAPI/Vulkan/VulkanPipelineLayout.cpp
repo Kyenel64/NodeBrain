@@ -1,24 +1,26 @@
 #include "NBpch.h"
-#include "VulkanGraphicsPipeline.h"
+#include "VulkanPipelineLayout.h"
 
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
 {
-	VulkanGraphicsPipeline::VulkanGraphicsPipeline(std::shared_ptr<Shader> vertShader, std::shared_ptr<Shader> fragShader)
+	VulkanPipelineLayout::VulkanPipelineLayout(std::shared_ptr<Shader> vertShader, std::shared_ptr<Shader> fragShader)
 	{
 		m_VertexShader = std::dynamic_pointer_cast<VulkanShader>(vertShader); // TODO: Check if this is ok.
 		m_FragmentShader = std::dynamic_pointer_cast<VulkanShader>(fragShader);
 
+		m_Device = VulkanRenderContext::GetInstance()->GetDevice();
+
 		Init();
 	}
 
-	VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
+	VulkanPipelineLayout::~VulkanPipelineLayout()
 	{
-		vkDestroyPipelineLayout(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), m_PipelineLayout, nullptr);
+		vkDestroyPipelineLayout(m_Device->GetVkDevice(), m_PipelineLayout, nullptr);
 	}
 
-	void VulkanGraphicsPipeline::Init()
+	void VulkanPipelineLayout::Init()
 	{
 		NB_PROFILE_FN();
 
@@ -122,7 +124,7 @@ namespace NodeBrain
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
 		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
-		VkResult result = vkCreatePipelineLayout(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
+		VkResult result = vkCreatePipelineLayout(m_Device->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
 		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan pipeline layout");
 
 	}

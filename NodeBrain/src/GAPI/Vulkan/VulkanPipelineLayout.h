@@ -3,15 +3,16 @@
 #include <vulkan/vulkan.h>
 
 #include "GAPI/Vulkan/VulkanShader.h"
-#include "Renderer/GraphicsPipeline.h"
+#include "GAPI/Vulkan/VulkanDevice.h"
 
 namespace NodeBrain
 {
-	class VulkanGraphicsPipeline : public GraphicsPipeline
+	class VulkanPipelineLayout
 	{
 	public:
-		VulkanGraphicsPipeline(std::shared_ptr<Shader> vertShader, std::shared_ptr<Shader> fragShader);
-		virtual ~VulkanGraphicsPipeline();
+		VulkanPipelineLayout(std::shared_ptr<Shader> vertShader, std::shared_ptr<Shader> fragShader);
+		virtual ~VulkanPipelineLayout();
+
 	private:
 		void Init();
 
@@ -20,5 +21,7 @@ namespace NodeBrain
 
 		std::shared_ptr<VulkanShader> m_VertexShader;
 		std::shared_ptr<VulkanShader> m_FragmentShader;
+
+		std::shared_ptr<VulkanDevice> m_Device;
 	};
 }

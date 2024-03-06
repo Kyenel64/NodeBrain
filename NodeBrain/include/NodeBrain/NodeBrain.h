@@ -13,5 +13,4 @@
 #include "Renderer/Renderer.h"
 #include "Renderer/RendererAPI.h"
 #include "Renderer/RenderContext.h"
-#include "Renderer/GraphicsPipeline.h"
 #include "Renderer/Shader.h"
