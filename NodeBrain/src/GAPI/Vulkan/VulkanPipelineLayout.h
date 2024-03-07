@@ -2,26 +2,48 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Renderer/PipelineLayout.h"
 #include "GAPI/Vulkan/VulkanShader.h"
 #include "GAPI/Vulkan/VulkanDevice.h"
 
 namespace NodeBrain
 {
-	class VulkanPipelineLayout
+	struct VulkanPipelineCreateInfos
+	{
+		VkPipelineShaderStageCreateInfo ShaderStages[2];
+		
+		VkPipelineVertexInputStateCreateInfo VertexInput;
+		VkPipelineInputAssemblyStateCreateInfo InputAssembly;
+		VkPipelineRasterizationStateCreateInfo Rasterizer;
+		VkPipelineMultisampleStateCreateInfo Multisampling;
+		VkPipelineDepthStencilStateCreateInfo DepthStencil;
+		VkPipelineColorBlendAttachmentState ColorBlendAttachment; 
+		VkPipelineColorBlendStateCreateInfo ColorBlend;
+
+		std::vector<VkDynamicState> DynamicStates;
+		VkPipelineDynamicStateCreateInfo DynamicState;
+		VkPipelineViewportStateCreateInfo ViewportState;
+
+	};
+
+
+	// TODO: Probably can put this together with GraphicsPipeline class. 
+	class VulkanPipelineLayout : public PipelineLayout
 	{
 	public:
-		VulkanPipelineLayout(std::shared_ptr<Shader> vertShader, std::shared_ptr<Shader> fragShader);
+		VulkanPipelineLayout(const PipelineData& pipelineState);
 		virtual ~VulkanPipelineLayout();
+
+		const VulkanPipelineCreateInfos& GetCreateInfos() const { return m_CreateInfos; }
+		VkPipelineLayout GetVkPipelineLayout() const { return m_VkPipelineLayout; }
 
 	private:
 		void Init();
 
 	private:
-		VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;
-
-		std::shared_ptr<VulkanShader> m_VertexShader;
-		std::shared_ptr<VulkanShader> m_FragmentShader;
-
+		VkPipelineLayout m_VkPipelineLayout = VK_NULL_HANDLE;
 		std::shared_ptr<VulkanDevice> m_Device;
+		const PipelineData& m_PipelineState;
+		VulkanPipelineCreateInfos m_CreateInfos = {};
 	};
 }

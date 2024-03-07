@@ -11,6 +11,8 @@ namespace NodeBrain
         VulkanRenderPass();
         virtual ~VulkanRenderPass();
 
+		VkRenderPass GetVkRenderPass() const { return m_VkRenderPass; }
+
     private:
 		void Init();
     private:

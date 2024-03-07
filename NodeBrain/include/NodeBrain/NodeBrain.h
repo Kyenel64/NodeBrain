@@ -14,3 +14,6 @@
 #include "Renderer/RendererAPI.h"
 #include "Renderer/RenderContext.h"
 #include "Renderer/Shader.h"
+#include "Renderer/GraphicsPipeline.h"
+#include "Renderer/PipelineData.h"
+#include "Renderer/RenderPass.h"
