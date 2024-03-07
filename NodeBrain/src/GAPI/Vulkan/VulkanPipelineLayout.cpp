@@ -5,8 +5,8 @@
 
 namespace NodeBrain
 {
-	VulkanPipelineLayout::VulkanPipelineLayout(const PipelineData& pipelineState)
-		: m_PipelineState(pipelineState)
+	VulkanPipelineLayout::VulkanPipelineLayout(const PipelineConfiguration& pipelineConfig)
+		: m_PipelineConfig(pipelineConfig)
 	{
 		NB_PROFILE_FN();
 
@@ -31,14 +31,14 @@ namespace NodeBrain
 		VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo = {};
 		vertShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		vertShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-		vertShaderStageCreateInfo.module = std::dynamic_pointer_cast<VulkanShader>(m_PipelineState.VertexShader)->GetVkShaderModule();
+		vertShaderStageCreateInfo.module = std::dynamic_pointer_cast<VulkanShader>(m_PipelineConfig.VertexShader)->GetVkShaderModule();
 		vertShaderStageCreateInfo.pName = "main";
 
 		// Fragment
 		VkPipelineShaderStageCreateInfo fragShaderStageCreateInfo = {};
 		fragShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		fragShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		fragShaderStageCreateInfo.module = std::dynamic_pointer_cast<VulkanShader>(m_PipelineState.FragmentShader)->GetVkShaderModule();
+		fragShaderStageCreateInfo.module = std::dynamic_pointer_cast<VulkanShader>(m_PipelineConfig.FragmentShader)->GetVkShaderModule();
 		fragShaderStageCreateInfo.pName = "main";
 
 		m_CreateInfos.ShaderStages[0] = vertShaderStageCreateInfo;

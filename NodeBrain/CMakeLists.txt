@@ -19,7 +19,7 @@ set (VulkanFiles "src/GAPI/Vulkan/VulkanRendererAPI.h" "src/GAPI/Vulkan/VulkanRe
 set (RendererFiles "src/Renderer/Renderer.h" "src/Renderer/Renderer.cpp" "src/Renderer/RendererAPI.h" "src/Renderer/RendererAPI.cpp" 
 "src/Renderer/RenderContext.h" "src/Renderer/RenderContext.cpp" "src/Renderer/Shader.h" "src/Renderer/Shader.cpp" 
 "src/Renderer/RenderPass.h" "src/Renderer/RenderPass.cpp" "src/Renderer/GraphicsPipeline.h" "src/Renderer/GraphicsPipeline.cpp" 
-"src/Renderer/PipelineLayout.h" "src/Renderer/PipelineLayout.cpp" "src/Renderer/PipelineData.h")
+"src/Renderer/PipelineLayout.h" "src/Renderer/PipelineLayout.cpp" "src/Renderer/PipelineConfiguration.h")
 
 # Source files
 add_library ( ${PROJECT_NAME} 

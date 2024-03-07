@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/PipelineData.h"
+#include "Renderer/PipelineConfiguration.h"
 
 namespace NodeBrain
 {
@@ -8,6 +8,6 @@ namespace NodeBrain
     {
     public:
         virtual ~PipelineLayout() = default;
-		static std::shared_ptr<PipelineLayout> Create(const PipelineData& pipelineState);
+		static std::shared_ptr<PipelineLayout> Create(const PipelineConfiguration& pipelineConfig);
     };
 }

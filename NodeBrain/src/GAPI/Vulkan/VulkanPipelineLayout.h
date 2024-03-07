@@ -31,7 +31,7 @@ namespace NodeBrain
 	class VulkanPipelineLayout : public PipelineLayout
 	{
 	public:
-		VulkanPipelineLayout(const PipelineData& pipelineState);
+		VulkanPipelineLayout(const PipelineConfiguration& pipelineConfig);
 		virtual ~VulkanPipelineLayout();
 
 		const VulkanPipelineCreateInfos& GetCreateInfos() const { return m_CreateInfos; }
@@ -43,7 +43,7 @@ namespace NodeBrain
 	private:
 		VkPipelineLayout m_VkPipelineLayout = VK_NULL_HANDLE;
 		std::shared_ptr<VulkanDevice> m_Device;
-		const PipelineData& m_PipelineState;
+		const PipelineConfiguration& m_PipelineConfig;
 		VulkanPipelineCreateInfos m_CreateInfos = {};
 	};
 }

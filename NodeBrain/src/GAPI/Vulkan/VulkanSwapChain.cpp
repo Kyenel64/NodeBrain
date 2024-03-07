@@ -87,8 +87,6 @@ namespace NodeBrain
 
 	VkSurfaceFormatKHR VulkanSwapChain::ChooseSwapChainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
 	{
-		NB_PROFILE_FN();
-
 		for (const auto& format : availableFormats)
 		{
 			if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)
@@ -100,8 +98,6 @@ namespace NodeBrain
 
 	VkPresentModeKHR VulkanSwapChain::ChooseSwapChainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes)
 	{
-		NB_PROFILE_FN();
-
 		for (const auto& presentationMode : availablePresentationModes)
 		{
 			if (presentationMode == VK_PRESENT_MODE_MAILBOX_KHR)
@@ -112,8 +108,6 @@ namespace NodeBrain
 
 	VkExtent2D VulkanSwapChain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 	{
-		NB_PROFILE_FN();
-
 		if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
 		{
 			return capabilities.currentExtent;
