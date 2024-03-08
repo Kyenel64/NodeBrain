@@ -5,10 +5,10 @@
 
 namespace NodeBrain
 {
-    class GraphicsPipeline
-    {
-    public:
+	class GraphicsPipeline
+	{
+	public:
 		virtual ~GraphicsPipeline() = default;
 		static std::shared_ptr<GraphicsPipeline> Create(std::shared_ptr<PipelineLayout> layout, std::shared_ptr<RenderPass> renderPass);
-    };
+	};
 }

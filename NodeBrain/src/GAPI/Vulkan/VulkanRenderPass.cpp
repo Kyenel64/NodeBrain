@@ -5,14 +5,14 @@
 
 namespace NodeBrain
 {
-    VulkanRenderPass::VulkanRenderPass()
-    {
+	VulkanRenderPass::VulkanRenderPass()
+	{
 		NB_PROFILE_FN();
 
-        m_Device = VulkanRenderContext::GetInstance()->GetDevice();
+		m_Device = VulkanRenderContext::GetInstance()->GetDevice();
 
 		Init();
-    }
+	}
 
 	void VulkanRenderPass::Init()
 	{
@@ -50,10 +50,10 @@ namespace NodeBrain
 		NB_ASSERT(result == VK_SUCCESS, result);
 	}
 
-    VulkanRenderPass::~VulkanRenderPass()
-    {
+	VulkanRenderPass::~VulkanRenderPass()
+	{
 		NB_PROFILE_FN();
 
 		vkDestroyRenderPass(m_Device->GetVkDevice(), m_VkRenderPass, nullptr);
-    }
+	}
 }

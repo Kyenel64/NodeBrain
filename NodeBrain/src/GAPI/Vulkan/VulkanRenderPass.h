@@ -5,19 +5,19 @@
 
 namespace NodeBrain
 {
-    class VulkanRenderPass : public RenderPass
-    {
-    public:
-        VulkanRenderPass();
-        virtual ~VulkanRenderPass();
+	class VulkanRenderPass : public RenderPass
+	{
+	public:
+		VulkanRenderPass();
+		virtual ~VulkanRenderPass();
 
 		VkRenderPass GetVkRenderPass() const { return m_VkRenderPass; }
 
-    private:
+	private:
 		void Init();
-    private:
+	private:
 		VkRenderPass m_VkRenderPass;
-        std::shared_ptr<VulkanDevice> m_Device;
+		std::shared_ptr<VulkanDevice> m_Device;
 
-    };
+	};
 }

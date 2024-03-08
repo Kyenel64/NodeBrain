@@ -8,13 +8,13 @@
 
 namespace NodeBrain
 {
-    class VulkanGraphicsPipeline : public GraphicsPipeline
-    {
-    public:
+	class VulkanGraphicsPipeline : public GraphicsPipeline
+	{
+	public:
 		VulkanGraphicsPipeline(std::shared_ptr<VulkanPipelineLayout> layout, std::shared_ptr<VulkanRenderPass> renderPass);
 		virtual ~VulkanGraphicsPipeline();
 
-    private:
+	private:
 		void Init();
 
 	private:
@@ -23,5 +23,5 @@ namespace NodeBrain
 
 		std::shared_ptr<VulkanPipelineLayout> m_PipelineLayout;
 		std::shared_ptr<VulkanRenderPass> m_RenderPass;
-    };
+	};
 }

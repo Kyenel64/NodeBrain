@@ -6,9 +6,9 @@
 
 namespace NodeBrain
 {
-    std::shared_ptr<GraphicsPipeline> GraphicsPipeline::Create(std::shared_ptr<PipelineLayout> layout, std::shared_ptr<RenderPass> renderPass)
-    {
-        switch (Renderer::GetGAPI())
+	std::shared_ptr<GraphicsPipeline> GraphicsPipeline::Create(std::shared_ptr<PipelineLayout> layout, std::shared_ptr<RenderPass> renderPass)
+	{
+		switch (Renderer::GetGAPI())
 		{
 			case GAPI::None: NB_ERROR("Graphics API not detected"); return nullptr;
 			case GAPI::Vulkan: return std::make_shared<VulkanGraphicsPipeline>(
@@ -17,5 +17,5 @@ namespace NodeBrain
 
 		NB_ASSERT(false, "Graphics API not detected!");
 		return nullptr;
-    }
+	}
 }

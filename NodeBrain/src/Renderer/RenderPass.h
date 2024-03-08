@@ -2,11 +2,11 @@
 
 namespace NodeBrain
 {
-    class RenderPass
-    {
-    public:
+	class RenderPass
+	{
+	public:
 		virtual ~RenderPass() = default;
 
 		static std::shared_ptr<RenderPass> Create();
-    };
+	};
 }
