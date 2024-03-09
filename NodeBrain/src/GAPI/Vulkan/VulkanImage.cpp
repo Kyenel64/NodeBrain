@@ -14,15 +14,11 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		if (m_ImageView)
-			Destroy();
-	}
-
-	void VulkanImage::Destroy()
-	{
-		NB_PROFILE_FN();
-
-		vkDestroyImageView(m_Device->GetVkDevice(), m_ImageView, nullptr);
-		m_ImageView = VK_NULL_HANDLE;
+		{
+			vkDestroyImageView(m_Device->GetVkDevice(), m_ImageView, nullptr);
+			m_ImageView = VK_NULL_HANDLE;
+		}
+		
 	}
 
 	void VulkanImage::Init()

@@ -17,4 +17,4 @@ namespace NodeBrain
 		NB_ASSERT(false, "Graphics API not detected!");
 		return nullptr;
 	}
-}s
+}

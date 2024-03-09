@@ -14,12 +14,13 @@ set (VulkanFiles "src/GAPI/Vulkan/VulkanRendererAPI.h" "src/GAPI/Vulkan/VulkanRe
 "src/GAPI/Vulkan/VulkanRenderContext.h" "src/GAPI/Vulkan/VulkanRenderContext.cpp" "src/GAPI/Vulkan/VulkanImage.h" 
 "src/GAPI/Vulkan/VulkanImage.cpp" "src/GAPI/Vulkan/VulkanPipelineLayout.h" "src/GAPI/Vulkan/VulkanPipelineLayout.cpp"
 "src/GAPI/Vulkan/VulkanShader.h" "src/GAPI/Vulkan/VulkanShader.cpp" "src/GAPI/Vulkan/VulkanRenderPass.h" "src/GAPI/Vulkan/VulkanRenderPass.cpp"
-"src/GAPI/Vulkan/VulkanGraphicsPipeline.h" "src/GAPI/Vulkan/VulkanGraphicsPipeline.cpp")
+"src/GAPI/Vulkan/VulkanGraphicsPipeline.h" "src/GAPI/Vulkan/VulkanGraphicsPipeline.cpp" "src/GAPI/Vulkan/VulkanFramebuffer.h" "src/GAPI/Vulkan/VulkanFramebuffer.cpp")
 
 set (RendererFiles "src/Renderer/Renderer.h" "src/Renderer/Renderer.cpp" "src/Renderer/RendererAPI.h" "src/Renderer/RendererAPI.cpp" 
 "src/Renderer/RenderContext.h" "src/Renderer/RenderContext.cpp" "src/Renderer/Shader.h" "src/Renderer/Shader.cpp" 
 "src/Renderer/RenderPass.h" "src/Renderer/RenderPass.cpp" "src/Renderer/GraphicsPipeline.h" "src/Renderer/GraphicsPipeline.cpp" 
-"src/Renderer/PipelineLayout.h" "src/Renderer/PipelineLayout.cpp" "src/Renderer/PipelineConfiguration.h")
+"src/Renderer/PipelineLayout.h" "src/Renderer/PipelineLayout.cpp" "src/Renderer/PipelineConfiguration.h"
+"src/Renderer/Framebuffer.h" "src/Renderer/Framebuffer.cpp")
 
 # Source files
 add_library ( ${PROJECT_NAME} 

@@ -12,7 +12,7 @@ namespace NodeBrain
 		VulkanImage(std::shared_ptr<VulkanDevice> device, VkImage image, VkFormat imageFormat);
 		~VulkanImage();
 
-		void Destroy();
+		VkImageView GetVkImageView() const { return m_ImageView; }
 
 	private:
 		void Init();

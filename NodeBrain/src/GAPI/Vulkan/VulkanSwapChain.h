@@ -5,6 +5,7 @@
 #include "GAPI/Vulkan/VulkanPhysicalDevice.h"
 #include "GAPI/Vulkan/VulkanDevice.h"
 #include "GAPI/Vulkan/VulkanImage.h"
+#include "GAPI/Vulkan/VulkanFramebuffer.h"
 
 namespace NodeBrain
 {
@@ -15,6 +16,9 @@ namespace NodeBrain
 		~VulkanSwapChain();
 
 		VkFormat GetFormat() const { return m_ColorFormat; }
+		const std::vector<std::shared_ptr<VulkanImage>>& GetSwapchainImages() const { return m_SwapChainImages; }
+		float GetExtentWidth() const { return m_Extent.width; }
+		float GetExtentHeight() const { return m_Extent.height; }
 
 	private:
 		void Init();

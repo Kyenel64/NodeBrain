@@ -17,6 +17,12 @@ namespace NodeBrain
 	VulkanSwapChain::~VulkanSwapChain()
 	{
 		NB_PROFILE_FN();
+
+		if (!m_SwapChainImages.empty())
+		{
+			for (auto& image : m_SwapChainImages)
+				image.reset();
+		}
 		
 		if (m_VkSwapChain)
 		{
@@ -76,11 +82,11 @@ namespace NodeBrain
 		VkResult result = vkCreateSwapchainKHR(m_Device->GetVkDevice(), &createInfo, nullptr, &m_VkSwapChain);
 		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan swap chain");
 
+		// Create image views
 		std::vector<VkImage> swapchainImages;
 		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapChain, &imageCount, nullptr);
 		swapchainImages.resize(imageCount);
 		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapChain, &imageCount, &swapchainImages[0]);
-
 		for (int i = 0; i < imageCount; i++)
 			m_SwapChainImages.push_back(std::make_shared<VulkanImage>(m_Device, swapchainImages[i], m_ColorFormat));
 	}
