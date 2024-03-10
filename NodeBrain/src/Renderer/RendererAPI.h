@@ -7,6 +7,8 @@ namespace NodeBrain
 	public:
 		virtual ~RendererAPI() = default;
 
+		virtual void DrawTestTriangle() = 0;
+
 		static std::unique_ptr<RendererAPI> Create();
 	};
 }

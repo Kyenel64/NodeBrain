@@ -16,13 +16,14 @@ namespace NodeBrain
 		VulkanFramebuffer(std::shared_ptr<VulkanRenderPass> renderPass, std::shared_ptr<VulkanImage> image);
 		virtual ~VulkanFramebuffer();
 
+		VkFramebuffer GetVkFramebuffer() const { return m_VkFramebuffer; }
+
 	private:
 		void Init();
 
 	private:
 		VkFramebuffer m_VkFramebuffer = VK_NULL_HANDLE;
 		std::shared_ptr<VulkanRenderPass> m_RenderPass;
-		std::shared_ptr<VulkanSwapChain> m_Swapchain;
 		std::shared_ptr<VulkanDevice> m_Device;
 
 		std::shared_ptr<VulkanImage> m_Image;

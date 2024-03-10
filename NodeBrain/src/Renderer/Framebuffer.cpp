@@ -12,7 +12,7 @@ namespace NodeBrain
 		switch (Renderer::GetGAPI())
 		{
 			case GAPI::None: NB_ERROR("Graphics API not detected"); return nullptr;
-			case GAPI::Vulkan: return std::make_shared<VulkanFramebuffer>(std::dynamic_pointer_cast<VulkanRenderPass>(renderPass));
+			case GAPI::Vulkan: return std::make_shared<VulkanFramebuffer>(std::dynamic_pointer_cast<VulkanRenderPass>(renderPass), nullptr); // temp
 		}
 
 		NB_ASSERT(false, "Graphics API not detected!");

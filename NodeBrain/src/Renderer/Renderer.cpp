@@ -22,5 +22,10 @@ namespace NodeBrain
 		NB_INFO("Shutdown renderer");
 	}
 
+	void Renderer::DrawTestTriangle()
+	{
+		s_RendererAPI->DrawTestTriangle();
+	}
+
 	GAPI Renderer::GetGAPI() { return s_GAPI; }
 }

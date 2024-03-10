@@ -14,6 +14,8 @@ namespace NodeBrain
 
 		VkDevice GetVkDevice() const { return m_VkDevice; }
 		std::shared_ptr<VulkanPhysicalDevice> GetPhysicalDevice() const { return m_PhysicalDevice; }
+		VkQueue GetGraphicsQueue() const { return m_GraphicsQueue; }
+		VkQueue GetPresentationQueue() const { return m_PresentationQueue; }
 
 	private:
 		void Init();

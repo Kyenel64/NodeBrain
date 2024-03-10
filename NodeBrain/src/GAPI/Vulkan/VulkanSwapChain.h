@@ -15,8 +15,11 @@ namespace NodeBrain
 		VulkanSwapChain(VkSurfaceKHR surface, std::shared_ptr<VulkanDevice> device);
 		~VulkanSwapChain();
 
+		VkSwapchainKHR GetVkSwapchain() const { return m_VkSwapChain; }
 		VkFormat GetFormat() const { return m_ColorFormat; }
 		const std::vector<std::shared_ptr<VulkanImage>>& GetSwapchainImages() const { return m_SwapChainImages; }
+
+		VkExtent2D GetVkExtent() const { return m_Extent; }
 		float GetExtentWidth() const { return m_Extent.width; }
 		float GetExtentHeight() const { return m_Extent.height; }
 

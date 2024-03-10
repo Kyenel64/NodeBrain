@@ -12,6 +12,8 @@ namespace NodeBrain
 		VulkanRendererAPI();
 		virtual ~VulkanRendererAPI();
 
+		virtual void DrawTestTriangle() override;
+
 	private:
 		void Init();
 

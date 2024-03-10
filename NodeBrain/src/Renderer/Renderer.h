@@ -11,6 +11,8 @@ namespace NodeBrain
 		static void Init();
 		static void Shutdown();
 
+		static void DrawTestTriangle();
+
 		static GAPI GetGAPI();
 	};
 }

@@ -7,6 +7,8 @@ namespace NodeBrain
 		: m_Device(device), m_Image(image), m_ImageFormat(imageFormat)
 	{
 		NB_PROFILE_FN();
+
+		Init();
 	}
 
 	VulkanImage::~VulkanImage()

@@ -26,6 +26,8 @@ namespace NodeBrain
 			NB_INFO("'T' released");
 		if (Input::IsMouseButtonReleased(MouseButton::Left))
 			NB_INFO("Left mousebutton released");
+
+		Renderer::DrawTestTriangle();
 	}
 
 	void BrainEditor::OnUpdateGUI()

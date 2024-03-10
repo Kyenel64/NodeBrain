@@ -42,7 +42,7 @@ namespace NodeBrain
 		pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 		pipelineCreateInfo.basePipelineIndex = -1; // Optional
 
-		VkResult result = vkCreateGraphicsPipelines(m_Device->GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_VkGraphicsPipeline);
+		VkResult result = vkCreateGraphicsPipelines(m_Device->GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_VkPipeline);
 		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan graphics pipeline");
 
 	}
@@ -51,6 +51,6 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		vkDestroyPipeline(m_Device->GetVkDevice(), m_VkGraphicsPipeline, nullptr);
+		vkDestroyPipeline(m_Device->GetVkDevice(), m_VkPipeline, nullptr);
 	}
 }
