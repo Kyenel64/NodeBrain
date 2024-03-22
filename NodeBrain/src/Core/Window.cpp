@@ -45,13 +45,12 @@ namespace NodeBrain
 			NB_INFO("Created Window {0}, size: {1}, {2}", m_WindowName, m_Data.Width, m_Data.Height);
 			// Set data when calling glfwGetWindowUserPointer
 			glfwSetWindowUserPointer(m_Window, &m_Data);
-			glfwMakeContextCurrent(m_Window);
 
 			// Vulkan extensions
 			uint32_t extensionCount = 0;
 			const char** extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
 			for (size_t i = 0; i < extensionCount; i++)
-				m_Extensions.push_back(extensions[i]);
+				m_VulkanExtensions.push_back(extensions[i]);
 		}
 
 		m_RenderContext = RenderContext::Create(this);
@@ -59,6 +58,13 @@ namespace NodeBrain
 		RegisterCallbacks();
 
 		return true;
+	}
+
+	void Window::AcquireNextImage()
+	{
+		NB_PROFILE_FN();
+		
+		m_RenderContext->AcquireNextImage();
 	}
 
 	void Window::SwapBuffers()

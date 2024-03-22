@@ -2,15 +2,16 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Renderer/CommandPool.h"
 #include "GAPI/Vulkan/VulkanDevice.h"
 
 namespace NodeBrain
 {
-	class VulkanCommandPool
+	class VulkanCommandPool : public CommandPool
 	{
 	public:
 		VulkanCommandPool();
-		~VulkanCommandPool();
+		virtual ~VulkanCommandPool();
 
 		VkCommandPool GetVkCommandPool() const { return m_VkCommandPool; }
 
@@ -19,6 +20,5 @@ namespace NodeBrain
 
 	private:
 		VkCommandPool m_VkCommandPool = VK_NULL_HANDLE;
-		std::shared_ptr<VulkanDevice> m_Device;
 	};
 }

@@ -24,12 +24,13 @@ namespace NodeBrain
 
 		bool Init();
 		void SetEventCallback(std::function<void(Event&)> func) { m_Data.EventCallback = func; }
+		void AcquireNextImage();
 		void SwapBuffers();
 		void PollEvents();
 
 		GLFWwindow* GetGLFWWindow() const { return m_Window; }
 		RenderContext& GetRenderContext() const { return *m_RenderContext; }
-		std::vector<const char*> GetExtensions() const { return m_Extensions; }
+		std::vector<const char*> GetVulkanExtensions() const { return m_VulkanExtensions; }
 		glm::vec2 GetFramebufferSize() const;
 
 	private:
@@ -42,6 +43,6 @@ namespace NodeBrain
 
 		WindowData m_Data;
 
-		std::vector<const char*> m_Extensions;
+		std::vector<const char*> m_VulkanExtensions;
 	};
 }

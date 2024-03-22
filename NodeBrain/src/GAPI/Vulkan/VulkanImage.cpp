@@ -3,8 +3,13 @@
 
 namespace NodeBrain
 {
+	VulkanImage::VulkanImage(const ImageConfiguration& configuration)
+	{
+		// TODO: Create with configuration data
+	}
+
 	VulkanImage::VulkanImage(std::shared_ptr<VulkanDevice> device, VkImage image, VkFormat imageFormat)
-		: m_Device(device), m_Image(image), m_ImageFormat(imageFormat)
+		: m_Device(device), m_VkImage(image), m_ImageFormat(imageFormat)
 	{
 		NB_PROFILE_FN();
 
@@ -15,10 +20,10 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		if (m_ImageView)
+		if (m_VkImageView)
 		{
-			vkDestroyImageView(m_Device->GetVkDevice(), m_ImageView, nullptr);
-			m_ImageView = VK_NULL_HANDLE;
+			vkDestroyImageView(m_Device->GetVkDevice(), m_VkImageView, nullptr);
+			m_VkImageView = VK_NULL_HANDLE;
 		}
 		
 	}
@@ -29,7 +34,7 @@ namespace NodeBrain
 
 		VkImageViewCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		createInfo.image = m_Image;
+		createInfo.image = m_VkImage;
 		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D; // TODO: parameterize
 		createInfo.format = m_ImageFormat;
 
@@ -44,7 +49,7 @@ namespace NodeBrain
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
 
-		VkResult result = vkCreateImageView(m_Device->GetVkDevice(), &createInfo, nullptr, &m_ImageView);
+		VkResult result = vkCreateImageView(m_Device->GetVkDevice(), &createInfo, nullptr, &m_VkImageView);
 		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view");
 	}
 }

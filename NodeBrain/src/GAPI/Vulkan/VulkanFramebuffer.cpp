@@ -5,11 +5,9 @@
 
 namespace NodeBrain
 {
-	VulkanFramebuffer::VulkanFramebuffer(std::shared_ptr<VulkanRenderPass> renderPass, std::shared_ptr<VulkanImage> image)
-		: m_RenderPass(renderPass), m_Image(image)
+	VulkanFramebuffer::VulkanFramebuffer(const FramebufferConfiguration& configuration)
+		: m_Configuration(configuration)
 	{
-		m_Device = VulkanRenderContext::GetInstance()->GetDevice();
-
 		Init();
 	}
 
@@ -19,7 +17,7 @@ namespace NodeBrain
 
 		if (m_VkFramebuffer)
 		{
-			vkDestroyFramebuffer(m_Device->GetVkDevice(), m_VkFramebuffer, nullptr);
+			vkDestroyFramebuffer(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), m_VkFramebuffer, nullptr);
 			m_VkFramebuffer = VK_NULL_HANDLE;
 		}
 	}
@@ -27,21 +25,32 @@ namespace NodeBrain
 	void VulkanFramebuffer::Init()
 	{
 		NB_PROFILE_FN();
+		
+		// Create a new render pass if no render pass is provided
+		if (!m_Configuration.RenderPass)
+		{
+			m_Configuration.RenderPass = std::make_shared<VulkanRenderPass>();
+		}
 
-		// If using swapchain
-		VkImageView attachments[] = { m_Image->GetVkImageView() };
+		// Currently used for creating framebuffers from swapchain images
+		if (!m_Configuration.Image)
+		{
+			ImageConfiguration config = {};
+			m_Configuration.Image = std::make_shared<VulkanImage>(config);
+		}
+		VkImageView attachments[1] = { std::dynamic_pointer_cast<VulkanImage>(m_Configuration.Image)->GetVkImageView() };
+
 
 		VkFramebufferCreateInfo framebufferCreateInfo = {};
 		framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferCreateInfo.renderPass = m_RenderPass->GetVkRenderPass();
+		framebufferCreateInfo.renderPass = std::dynamic_pointer_cast<VulkanRenderPass>(m_Configuration.RenderPass)->GetVkRenderPass();
 		framebufferCreateInfo.attachmentCount = 1;
 		framebufferCreateInfo.pAttachments = attachments;
-		framebufferCreateInfo.width = VulkanRenderContext::GetInstance()->GetSwapchain()->GetExtentWidth();
-		framebufferCreateInfo.height = VulkanRenderContext::GetInstance()->GetSwapchain()->GetExtentHeight();
+		framebufferCreateInfo.width = m_Configuration.Width;
+		framebufferCreateInfo.height = m_Configuration.Height;
 		framebufferCreateInfo.layers = 1;
 
-		VkResult result = vkCreateFramebuffer(m_Device->GetVkDevice(), &framebufferCreateInfo, nullptr, &m_VkFramebuffer);
+		VkResult result = vkCreateFramebuffer(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &framebufferCreateInfo, nullptr, &m_VkFramebuffer);
 		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan frame buffer");
-		
 	}
 }

@@ -23,13 +23,13 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		Renderer::Shutdown();
-		
 		for (Layer* layer : m_Layers)
 		{
 			layer->OnDetach();
 			delete layer;
 		}
+
+		Renderer::Shutdown();
 
 		m_Timer.EndTimer();
 
@@ -61,6 +61,10 @@ namespace NodeBrain
 			float deltaTime = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
+			m_Window->AcquireNextImage();
+
+			Renderer::BeginFrame();
+
 			// Update
 			for (Layer* layer : m_Layers)
 				layer->OnUpdate(deltaTime);
@@ -68,6 +72,8 @@ namespace NodeBrain
 			// Update GUI
 			for (Layer* layer : m_Layers)
 				layer->OnUpdateGUI();
+
+			Renderer::EndFrame();
 
 			// Process input polling
 			Input::ProcessStates();

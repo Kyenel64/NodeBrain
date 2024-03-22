@@ -27,7 +27,16 @@ namespace NodeBrain
 		if (Input::IsMouseButtonReleased(MouseButton::Left))
 			NB_INFO("Left mousebutton released");
 
+		// Pseudo code. Eventually used in scene class
+		Renderer::Begin();
 		Renderer::DrawTestTriangle();
+		//Renderer::DrawDynamicMesh(transform, mesh, material, entityID);
+		Renderer::End();
+
+
+		//Renderer::Begin(framebuffer);
+
+		//Renderer::End();
 	}
 
 	void BrainEditor::OnUpdateGUI()

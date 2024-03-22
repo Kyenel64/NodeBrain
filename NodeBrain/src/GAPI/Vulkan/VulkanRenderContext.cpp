@@ -119,14 +119,17 @@ namespace NodeBrain
 
 		m_PhysicalDevice = FindFirstSuitablePhysicalDevice();
 		m_Device = std::make_shared<VulkanDevice>(m_PhysicalDevice);
-		m_SwapChain = std::make_shared<VulkanSwapChain>(m_VkSurface, m_Device);
+		m_SwapChain = std::make_unique<VulkanSwapChain>(m_VkSurface, m_Device);
 	}
 
 	VulkanRenderContext::~VulkanRenderContext()
 	{
 		NB_PROFILE_FN();
 
-		// Destroy in order
+		VkFence fence = m_SwapChain->GetInFlightFence();
+		vkWaitForFences(m_Device->GetVkDevice(), 1, &fence, VK_TRUE, UINT64_MAX);
+
+		// Destroy in reverse order
 		m_SwapChain.reset();
 
 		m_Device.reset();
@@ -189,7 +192,7 @@ namespace NodeBrain
 
 		// Extensions
 		std::vector<const char*> extensions;
-		for (const char* ext : m_Window->GetExtensions())
+		for (const char* ext : m_Window->GetVulkanExtensions())
 			extensions.push_back(ext);
 
 		#if NB_APPLE
@@ -238,8 +241,13 @@ namespace NodeBrain
 		return func(m_VkInstance, &debugCreateInfo, nullptr, &m_DebugMessenger);
 	}
 
+	void VulkanRenderContext::AcquireNextImage()
+	{
+		m_SwapChain->AcquireNextImage();
+	}
+
 	void VulkanRenderContext::SwapBuffers()
 	{
-		
+		m_SwapChain->PresentImage();
 	}
 }

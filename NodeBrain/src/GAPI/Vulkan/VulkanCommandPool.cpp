@@ -7,8 +7,6 @@ namespace NodeBrain
 {
 	VulkanCommandPool::VulkanCommandPool()
 	{
-		m_Device = VulkanRenderContext::GetInstance()->GetDevice();
-
 		Init();
 	}
 	
@@ -16,14 +14,14 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		QueueFamilyIndices queueFamilyIndices = m_Device->GetPhysicalDevice()->GetQueueFamilyIndices();
+		QueueFamilyIndices queueFamilyIndices = VulkanRenderContext::GetInstance()->GetDevice()->GetPhysicalDevice()->GetQueueFamilyIndices();
 
 		VkCommandPoolCreateInfo commandPoolCreateInfo = {};
 		commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.Graphics.value();
 
-		VkResult result = vkCreateCommandPool(m_Device->GetVkDevice(), &commandPoolCreateInfo, nullptr, &m_VkCommandPool);
+		VkResult result = vkCreateCommandPool(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &commandPoolCreateInfo, nullptr, &m_VkCommandPool);
 		NB_ASSERT(result == VK_SUCCESS, result);
 	}
 
@@ -31,7 +29,7 @@ namespace NodeBrain
 	{
 		if (m_VkCommandPool)
 		{
-			vkDestroyCommandPool(m_Device->GetVkDevice(), m_VkCommandPool, nullptr);
+			vkDestroyCommandPool(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), m_VkCommandPool, nullptr);
 			m_VkCommandPool = VK_NULL_HANDLE;
 		}
 	}

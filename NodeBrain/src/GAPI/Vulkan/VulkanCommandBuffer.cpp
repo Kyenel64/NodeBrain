@@ -8,8 +8,6 @@ namespace NodeBrain
 	VulkanCommandBuffer::VulkanCommandBuffer(std::shared_ptr<VulkanCommandPool> commandPool)
 		: m_CommandPool(commandPool)
 	{
-		m_Device = VulkanRenderContext::GetInstance()->GetDevice();
-
 		Init();
 	}
 
@@ -23,7 +21,7 @@ namespace NodeBrain
 		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		commandBufferAllocateInfo.commandBufferCount = 1;
 
-		VkResult result = vkAllocateCommandBuffers(m_Device->GetVkDevice(), &commandBufferAllocateInfo, &m_VkCommandBuffer);
+		VkResult result = vkAllocateCommandBuffers(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &commandBufferAllocateInfo, &m_VkCommandBuffer);
 		NB_ASSERT(result == VK_SUCCESS, result);
 	}
 
@@ -49,33 +47,21 @@ namespace NodeBrain
 		NB_ASSERT(result == VK_SUCCESS, result);
 	}
 
-	void VulkanCommandBuffer::StartRenderPass(std::shared_ptr<VulkanRenderPass> renderPass, std::shared_ptr<VulkanFramebuffer> framebuffer)
+	void VulkanCommandBuffer::StartRenderPass(std::shared_ptr<VulkanRenderPass> renderPass)
 	{
+		std::shared_ptr<VulkanFramebuffer> targetFramebuffer = renderPass->GetTargetFramebuffer();
+
 		VkRenderPassBeginInfo renderPassBeginInfo = {};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassBeginInfo.renderPass = renderPass->GetVkRenderPass();
-		renderPassBeginInfo.framebuffer = framebuffer->GetVkFramebuffer();
+		renderPassBeginInfo.framebuffer = targetFramebuffer->GetVkFramebuffer();
 		renderPassBeginInfo.renderArea.offset = { 0, 0 };
-		renderPassBeginInfo.renderArea.extent = VulkanRenderContext::GetInstance()->GetSwapchain()->GetVkExtent();
+		renderPassBeginInfo.renderArea.extent = { targetFramebuffer->GetConfiguration().Width, targetFramebuffer->GetConfiguration().Height };
 		VkClearValue clearColor = { 0.3f, 0.3f, 0.3f, 1.0f };
 		renderPassBeginInfo.clearValueCount = 1;
 		renderPassBeginInfo.pClearValues = &clearColor;
 
 		vkCmdBeginRenderPass(m_VkCommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		VkViewport viewport = {};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = VulkanRenderContext::GetInstance()->GetSwapchain()->GetExtentWidth();
-		viewport.height = VulkanRenderContext::GetInstance()->GetSwapchain()->GetExtentHeight();
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(m_VkCommandBuffer, 0, 1, &viewport);
-
-		VkRect2D scissor{};
-		scissor.offset = { 0, 0 };
-		scissor.extent = VulkanRenderContext::GetInstance()->GetSwapchain()->GetVkExtent();
-		vkCmdSetScissor(m_VkCommandBuffer, 0, 1, &scissor);
 	}
 
 	void VulkanCommandBuffer::EndRenderPass()
@@ -88,8 +74,52 @@ namespace NodeBrain
 		vkCmdDraw(m_VkCommandBuffer, 3, 1, 0, 0);
 	}
 
+	void VulkanCommandBuffer::Submit()
+	{
+		VkFence inFlightFence = VulkanRenderContext::GetInstance()->GetSwapchain().GetInFlightFence();
+		VkSemaphore imageAvailableSemaphore = VulkanRenderContext::GetInstance()->GetSwapchain().GetImageAvailableSemaphore();
+		VkSemaphore renderFinishedSemaphore = VulkanRenderContext::GetInstance()->GetSwapchain().GetRenderFinishedSemaphore();
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		VkSemaphore waitSemaphores[] = { imageAvailableSemaphore };
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &m_VkCommandBuffer;
+
+		VkSemaphore signalSemaphores[] = { renderFinishedSemaphore };
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		VkResult result = vkQueueSubmit(VulkanRenderContext::GetInstance()->GetDevice()->GetGraphicsQueue(), 1, &submitInfo, inFlightFence);
+		NB_ASSERT(result == VK_SUCCESS, result);
+	}
+
 	void VulkanCommandBuffer::BindGraphicsPipeline(std::shared_ptr<VulkanGraphicsPipeline> pipeline)
 	{
 		vkCmdBindPipeline(m_VkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetVkPipeline());
+
+		const PipelineConfiguration& config = pipeline->GetConfiguration();
+		std::shared_ptr<VulkanRenderPass> renderPass = std::dynamic_pointer_cast<VulkanRenderPass>(pipeline->GetConfiguration().Framebuffer->GetConfiguration().RenderPass);
+		std::shared_ptr<VulkanFramebuffer> targetFramebuffer = renderPass->GetTargetFramebuffer();
+
+		// Update dynamic states
+		VkViewport viewport = {};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = targetFramebuffer->GetConfiguration().Width;
+		viewport.height = targetFramebuffer->GetConfiguration().Height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(m_VkCommandBuffer, 0, 1, &viewport);
+
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = { targetFramebuffer->GetConfiguration().Width, targetFramebuffer->GetConfiguration().Height };
+		vkCmdSetScissor(m_VkCommandBuffer, 0, 1, &scissor);
 	}
 }

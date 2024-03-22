@@ -2,18 +2,19 @@
 
 #include <vulkan/vulkan.h>
 
+#include "GAPI/Vulkan/VulkanDevice.h"
 #include "Renderer/GraphicsPipeline.h"
-#include "GAPI/Vulkan/VulkanPipelineLayout.h"
-#include "GAPI/Vulkan/VulkanRenderPass.h"
+#include "Renderer/Framebuffer.h"
 
 namespace NodeBrain
 {
 	class VulkanGraphicsPipeline : public GraphicsPipeline
 	{
 	public:
-		VulkanGraphicsPipeline(std::shared_ptr<VulkanPipelineLayout> layout, std::shared_ptr<VulkanRenderPass> renderPass);
+		VulkanGraphicsPipeline(const PipelineConfiguration& config);
 		virtual ~VulkanGraphicsPipeline();
 
+		virtual const PipelineConfiguration& GetConfiguration() const override { return m_Configuration; }
 		VkPipeline GetVkPipeline() const { return m_VkPipeline; }
 
 	private:
@@ -21,9 +22,8 @@ namespace NodeBrain
 
 	private:
 		VkPipeline m_VkPipeline = VK_NULL_HANDLE;
-		std::shared_ptr<VulkanDevice> m_Device;
+		VkPipelineLayout m_VkPipelineLayout = VK_NULL_HANDLE;
 
-		std::shared_ptr<VulkanPipelineLayout> m_PipelineLayout;
-		std::shared_ptr<VulkanRenderPass> m_RenderPass;
+		PipelineConfiguration m_Configuration;
 	};
 }

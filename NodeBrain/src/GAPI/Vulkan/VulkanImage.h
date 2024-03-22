@@ -2,17 +2,19 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Renderer/Image.h"
 #include "GAPI/Vulkan/VulkanDevice.h"
 
 namespace NodeBrain
 {
-	class VulkanImage
+	class VulkanImage : public Image
 	{
 	public:
+		VulkanImage(const ImageConfiguration& configuration);
 		VulkanImage(std::shared_ptr<VulkanDevice> device, VkImage image, VkFormat imageFormat);
-		~VulkanImage();
+		virtual ~VulkanImage();
 
-		VkImageView GetVkImageView() const { return m_ImageView; }
+		VkImageView GetVkImageView() const { return m_VkImageView; }
 
 	private:
 		void Init();
@@ -20,8 +22,8 @@ namespace NodeBrain
 	private:
 		std::shared_ptr<VulkanDevice> m_Device;
 
-		VkImage m_Image = VK_NULL_HANDLE;
-		VkImageView m_ImageView = VK_NULL_HANDLE;
+		VkImage m_VkImage = VK_NULL_HANDLE;
+		VkImageView m_VkImageView = VK_NULL_HANDLE;
 		VkFormat m_ImageFormat;
 	};
 }

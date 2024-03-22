@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Renderer/RenderPass.h"
-#include "GAPI/Vulkan/VulkanDevice.h"
+#include "GAPI/Vulkan/VulkanFramebuffer.h"
 
 namespace NodeBrain
 {
@@ -11,13 +11,16 @@ namespace NodeBrain
 		VulkanRenderPass();
 		virtual ~VulkanRenderPass();
 
+		void SetTargetFramebuffer(std::shared_ptr<VulkanFramebuffer> targetFramebuffer) { m_TargetFramebuffer = targetFramebuffer; }
+
 		VkRenderPass GetVkRenderPass() const { return m_VkRenderPass; }
+		std::shared_ptr<VulkanFramebuffer> GetTargetFramebuffer() const { return m_TargetFramebuffer; }
 
 	private:
 		void Init();
 	private:
 		VkRenderPass m_VkRenderPass;
-		std::shared_ptr<VulkanDevice> m_Device;
+		std::shared_ptr<VulkanFramebuffer> m_TargetFramebuffer;
 
 	};
 }

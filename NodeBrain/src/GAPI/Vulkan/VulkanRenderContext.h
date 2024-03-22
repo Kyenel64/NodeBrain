@@ -17,12 +17,13 @@ namespace NodeBrain
 		~VulkanRenderContext();
 
 		virtual void Init() override;
+		virtual void AcquireNextImage() override;
 		virtual void SwapBuffers() override;
 
 		// Getters
 		VkInstance GetVkInstance() const { return m_VkInstance; }
 		std::shared_ptr<VulkanDevice> GetDevice() const { return m_Device; }
-		std::shared_ptr<VulkanSwapChain> GetSwapchain() const { return m_SwapChain; }
+		VulkanSwapChain& GetSwapchain() const { return *m_SwapChain; }
 		const std::vector<const char*>& GetValidationLayers() const { return m_ValidationLayers; }
 
 		static VulkanRenderContext* GetInstance();
@@ -40,7 +41,7 @@ namespace NodeBrain
 
 		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
 		std::shared_ptr<VulkanDevice> m_Device;
-		std::shared_ptr<VulkanSwapChain> m_SwapChain;
+		std::unique_ptr<VulkanSwapChain> m_SwapChain;
 
 		// Debug
 		VkDebugUtilsMessengerEXT m_DebugMessenger = nullptr;

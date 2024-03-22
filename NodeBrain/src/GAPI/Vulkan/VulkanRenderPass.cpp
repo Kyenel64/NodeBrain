@@ -9,8 +9,6 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		m_Device = VulkanRenderContext::GetInstance()->GetDevice();
-
 		Init();
 	}
 
@@ -19,7 +17,7 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		VkAttachmentDescription colorAttachment = {};
-		colorAttachment.format = VulkanRenderContext::GetInstance()->GetSwapchain()->GetFormat();
+		colorAttachment.format = VK_FORMAT_B8G8R8A8_SRGB; // temp. parametrize
 		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -56,7 +54,7 @@ namespace NodeBrain
 		renderPassCreateInfo.dependencyCount = 1;
 		renderPassCreateInfo.pDependencies = &dependency;
 
-		VkResult result = vkCreateRenderPass(m_Device->GetVkDevice(), &renderPassCreateInfo, nullptr, &m_VkRenderPass);
+		VkResult result = vkCreateRenderPass(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &renderPassCreateInfo, nullptr, &m_VkRenderPass);
 		NB_ASSERT(result == VK_SUCCESS, result);
 	}
 
@@ -64,6 +62,12 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		vkDestroyRenderPass(m_Device->GetVkDevice(), m_VkRenderPass, nullptr);
+		m_TargetFramebuffer = nullptr;
+
+		if (m_VkRenderPass)
+		{
+			vkDestroyRenderPass(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), m_VkRenderPass, nullptr);
+			m_VkRenderPass = VK_NULL_HANDLE;
+		}
 	}
 }
