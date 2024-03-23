@@ -13,14 +13,14 @@ namespace NodeBrain
 		VulkanRendererAPI();
 		virtual ~VulkanRendererAPI();
 
-		virtual void BeginFrame(std::shared_ptr<CommandBuffer> commandBuffer) override;
-		virtual void EndFrame(std::shared_ptr<CommandBuffer> commandBuffer) override;
+		virtual void BeginFrame() override;
+		virtual void EndFrame() override;
 
 		// Use swapchain renderpass if renderPass == nullptr
-		virtual void BeginRenderPass(std::shared_ptr<CommandBuffer> commandBuffer, std::shared_ptr<RenderPass> renderPass = nullptr) override;
-		virtual void EndRenderPass(std::shared_ptr<CommandBuffer> commandBuffer) override;
+		virtual void BeginRenderPass(std::shared_ptr<RenderPass> renderPass = nullptr) override;
+		virtual void EndRenderPass() override;
 		
-		virtual void DrawTestTriangle(std::shared_ptr<CommandBuffer> commandBuffer, std::shared_ptr<GraphicsPipeline> pipeline) override;
+		virtual void DrawTestTriangle(std::shared_ptr<GraphicsPipeline> pipeline) override;
 
 		virtual void WaitForGPU() override;
 

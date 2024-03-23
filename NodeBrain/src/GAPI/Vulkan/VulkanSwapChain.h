@@ -10,6 +10,17 @@
 
 namespace NodeBrain
 {
+	#define FRAMES_IN_FLIGHT 2
+
+	struct FrameData
+	{
+		VkCommandPool CommandPool;
+		VkCommandBuffer CommandBuffer;
+		VkSemaphore ImageAvailableSemaphore = VK_NULL_HANDLE;
+		VkSemaphore RenderFinishedSemaphore = VK_NULL_HANDLE;
+		VkFence InFlightFence = VK_NULL_HANDLE;
+	};
+
 	class VulkanSwapChain
 	{
 	public:
@@ -22,32 +33,18 @@ namespace NodeBrain
 		VkSwapchainKHR GetVkSwapchain() const { return m_VkSwapChain; }
 		VkFormat GetFormat() const { return m_ColorFormat; }
 		VkExtent2D GetVkExtent() const { return m_Extent; }
-		VkFence GetInFlightFence() const { return m_InFlightFence; }
-		VkSemaphore GetImageAvailableSemaphore() const { return m_ImageAvailableSemaphore; }
-		VkSemaphore GetRenderFinishedSemaphore() const { return m_RenderFinishedSemaphore; }
 		std::shared_ptr<VulkanRenderPass> GetRenderPass() const { return m_RenderPass; }
 		std::shared_ptr<VulkanFramebuffer> GetCurrentFramebuffer() const { return m_Framebuffers[m_ImageIndex]; }
+		const FrameData& GetCurrentFrameData() const { return m_FrameDatas[m_CurrentFrame]; }
 		uint32_t GetImageIndex() const { return m_ImageIndex; }
 		
 	private:
 		void Init();
 
-		VkSurfaceFormatKHR ChooseSwapChainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-		VkPresentModeKHR ChooseSwapChainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes);
-		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-
 	private:
 		VkSwapchainKHR m_VkSwapChain = VK_NULL_HANDLE;
 		VkSurfaceKHR m_VkSurface = VK_NULL_HANDLE;
 		std::shared_ptr<VulkanDevice> m_Device;
-
-		std::shared_ptr<VulkanRenderPass> m_RenderPass;
-
-		std::vector<std::shared_ptr<VulkanImage>> m_SwapChainImages;
-		
-		std::vector<std::shared_ptr<VulkanFramebuffer>> m_Framebuffers;
-
-		uint32_t m_ImageIndex = 0;
 
 		// Configuration
 		VkFormat m_ColorFormat;
@@ -55,10 +52,14 @@ namespace NodeBrain
 		VkExtent2D m_Extent;
 		VkPresentModeKHR m_PresentationMode;
 
-		// Synchronizations
-		VkSemaphore m_ImageAvailableSemaphore = VK_NULL_HANDLE;
-		VkSemaphore m_RenderFinishedSemaphore = VK_NULL_HANDLE;
-		VkFence m_InFlightFence = VK_NULL_HANDLE;
+		uint32_t m_ImageIndex = 0;
+		uint32_t m_CurrentFrame = 0;
+
+		std::shared_ptr<VulkanRenderPass> m_RenderPass;
+		std::vector<std::shared_ptr<VulkanImage>> m_SwapChainImages;
+		std::vector<std::shared_ptr<VulkanFramebuffer>> m_Framebuffers;
+
+		FrameData m_FrameDatas[FRAMES_IN_FLIGHT];
 
 	};
 }

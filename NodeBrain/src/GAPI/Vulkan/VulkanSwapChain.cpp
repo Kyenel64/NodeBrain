@@ -5,6 +5,50 @@
 
 namespace NodeBrain
 {
+	namespace Utils
+	{
+		static VkSurfaceFormatKHR ChooseSwapChainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
+		{
+			for (const auto& format : availableFormats)
+			{
+				if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)
+					return format;
+			}
+
+			return availableFormats[0];
+		}
+
+		static VkPresentModeKHR ChooseSwapChainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes)
+		{
+			for (const auto& presentationMode : availablePresentationModes)
+			{
+				if (presentationMode == VK_PRESENT_MODE_MAILBOX_KHR)
+					return presentationMode;
+			}
+			return VK_PRESENT_MODE_FIFO_KHR;
+		}
+
+		static VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
+		{
+			if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+			{
+				return capabilities.currentExtent;
+			}
+			else
+			{
+				glm::vec2 framebufferSize = App::GetInstance()->GetWindow().GetFramebufferSize();
+				VkExtent2D actualExtent = { static_cast<uint32_t>(framebufferSize.x), static_cast<uint32_t>(framebufferSize.y) };
+				actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+				actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+
+				return actualExtent;
+			}
+		}
+	}
+
+
+
+
 	VulkanSwapChain::VulkanSwapChain(VkSurfaceKHR surface, std::shared_ptr<VulkanDevice> device)
 		: m_VkSurface(surface), m_Device(device), m_ImageIndex(0)
 	{
@@ -17,20 +61,16 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 		
-		if (m_ImageAvailableSemaphore)
+		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
-			vkDestroySemaphore(m_Device->GetVkDevice(), m_ImageAvailableSemaphore, nullptr);
-			m_ImageAvailableSemaphore = VK_NULL_HANDLE;
-		}
-		if (m_RenderFinishedSemaphore)
-		{
-			vkDestroySemaphore(m_Device->GetVkDevice(), m_RenderFinishedSemaphore, nullptr);
-			m_RenderFinishedSemaphore = VK_NULL_HANDLE;
-		}
-		if (m_InFlightFence)
-		{
-			vkDestroyFence(m_Device->GetVkDevice(), m_InFlightFence, nullptr);
-			m_InFlightFence = VK_NULL_HANDLE;
+			vkDestroyCommandPool(m_Device->GetVkDevice(), m_FrameDatas[i].CommandPool, nullptr);
+			m_FrameDatas[i].CommandPool = VK_NULL_HANDLE;
+			vkDestroySemaphore(m_Device->GetVkDevice(), m_FrameDatas[i].RenderFinishedSemaphore, nullptr);
+			m_FrameDatas[i].RenderFinishedSemaphore = VK_NULL_HANDLE;
+			vkDestroySemaphore(m_Device->GetVkDevice(), m_FrameDatas[i].ImageAvailableSemaphore, nullptr);
+			m_FrameDatas[i].ImageAvailableSemaphore = VK_NULL_HANDLE;
+			vkDestroyFence(m_Device->GetVkDevice(), m_FrameDatas[i].InFlightFence, nullptr);
+			m_FrameDatas[i].InFlightFence = VK_NULL_HANDLE;
 		}
 
 		if (!m_Framebuffers.empty())
@@ -64,11 +104,11 @@ namespace NodeBrain
 
 		// Set configurations
 		const SwapChainSupportDetails& swapChainSupport = m_Device->GetPhysicalDevice()->GetSwapChainSupportDetails();
-		VkSurfaceFormatKHR surfaceFormat = ChooseSwapChainFormat(swapChainSupport.Formats);
+		VkSurfaceFormatKHR surfaceFormat = Utils::ChooseSwapChainFormat(swapChainSupport.Formats);
 		m_ColorFormat = surfaceFormat.format;
 		m_ColorSpace = surfaceFormat.colorSpace;
-		m_PresentationMode = ChooseSwapChainPresentationMode(swapChainSupport.PresentationModes);
-		m_Extent = ChooseSwapExtent(swapChainSupport.Capabilities);
+		m_PresentationMode = Utils::ChooseSwapChainPresentationMode(swapChainSupport.PresentationModes);
+		m_Extent = Utils::ChooseSwapExtent(swapChainSupport.Capabilities);
 
 		uint32_t imageCount = swapChainSupport.Capabilities.minImageCount + 1;
 		if (swapChainSupport.Capabilities.maxImageCount > 0 && imageCount > swapChainSupport.Capabilities.maxImageCount)
@@ -132,63 +172,45 @@ namespace NodeBrain
 		}
 		m_RenderPass->SetTargetFramebuffer(m_Framebuffers[m_ImageIndex]);
 
-		// --- Create synchronization objects ---
-		VkSemaphoreCreateInfo semaphoreCreateInfo = {};
-		semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-		VkFenceCreateInfo fenceCreateInfo = {};
-		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-		fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-		vkCreateSemaphore(m_Device->GetVkDevice(), &semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphore);
-		vkCreateSemaphore(m_Device->GetVkDevice(), &semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphore);
-		vkCreateFence(m_Device->GetVkDevice(), &fenceCreateInfo, nullptr, &m_InFlightFence);
-	}
-
-	VkSurfaceFormatKHR VulkanSwapChain::ChooseSwapChainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
-	{
-		for (const auto& format : availableFormats)
+		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
-			if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)
-				return format;
-		}
+			QueueFamilyIndices queueFamilyIndices = m_Device->GetPhysicalDevice()->GetQueueFamilyIndices();
+			VkCommandPoolCreateInfo commandPoolCreateInfo = {};
+			commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+			commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+			commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.Graphics.value();
+			VkResult result = vkCreateCommandPool(m_Device->GetVkDevice(), &commandPoolCreateInfo, nullptr, &m_FrameDatas[i].CommandPool);
+			NB_ASSERT(result == VK_SUCCESS, result);
 
-		return availableFormats[0];
-	}
+			VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
+			commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+			commandBufferAllocateInfo.commandPool = m_FrameDatas[i].CommandPool;
+			commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+			commandBufferAllocateInfo.commandBufferCount = 1;
+			result = vkAllocateCommandBuffers(m_Device->GetVkDevice(), &commandBufferAllocateInfo, &m_FrameDatas[i].CommandBuffer);
+			NB_ASSERT(result == VK_SUCCESS, result);
 
-	VkPresentModeKHR VulkanSwapChain::ChooseSwapChainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes)
-	{
-		for (const auto& presentationMode : availablePresentationModes)
-		{
-			if (presentationMode == VK_PRESENT_MODE_MAILBOX_KHR)
-				return presentationMode;
-		}
-		return VK_PRESENT_MODE_FIFO_KHR;
-	}
+			VkSemaphoreCreateInfo semaphoreCreateInfo = {};
+			semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+			result = vkCreateSemaphore(m_Device->GetVkDevice(), &semaphoreCreateInfo, nullptr, &m_FrameDatas[i].ImageAvailableSemaphore);
+			NB_ASSERT(result == VK_SUCCESS, result);
+			result = vkCreateSemaphore(m_Device->GetVkDevice(), &semaphoreCreateInfo, nullptr, &m_FrameDatas[i].RenderFinishedSemaphore);
+			NB_ASSERT(result == VK_SUCCESS, result);
 
-	VkExtent2D VulkanSwapChain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
-	{
-		if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
-		{
-			return capabilities.currentExtent;
-		}
-		else
-		{
-			glm::vec2 framebufferSize = App::GetInstance()->GetWindow().GetFramebufferSize();
-			VkExtent2D actualExtent = { static_cast<uint32_t>(framebufferSize.x), static_cast<uint32_t>(framebufferSize.y) };
-			actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-			actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-
-			return actualExtent;
+			VkFenceCreateInfo fenceCreateInfo = {};
+			fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+			fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+			result = vkCreateFence(m_Device->GetVkDevice(), &fenceCreateInfo, nullptr, &m_FrameDatas[i].InFlightFence);
+			NB_ASSERT(result == VK_SUCCESS, result);
 		}
 	}
 
 	uint32_t VulkanSwapChain::AcquireNextImage()
 	{
-		vkWaitForFences(m_Device->GetVkDevice(), 1, &m_InFlightFence, VK_TRUE, UINT64_MAX);
-		vkResetFences(m_Device->GetVkDevice(), 1, &m_InFlightFence);
+		vkWaitForFences(m_Device->GetVkDevice(), 1, &m_FrameDatas[m_CurrentFrame].InFlightFence, VK_TRUE, UINT64_MAX);
+		vkResetFences(m_Device->GetVkDevice(), 1, &m_FrameDatas[m_CurrentFrame].InFlightFence);
 
-		vkAcquireNextImageKHR(m_Device->GetVkDevice(), m_VkSwapChain, UINT64_MAX, m_ImageAvailableSemaphore, VK_NULL_HANDLE, &m_ImageIndex);
+		vkAcquireNextImageKHR(m_Device->GetVkDevice(), m_VkSwapChain, UINT64_MAX, m_FrameDatas[m_CurrentFrame].ImageAvailableSemaphore, VK_NULL_HANDLE, &m_ImageIndex);
 		m_RenderPass->SetTargetFramebuffer(m_Framebuffers[m_ImageIndex]);
 		return m_ImageIndex;
 	}
@@ -199,7 +221,7 @@ namespace NodeBrain
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
 		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = &m_RenderFinishedSemaphore;
+		presentInfo.pWaitSemaphores = &m_FrameDatas[m_CurrentFrame].RenderFinishedSemaphore;
 
 		VkSwapchainKHR swapChains[] = { m_VkSwapChain };
 		presentInfo.swapchainCount = 1;
@@ -208,5 +230,7 @@ namespace NodeBrain
 		presentInfo.pResults = nullptr; // Optional
 
 		vkQueuePresentKHR(m_Device->GetPresentationQueue(), &presentInfo);
+
+		m_CurrentFrame = (m_CurrentFrame + 1) % FRAMES_IN_FLIGHT;
 	}
 }

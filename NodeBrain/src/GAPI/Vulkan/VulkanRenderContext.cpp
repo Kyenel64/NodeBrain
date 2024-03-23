@@ -126,9 +126,6 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		VkFence fence = m_SwapChain->GetInFlightFence();
-		vkWaitForFences(m_Device->GetVkDevice(), 1, &fence, VK_TRUE, UINT64_MAX);
-
 		// Destroy in reverse order
 		m_SwapChain.reset();
 
