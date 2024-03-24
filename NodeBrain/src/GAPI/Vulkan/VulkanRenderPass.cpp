@@ -54,8 +54,7 @@ namespace NodeBrain
 		renderPassCreateInfo.dependencyCount = 1;
 		renderPassCreateInfo.pDependencies = &dependency;
 
-		VkResult result = vkCreateRenderPass(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &renderPassCreateInfo, nullptr, &m_VkRenderPass);
-		NB_ASSERT(result == VK_SUCCESS, result);
+		VK_CHECK(vkCreateRenderPass(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &renderPassCreateInfo, nullptr, &m_VkRenderPass));
 	}
 
 	VulkanRenderPass::~VulkanRenderPass()

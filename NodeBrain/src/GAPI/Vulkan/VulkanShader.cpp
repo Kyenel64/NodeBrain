@@ -43,8 +43,7 @@ namespace NodeBrain
 		createInfo.codeSize = buffer.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(buffer.data());
 
-		VkResult result = vkCreateShaderModule(m_Device, &createInfo, nullptr, &m_VkShaderModule);
-		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan shader module");
+		VK_CHECK(vkCreateShaderModule(m_Device, &createInfo, nullptr, &m_VkShaderModule));
 
 		NB_INFO("Created shader module of size: {0}", buffer.size());
 	}

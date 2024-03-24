@@ -106,15 +106,12 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		VkResult result = CreateInstance();
-		NB_ASSERT(result == VK_SUCCESS, result);
+		VK_CHECK(CreateInstance());
 
-		result = glfwCreateWindowSurface(m_VkInstance, m_Window->GetGLFWWindow(), nullptr, &m_VkSurface);
-		NB_ASSERT(result == VK_SUCCESS, result);
+		VK_CHECK(glfwCreateWindowSurface(m_VkInstance, m_Window->GetGLFWWindow(), nullptr, &m_VkSurface));
 
 		#ifdef NB_DEBUG
-			result = CreateDebugUtilsMessenger();
-			NB_ASSERT(result == VK_SUCCESS, result);
+			VK_CHECK(CreateDebugUtilsMessenger());
 		#endif
 
 		m_PhysicalDevice = FindFirstSuitablePhysicalDevice();

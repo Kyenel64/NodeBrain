@@ -67,8 +67,7 @@ namespace NodeBrain
 		}
 
 		// Create device
-		VkResult result = vkCreateDevice(m_PhysicalDevice->GetVkPhysicalDevice(), &createInfo, nullptr, &m_VkDevice);
-		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan device");
+		VK_CHECK(vkCreateDevice(m_PhysicalDevice->GetVkPhysicalDevice(), &createInfo, nullptr, &m_VkDevice));
 
 		// Create graphics queue
 		vkGetDeviceQueue(m_VkDevice, indices.Graphics.value(), 0, &m_GraphicsQueue);

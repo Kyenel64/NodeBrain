@@ -73,22 +73,21 @@ namespace NodeBrain
 			m_FrameDatas[i].InFlightFence = VK_NULL_HANDLE;
 		}
 
-		if (!m_Framebuffers.empty())
+		if (!m_VkFramebuffers.empty())
 		{
-			m_Framebuffers.clear();
+			for (auto framebuffer : m_VkFramebuffers)
+				vkDestroyFramebuffer(m_Device->GetVkDevice(), framebuffer, nullptr);
 		}
 
-		// current framebuffer doesnt destroy if owned by renderpass for some reason
-		m_RenderPass->SetTargetFramebuffer(nullptr);
-
-		if (m_RenderPass)
+		if (!m_VkImageViews.empty())
 		{
-			m_RenderPass.reset();
+			for (auto imageView : m_VkImageViews)
+				vkDestroyImageView(m_Device->GetVkDevice(), imageView, nullptr);
 		}
 
-		if (!m_SwapChainImages.empty())
+		if (m_VkRenderPass)
 		{
-			m_SwapChainImages.clear();
+			vkDestroyRenderPass(m_Device->GetVkDevice(), m_VkRenderPass, nullptr);
 		}
 
 		if (m_VkSwapChain)
@@ -105,10 +104,10 @@ namespace NodeBrain
 		// Set configurations
 		const SwapChainSupportDetails& swapChainSupport = m_Device->GetPhysicalDevice()->GetSwapChainSupportDetails();
 		VkSurfaceFormatKHR surfaceFormat = Utils::ChooseSwapChainFormat(swapChainSupport.Formats);
-		m_ColorFormat = surfaceFormat.format;
-		m_ColorSpace = surfaceFormat.colorSpace;
-		m_PresentationMode = Utils::ChooseSwapChainPresentationMode(swapChainSupport.PresentationModes);
-		m_Extent = Utils::ChooseSwapExtent(swapChainSupport.Capabilities);
+		m_VkColorFormat = surfaceFormat.format;
+		m_VkColorSpace = surfaceFormat.colorSpace;
+		m_VkPresentationMode = Utils::ChooseSwapChainPresentationMode(swapChainSupport.PresentationModes);
+		m_VkExtent = Utils::ChooseSwapExtent(swapChainSupport.Capabilities);
 
 		uint32_t imageCount = swapChainSupport.Capabilities.minImageCount + 1;
 		if (swapChainSupport.Capabilities.maxImageCount > 0 && imageCount > swapChainSupport.Capabilities.maxImageCount)
@@ -119,9 +118,9 @@ namespace NodeBrain
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		createInfo.surface = m_VkSurface;
 		createInfo.minImageCount = imageCount;
-		createInfo.imageFormat = m_ColorFormat;
-		createInfo.imageColorSpace = m_ColorSpace;
-		createInfo.imageExtent = m_Extent;
+		createInfo.imageFormat = m_VkColorFormat;
+		createInfo.imageColorSpace = m_VkColorSpace;
+		createInfo.imageExtent = m_VkExtent;
 		createInfo.imageArrayLayers = 1;
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
@@ -142,36 +141,103 @@ namespace NodeBrain
 		}
 		createInfo.preTransform = swapChainSupport.Capabilities.currentTransform;
 		createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-		createInfo.presentMode = m_PresentationMode;
+		createInfo.presentMode = m_VkPresentationMode;
 		createInfo.clipped = VK_TRUE;
 		createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-		VkResult result = vkCreateSwapchainKHR(m_Device->GetVkDevice(), &createInfo, nullptr, &m_VkSwapChain);
-		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan swap chain");
+		VK_CHECK(vkCreateSwapchainKHR(m_Device->GetVkDevice(), &createInfo, nullptr, &m_VkSwapChain));
+
 
 		// --- Create image & views ---
-		std::vector<VkImage> images;
-		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapChain, &imageCount, nullptr);
-		images.resize(imageCount);
-		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapChain, &imageCount, &images[0]);
-		for (int i = 0; i < imageCount; i++)
-			m_SwapChainImages.push_back(std::make_shared<VulkanImage>(m_Device, images[i], m_ColorFormat));
+		uint32_t vkImageCount = 0;
+		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapChain, &vkImageCount, nullptr);
+		m_VkImages.resize(vkImageCount);
+		m_VkImageViews.resize(vkImageCount);
+		m_VkFramebuffers.resize(vkImageCount);
+		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapChain, &vkImageCount, &m_VkImages[0]);
+
+		for (size_t i = 0; i < vkImageCount; i++)
+		{
+			VkImageViewCreateInfo imageViewCreateInfo = {};
+			imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+			imageViewCreateInfo.image = m_VkImages[i];
+			imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D; // TODO: parameterize
+			imageViewCreateInfo.format = m_VkColorFormat;
+
+			// TODO: parameterize
+			imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+			imageViewCreateInfo.subresourceRange.levelCount = 1;
+			imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+			imageViewCreateInfo.subresourceRange.layerCount = 1;
+
+			VK_CHECK(vkCreateImageView(m_Device->GetVkDevice(), &imageViewCreateInfo, nullptr, &m_VkImageViews[i]));
+		}
+
 
 		// --- Create render pass ---
-		m_RenderPass = std::make_shared<VulkanRenderPass>();
+		VkAttachmentDescription colorAttachment = {};
+		colorAttachment.format = VK_FORMAT_B8G8R8A8_SRGB; // temp. parametrize
+		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+		// Subpass
+		VkAttachmentReference colorAttachmentRef = {};
+		colorAttachmentRef.attachment = 0;
+		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		VkSubpassDescription subpass{};
+		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+		subpass.colorAttachmentCount = 1;
+		subpass.pColorAttachments = &colorAttachmentRef;
+
+		VkSubpassDependency dependency = {};
+		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+		dependency.dstSubpass = 0;
+		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dependency.srcAccessMask = 0;
+		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+		VkRenderPassCreateInfo renderPassCreateInfo = {};
+		renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+		renderPassCreateInfo.attachmentCount = 1;
+		renderPassCreateInfo.pAttachments = &colorAttachment;
+		renderPassCreateInfo.subpassCount = 1;
+		renderPassCreateInfo.pSubpasses = &subpass;
+		renderPassCreateInfo.dependencyCount = 1;
+		renderPassCreateInfo.pDependencies = &dependency;
+
+		VK_CHECK(vkCreateRenderPass(m_Device->GetVkDevice(), &renderPassCreateInfo, nullptr, &m_VkRenderPass));
+
 
 		// --- Create framebuffers ---
-		for (int i = 0; i < imageCount; i++)
+		for (int i = 0; i < vkImageCount; i++)
 		{
-			FramebufferConfiguration config = {};
-			config.Width = m_Extent.width;
-			config.Height = m_Extent.height;
-			config.Image = m_SwapChainImages[i];
-			config.RenderPass = m_RenderPass;
-			m_Framebuffers.push_back(std::make_shared<VulkanFramebuffer>(config));
-		}
-		m_RenderPass->SetTargetFramebuffer(m_Framebuffers[m_ImageIndex]);
+			VkImageView attachments[] = { m_VkImageViews[i] };
 
+			VkFramebufferCreateInfo framebufferCreateInfo = {};
+			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferCreateInfo.renderPass = m_VkRenderPass;
+			framebufferCreateInfo.attachmentCount = 1;
+			framebufferCreateInfo.pAttachments = attachments;
+			framebufferCreateInfo.width = m_VkExtent.width;
+			framebufferCreateInfo.height = m_VkExtent.height;
+			framebufferCreateInfo.layers = 1;
+
+			VK_CHECK(vkCreateFramebuffer(m_Device->GetVkDevice(), &framebufferCreateInfo, nullptr, &m_VkFramebuffers[i]));
+		}
+
+
+		// --- Create synchronization objects ---
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
 			QueueFamilyIndices queueFamilyIndices = m_Device->GetPhysicalDevice()->GetQueueFamilyIndices();
@@ -179,39 +245,37 @@ namespace NodeBrain
 			commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 			commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 			commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.Graphics.value();
-			VkResult result = vkCreateCommandPool(m_Device->GetVkDevice(), &commandPoolCreateInfo, nullptr, &m_FrameDatas[i].CommandPool);
-			NB_ASSERT(result == VK_SUCCESS, result);
+			VK_CHECK(vkCreateCommandPool(m_Device->GetVkDevice(), &commandPoolCreateInfo, nullptr, &m_FrameDatas[i].CommandPool));
 
 			VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
 			commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 			commandBufferAllocateInfo.commandPool = m_FrameDatas[i].CommandPool;
 			commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 			commandBufferAllocateInfo.commandBufferCount = 1;
-			result = vkAllocateCommandBuffers(m_Device->GetVkDevice(), &commandBufferAllocateInfo, &m_FrameDatas[i].CommandBuffer);
-			NB_ASSERT(result == VK_SUCCESS, result);
+			VK_CHECK(vkAllocateCommandBuffers(m_Device->GetVkDevice(), &commandBufferAllocateInfo, &m_FrameDatas[i].CommandBuffer));
 
 			VkSemaphoreCreateInfo semaphoreCreateInfo = {};
 			semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-			result = vkCreateSemaphore(m_Device->GetVkDevice(), &semaphoreCreateInfo, nullptr, &m_FrameDatas[i].ImageAvailableSemaphore);
-			NB_ASSERT(result == VK_SUCCESS, result);
-			result = vkCreateSemaphore(m_Device->GetVkDevice(), &semaphoreCreateInfo, nullptr, &m_FrameDatas[i].RenderFinishedSemaphore);
-			NB_ASSERT(result == VK_SUCCESS, result);
+			VK_CHECK(vkCreateSemaphore(m_Device->GetVkDevice(), &semaphoreCreateInfo, nullptr, &m_FrameDatas[i].ImageAvailableSemaphore));
+			VK_CHECK(vkCreateSemaphore(m_Device->GetVkDevice(), &semaphoreCreateInfo, nullptr, &m_FrameDatas[i].RenderFinishedSemaphore));
 
 			VkFenceCreateInfo fenceCreateInfo = {};
 			fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 			fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-			result = vkCreateFence(m_Device->GetVkDevice(), &fenceCreateInfo, nullptr, &m_FrameDatas[i].InFlightFence);
-			NB_ASSERT(result == VK_SUCCESS, result);
+			VK_CHECK(vkCreateFence(m_Device->GetVkDevice(), &fenceCreateInfo, nullptr, &m_FrameDatas[i].InFlightFence));
 		}
 	}
 
 	uint32_t VulkanSwapChain::AcquireNextImage()
 	{
 		vkWaitForFences(m_Device->GetVkDevice(), 1, &m_FrameDatas[m_CurrentFrame].InFlightFence, VK_TRUE, UINT64_MAX);
-		vkResetFences(m_Device->GetVkDevice(), 1, &m_FrameDatas[m_CurrentFrame].InFlightFence);
 
-		vkAcquireNextImageKHR(m_Device->GetVkDevice(), m_VkSwapChain, UINT64_MAX, m_FrameDatas[m_CurrentFrame].ImageAvailableSemaphore, VK_NULL_HANDLE, &m_ImageIndex);
-		m_RenderPass->SetTargetFramebuffer(m_Framebuffers[m_ImageIndex]);
+		VkResult result = vkAcquireNextImageKHR(m_Device->GetVkDevice(), m_VkSwapChain, UINT64_MAX, m_FrameDatas[m_CurrentFrame].ImageAvailableSemaphore, VK_NULL_HANDLE, &m_ImageIndex);
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+			NB_INFO("RecreateSwapchain"); //RecreateSwapchain();
+
+		vkResetFences(m_Device->GetVkDevice(), 1, &m_FrameDatas[m_CurrentFrame].InFlightFence);
+		//m_RenderPass->SetTargetFramebuffer(m_Framebuffers[m_ImageIndex]);
 		return m_ImageIndex;
 	}
 

@@ -109,13 +109,13 @@ namespace NodeBrain
 		pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 		pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 
-		VkResult result = vkCreatePipelineLayout(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout);
-		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan pipeline layout");
+		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
 
 
 		// --- Pipeline ---
+		VkRenderPass renderPass = VK_NULL_HANDLE;
 		if (!m_Configuration.Framebuffer)
-			m_Configuration.Framebuffer = VulkanRenderContext::GetInstance()->GetSwapchain().GetCurrentFramebuffer();
+			renderPass = VulkanRenderContext::GetInstance()->GetSwapchain().GetVkRenderPass();
 
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
 		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -132,13 +132,12 @@ namespace NodeBrain
 		pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
 
 		pipelineCreateInfo.layout = m_VkPipelineLayout;
-		pipelineCreateInfo.renderPass = std::dynamic_pointer_cast<VulkanRenderPass>(m_Configuration.Framebuffer->GetConfiguration().RenderPass)->GetVkRenderPass();
+		pipelineCreateInfo.renderPass = renderPass;
 		pipelineCreateInfo.subpass = 0;
 		pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 		pipelineCreateInfo.basePipelineIndex = -1; // Optional
 
-		result = vkCreateGraphicsPipelines(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_VkPipeline);
-		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan graphics pipeline");
+		VK_CHECK(vkCreateGraphicsPipelines(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_VkPipeline));
 
 	}
 

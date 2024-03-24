@@ -50,7 +50,6 @@ namespace NodeBrain
 		framebufferCreateInfo.height = m_Configuration.Height;
 		framebufferCreateInfo.layers = 1;
 
-		VkResult result = vkCreateFramebuffer(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &framebufferCreateInfo, nullptr, &m_VkFramebuffer);
-		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan frame buffer");
+		VK_CHECK(vkCreateFramebuffer(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &framebufferCreateInfo, nullptr, &m_VkFramebuffer));
 	}
 }

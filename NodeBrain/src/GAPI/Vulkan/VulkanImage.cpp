@@ -49,7 +49,6 @@ namespace NodeBrain
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
 
-		VkResult result = vkCreateImageView(m_Device->GetVkDevice(), &createInfo, nullptr, &m_VkImageView);
-		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view");
+		VK_CHECK(vkCreateImageView(m_Device->GetVkDevice(), &createInfo, nullptr, &m_VkImageView));
 	}
 }

@@ -31,10 +31,10 @@ namespace NodeBrain
 		void PresentImage();
 
 		VkSwapchainKHR GetVkSwapchain() const { return m_VkSwapChain; }
-		VkFormat GetFormat() const { return m_ColorFormat; }
-		VkExtent2D GetVkExtent() const { return m_Extent; }
-		std::shared_ptr<VulkanRenderPass> GetRenderPass() const { return m_RenderPass; }
-		std::shared_ptr<VulkanFramebuffer> GetCurrentFramebuffer() const { return m_Framebuffers[m_ImageIndex]; }
+		VkFormat GetVkFormat() const { return m_VkColorFormat; }
+		VkExtent2D GetVkExtent() const { return m_VkExtent; }
+		VkRenderPass GetVkRenderPass() const { return m_VkRenderPass; }
+		VkFramebuffer GetCurrentVkFramebuffer() const { return m_VkFramebuffers[m_ImageIndex]; }
 		const FrameData& GetCurrentFrameData() const { return m_FrameDatas[m_CurrentFrame]; }
 		uint32_t GetImageIndex() const { return m_ImageIndex; }
 		
@@ -47,17 +47,18 @@ namespace NodeBrain
 		std::shared_ptr<VulkanDevice> m_Device;
 
 		// Configuration
-		VkFormat m_ColorFormat;
-		VkColorSpaceKHR m_ColorSpace;
-		VkExtent2D m_Extent;
-		VkPresentModeKHR m_PresentationMode;
+		VkFormat m_VkColorFormat;
+		VkColorSpaceKHR m_VkColorSpace;
+		VkExtent2D m_VkExtent;
+		VkPresentModeKHR m_VkPresentationMode;
 
 		uint32_t m_ImageIndex = 0;
 		uint32_t m_CurrentFrame = 0;
 
-		std::shared_ptr<VulkanRenderPass> m_RenderPass;
-		std::vector<std::shared_ptr<VulkanImage>> m_SwapChainImages;
-		std::vector<std::shared_ptr<VulkanFramebuffer>> m_Framebuffers;
+		VkRenderPass m_VkRenderPass;
+		std::vector<VkImage> m_VkImages;
+		std::vector<VkImageView> m_VkImageViews;
+		std::vector<VkFramebuffer> m_VkFramebuffers;
 
 		FrameData m_FrameDatas[FRAMES_IN_FLIGHT];
 

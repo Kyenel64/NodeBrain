@@ -43,8 +43,7 @@ namespace NodeBrain
 		commandBufferBeginInfo.pInheritanceInfo = nullptr;
 
 		vkResetCommandBuffer(cmdBuffer, 0);
-		VkResult result = vkBeginCommandBuffer(cmdBuffer, &commandBufferBeginInfo);
-		NB_ASSERT(result == VK_SUCCESS, result);
+		VK_CHECK(vkBeginCommandBuffer(cmdBuffer, &commandBufferBeginInfo));
 	}
 
 	void VulkanRendererAPI::EndFrame()
@@ -52,8 +51,7 @@ namespace NodeBrain
 		VkCommandBuffer cmdBuffer = VulkanRenderContext::GetInstance()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
 
 		// End command buffer
-		VkResult result = vkEndCommandBuffer(cmdBuffer);
-		NB_ASSERT(result == VK_SUCCESS, result);
+		VK_CHECK(vkEndCommandBuffer(cmdBuffer));
 
 
 		// Submit buffer
@@ -76,28 +74,22 @@ namespace NodeBrain
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		result = vkQueueSubmit(VulkanRenderContext::GetInstance()->GetDevice()->GetGraphicsQueue(), 1, &submitInfo, inFlightFence);
-		NB_ASSERT(result == VK_SUCCESS, result);
+		VK_CHECK(vkQueueSubmit(VulkanRenderContext::GetInstance()->GetDevice()->GetGraphicsQueue(), 1, &submitInfo, inFlightFence));
 	}
 
 	void VulkanRendererAPI::BeginRenderPass(std::shared_ptr<RenderPass> renderPass)
 	{
 		VkCommandBuffer cmdBuffer = VulkanRenderContext::GetInstance()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
 
-		std::shared_ptr<VulkanRenderPass> rp;
-		if (!renderPass)
-			rp = VulkanRenderContext::GetInstance()->GetSwapchain().GetRenderPass();
-		else
-			NB_ASSERT(false, "Not yet implemented");
+		VkRenderPass rp = VulkanRenderContext::GetInstance()->GetSwapchain().GetVkRenderPass();
+		VkFramebuffer framebuffer = VulkanRenderContext::GetInstance()->GetSwapchain().GetCurrentVkFramebuffer();
 			
-		std::shared_ptr<VulkanFramebuffer> targetFramebuffer = rp->GetTargetFramebuffer();
-
 		VkRenderPassBeginInfo renderPassBeginInfo = {};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassBeginInfo.renderPass = rp->GetVkRenderPass();
-		renderPassBeginInfo.framebuffer = targetFramebuffer->GetVkFramebuffer();
+		renderPassBeginInfo.renderPass = rp;
+		renderPassBeginInfo.framebuffer = framebuffer;
 		renderPassBeginInfo.renderArea.offset = { 0, 0 };
-		renderPassBeginInfo.renderArea.extent = { targetFramebuffer->GetConfiguration().Width, targetFramebuffer->GetConfiguration().Height };
+		renderPassBeginInfo.renderArea.extent = { VulkanRenderContext::GetInstance()->GetSwapchain().GetVkExtent().width, VulkanRenderContext::GetInstance()->GetSwapchain().GetVkExtent().height };
 		VkClearValue clearColor = { 0.3f, 0.3f, 0.3f, 1.0f };
 		renderPassBeginInfo.clearValueCount = 1;
 		renderPassBeginInfo.pClearValues = &clearColor;
@@ -115,9 +107,6 @@ namespace NodeBrain
 	void VulkanRendererAPI::DrawTestTriangle(std::shared_ptr<GraphicsPipeline> pipeline)
 	{
 		VkCommandBuffer cmdBuffer = VulkanRenderContext::GetInstance()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
-		const PipelineConfiguration& config = pipeline->GetConfiguration();
-		std::shared_ptr<VulkanRenderPass> renderPass = std::dynamic_pointer_cast<VulkanRenderPass>(pipeline->GetConfiguration().Framebuffer->GetConfiguration().RenderPass);
-		std::shared_ptr<VulkanFramebuffer> targetFramebuffer = renderPass->GetTargetFramebuffer();
 
 		// Bind pipeline
 		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, std::dynamic_pointer_cast<VulkanGraphicsPipeline>(pipeline)->GetVkPipeline());
@@ -127,15 +116,15 @@ namespace NodeBrain
 		VkViewport viewport = {};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = targetFramebuffer->GetConfiguration().Width;
-		viewport.height = targetFramebuffer->GetConfiguration().Height;
+		viewport.width = VulkanRenderContext::GetInstance()->GetSwapchain().GetVkExtent().width;
+		viewport.height = VulkanRenderContext::GetInstance()->GetSwapchain().GetVkExtent().height;
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 		vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
 
 		VkRect2D scissor{};
 		scissor.offset = { 0, 0 };
-		scissor.extent = { targetFramebuffer->GetConfiguration().Width, targetFramebuffer->GetConfiguration().Height };
+		scissor.extent = { VulkanRenderContext::GetInstance()->GetSwapchain().GetVkExtent().width, VulkanRenderContext::GetInstance()->GetSwapchain().GetVkExtent().height };
 		vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
 
@@ -145,8 +134,6 @@ namespace NodeBrain
 
 	void VulkanRendererAPI::WaitForGPU()
 	{
-		//VkFence fence = VulkanRenderContext::GetInstance()->GetSwapchain().GetInFlightFence();
-		//vkWaitForFences(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), 1, &fence, VK_TRUE, UINT64_MAX);
 		vkDeviceWaitIdle(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice());
 	}
 }

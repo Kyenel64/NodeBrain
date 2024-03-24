@@ -13,7 +13,7 @@ namespace NodeBrain
 		std::shared_ptr<Shader> VertexShader;
 		std::shared_ptr<Shader> FragmentShader;
 
-		// Uses swapchain renderpass if render pass not provided
+		// Uses swapchain if framebuffer is not provided
 		std::shared_ptr<Framebuffer> Framebuffer = nullptr;
 
 		TopologyType Topology = TopologyType::TriangleList;
