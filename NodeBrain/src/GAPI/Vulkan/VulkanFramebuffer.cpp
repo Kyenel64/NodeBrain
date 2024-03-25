@@ -17,7 +17,7 @@ namespace NodeBrain
 
 		if (m_VkFramebuffer)
 		{
-			vkDestroyFramebuffer(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), m_VkFramebuffer, nullptr);
+			vkDestroyFramebuffer(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkFramebuffer, nullptr);
 			m_VkFramebuffer = VK_NULL_HANDLE;
 		}
 	}
@@ -50,6 +50,6 @@ namespace NodeBrain
 		framebufferCreateInfo.height = m_Configuration.Height;
 		framebufferCreateInfo.layers = 1;
 
-		VK_CHECK(vkCreateFramebuffer(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &framebufferCreateInfo, nullptr, &m_VkFramebuffer));
+		VK_CHECK(vkCreateFramebuffer(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &framebufferCreateInfo, nullptr, &m_VkFramebuffer));
 	}
 }

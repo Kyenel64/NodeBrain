@@ -140,7 +140,7 @@ namespace NodeBrain
 		m_VkInstance = VK_NULL_HANDLE;
 	}
 
-	VulkanRenderContext* VulkanRenderContext::GetInstance() 
+	VulkanRenderContext* VulkanRenderContext::Get() 
 	{ 
 		return s_Instance; 
 	}

@@ -59,7 +59,7 @@ namespace NodeBrain
 
 		// Validation layers
 		createInfo.enabledLayerCount = 0;
-		const std::vector<const char*>& validationLayers = VulkanRenderContext::GetInstance()->GetValidationLayers();
+		const std::vector<const char*>& validationLayers = VulkanRenderContext::Get()->GetValidationLayers();
 		if (!validationLayers.empty())
 		{
 			createInfo.enabledLayerCount = validationLayers.size();

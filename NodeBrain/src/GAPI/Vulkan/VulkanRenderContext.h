@@ -26,7 +26,7 @@ namespace NodeBrain
 		VulkanSwapchain& GetSwapchain() const { return *m_Swapchain; }
 		const std::vector<const char*>& GetValidationLayers() const { return m_ValidationLayers; }
 
-		static VulkanRenderContext* GetInstance();
+		static VulkanRenderContext* Get();
 
 	private:
 		VkResult CreateInstance();

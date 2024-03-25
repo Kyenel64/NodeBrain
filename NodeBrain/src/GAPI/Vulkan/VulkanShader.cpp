@@ -11,7 +11,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		m_Device = VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice();
+		m_Device = VulkanRenderContext::Get()->GetDevice()->GetVkDevice();
 
 		Init();
 	}

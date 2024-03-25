@@ -109,13 +109,13 @@ namespace NodeBrain
 		pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 		pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 
-		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
+		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
 
 
 		// --- Pipeline ---
 		VkRenderPass renderPass = VK_NULL_HANDLE;
 		if (!m_Configuration.Framebuffer)
-			renderPass = VulkanRenderContext::GetInstance()->GetSwapchain().GetVkRenderPass();
+			renderPass = VulkanRenderContext::Get()->GetSwapchain().GetVkRenderPass();
 
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
 		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -137,7 +137,7 @@ namespace NodeBrain
 		pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 		pipelineCreateInfo.basePipelineIndex = -1; // Optional
 
-		VK_CHECK(vkCreateGraphicsPipelines(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_VkPipeline));
+		VK_CHECK(vkCreateGraphicsPipelines(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_VkPipeline));
 
 	}
 
@@ -145,7 +145,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		vkDestroyPipelineLayout(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), m_VkPipelineLayout, nullptr);
-		vkDestroyPipeline(VulkanRenderContext::GetInstance()->GetDevice()->GetVkDevice(), m_VkPipeline, nullptr);
+		vkDestroyPipelineLayout(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkPipelineLayout, nullptr);
+		vkDestroyPipeline(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkPipeline, nullptr);
 	}
 }
