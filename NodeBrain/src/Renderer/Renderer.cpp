@@ -41,17 +41,12 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		WaitForGPU();
+		s_RendererAPI->WaitForGPU();
 
 		delete s_Data;
 
 		s_RendererAPI.reset();
 		NB_INFO("Shutdown renderer");
-	}
-
-	void Renderer::WaitForGPU()
-	{
-		s_RendererAPI->WaitForGPU();
 	}
 
 	void Renderer::BeginFrame()

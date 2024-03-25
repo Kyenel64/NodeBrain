@@ -29,7 +29,7 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		// --- Queue info ---
-		QueueFamilyIndices indices = m_PhysicalDevice->GetQueueFamilyIndices();
+		QueueFamilyIndices indices = m_PhysicalDevice->FindQueueFamilies();
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 		std::set<uint32_t> uniqueQueueFamilies = { indices.Graphics.value(), indices.Presentation.value() };
 		float queuePriority = 1.0f;

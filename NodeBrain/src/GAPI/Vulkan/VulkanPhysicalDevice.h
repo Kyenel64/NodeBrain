@@ -32,25 +32,19 @@ namespace NodeBrain
 
 		VkPhysicalDevice GetVkPhysicalDevice() const { return m_VkPhysicalDevice; }
 		const std::vector<const char*>& GetDeviceExtensions() const { return m_DeviceExtensions; }
-		const QueueFamilyIndices& GetQueueFamilyIndices() const { return m_QueueFamilyIndices; }
-		const SwapChainSupportDetails& GetSwapChainSupportDetails() const { return m_SwapChainSupportDetails; }
+		QueueFamilyIndices FindQueueFamilies() const;
+		SwapChainSupportDetails QuerySwapChainSupport() const;
+		bool CheckDeviceExtensionSupport() const;
 
 	private:
 		void Init();
-
-		QueueFamilyIndices FindQueueFamilies();
-		bool CheckDeviceExtensionSupport();
-		SwapChainSupportDetails QuerySwapChainSupport();
 
 	private:
 		VkPhysicalDevice m_VkPhysicalDevice = VK_NULL_HANDLE;
 		VkInstance m_VkInstance = VK_NULL_HANDLE;
 		VkSurfaceKHR m_VkSurfaceKHR = VK_NULL_HANDLE;
 
-		QueueFamilyIndices m_QueueFamilyIndices;
-		SwapChainSupportDetails m_SwapChainSupportDetails;
-
-		std::vector<const char*> m_DeviceExtensions;
 		uint32_t m_DeviceIndex;
+		std::vector<const char*> m_DeviceExtensions;
 	};
 }

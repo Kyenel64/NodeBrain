@@ -40,6 +40,7 @@ namespace NodeBrain
 		
 	private:
 		void Init();
+		void RecreateSwapchain();
 
 	private:
 		VkSwapchainKHR m_VkSwapChain = VK_NULL_HANDLE;

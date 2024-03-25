@@ -14,8 +14,6 @@ namespace NodeBrain
 
 		static GAPI GetGAPI();
 
-		static void WaitForGPU();
-
 		// Ran at the beginning of each frame / loop. Manages swapchain events.
 		static void BeginFrame();
 		static void EndFrame();

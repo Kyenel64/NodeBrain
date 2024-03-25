@@ -33,9 +33,6 @@ namespace NodeBrain
 		std::vector<VkPhysicalDevice> devices(deviceCount);
 		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, &devices[0]);
 		m_VkPhysicalDevice = devices[m_DeviceIndex];
-
-		m_QueueFamilyIndices = FindQueueFamilies();
-		m_SwapChainSupportDetails = QuerySwapChainSupport();
 	}
 
 	bool VulkanPhysicalDevice::IsSuitable()
@@ -46,15 +43,17 @@ namespace NodeBrain
 			return false;
 
 		bool extensionSupported = CheckDeviceExtensionSupport();
+		SwapChainSupportDetails swapchainSupportDetails = QuerySwapChainSupport();
+		QueueFamilyIndices queueFamilyIndices = FindQueueFamilies();
 
 		bool swapChainAdequate = false;
 		if (extensionSupported)
-			swapChainAdequate = !m_SwapChainSupportDetails.Formats.empty() && !m_SwapChainSupportDetails.PresentationModes.empty();
+			swapChainAdequate = !swapchainSupportDetails.Formats.empty() && !swapchainSupportDetails.PresentationModes.empty();
 
-		return m_QueueFamilyIndices.IsComplete() && extensionSupported && swapChainAdequate;
+		return queueFamilyIndices.IsComplete() && extensionSupported && swapChainAdequate;
 	}
 
-	QueueFamilyIndices VulkanPhysicalDevice::FindQueueFamilies()
+	QueueFamilyIndices VulkanPhysicalDevice::FindQueueFamilies() const
 	{
 		NB_PROFILE_FN();
 
@@ -80,7 +79,7 @@ namespace NodeBrain
 		return indices;
 	}
 
-	SwapChainSupportDetails VulkanPhysicalDevice::QuerySwapChainSupport()
+	SwapChainSupportDetails VulkanPhysicalDevice::QuerySwapChainSupport() const
 	{
 		NB_PROFILE_FN();
 
@@ -110,7 +109,7 @@ namespace NodeBrain
 		return supportDetails;
 	}
 
-	bool VulkanPhysicalDevice::CheckDeviceExtensionSupport()
+	bool VulkanPhysicalDevice::CheckDeviceExtensionSupport() const
 	{
 		NB_PROFILE_FN();
 
@@ -126,6 +125,4 @@ namespace NodeBrain
 
 		return requiredExtensions.empty();
 	}
-
-	
 }
