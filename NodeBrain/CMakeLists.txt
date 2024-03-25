@@ -10,7 +10,7 @@ set (CoreFiles "src/Core/App.h" "src/Core/App.cpp" "src/Core/Layer.h" "src/Core/
 
 set (VulkanFiles "src/GAPI/Vulkan/VulkanRendererAPI.h" "src/GAPI/Vulkan/VulkanRendererAPI.cpp" 
 "src/GAPI/Vulkan/VulkanPhysicalDevice.h" "src/GAPI/Vulkan/VulkanPhysicalDevice.cpp"  "src/GAPI/Vulkan/VulkanDevice.h" 
-"src/GAPI/Vulkan/VulkanDevice.cpp" "src/GAPI/Vulkan/VulkanSwapChain.h" "src/GAPI/Vulkan/VulkanSwapChain.cpp" 
+"src/GAPI/Vulkan/VulkanDevice.cpp" "src/GAPI/Vulkan/VulkanSwapchain.h" "src/GAPI/Vulkan/VulkanSwapchain.cpp" 
 "src/GAPI/Vulkan/VulkanRenderContext.h" "src/GAPI/Vulkan/VulkanRenderContext.cpp" "src/GAPI/Vulkan/VulkanImage.h" 
 "src/GAPI/Vulkan/VulkanImage.cpp" "src/GAPI/Vulkan/VulkanShader.h" "src/GAPI/Vulkan/VulkanShader.cpp" 
 "src/GAPI/Vulkan/VulkanRenderPass.h" "src/GAPI/Vulkan/VulkanRenderPass.cpp" "src/GAPI/Vulkan/VulkanGraphicsPipeline.h" 

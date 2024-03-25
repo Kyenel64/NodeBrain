@@ -43,14 +43,14 @@ namespace NodeBrain
 			return false;
 
 		bool extensionSupported = CheckDeviceExtensionSupport();
-		SwapChainSupportDetails swapchainSupportDetails = QuerySwapChainSupport();
+		SwapchainSupportDetails swapchainSupportDetails = QuerySwapchainSupport();
 		QueueFamilyIndices queueFamilyIndices = FindQueueFamilies();
 
-		bool swapChainAdequate = false;
+		bool swapchainAdequate = false;
 		if (extensionSupported)
-			swapChainAdequate = !swapchainSupportDetails.Formats.empty() && !swapchainSupportDetails.PresentationModes.empty();
+			swapchainAdequate = !swapchainSupportDetails.Formats.empty() && !swapchainSupportDetails.PresentationModes.empty();
 
-		return queueFamilyIndices.IsComplete() && extensionSupported && swapChainAdequate;
+		return queueFamilyIndices.IsComplete() && extensionSupported && swapchainAdequate;
 	}
 
 	QueueFamilyIndices VulkanPhysicalDevice::FindQueueFamilies() const
@@ -79,12 +79,12 @@ namespace NodeBrain
 		return indices;
 	}
 
-	SwapChainSupportDetails VulkanPhysicalDevice::QuerySwapChainSupport() const
+	SwapchainSupportDetails VulkanPhysicalDevice::QuerySwapchainSupport() const
 	{
 		NB_PROFILE_FN();
 
 		// Capabilities
-		SwapChainSupportDetails supportDetails = {};
+		SwapchainSupportDetails supportDetails = {};
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_VkPhysicalDevice, m_VkSurfaceKHR, &supportDetails.Capabilities);
 
 		// Formats

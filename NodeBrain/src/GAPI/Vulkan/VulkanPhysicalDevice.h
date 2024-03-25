@@ -15,7 +15,7 @@ namespace NodeBrain
 		}
 	};
 
-	struct SwapChainSupportDetails
+	struct SwapchainSupportDetails
 	{
 		VkSurfaceCapabilitiesKHR Capabilities;
 		std::vector<VkSurfaceFormatKHR> Formats;
@@ -33,7 +33,7 @@ namespace NodeBrain
 		VkPhysicalDevice GetVkPhysicalDevice() const { return m_VkPhysicalDevice; }
 		const std::vector<const char*>& GetDeviceExtensions() const { return m_DeviceExtensions; }
 		QueueFamilyIndices FindQueueFamilies() const;
-		SwapChainSupportDetails QuerySwapChainSupport() const;
+		SwapchainSupportDetails QuerySwapchainSupport() const;
 		bool CheckDeviceExtensionSupport() const;
 
 	private:

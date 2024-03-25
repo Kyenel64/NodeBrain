@@ -116,7 +116,7 @@ namespace NodeBrain
 
 		m_PhysicalDevice = FindFirstSuitablePhysicalDevice();
 		m_Device = std::make_shared<VulkanDevice>(m_PhysicalDevice);
-		m_SwapChain = std::make_unique<VulkanSwapChain>(m_VkSurface, m_Device);
+		m_Swapchain = std::make_unique<VulkanSwapchain>(m_VkSurface, m_Device);
 	}
 
 	VulkanRenderContext::~VulkanRenderContext()
@@ -124,7 +124,7 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		// Destroy in reverse order
-		m_SwapChain.reset();
+		m_Swapchain.reset();
 
 		m_Device.reset();
 
@@ -237,11 +237,11 @@ namespace NodeBrain
 
 	void VulkanRenderContext::AcquireNextImage()
 	{
-		m_SwapChain->AcquireNextImage();
+		m_Swapchain->AcquireNextImage();
 	}
 
 	void VulkanRenderContext::SwapBuffers()
 	{
-		m_SwapChain->PresentImage();
+		m_Swapchain->PresentImage();
 	}
 }

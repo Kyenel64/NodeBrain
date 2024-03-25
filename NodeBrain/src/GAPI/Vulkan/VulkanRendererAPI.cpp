@@ -8,7 +8,7 @@
 
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanFramebuffer.h"
-#include "GAPI/Vulkan/VulkanSwapChain.h"
+#include "GAPI/Vulkan/VulkanSwapchain.h"
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanGraphicsPipeline.h"
 

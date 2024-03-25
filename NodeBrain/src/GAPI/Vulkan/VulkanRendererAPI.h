@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.h>
 
 #include "Renderer/RendererAPI.h"
-#include "GAPI/Vulkan/VulkanSwapChain.h"
 
 namespace NodeBrain
 {

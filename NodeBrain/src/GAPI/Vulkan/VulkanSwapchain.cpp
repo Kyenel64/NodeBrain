@@ -1,5 +1,5 @@
 #include "NBpch.h"
-#include "VulkanSwapChain.h"
+#include "VulkanSwapchain.h"
 
 #include "Core/App.h"
 
@@ -7,7 +7,7 @@ namespace NodeBrain
 {
 	namespace Utils
 	{
-		static VkSurfaceFormatKHR ChooseSwapChainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
+		static VkSurfaceFormatKHR ChooseSwapchainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
 		{
 			for (const auto& format : availableFormats)
 			{
@@ -18,7 +18,7 @@ namespace NodeBrain
 			return availableFormats[0];
 		}
 
-		static VkPresentModeKHR ChooseSwapChainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes)
+		static VkPresentModeKHR ChooseSwapchainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes)
 		{
 			for (const auto& presentationMode : availablePresentationModes)
 			{
@@ -49,7 +49,7 @@ namespace NodeBrain
 
 
 
-	VulkanSwapChain::VulkanSwapChain(VkSurfaceKHR surface, std::shared_ptr<VulkanDevice> device)
+	VulkanSwapchain::VulkanSwapchain(VkSurfaceKHR surface, std::shared_ptr<VulkanDevice> device)
 		: m_VkSurface(surface), m_Device(device), m_ImageIndex(0)
 	{
 		NB_PROFILE_FN();
@@ -57,7 +57,7 @@ namespace NodeBrain
 		Init();
 	}
 
-	VulkanSwapChain::~VulkanSwapChain()
+	VulkanSwapchain::~VulkanSwapchain()
 	{
 		NB_PROFILE_FN();
 
@@ -102,23 +102,23 @@ namespace NodeBrain
 			m_VkImages.clear();
 		}
 
-		if (m_VkSwapChain)
+		if (m_VkSwapchain)
 		{
-			vkDestroySwapchainKHR(m_Device->GetVkDevice(), m_VkSwapChain, nullptr);
-			m_VkSwapChain = VK_NULL_HANDLE;
+			vkDestroySwapchainKHR(m_Device->GetVkDevice(), m_VkSwapchain, nullptr);
+			m_VkSwapchain = VK_NULL_HANDLE;
 		}
 	}
 
-	void VulkanSwapChain::Init()
+	void VulkanSwapchain::Init()
 	{
 		NB_PROFILE_FN();
 
 		// Set configurations
-		SwapChainSupportDetails swapChainSupport = m_Device->GetPhysicalDevice()->QuerySwapChainSupport();
-		VkSurfaceFormatKHR surfaceFormat = Utils::ChooseSwapChainFormat(swapChainSupport.Formats);
+		SwapchainSupportDetails swapChainSupport = m_Device->GetPhysicalDevice()->QuerySwapchainSupport();
+		VkSurfaceFormatKHR surfaceFormat = Utils::ChooseSwapchainFormat(swapChainSupport.Formats);
 		m_VkColorFormat = surfaceFormat.format;
 		m_VkColorSpace = surfaceFormat.colorSpace;
-		m_VkPresentationMode = Utils::ChooseSwapChainPresentationMode(swapChainSupport.PresentationModes);
+		m_VkPresentationMode = Utils::ChooseSwapchainPresentationMode(swapChainSupport.PresentationModes);
 		m_VkExtent = Utils::ChooseSwapExtent(swapChainSupport.Capabilities);
 
 		uint32_t imageCount = swapChainSupport.Capabilities.minImageCount + 1;
@@ -157,16 +157,16 @@ namespace NodeBrain
 		createInfo.clipped = VK_TRUE;
 		createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-		VK_CHECK(vkCreateSwapchainKHR(m_Device->GetVkDevice(), &createInfo, nullptr, &m_VkSwapChain));
+		VK_CHECK(vkCreateSwapchainKHR(m_Device->GetVkDevice(), &createInfo, nullptr, &m_VkSwapchain));
 
 
 		// --- Create image & views ---
 		uint32_t vkImageCount = 0;
-		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapChain, &vkImageCount, nullptr);
+		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapchain, &vkImageCount, nullptr);
 		m_VkImages.resize(vkImageCount);
 		m_VkImageViews.resize(vkImageCount);
 		m_VkFramebuffers.resize(vkImageCount);
-		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapChain, &vkImageCount, &m_VkImages[0]);
+		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapchain, &vkImageCount, &m_VkImages[0]);
 
 		for (size_t i = 0; i < vkImageCount; i++)
 		{
@@ -278,11 +278,11 @@ namespace NodeBrain
 		}
 	}
 
-	uint32_t VulkanSwapChain::AcquireNextImage()
+	uint32_t VulkanSwapchain::AcquireNextImage()
 	{
 		vkWaitForFences(m_Device->GetVkDevice(), 1, &m_FrameDatas[m_CurrentFrame].InFlightFence, VK_TRUE, UINT64_MAX);
 
-		VkResult result = vkAcquireNextImageKHR(m_Device->GetVkDevice(), m_VkSwapChain, UINT64_MAX, m_FrameDatas[m_CurrentFrame].ImageAvailableSemaphore, VK_NULL_HANDLE, &m_ImageIndex);
+		VkResult result = vkAcquireNextImageKHR(m_Device->GetVkDevice(), m_VkSwapchain, UINT64_MAX, m_FrameDatas[m_CurrentFrame].ImageAvailableSemaphore, VK_NULL_HANDLE, &m_ImageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			RecreateSwapchain();
@@ -293,7 +293,7 @@ namespace NodeBrain
 		return m_ImageIndex;
 	}
 
-	void VulkanSwapChain::PresentImage()
+	void VulkanSwapchain::PresentImage()
 	{
 		VkPresentInfoKHR presentInfo = {};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -301,7 +301,7 @@ namespace NodeBrain
 		presentInfo.waitSemaphoreCount = 1;
 		presentInfo.pWaitSemaphores = &m_FrameDatas[m_CurrentFrame].RenderFinishedSemaphore;
 
-		VkSwapchainKHR swapChains[] = { m_VkSwapChain };
+		VkSwapchainKHR swapChains[] = { m_VkSwapchain };
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapChains;
 		presentInfo.pImageIndices = &m_ImageIndex;
@@ -317,7 +317,7 @@ namespace NodeBrain
 		m_CurrentFrame = (m_CurrentFrame + 1) % FRAMES_IN_FLIGHT;
 	}
 
-	void VulkanSwapChain::RecreateSwapchain()
+	void VulkanSwapchain::RecreateSwapchain()
 	{
 		vkDeviceWaitIdle(m_Device->GetVkDevice());
 
@@ -343,20 +343,20 @@ namespace NodeBrain
 			m_VkImages.clear();
 		}
 
-		if (m_VkSwapChain)
+		if (m_VkSwapchain)
 		{
-			vkDestroySwapchainKHR(m_Device->GetVkDevice(), m_VkSwapChain, nullptr);
-			m_VkSwapChain = VK_NULL_HANDLE;
+			vkDestroySwapchainKHR(m_Device->GetVkDevice(), m_VkSwapchain, nullptr);
+			m_VkSwapchain = VK_NULL_HANDLE;
 		}
 
 
 		// Create swapchain, image views, and framebuffers.
 		// Set configurations
-		SwapChainSupportDetails swapChainSupport = m_Device->GetPhysicalDevice()->QuerySwapChainSupport();
-		VkSurfaceFormatKHR surfaceFormat = Utils::ChooseSwapChainFormat(swapChainSupport.Formats);
+		SwapchainSupportDetails swapChainSupport = m_Device->GetPhysicalDevice()->QuerySwapchainSupport();
+		VkSurfaceFormatKHR surfaceFormat = Utils::ChooseSwapchainFormat(swapChainSupport.Formats);
 		m_VkColorFormat = surfaceFormat.format;
 		m_VkColorSpace = surfaceFormat.colorSpace;
-		m_VkPresentationMode = Utils::ChooseSwapChainPresentationMode(swapChainSupport.PresentationModes);
+		m_VkPresentationMode = Utils::ChooseSwapchainPresentationMode(swapChainSupport.PresentationModes);
 		m_VkExtent = Utils::ChooseSwapExtent(swapChainSupport.Capabilities);
 
 		uint32_t imageCount = swapChainSupport.Capabilities.minImageCount + 1;
@@ -395,16 +395,16 @@ namespace NodeBrain
 		createInfo.clipped = VK_TRUE;
 		createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-		VK_CHECK(vkCreateSwapchainKHR(m_Device->GetVkDevice(), &createInfo, nullptr, &m_VkSwapChain));
+		VK_CHECK(vkCreateSwapchainKHR(m_Device->GetVkDevice(), &createInfo, nullptr, &m_VkSwapchain));
 
 
 		// --- Create image & views ---
 		uint32_t vkImageCount = 0;
-		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapChain, &vkImageCount, nullptr);
+		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapchain, &vkImageCount, nullptr);
 		m_VkImages.resize(vkImageCount);
 		m_VkImageViews.resize(vkImageCount);
 		m_VkFramebuffers.resize(vkImageCount);
-		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapChain, &vkImageCount, &m_VkImages[0]);
+		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapchain, &vkImageCount, &m_VkImages[0]);
 
 		for (size_t i = 0; i < vkImageCount; i++)
 		{

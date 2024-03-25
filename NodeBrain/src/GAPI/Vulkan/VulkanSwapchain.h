@@ -21,16 +21,16 @@ namespace NodeBrain
 		VkFence InFlightFence = VK_NULL_HANDLE;
 	};
 
-	class VulkanSwapChain
+	class VulkanSwapchain
 	{
 	public:
-		VulkanSwapChain(VkSurfaceKHR surface, std::shared_ptr<VulkanDevice> device);
-		~VulkanSwapChain();
+		VulkanSwapchain(VkSurfaceKHR surface, std::shared_ptr<VulkanDevice> device);
+		~VulkanSwapchain();
 
 		uint32_t AcquireNextImage();
 		void PresentImage();
 
-		VkSwapchainKHR GetVkSwapchain() const { return m_VkSwapChain; }
+		VkSwapchainKHR GetVkSwapchain() const { return m_VkSwapchain; }
 		VkFormat GetVkFormat() const { return m_VkColorFormat; }
 		VkExtent2D GetVkExtent() const { return m_VkExtent; }
 		VkRenderPass GetVkRenderPass() const { return m_VkRenderPass; }
@@ -43,7 +43,7 @@ namespace NodeBrain
 		void RecreateSwapchain();
 
 	private:
-		VkSwapchainKHR m_VkSwapChain = VK_NULL_HANDLE;
+		VkSwapchainKHR m_VkSwapchain = VK_NULL_HANDLE;
 		VkSurfaceKHR m_VkSurface = VK_NULL_HANDLE;
 		std::shared_ptr<VulkanDevice> m_Device;
 

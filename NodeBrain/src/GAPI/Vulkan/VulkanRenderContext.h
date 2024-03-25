@@ -6,7 +6,7 @@
 #include "Renderer/RenderContext.h"
 #include "GAPI/Vulkan/VulkanPhysicalDevice.h"
 #include "GAPI/Vulkan/VulkanDevice.h"
-#include "GAPI/Vulkan/VulkanSwapChain.h"
+#include "GAPI/Vulkan/VulkanSwapchain.h"
 
 namespace NodeBrain
 {
@@ -23,7 +23,7 @@ namespace NodeBrain
 		// Getters
 		VkInstance GetVkInstance() const { return m_VkInstance; }
 		std::shared_ptr<VulkanDevice> GetDevice() const { return m_Device; }
-		VulkanSwapChain& GetSwapchain() const { return *m_SwapChain; }
+		VulkanSwapchain& GetSwapchain() const { return *m_Swapchain; }
 		const std::vector<const char*>& GetValidationLayers() const { return m_ValidationLayers; }
 
 		static VulkanRenderContext* GetInstance();
@@ -41,7 +41,7 @@ namespace NodeBrain
 
 		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
 		std::shared_ptr<VulkanDevice> m_Device;
-		std::unique_ptr<VulkanSwapChain> m_SwapChain;
+		std::unique_ptr<VulkanSwapchain> m_Swapchain;
 
 		// Debug
 		VkDebugUtilsMessengerEXT m_DebugMessenger = nullptr;
