@@ -29,6 +29,7 @@ namespace NodeBrain
 
 		uint32_t AcquireNextImage();
 		void PresentImage();
+		void CopyImage(std::shared_ptr<VulkanImage> image);
 
 		VkSwapchainKHR GetVkSwapchain() const { return m_VkSwapchain; }
 		VkFormat GetVkFormat() const { return m_VkColorFormat; }
@@ -37,6 +38,7 @@ namespace NodeBrain
 		VkFramebuffer GetCurrentVkFramebuffer() const { return m_VkFramebuffers[m_ImageIndex]; }
 		const FrameData& GetCurrentFrameData() const { return m_FrameDatas[m_CurrentFrame]; }
 		uint32_t GetImageIndex() const { return m_ImageIndex; }
+		VkImage GetCurrentVkImage() const { return m_VkImages[m_CurrentFrame]; }
 		
 	private:
 		void Init();

@@ -317,6 +317,11 @@ namespace NodeBrain
 		m_CurrentFrame = (m_CurrentFrame + 1) % FRAMES_IN_FLIGHT;
 	}
 
+	void VulkanSwapchain::CopyImage(std::shared_ptr<VulkanImage> image)
+	{
+		
+	}
+
 	void VulkanSwapchain::RecreateSwapchain()
 	{
 		vkDeviceWaitIdle(m_Device->GetVkDevice());

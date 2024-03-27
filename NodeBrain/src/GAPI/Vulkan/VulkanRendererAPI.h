@@ -18,6 +18,10 @@ namespace NodeBrain
 		// Use swapchain renderpass if renderPass == nullptr
 		virtual void BeginRenderPass(std::shared_ptr<RenderPass> renderPass = nullptr) override;
 		virtual void EndRenderPass() override;
+
+		virtual void BeginDynamicPass() override;
+		virtual void EndDynamicPass() override;
+		virtual void DrawDynamicTest() override;
 		
 		virtual void DrawTestTriangle(std::shared_ptr<GraphicsPipeline> pipeline) override;
 

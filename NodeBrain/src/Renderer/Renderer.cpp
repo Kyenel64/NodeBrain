@@ -61,20 +61,24 @@ namespace NodeBrain
 
 	void Renderer::Begin(std::shared_ptr<Framebuffer> framebuffer)
 	{
-		if (framebuffer)
-			s_RendererAPI->BeginRenderPass(framebuffer->GetConfiguration().RenderPass);
-		else
-			s_RendererAPI->BeginRenderPass();
+		//if (framebuffer)
+		//	s_RendererAPI->BeginRenderPass(framebuffer->GetConfiguration().RenderPass);
+		//else
+		//	s_RendererAPI->BeginRenderPass();
+
+		s_RendererAPI->BeginDynamicPass();
 	}
 
 	void Renderer::End()
 	{
-		s_RendererAPI->EndRenderPass();
+		//s_RendererAPI->EndRenderPass();
+		s_RendererAPI->EndDynamicPass();
 	}
 
 	void Renderer::DrawTestTriangle()
 	{
-		s_RendererAPI->DrawTestTriangle(s_Data->TestPipeline);
+		//s_RendererAPI->DrawTestTriangle(s_Data->TestPipeline);
+		s_RendererAPI->DrawDynamicTest();
 	}
 
 	GAPI Renderer::GetGAPI() { return s_GAPI; }

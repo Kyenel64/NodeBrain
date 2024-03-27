@@ -16,6 +16,10 @@ namespace NodeBrain
 		virtual void BeginRenderPass(std::shared_ptr<RenderPass> renderPass = nullptr) = 0;
 		virtual void EndRenderPass() = 0;
 
+		virtual void BeginDynamicPass() = 0;
+		virtual void EndDynamicPass() = 0;
+		virtual void DrawDynamicTest() = 0;
+
 		virtual void DrawTestTriangle(std::shared_ptr<GraphicsPipeline> pipeline) = 0;
 
 		virtual void WaitForGPU() = 0;

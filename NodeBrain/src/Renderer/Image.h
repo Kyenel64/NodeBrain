@@ -2,9 +2,12 @@
 
 namespace NodeBrain
 {
+	enum class ImageFormat { None = 0, RGBA16 };
+
 	struct ImageConfiguration
 	{
 		uint32_t Width, Height;
+		ImageFormat ImageFormat;
 	};
 
 	class Image

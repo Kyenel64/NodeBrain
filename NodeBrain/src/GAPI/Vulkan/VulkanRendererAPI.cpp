@@ -16,6 +16,45 @@
 
 namespace NodeBrain
 {
+	static VkImageSubresourceRange ImageSubresourceRange(VkImageAspectFlags aspectMask)
+	{
+		VkImageSubresourceRange subImage = {};
+		subImage.aspectMask = aspectMask;
+		subImage.baseMipLevel = 0;
+		subImage.levelCount = VK_REMAINING_MIP_LEVELS;
+		subImage.baseArrayLayer = 0;
+		subImage.layerCount = VK_REMAINING_ARRAY_LAYERS;
+
+		return subImage;
+	}
+
+	static void TransitionImage(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout)
+	{
+		VkImageMemoryBarrier2 imageBarrier = {};
+		imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+		imageBarrier.pNext = nullptr;
+
+		imageBarrier.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+		imageBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
+		imageBarrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+		imageBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT;
+
+		imageBarrier.oldLayout = currentLayout;
+		imageBarrier.newLayout = newLayout;
+
+		VkImageAspectFlags aspectFlags = (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
+		imageBarrier.subresourceRange = ImageSubresourceRange(aspectFlags);
+		imageBarrier.image = image;
+
+		VkDependencyInfo depInfo = {};
+		depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+		depInfo.pNext = nullptr;
+		depInfo.imageMemoryBarrierCount = 1;
+		depInfo.pImageMemoryBarriers = &imageBarrier;
+
+		vkCmdPipelineBarrier2(commandBuffer, &depInfo);
+	}
+
 	VulkanRendererAPI::VulkanRendererAPI()
 	{
 		NB_PROFILE_FN();
@@ -135,5 +174,37 @@ namespace NodeBrain
 	void VulkanRendererAPI::WaitForGPU()
 	{
 		vkDeviceWaitIdle(VulkanRenderContext::Get()->GetDevice()->GetVkDevice());
+	}
+
+	void VulkanRendererAPI::BeginDynamicPass()
+	{
+		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
+		VkImage image = VulkanRenderContext::Get()->GetSwapchain().GetCurrentVkImage();
+
+		// Convert image to writable format. Not optimal
+		TransitionImage(cmdBuffer, image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+	}
+	void VulkanRendererAPI::EndDynamicPass()
+	{
+		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
+		VkImage image = VulkanRenderContext::Get()->GetSwapchain().GetCurrentVkImage();
+
+		// Convert image to presentable format
+		TransitionImage(cmdBuffer, image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+		VK_CHECK(vkEndCommandBuffer(cmdBuffer));
+	}
+
+	void VulkanRendererAPI::DrawDynamicTest()
+	{
+		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
+		VkImage image = VulkanRenderContext::Get()->GetSwapchain().GetCurrentVkImage();
+
+		VkClearColorValue clearValue;
+		clearValue = { { 0.3f, 0.3f, 0.8f, 1.0f }};
+
+		VkImageSubresourceRange clearRange = ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
+
+		vkCmdClearColorImage(cmdBuffer, image, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
 	}
 }
