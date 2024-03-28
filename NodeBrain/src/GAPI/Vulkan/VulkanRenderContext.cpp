@@ -180,7 +180,7 @@ namespace NodeBrain
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.pEngineName = "NodeBrain";
 		appInfo.engineVersion = VK_MAKE_VERSION(0, 0, 1); // TODO:
-		appInfo.apiVersion = VK_API_VERSION_1_0;
+		appInfo.apiVersion = VK_API_VERSION_1_3;
 
 		// --- Create info ---
 		VkInstanceCreateInfo createInfo = {};

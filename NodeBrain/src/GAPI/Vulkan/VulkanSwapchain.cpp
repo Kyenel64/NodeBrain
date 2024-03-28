@@ -134,7 +134,7 @@ namespace NodeBrain
 		createInfo.imageColorSpace = m_VkColorSpace;
 		createInfo.imageExtent = m_VkExtent;
 		createInfo.imageArrayLayers = 1;
-		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
 		QueueFamilyIndices indices = m_Device->GetPhysicalDevice()->FindQueueFamilies();
 		uint32_t queueFamilyIndices[] = { indices.Graphics.value(), indices.Presentation.value() };

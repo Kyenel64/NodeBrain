@@ -191,8 +191,6 @@ namespace NodeBrain
 
 		// Convert image to presentable format
 		TransitionImage(cmdBuffer, image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-
-		VK_CHECK(vkEndCommandBuffer(cmdBuffer));
 	}
 
 	void VulkanRendererAPI::DrawDynamicTest()

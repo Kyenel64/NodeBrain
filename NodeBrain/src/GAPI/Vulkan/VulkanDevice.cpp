@@ -44,14 +44,33 @@ namespace NodeBrain
 		}
 		
 		// --- Features ---
-		VkPhysicalDeviceFeatures deviceFeatures = {}; // TODO:
+		VkPhysicalDeviceFeatures2 deviceFeatures = {}; // TODO:
+		deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
+
+		VkPhysicalDeviceVulkan12Features vulkan12Features = {};
+		vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+		vulkan12Features.bufferDeviceAddress = VK_TRUE;
+		vulkan12Features.descriptorIndexing = VK_TRUE;
+
+		VkPhysicalDeviceVulkan13Features vulkan13Features = {};
+		vulkan13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+		vulkan13Features.dynamicRendering = VK_TRUE;
+		vulkan13Features.synchronization2 = VK_TRUE;
+
+		VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures = {};
+		dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
+		dynamicRenderingFeatures.dynamicRendering = VK_TRUE;
+
+		deviceFeatures.pNext = &vulkan12Features;
+		vulkan12Features.pNext = &vulkan13Features;
 
 		// --- Device ---
 		VkDeviceCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		createInfo.pNext = &deviceFeatures;
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		createInfo.pQueueCreateInfos = &queueCreateInfos[0];
-		createInfo.pEnabledFeatures = &deviceFeatures;
+		//createInfo.pEnabledFeatures = &deviceFeatures;
 
 		// Extensions
 		createInfo.enabledExtensionCount = m_PhysicalDevice->GetDeviceExtensions().size();
