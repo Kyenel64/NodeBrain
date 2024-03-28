@@ -57,12 +57,16 @@ namespace NodeBrain
 		vulkan13Features.dynamicRendering = VK_TRUE;
 		vulkan13Features.synchronization2 = VK_TRUE;
 
-		VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures = {};
-		dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
-		dynamicRenderingFeatures.dynamicRendering = VK_TRUE;
+		//VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures = {};
+		//dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
+		//dynamicRenderingFeatures.dynamicRendering = VK_TRUE;
 
 		deviceFeatures.pNext = &vulkan12Features;
-		vulkan12Features.pNext = &vulkan13Features;
+		#ifdef NB_VULKAN_VERSION_1_3
+			vulkan12Features.pNext = &vulkan13Features;
+		#else
+			vulkan12Features.pNext = VK_NULL_HANDLE;
+		#endif
 
 		// --- Device ---
 		VkDeviceCreateInfo createInfo = {};

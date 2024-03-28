@@ -38,7 +38,7 @@ namespace NodeBrain
 		VkFramebuffer GetCurrentVkFramebuffer() const { return m_VkFramebuffers[m_ImageIndex]; }
 		const FrameData& GetCurrentFrameData() const { return m_FrameDatas[m_CurrentFrame]; }
 		uint32_t GetImageIndex() const { return m_ImageIndex; }
-		VkImage GetCurrentVkImage() const { return m_VkImages[m_CurrentFrame]; }
+		VkImage GetCurrentVkImage() const { return m_VkImages[m_ImageIndex]; }
 		
 	private:
 		void Init();
