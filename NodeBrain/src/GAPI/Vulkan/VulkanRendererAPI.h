@@ -26,8 +26,5 @@ namespace NodeBrain
 		virtual void DrawTestTriangle(std::shared_ptr<GraphicsPipeline> pipeline) override;
 
 		virtual void WaitForGPU() override;
-
-	private:
-		void Init();
 	};
 }

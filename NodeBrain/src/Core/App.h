@@ -10,15 +10,16 @@ namespace NodeBrain
 	class App
 	{
 	public:
-		App();
+		App(const std::string& applicationName);
 		~App();
 
 		void Run();
 		void PushLayer(Layer* layer);
 
+		static App* Get();
 		size_t GetLayersSize() const { return m_Layers.size(); }
 		Window& GetWindow() const { return *m_Window; }
-		static App* GetInstance();
+		const std::string& GetApplicationName() const { return m_ApplicationName; }
 
 	private:
 		// Events
@@ -28,6 +29,7 @@ namespace NodeBrain
 		bool StartupSubSystems();
 
 	private:
+		std::string m_ApplicationName;
 		bool m_Running = true;
 		std::vector<Layer*> m_Layers;
 		std::unique_ptr<Window> m_Window;

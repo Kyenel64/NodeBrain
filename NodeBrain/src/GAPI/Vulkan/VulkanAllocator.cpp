@@ -10,11 +10,6 @@ namespace NodeBrain
 {
 	VulkanAllocator::VulkanAllocator()
 	{
-
-	}
-
-	void VulkanAllocator::Init()
-	{
 		VmaAllocatorCreateInfo allocatorCreateInfo = {};
 		allocatorCreateInfo.physicalDevice = VulkanRenderContext::Get()->GetPhysicalDevice()->GetVkPhysicalDevice();
 		allocatorCreateInfo.device = VulkanRenderContext::Get()->GetDevice()->GetVkDevice();

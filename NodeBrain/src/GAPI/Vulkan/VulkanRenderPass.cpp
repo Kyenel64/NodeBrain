@@ -9,13 +9,6 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		Init();
-	}
-
-	void VulkanRenderPass::Init()
-	{
-		NB_PROFILE_FN();
-
 		VkAttachmentDescription colorAttachment = {};
 		colorAttachment.format = VK_FORMAT_B8G8R8A8_SRGB; // temp. parametrize
 		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;

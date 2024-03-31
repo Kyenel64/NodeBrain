@@ -17,9 +17,6 @@ namespace NodeBrain
 		VkImageView GetVkImageView() const { return m_VkImageView; }
 
 	private:
-		void Init();
-
-	private:
 		VkImage m_VkImage = VK_NULL_HANDLE;
 		VkImageView m_VkImageView = VK_NULL_HANDLE;
 		VmaAllocation m_VMAAllocation = VK_NULL_HANDLE;

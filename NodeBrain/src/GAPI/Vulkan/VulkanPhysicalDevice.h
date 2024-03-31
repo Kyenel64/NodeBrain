@@ -31,13 +31,10 @@ namespace NodeBrain
 		bool IsSuitable();
 
 		VkPhysicalDevice GetVkPhysicalDevice() const { return m_VkPhysicalDevice; }
-		const std::vector<const char*>& GetDeviceExtensions() const { return m_DeviceExtensions; }
+		const std::vector<const char*>& GetEnabledDeviceExtensions() const { return m_EnabledDeviceExtensions; }
 		QueueFamilyIndices FindQueueFamilies() const;
 		SwapchainSupportDetails QuerySwapchainSupport() const;
 		bool CheckDeviceExtensionSupport() const;
-
-	private:
-		void Init();
 
 	private:
 		VkPhysicalDevice m_VkPhysicalDevice = VK_NULL_HANDLE;
@@ -45,6 +42,6 @@ namespace NodeBrain
 		VkSurfaceKHR m_VkSurfaceKHR = VK_NULL_HANDLE;
 
 		uint32_t m_DeviceIndex;
-		std::vector<const char*> m_DeviceExtensions;
+		std::vector<const char*> m_EnabledDeviceExtensions;
 	};
 }

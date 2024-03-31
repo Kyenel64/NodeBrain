@@ -9,7 +9,8 @@ namespace NodeBrain
 {
 	App* s_Instance = nullptr;
 
-	App::App()
+	App::App(const std::string& applicationName)
+		: m_ApplicationName(applicationName)
 	{
 		NB_PROFILE_FN();
 
@@ -113,7 +114,7 @@ namespace NodeBrain
 		m_Running = false;
 	}
 
-	App* App::GetInstance() 
+	App* App::Get() 
 	{ 
 		NB_PROFILE_FN();
 

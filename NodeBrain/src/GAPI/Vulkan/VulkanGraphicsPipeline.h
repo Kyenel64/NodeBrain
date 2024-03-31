@@ -18,9 +18,6 @@ namespace NodeBrain
 		VkPipeline GetVkPipeline() const { return m_VkPipeline; }
 
 	private:
-		void Init();
-
-	private:
 		VkPipeline m_VkPipeline = VK_NULL_HANDLE;
 		VkPipelineLayout m_VkPipelineLayout = VK_NULL_HANDLE;
 

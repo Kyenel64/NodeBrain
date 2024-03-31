@@ -117,7 +117,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		GLFWwindow* window = App::GetInstance()->GetWindow().GetGLFWWindow();
+		GLFWwindow* window = App::Get()->GetWindow().GetGLFWWindow();
 		NB_ASSERT(window, "Could not retrieve application instance");
 		double xpos = 0, ypos = 0;
 		glfwGetCursorPos(window, &xpos, &ypos);

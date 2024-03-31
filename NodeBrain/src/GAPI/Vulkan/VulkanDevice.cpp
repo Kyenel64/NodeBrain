@@ -10,24 +10,6 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		Init();
-	}
-
-	VulkanDevice::~VulkanDevice()
-	{
-		NB_PROFILE_FN();
-		
-		if (m_VkDevice)
-		{
-			vkDestroyDevice(m_VkDevice, nullptr);
-			m_VkDevice = VK_NULL_HANDLE;
-		}
-	}
-
-	void VulkanDevice::Init()
-	{
-		NB_PROFILE_FN();
-
 		// --- Queue info ---
 		QueueFamilyIndices indices = m_PhysicalDevice->FindQueueFamilies();
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -77,12 +59,12 @@ namespace NodeBrain
 		//createInfo.pEnabledFeatures = &deviceFeatures;
 
 		// Extensions
-		createInfo.enabledExtensionCount = m_PhysicalDevice->GetDeviceExtensions().size();
-		createInfo.ppEnabledExtensionNames = m_PhysicalDevice->GetDeviceExtensions().data();
+		createInfo.enabledExtensionCount = m_PhysicalDevice->GetEnabledDeviceExtensions().size();
+		createInfo.ppEnabledExtensionNames = m_PhysicalDevice->GetEnabledDeviceExtensions().data();
 
 		// Validation layers
 		createInfo.enabledLayerCount = 0;
-		const std::vector<const char*>& validationLayers = VulkanRenderContext::Get()->GetValidationLayers();
+		const std::vector<const char*>& validationLayers = VulkanRenderContext::Get()->GetEnabledLayers();
 		if (!validationLayers.empty())
 		{
 			createInfo.enabledLayerCount = validationLayers.size();
@@ -92,8 +74,19 @@ namespace NodeBrain
 		// Create device
 		VK_CHECK(vkCreateDevice(m_PhysicalDevice->GetVkPhysicalDevice(), &createInfo, nullptr, &m_VkDevice));
 
-		// Create graphics queue
+		// Retrieve queues
 		vkGetDeviceQueue(m_VkDevice, indices.Graphics.value(), 0, &m_GraphicsQueue);
 		vkGetDeviceQueue(m_VkDevice, indices.Presentation.value(), 0, &m_PresentationQueue);
+	}
+
+	VulkanDevice::~VulkanDevice()
+	{
+		NB_PROFILE_FN();
+		
+		if (m_VkDevice)
+		{
+			vkDestroyDevice(m_VkDevice, nullptr);
+			m_VkDevice = VK_NULL_HANDLE;
+		}
 	}
 }

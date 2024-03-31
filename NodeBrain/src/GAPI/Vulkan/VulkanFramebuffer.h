@@ -16,9 +16,6 @@ namespace NodeBrain
 		VkFramebuffer GetVkFramebuffer() const { return m_VkFramebuffer; }
 
 	private:
-		void Init();
-
-	private:
 		VkFramebuffer m_VkFramebuffer = VK_NULL_HANDLE;
 		
 		FramebufferConfiguration m_Configuration;

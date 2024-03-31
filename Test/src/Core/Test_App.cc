@@ -3,7 +3,7 @@
 
 TEST(App, PushLayer) 
 {
-    NodeBrain::App* app = new NodeBrain::App();
+    NodeBrain::App* app = new NodeBrain::App("Test");
     app->PushLayer(nullptr);
     EXPECT_EQ(app->GetLayersSize(), 0);
 

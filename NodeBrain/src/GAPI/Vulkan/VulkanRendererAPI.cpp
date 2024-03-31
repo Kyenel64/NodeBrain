@@ -76,16 +76,9 @@ namespace NodeBrain
 	VulkanRendererAPI::VulkanRendererAPI()
 	{
 		NB_PROFILE_FN();
-
-		Init();
 	}
 
 	VulkanRendererAPI::~VulkanRendererAPI()
-	{
-		NB_PROFILE_FN();
-	}
-
-	void VulkanRendererAPI::Init()
 	{
 		NB_PROFILE_FN();
 	}

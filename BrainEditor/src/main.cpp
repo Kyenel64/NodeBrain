@@ -5,7 +5,7 @@
 int main()
 {
 	NB_PROFILE_BEGIN("Startup", "Startup.log");
-	NodeBrain::App* app = new NodeBrain::App();
+	NodeBrain::App* app = new NodeBrain::App("NodeBrain");
 	NB_PROFILE_END();
 
 	app->PushLayer(new NodeBrain::BrainEditor());

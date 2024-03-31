@@ -17,8 +17,6 @@ namespace NodeBrain
 		std::shared_ptr<VulkanFramebuffer> GetTargetFramebuffer() const { return m_TargetFramebuffer; }
 
 	private:
-		void Init();
-	private:
 		VkRenderPass m_VkRenderPass;
 		std::shared_ptr<VulkanFramebuffer> m_TargetFramebuffer;
 

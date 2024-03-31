@@ -19,9 +19,6 @@ namespace NodeBrain
 		VkShaderModule GetVkShaderModule() const { return m_VkShaderModule; }
 
 	private:
-		void Init();
-
-	private:
 		VkShaderModule m_VkShaderModule = VK_NULL_HANDLE;
 		VkDevice m_Device;
 		const std::filesystem::path& m_ShaderPath;

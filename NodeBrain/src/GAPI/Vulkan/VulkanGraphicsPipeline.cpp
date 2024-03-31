@@ -11,14 +11,6 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 		
-		Init();
-	}
-
-	void VulkanGraphicsPipeline::Init()
-	{
-		NB_PROFILE_FN();
-
-		// --- Pipeline Layout ---
 		// Vertex
 		VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo = {};
 		vertShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -111,8 +103,6 @@ namespace NodeBrain
 
 		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
 
-
-		// --- Pipeline ---
 		VkRenderPass renderPass = VK_NULL_HANDLE;
 		if (!m_Configuration.Framebuffer)
 			renderPass = VulkanRenderContext::Get()->GetSwapchain().GetVkRenderPass();
@@ -138,7 +128,6 @@ namespace NodeBrain
 		pipelineCreateInfo.basePipelineIndex = -1; // Optional
 
 		VK_CHECK(vkCreateGraphicsPipelines(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_VkPipeline));
-
 	}
 
 	VulkanGraphicsPipeline::~VulkanGraphicsPipeline()

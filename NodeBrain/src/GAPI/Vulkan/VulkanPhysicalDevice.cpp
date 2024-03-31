@@ -15,17 +15,12 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		m_DeviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-		m_DeviceExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
+		m_EnabledDeviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+		m_EnabledDeviceExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
 		#if NB_APPLE
-			m_DeviceExtensions.push_back("VK_KHR_portability_subset");
+			m_EnabledDeviceExtensions.push_back("VK_KHR_portability_subset");
 		#endif
 
-		Init();
-	}
-
-	void VulkanPhysicalDevice::Init()
-	{
 		// Set VkPhysicalDevice from device index
 		uint32_t deviceCount = 0;
 		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, nullptr);
@@ -119,7 +114,7 @@ namespace NodeBrain
 		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
 		vkEnumerateDeviceExtensionProperties(m_VkPhysicalDevice, nullptr, &extensionCount, &availableExtensions[0]);
 
-		std::set<std::string> requiredExtensions(m_DeviceExtensions.begin(), m_DeviceExtensions.end());
+		std::set<std::string> requiredExtensions(m_EnabledDeviceExtensions.begin(), m_EnabledDeviceExtensions.end());
 
 		for (const auto& extension : availableExtensions)
 			requiredExtensions.erase(extension.extensionName);

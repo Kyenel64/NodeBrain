@@ -18,9 +18,6 @@ namespace NodeBrain
 		VkQueue GetPresentationQueue() const { return m_PresentationQueue; }
 
 	private:
-		void Init();
-
-	private:
 		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
 		VkDevice m_VkDevice = VK_NULL_HANDLE;
 

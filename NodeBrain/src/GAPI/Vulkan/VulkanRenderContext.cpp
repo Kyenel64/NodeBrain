@@ -96,7 +96,15 @@ namespace NodeBrain
 		s_Instance = this;
 
 		#ifdef NB_DEBUG
-			m_ValidationLayers.push_back("VK_LAYER_KHRONOS_validation");
+			m_EnabledLayers.push_back("VK_LAYER_KHRONOS_validation");
+		#endif
+
+		for (const char* ext : m_Window->GetVulkanExtensions())
+			m_EnabledInstanceExtensions.push_back(ext);
+
+		#if NB_APPLE
+			m_EnabledInstanceExtensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+			m_EnabledInstanceExtensions.push_back("VK_KHR_get_physical_device_properties2");
 		#endif
 
 		Init();
@@ -125,16 +133,10 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		m_Allocator.reset();
-
-		// Destroy in reverse order
 		m_Swapchain.reset();
-
 		m_Device.reset();
 
-		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VkInstance, "vkDestroyDebugUtilsMessengerEXT");
-		NB_ASSERT(func, "Could not destroy Vulkan debug messenger");
-		func(m_VkInstance, m_DebugMessenger, nullptr);
-		m_DebugMessenger = VK_NULL_HANDLE;
+		DestroyDebugUtilsMessenger();
 
 		vkDestroySurfaceKHR(m_VkInstance, m_VkSurface, nullptr);
 		m_VkSurface = VK_NULL_HANDLE;
@@ -173,56 +175,47 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		// --- App info ---
-		VkApplicationInfo appInfo = {};
-		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		appInfo.pApplicationName = "BrainEditor"; // TODO:
-		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.pEngineName = "NodeBrain";
-		appInfo.engineVersion = VK_MAKE_VERSION(0, 0, 1); // TODO:
-		appInfo.apiVersion = VK_API_VERSION_1_3;
+		VkApplicationInfo applicationInfo = {};
+		applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+		applicationInfo.pApplicationName = App::Get()->GetApplicationName().c_str();
+		applicationInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+		applicationInfo.pEngineName = App::Get()->GetApplicationName().c_str();
+		applicationInfo.engineVersion = VK_MAKE_VERSION(0, 0, 1);
+		applicationInfo.apiVersion = VK_API_VERSION_1_2;
 
-		// --- Create info ---
-		VkInstanceCreateInfo createInfo = {};
-		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-		createInfo.pApplicationInfo = &appInfo;
+		VkInstanceCreateInfo instanceCreateInfo = {};
+		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+		instanceCreateInfo.pApplicationInfo = &applicationInfo;
 
-		// Extensions
-		std::vector<const char*> extensions;
-		for (const char* ext : m_Window->GetVulkanExtensions())
-			extensions.push_back(ext);
+		instanceCreateInfo.enabledExtensionCount = m_EnabledInstanceExtensions.size();
+		instanceCreateInfo.ppEnabledExtensionNames = &m_EnabledInstanceExtensions[0];
+		instanceCreateInfo.enabledLayerCount = 0;
+		instanceCreateInfo.pNext = nullptr;
 
-		#if NB_APPLE
-			extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-			extensions.push_back("VK_KHR_get_physical_device_properties2");
-			createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+		#ifdef NB_APPLE
+			instanceCreateInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 		#endif
-
-		createInfo.enabledExtensionCount = extensions.size();
-		createInfo.ppEnabledExtensionNames = &extensions[0];
-		createInfo.enabledLayerCount = 0;
-		createInfo.pNext = nullptr;
 
 		// Validation layer
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = {};
-		if (!m_ValidationLayers.empty())
+		if (!m_EnabledLayers.empty())
 		{
-			NB_ASSERT(Utils::CheckValidationLayerSupport(m_ValidationLayers), "Validation layers unavailable");
-			createInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayers.size());
-			createInfo.ppEnabledLayerNames = &m_ValidationLayers[0];
+			NB_ASSERT(Utils::CheckValidationLayerSupport(m_EnabledLayers), "Enabled layers are unavailable");
+			instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(m_EnabledLayers.size());
+			instanceCreateInfo.ppEnabledLayerNames = &m_EnabledLayers[0];
 
 			// Add debug utils extension
-			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-			createInfo.enabledExtensionCount = extensions.size();
-			createInfo.ppEnabledExtensionNames = &extensions[0];
+			m_EnabledInstanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+			instanceCreateInfo.enabledExtensionCount = m_EnabledInstanceExtensions.size();
+			instanceCreateInfo.ppEnabledExtensionNames = &m_EnabledInstanceExtensions[0];
 
 			Utils::PopulateDebugMessengerCreateInfo(debugCreateInfo);
-			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+			instanceCreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
 		}
 
-		NB_ASSERT(Utils::CheckInstanceExtensionSupport(extensions), "Extensions unavailable");
+		NB_ASSERT(Utils::CheckInstanceExtensionSupport(m_EnabledInstanceExtensions), "Unavailable instance extensions enabled");
 
-		return vkCreateInstance(&createInfo, nullptr, &m_VkInstance);
+		return vkCreateInstance(&instanceCreateInfo, nullptr, &m_VkInstance);
 	}
 
 	VkResult VulkanRenderContext::CreateDebugUtilsMessenger()
@@ -233,9 +226,17 @@ namespace NodeBrain
 		Utils::PopulateDebugMessengerCreateInfo(debugCreateInfo);
 
 		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VkInstance, "vkCreateDebugUtilsMessengerEXT");
-		NB_ASSERT(func, "Failed to create Vulkan debug messenger");
+		NB_ASSERT(func, "Failed to retrieve vkCreateDebugUtilsMessengerEXT function");
 
 		return func(m_VkInstance, &debugCreateInfo, nullptr, &m_DebugMessenger);
+	}
+
+	void VulkanRenderContext::DestroyDebugUtilsMessenger()
+	{
+		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VkInstance, "vkDestroyDebugUtilsMessengerEXT");
+		NB_ASSERT(func, "Failed to retrieve vkDestroyDebugUtilsMessengerEXT function");
+		func(m_VkInstance, m_DebugMessenger, nullptr);
+		m_DebugMessenger = VK_NULL_HANDLE;
 	}
 
 	void VulkanRenderContext::AcquireNextImage()

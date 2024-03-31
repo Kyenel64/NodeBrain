@@ -8,22 +8,6 @@ namespace NodeBrain
 	VulkanFramebuffer::VulkanFramebuffer(const FramebufferConfiguration& configuration)
 		: m_Configuration(configuration)
 	{
-		Init();
-	}
-
-	VulkanFramebuffer::~VulkanFramebuffer()
-	{
-		NB_PROFILE_FN();
-
-		if (m_VkFramebuffer)
-		{
-			vkDestroyFramebuffer(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkFramebuffer, nullptr);
-			m_VkFramebuffer = VK_NULL_HANDLE;
-		}
-	}
-
-	void VulkanFramebuffer::Init()
-	{
 		NB_PROFILE_FN();
 		
 		// Create a new render pass if no render pass is provided
@@ -51,5 +35,16 @@ namespace NodeBrain
 		framebufferCreateInfo.layers = 1;
 
 		VK_CHECK(vkCreateFramebuffer(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &framebufferCreateInfo, nullptr, &m_VkFramebuffer));
+	}
+
+	VulkanFramebuffer::~VulkanFramebuffer()
+	{
+		NB_PROFILE_FN();
+
+		if (m_VkFramebuffer)
+		{
+			vkDestroyFramebuffer(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkFramebuffer, nullptr);
+			m_VkFramebuffer = VK_NULL_HANDLE;
+		}
 	}
 }

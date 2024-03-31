@@ -12,8 +12,6 @@ namespace NodeBrain
 
 		VmaAllocator GetVMAAllocator() const { return m_VMAAllocator; }
 
-	private:
-		void Init();
     private:
 		VmaAllocator m_VMAAllocator;
     };

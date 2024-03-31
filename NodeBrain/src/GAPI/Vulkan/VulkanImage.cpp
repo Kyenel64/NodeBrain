@@ -26,23 +26,6 @@ namespace NodeBrain
 	VulkanImage::VulkanImage(const ImageConfiguration& configuration)
 		: m_Configuration(configuration)
 	{
-		Init();
-	}
-
-	VulkanImage::~VulkanImage()
-	{
-		NB_PROFILE_FN();
-
-		if (m_VkImageView)
-		{
-			vkDestroyImageView(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkImageView, nullptr);
-			m_VkImageView = VK_NULL_HANDLE;
-		}
-		
-	}
-
-	void VulkanImage::Init()
-	{
 		NB_PROFILE_FN();
 
 		// --- Create Image ---
@@ -96,5 +79,17 @@ namespace NodeBrain
 		VK_CHECK(vkCreateImageView(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &imageViewCreateInfo, nullptr, &m_VkImageView));
 
 		// TODO: add to deletion queue
+	}
+
+	VulkanImage::~VulkanImage()
+	{
+		NB_PROFILE_FN();
+
+		if (m_VkImageView)
+		{
+			vkDestroyImageView(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkImageView, nullptr);
+			m_VkImageView = VK_NULL_HANDLE;
+		}
+		
 	}
 }
