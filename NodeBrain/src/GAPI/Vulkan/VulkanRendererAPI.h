@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 
 #include "Renderer/RendererAPI.h"
+#include "GAPI/Vulkan/VulkanImage.h"
 
 namespace NodeBrain
 {
@@ -26,5 +27,8 @@ namespace NodeBrain
 		virtual void DrawTestTriangle(std::shared_ptr<GraphicsPipeline> pipeline) override;
 
 		virtual void WaitForGPU() override;
+
+	private:
+		std::shared_ptr<VulkanImage> TempImage;
 	};
 }

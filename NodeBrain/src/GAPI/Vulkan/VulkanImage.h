@@ -4,7 +4,6 @@
 #include <VMA/vk_mem_alloc.h>
 
 #include "Renderer/Image.h"
-#include "GAPI/Vulkan/VulkanDevice.h"
 
 namespace NodeBrain
 {
@@ -14,6 +13,7 @@ namespace NodeBrain
 		VulkanImage(const ImageConfiguration& configuration);
 		virtual ~VulkanImage();
 
+		VkImage GetVkImage() const { return m_VkImage; }
 		VkImageView GetVkImageView() const { return m_VkImageView; }
 
 	private:

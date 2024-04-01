@@ -1,9 +1,6 @@
 #include "NBpch.h"
 #include "VulkanImage.h"
 
-#define VMA_IMPLEMENTATION
-#include <VMA/vk_mem_alloc.h>
-
 #include "VulkanRenderContext.h"
 
 namespace NodeBrain
@@ -15,6 +12,7 @@ namespace NodeBrain
 			switch (format)
 			{
 				case ImageFormat::None: return VK_FORMAT_UNDEFINED; break;
+				case ImageFormat::RGBA8: return VK_FORMAT_B8G8R8A8_SRGB; break;
 				case ImageFormat::RGBA16: return VK_FORMAT_R16G16B16A16_SFLOAT; break;
 			}
 
@@ -33,21 +31,26 @@ namespace NodeBrain
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
 		imageCreateInfo.format = Utils::ImageFormatToVulkanFormat(m_Configuration.ImageFormat);
-		imageCreateInfo.extent = { m_Configuration.Width, m_Configuration.Height };
-
+		imageCreateInfo.extent = { m_Configuration.Width, m_Configuration.Height, 1 };
 		imageCreateInfo.mipLevels = 1;
 		imageCreateInfo.arrayLayers = 1;
 		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 
-		// temp settings
+		// Usage flags TEMP
 		VkImageUsageFlags usage = {};
 		usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 		usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		usage |= VK_IMAGE_USAGE_STORAGE_BIT;
 		usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
 		imageCreateInfo.usage = usage;
+
+		// Allocation
+		VmaAllocationCreateInfo allocationCreateInfo = {};
+		allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+		allocationCreateInfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+		VK_CHECK(vmaCreateImage(VulkanRenderContext::Get()->GetAllocator().GetVMAAllocator(), &imageCreateInfo, &allocationCreateInfo, &m_VkImage, &m_VMAAllocation, nullptr));
 
 
 		// --- Create Image View ---
@@ -67,18 +70,7 @@ namespace NodeBrain
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 		imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-
-		// --- Create Allocation ---
-		VmaAllocationCreateInfo allocationCreateInfo = {};
-		allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-		allocationCreateInfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-
-		// --- Create Image and View ---
-		VK_CHECK(vmaCreateImage(VulkanRenderContext::Get()->GetAllocator().GetVMAAllocator(), &imageCreateInfo, &allocationCreateInfo, &m_VkImage, &m_VMAAllocation, nullptr));
 		VK_CHECK(vkCreateImageView(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &imageViewCreateInfo, nullptr, &m_VkImageView));
-
-		// TODO: add to deletion queue
 	}
 
 	VulkanImage::~VulkanImage()
@@ -89,6 +81,12 @@ namespace NodeBrain
 		{
 			vkDestroyImageView(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkImageView, nullptr);
 			m_VkImageView = VK_NULL_HANDLE;
+		}
+
+		if (m_VkImage)
+		{
+			vmaDestroyImage(VulkanRenderContext::Get()->GetAllocator().GetVMAAllocator(), m_VkImage, m_VMAAllocation);
+			m_VkImage = VK_NULL_HANDLE;
 		}
 		
 	}

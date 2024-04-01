@@ -1,9 +1,6 @@
 #include "NBpch.h"
 #include "VulkanAllocator.h"
 
-#define VMA_IMPLEMENTATION
-#include <VMA/vk_mem_alloc.h>
-
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain

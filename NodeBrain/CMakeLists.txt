@@ -28,6 +28,7 @@ add_library ( ${PROJECT_NAME}
     ${CoreFiles}
     ${RendererFiles}
     ${VulkanFiles}
+    "thirdparty/VMA/vk_mem_alloc.h" "thirdparty/VMA/vk_mem_alloc.cpp" 
     "src/Utils/FileUtils.h" "src/Utils/FileUtils.cpp")
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
@@ -45,7 +46,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/sr
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)
 
 # Libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw Vulkan::Vulkan PUBLIC spdlog glm)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw PUBLIC Vulkan::Vulkan spdlog glm)
 
 # Defines
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:NB_DEBUG>)

@@ -12,8 +12,6 @@
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanGraphicsPipeline.h"
 
-#define NB_LIST_AVAILABLE_VK_EXTENSTIONS
-
 namespace NodeBrain
 {
 	static VkImageSubresourceRange ImageSubresourceRange(VkImageAspectFlags aspectMask)
@@ -73,9 +71,78 @@ namespace NodeBrain
 		#endif
 	}
 
+	static void CopyImageToImage(VkCommandBuffer commandBuffer, VkImage srcImage, VkImage dstImage, VkExtent2D srcExtent, VkExtent2D dstExtent)
+	{
+		#ifdef NB_VULKAN_VERSION_1_3
+			VkImageBlit2 blitRegion = {};
+			blitRegion.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2;
+
+			blitRegion.srcOffsets[1].x = srcExtent.width;
+			blitRegion.srcOffsets[1].y = srcExtent.height;
+			blitRegion.srcOffsets[1].z = 1;
+
+			blitRegion.dstOffsets[1].x = dstExtent.width;
+			blitRegion.dstOffsets[1].y = dstExtent.height;
+			blitRegion.dstOffsets[1].z = 1;
+
+			blitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			blitRegion.srcSubresource.baseArrayLayer = 0;
+			blitRegion.srcSubresource.layerCount = 1;
+			blitRegion.srcSubresource.mipLevel = 0;
+
+			blitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			blitRegion.dstSubresource.baseArrayLayer = 0;
+			blitRegion.dstSubresource.layerCount = 1;
+			blitRegion.dstSubresource.mipLevel = 0;
+
+			VkBlitImageInfo2 blitImageInfo = {};
+			blitImageInfo.sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2;
+			blitImageInfo.dstImage = dstImage;
+			blitImageInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+			blitImageInfo.srcImage = srcImage;
+			blitImageInfo.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+			blitImageInfo.filter = VK_FILTER_LINEAR;
+			blitImageInfo.regionCount = 1;
+			blitImageInfo.pRegions = &blitRegion;
+
+			vkCmdBlitImage2(commandBuffer, &blitImageInfo);
+		#endif
+
+		VkImageBlit blitRegion = {};
+		blitRegion.srcOffsets[1].x = srcExtent.width;
+		blitRegion.srcOffsets[1].y = srcExtent.height;
+		blitRegion.srcOffsets[1].z = 1;
+
+		blitRegion.dstOffsets[1].x = dstExtent.width;
+		blitRegion.dstOffsets[1].y = dstExtent.height;
+		blitRegion.dstOffsets[1].z = 1;
+
+		blitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blitRegion.srcSubresource.baseArrayLayer = 0;
+		blitRegion.srcSubresource.layerCount = 1;
+		blitRegion.srcSubresource.mipLevel = 0;
+
+		blitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blitRegion.dstSubresource.baseArrayLayer = 0;
+		blitRegion.dstSubresource.layerCount = 1;
+		blitRegion.dstSubresource.mipLevel = 0;
+
+		vkCmdBlitImage(commandBuffer, 
+		srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 
+		dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+		1, &blitRegion, VK_FILTER_LINEAR);
+	}
+
 	VulkanRendererAPI::VulkanRendererAPI()
 	{
 		NB_PROFILE_FN();
+
+		// temp
+		ImageConfiguration config = {};
+		config.Width = VulkanRenderContext::Get()->GetSwapchain().GetVkExtent().width;
+		config.Height = VulkanRenderContext::Get()->GetSwapchain().GetVkExtent().height;
+		config.ImageFormat = ImageFormat::RGBA8;
+		TempImage = std::make_shared<VulkanImage>(config);
 	}
 
 	VulkanRendererAPI::~VulkanRendererAPI()
@@ -190,18 +257,27 @@ namespace NodeBrain
 	void VulkanRendererAPI::BeginDynamicPass()
 	{
 		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
-		VkImage image = VulkanRenderContext::Get()->GetSwapchain().GetCurrentVkImage();
+		VkImage swapchainImage = VulkanRenderContext::Get()->GetSwapchain().GetCurrentVkImage();
+		VkImage tempImage = TempImage->GetVkImage();
 
 		// Convert image to writable format. Not optimal
-		TransitionImage(cmdBuffer, image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+		TransitionImage(cmdBuffer, tempImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 	}
 	void VulkanRendererAPI::EndDynamicPass()
 	{
 		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
-		VkImage image = VulkanRenderContext::Get()->GetSwapchain().GetCurrentVkImage();
+		VkImage swapchainImage = VulkanRenderContext::Get()->GetSwapchain().GetCurrentVkImage();
+		VkImage tempImage = TempImage->GetVkImage();
+
+		// Convert image to transfer format
+		TransitionImage(cmdBuffer, tempImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+		CopyImageToImage(cmdBuffer, tempImage, swapchainImage, VulkanRenderContext::Get()->GetSwapchain().GetVkExtent(), VulkanRenderContext::Get()->GetSwapchain().GetVkExtent());
 
 		// Convert image to presentable format
-		TransitionImage(cmdBuffer, image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	}
 
 	void VulkanRendererAPI::DrawDynamicTest()
