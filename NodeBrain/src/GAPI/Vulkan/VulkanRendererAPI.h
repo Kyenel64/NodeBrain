@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <glm/glm.hpp>
 
 #include "Renderer/RendererAPI.h"
 #include "GAPI/Vulkan/VulkanImage.h"
@@ -22,13 +23,10 @@ namespace NodeBrain
 
 		virtual void BeginDynamicPass() override;
 		virtual void EndDynamicPass() override;
-		virtual void DrawDynamicTest() override;
+		virtual void ClearColor(const glm::vec4& color) override;
 		
 		virtual void DrawTestTriangle(std::shared_ptr<GraphicsPipeline> pipeline) override;
 
 		virtual void WaitForGPU() override;
-
-	private:
-		std::shared_ptr<VulkanImage> TempImage;
 	};
 }

@@ -58,6 +58,12 @@ namespace NodeBrain
 		VK_CHECK(CreateVkRenderPass());
 		VK_CHECK(CreateImageDatas());
 		VK_CHECK(CreateFrameDatas());
+
+		ImageConfiguration config = {};
+		config.Width = m_VkExtent.width;
+		config.Height = m_VkExtent.height;
+		config.ImageFormat = ImageFormat::RGBA16;
+		m_DrawImage = std::make_unique<VulkanImage>(config);
 	}
 
 	VulkanSwapchain::~VulkanSwapchain()
@@ -66,6 +72,7 @@ namespace NodeBrain
 
 		vkDeviceWaitIdle(m_Device->GetVkDevice());
 
+		m_DrawImage.reset();
 		DestroyFrameDatas();
 		DestroyImageDatas();
 		DestroyVkRenderPass();
@@ -361,10 +368,19 @@ namespace NodeBrain
 	{
 		vkDeviceWaitIdle(m_Device->GetVkDevice());
 
+		// Destroy
+		m_DrawImage.reset();
 		DestroyImageDatas();
 		DestroyVkSwapchain();
 
+		// Recreate
 		VK_CHECK(CreateVkSwapchain());
 		VK_CHECK(CreateImageDatas());
+
+		ImageConfiguration config = {};
+		config.Width = m_VkExtent.width;
+		config.Height = m_VkExtent.height;
+		config.ImageFormat = ImageFormat::RGBA16;
+		m_DrawImage = std::make_unique<VulkanImage>(config);
 	}
 }

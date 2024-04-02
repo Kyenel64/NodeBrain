@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include "Renderer/GraphicsPipeline.h"
 #include "Renderer/Framebuffer.h"
 
@@ -18,7 +20,7 @@ namespace NodeBrain
 
 		virtual void BeginDynamicPass() = 0;
 		virtual void EndDynamicPass() = 0;
-		virtual void DrawDynamicTest() = 0;
+		virtual void ClearColor(const glm::vec4& color) = 0;
 
 		virtual void DrawTestTriangle(std::shared_ptr<GraphicsPipeline> pipeline) = 0;
 

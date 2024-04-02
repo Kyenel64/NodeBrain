@@ -124,16 +124,16 @@ namespace NodeBrain
 
 		m_PhysicalDevice = FindFirstSuitablePhysicalDevice();
 		m_Device = std::make_shared<VulkanDevice>(m_PhysicalDevice);
-		m_Swapchain = std::make_unique<VulkanSwapchain>(m_VkSurface, m_Device);
 		m_Allocator = std::make_unique<VulkanAllocator>();
+		m_Swapchain = std::make_unique<VulkanSwapchain>(m_VkSurface, m_Device);
 	}
 
 	VulkanRenderContext::~VulkanRenderContext()
 	{
 		NB_PROFILE_FN();
 
-		m_Allocator.reset();
 		m_Swapchain.reset();
+		m_Allocator.reset();
 		m_Device.reset();
 
 		DestroyDebugUtilsMessenger();

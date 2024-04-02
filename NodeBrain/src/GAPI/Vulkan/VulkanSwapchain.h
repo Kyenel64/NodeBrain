@@ -48,6 +48,7 @@ namespace NodeBrain
 		const FrameData& GetCurrentFrameData() const { return m_FrameDatas[m_CurrentFrame]; }
 		uint32_t GetImageIndex() const { return m_ImageIndex; }
 		VkImage GetCurrentVkImage() const { return m_ImageDatas[m_ImageIndex].Image; }
+		VulkanImage& GetDrawImage() const { return *m_DrawImage; }
 		
 	private:
 		void RecreateSwapchain();
@@ -66,6 +67,9 @@ namespace NodeBrain
 		VkSwapchainKHR m_VkSwapchain = VK_NULL_HANDLE;
 		VkSurfaceKHR m_VkSurface = VK_NULL_HANDLE;
 		std::shared_ptr<VulkanDevice> m_Device;
+
+		// Draw Image
+		std::unique_ptr<VulkanImage> m_DrawImage;
 
 		// Configuration
 		VkFormat m_VkColorFormat;

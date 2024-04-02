@@ -1,13 +1,6 @@
 #include "NBpch.h"
 #include "VulkanPhysicalDevice.h"
 
-#include <limits>
-
-#include <glm/glm.hpp>
-
-#include "Core/App.h"
-#include "GAPI/Vulkan/VulkanRenderContext.h"
-
 namespace NodeBrain
 {
 	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, uint32_t deviceIndex)
@@ -21,7 +14,7 @@ namespace NodeBrain
 			m_EnabledDeviceExtensions.push_back("VK_KHR_portability_subset");
 		#endif
 
-		// Set VkPhysicalDevice from device index
+		// Retrieve the VkPhysicalDevice at m_DeviceIndex
 		uint32_t deviceCount = 0;
 		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, nullptr);
 		NB_ASSERT(deviceCount, "Could not find any GPUs with Vulkan support");

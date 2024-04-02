@@ -6,6 +6,8 @@
 #include "Renderer/GraphicsPipeline.h"
 #include "RenderContext.h"
 
+#define NB_RENDERMODE_DYNAMIC
+
 namespace NodeBrain
 {
 	std::unique_ptr<RendererAPI> s_RendererAPI = nullptr;
@@ -61,24 +63,32 @@ namespace NodeBrain
 
 	void Renderer::Begin(std::shared_ptr<Framebuffer> framebuffer)
 	{
-		//if (framebuffer)
-		//	s_RendererAPI->BeginRenderPass(framebuffer->GetConfiguration().RenderPass);
-		//else
-		//	s_RendererAPI->BeginRenderPass();
-
-		s_RendererAPI->BeginDynamicPass();
+		#ifdef NB_RENDERMODE_DYNAMIC
+			s_RendererAPI->BeginDynamicPass();
+			s_RendererAPI->ClearColor({ 0.9f, 0.3f, 0.3f, 1.0f });
+		#else
+			if (framebuffer)
+				s_RendererAPI->BeginRenderPass(framebuffer->GetConfiguration().RenderPass);
+			else
+				s_RendererAPI->BeginRenderPass();
+		#endif		
 	}
 
 	void Renderer::End()
 	{
-		//s_RendererAPI->EndRenderPass();
-		s_RendererAPI->EndDynamicPass();
+		#ifdef NB_RENDERMODE_DYNAMIC
+			s_RendererAPI->EndDynamicPass();
+		#else
+			s_RendererAPI->EndRenderPass();
+		#endif
 	}
 
 	void Renderer::DrawTestTriangle()
 	{
-		//s_RendererAPI->DrawTestTriangle(s_Data->TestPipeline);
-		s_RendererAPI->DrawDynamicTest();
+		#ifdef NB_RENDERMODE_DYNAMIC
+		#else
+			s_RendererAPI->DrawTestTriangle(s_Data->TestPipeline);
+		#endif
 	}
 
 	GAPI Renderer::GetGAPI() { return s_GAPI; }

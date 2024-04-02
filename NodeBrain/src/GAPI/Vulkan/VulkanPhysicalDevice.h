@@ -32,6 +32,7 @@ namespace NodeBrain
 
 		VkPhysicalDevice GetVkPhysicalDevice() const { return m_VkPhysicalDevice; }
 		const std::vector<const char*>& GetEnabledDeviceExtensions() const { return m_EnabledDeviceExtensions; }
+		
 		QueueFamilyIndices FindQueueFamilies() const;
 		SwapchainSupportDetails QuerySwapchainSupport() const;
 		bool CheckDeviceExtensionSupport() const;
