@@ -106,31 +106,32 @@ namespace NodeBrain
 			blitImageInfo.pRegions = &blitRegion;
 
 			vkCmdBlitImage2(commandBuffer, &blitImageInfo);
+
+		#else
+			VkImageBlit blitRegion = {};
+			blitRegion.srcOffsets[1].x = srcExtent.width;
+			blitRegion.srcOffsets[1].y = srcExtent.height;
+			blitRegion.srcOffsets[1].z = 1;
+
+			blitRegion.dstOffsets[1].x = dstExtent.width;
+			blitRegion.dstOffsets[1].y = dstExtent.height;
+			blitRegion.dstOffsets[1].z = 1;
+
+			blitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			blitRegion.srcSubresource.baseArrayLayer = 0;
+			blitRegion.srcSubresource.layerCount = 1;
+			blitRegion.srcSubresource.mipLevel = 0;
+
+			blitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			blitRegion.dstSubresource.baseArrayLayer = 0;
+			blitRegion.dstSubresource.layerCount = 1;
+			blitRegion.dstSubresource.mipLevel = 0;
+
+			vkCmdBlitImage(commandBuffer, 
+			srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 
+			dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+			1, &blitRegion, VK_FILTER_LINEAR);
 		#endif
-
-		VkImageBlit blitRegion = {};
-		blitRegion.srcOffsets[1].x = srcExtent.width;
-		blitRegion.srcOffsets[1].y = srcExtent.height;
-		blitRegion.srcOffsets[1].z = 1;
-
-		blitRegion.dstOffsets[1].x = dstExtent.width;
-		blitRegion.dstOffsets[1].y = dstExtent.height;
-		blitRegion.dstOffsets[1].z = 1;
-
-		blitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		blitRegion.srcSubresource.baseArrayLayer = 0;
-		blitRegion.srcSubresource.layerCount = 1;
-		blitRegion.srcSubresource.mipLevel = 0;
-
-		blitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		blitRegion.dstSubresource.baseArrayLayer = 0;
-		blitRegion.dstSubresource.layerCount = 1;
-		blitRegion.dstSubresource.mipLevel = 0;
-
-		vkCmdBlitImage(commandBuffer, 
-		srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 
-		dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
-		1, &blitRegion, VK_FILTER_LINEAR);
 	}
 
 	VulkanRendererAPI::VulkanRendererAPI()
@@ -141,7 +142,7 @@ namespace NodeBrain
 		ImageConfiguration config = {};
 		config.Width = VulkanRenderContext::Get()->GetSwapchain().GetVkExtent().width;
 		config.Height = VulkanRenderContext::Get()->GetSwapchain().GetVkExtent().height;
-		config.ImageFormat = ImageFormat::RGBA8;
+		config.ImageFormat = ImageFormat::RGBA16;
 		TempImage = std::make_shared<VulkanImage>(config);
 	}
 
@@ -274,16 +275,17 @@ namespace NodeBrain
 		TransitionImage(cmdBuffer, tempImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
+		// Transfer draw image to swapchain image
 		CopyImageToImage(cmdBuffer, tempImage, swapchainImage, VulkanRenderContext::Get()->GetSwapchain().GetVkExtent(), VulkanRenderContext::Get()->GetSwapchain().GetVkExtent());
 
-		// Convert image to presentable format
+		// Convert newly transferred swapchain image to presentable format
 		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	}
 
 	void VulkanRendererAPI::DrawDynamicTest()
 	{
 		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
-		VkImage image = VulkanRenderContext::Get()->GetSwapchain().GetCurrentVkImage();
+		VkImage image = TempImage->GetVkImage();
 
 		VkClearColorValue clearValue;
 		clearValue = { { 0.3f, 0.3f, 0.8f, 1.0f }};

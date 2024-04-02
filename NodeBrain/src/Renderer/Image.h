@@ -2,7 +2,7 @@
 
 namespace NodeBrain
 {
-	enum class ImageFormat { None = 0, RGBA8, RGBA16 };
+	enum class ImageFormat { None = 0, RGBA16 };
 
 	struct ImageConfiguration
 	{

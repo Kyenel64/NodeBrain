@@ -12,7 +12,6 @@ namespace NodeBrain
 			switch (format)
 			{
 				case ImageFormat::None: return VK_FORMAT_UNDEFINED; break;
-				case ImageFormat::RGBA8: return VK_FORMAT_B8G8R8A8_SRGB; break;
 				case ImageFormat::RGBA16: return VK_FORMAT_R16G16B16A16_SFLOAT; break;
 			}
 

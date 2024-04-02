@@ -134,10 +134,11 @@ namespace NodeBrain
 		// Create temporary contiguous array to get vkImages from swapchain
 		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapchain, &m_ImageCount, nullptr);
 		m_ImageDatas.resize(m_ImageCount);
-		VkImage images[m_ImageCount];
+		std::vector<VkImage> images;
+		images.resize(m_ImageCount);
 		for (size_t i = 0; i < m_ImageCount; i++)
 			images[i] = m_ImageDatas[i].Image;
-		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapchain, &m_ImageCount, images);
+		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapchain, &m_ImageCount, &images[0]);
 		for (size_t i = 0; i < m_ImageCount; i++)
 			m_ImageDatas[i].Image = images[i];
 
