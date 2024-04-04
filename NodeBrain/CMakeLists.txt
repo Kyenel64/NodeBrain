@@ -15,7 +15,8 @@ set (VulkanFiles "src/GAPI/Vulkan/VulkanRendererAPI.h" "src/GAPI/Vulkan/VulkanRe
 "src/GAPI/Vulkan/VulkanImage.cpp" "src/GAPI/Vulkan/VulkanShader.h" "src/GAPI/Vulkan/VulkanShader.cpp" 
 "src/GAPI/Vulkan/VulkanRenderPass.h" "src/GAPI/Vulkan/VulkanRenderPass.cpp" "src/GAPI/Vulkan/VulkanGraphicsPipeline.h" 
 "src/GAPI/Vulkan/VulkanGraphicsPipeline.cpp" "src/GAPI/Vulkan/VulkanFramebuffer.h" "src/GAPI/Vulkan/VulkanFramebuffer.cpp"
-"src/GAPI/Vulkan/VulkanUtils.h" "src/GAPI/Vulkan/VulkanAllocator.h" "src/GAPI/Vulkan/VulkanAllocator.cpp")
+"src/GAPI/Vulkan/VulkanUtils.h" "src/GAPI/Vulkan/VulkanAllocator.h" "src/GAPI/Vulkan/VulkanAllocator.cpp"
+"src/GAPI/Vulkan/VulkanDescriptorLayout.h" "src/GAPI/Vulkan/VulkanDescriptorLayout.cpp")
 
 set (RendererFiles "src/Renderer/Renderer.h" "src/Renderer/Renderer.cpp" "src/Renderer/RendererAPI.h" "src/Renderer/RendererAPI.cpp" 
 "src/Renderer/RenderContext.h" "src/Renderer/RenderContext.cpp" "src/Renderer/Shader.h" "src/Renderer/Shader.cpp" 
