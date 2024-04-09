@@ -4,9 +4,8 @@
 #include "Renderer/RendererAPI.h"
 #include "Renderer/Shader.h"
 #include "Renderer/GraphicsPipeline.h"
+#include "Renderer/ComputePipeline.h"
 #include "RenderContext.h"
-
-#define NB_RENDERMODE_DYNAMIC
 
 namespace NodeBrain
 {
@@ -18,6 +17,11 @@ namespace NodeBrain
 		std::shared_ptr<Shader> TestVertexShader;
 		std::shared_ptr<Shader> TestFragmentShader;
 		std::shared_ptr<GraphicsPipeline> TestPipeline;
+
+		std::shared_ptr<Shader> TestComputeShader;
+		std::shared_ptr<ComputePipeline> TestComputePipeline;
+
+		//std::shared_ptr<Texture2D> TestTexture;
 	};
 
 	static RendererData* s_Data;
@@ -37,6 +41,13 @@ namespace NodeBrain
 		pipelineConfig.VertexShader = s_Data->TestVertexShader;
 		pipelineConfig.FragmentShader = s_Data->TestFragmentShader;
 		s_Data->TestPipeline = GraphicsPipeline::Create(pipelineConfig);
+
+
+		// Compute shader
+		s_Data->TestComputeShader = Shader::Create("Assets/Shaders/Compiled/gradient.comp.spv"); // Set descriptor layout
+		//s_Data->TestTexture = Texture2D::Create(); Create() allocates its own descriptor set and layout from the descriptor pool
+		//computePipelineConfig.AddImage(s_Data->TestTexture);
+		s_Data->TestComputePipeline = ComputePipeline::Create(s_Data->TestComputeShader);
 	}
 
 	void Renderer::Shutdown()
@@ -63,32 +74,19 @@ namespace NodeBrain
 
 	void Renderer::Begin(std::shared_ptr<Framebuffer> framebuffer)
 	{
-		#ifdef NB_RENDERMODE_DYNAMIC
-			s_RendererAPI->BeginDynamicPass();
-			s_RendererAPI->ClearColor({ 0.9f, 0.3f, 0.3f, 1.0f });
-		#else
-			if (framebuffer)
-				s_RendererAPI->BeginRenderPass(framebuffer->GetConfiguration().RenderPass);
-			else
-				s_RendererAPI->BeginRenderPass();
-		#endif		
+		s_RendererAPI->BeginComputePass(s_Data->TestComputePipeline);
+		s_RendererAPI->Dispatch();
 	}
 
 	void Renderer::End()
 	{
-		#ifdef NB_RENDERMODE_DYNAMIC
-			s_RendererAPI->EndDynamicPass();
-		#else
-			s_RendererAPI->EndRenderPass();
-		#endif
+		s_RendererAPI->EndComputePass();
 	}
 
 	void Renderer::DrawTestTriangle()
 	{
-		#ifdef NB_RENDERMODE_DYNAMIC
-		#else
-			s_RendererAPI->DrawTestTriangle(s_Data->TestPipeline);
-		#endif
+		//s_Data->TestTexture->Bind();
+		//s_RendererAPI->DrawTestTriangle(s_Data->TestPipeline);
 	}
 
 	GAPI Renderer::GetGAPI() { return s_GAPI; }

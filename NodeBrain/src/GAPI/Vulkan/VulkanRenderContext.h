@@ -8,6 +8,7 @@
 #include "GAPI/Vulkan/VulkanDevice.h"
 #include "GAPI/Vulkan/VulkanSwapchain.h"
 #include "GAPI/Vulkan/VulkanAllocator.h"
+#include "GAPI/Vulkan/VulkanDescriptorPool.h"
 
 namespace NodeBrain
 {
@@ -28,6 +29,7 @@ namespace NodeBrain
 		VulkanSwapchain& GetSwapchain() const { return *m_Swapchain; }
 		VulkanAllocator& GetAllocator() const { return *m_Allocator; }
 		const std::vector<const char*>& GetEnabledLayers() const { return m_EnabledLayers; }
+		VkDescriptorPool GetVkDescriptorPool() const { return m_DescriptorPool->GetVkDescriptorPool(); }
 
 		static VulkanRenderContext* Get();
 
@@ -47,6 +49,7 @@ namespace NodeBrain
 		std::shared_ptr<VulkanDevice> m_Device;
 		std::unique_ptr<VulkanSwapchain> m_Swapchain;
 		std::unique_ptr<VulkanAllocator> m_Allocator;
+		std::unique_ptr<VulkanDescriptorPool> m_DescriptorPool;
 
 		std::vector<const char*> m_EnabledLayers;
 		std::vector<const char*> m_EnabledInstanceExtensions;

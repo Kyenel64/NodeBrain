@@ -126,6 +126,9 @@ namespace NodeBrain
 		m_Device = std::make_shared<VulkanDevice>(m_PhysicalDevice);
 		m_Allocator = std::make_unique<VulkanAllocator>();
 		m_Swapchain = std::make_unique<VulkanSwapchain>(m_VkSurface, m_Device);
+
+		std::vector<PoolSizeRatio> sizes = { { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 } };
+		m_DescriptorPool = std::make_unique<VulkanDescriptorPool>(10, sizes);
 	}
 
 	VulkanRenderContext::~VulkanRenderContext()

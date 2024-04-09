@@ -12,15 +12,21 @@ namespace NodeBrain
 		VulkanShader(const std::filesystem::path& path);
 		virtual ~VulkanShader();
 
-		void Destroy();
-
 		virtual const std::filesystem::path& GetShaderPath() const override { return m_ShaderPath; }
-
 		VkShaderModule GetVkShaderModule() const { return m_VkShaderModule; }
+
+		VkDescriptorSetLayout GetVkDescriptorSetLayout() const { return m_VkDescriptorSetLayout; }
+		VkDescriptorSet GetVkDescriptorSet() const { return m_VkDescriptorSet; }
+
+	private:
+		void CreateDescriptorSets();
+		
 
 	private:
 		VkShaderModule m_VkShaderModule = VK_NULL_HANDLE;
-		VkDevice m_Device;
 		const std::filesystem::path& m_ShaderPath;
+
+		VkDescriptorSetLayout m_VkDescriptorSetLayout = VK_NULL_HANDLE;
+		VkDescriptorSet m_VkDescriptorSet = VK_NULL_HANDLE;
 	};
 }

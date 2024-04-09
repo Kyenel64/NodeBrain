@@ -11,6 +11,9 @@
 #include "GAPI/Vulkan/VulkanSwapchain.h"
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanGraphicsPipeline.h"
+#include "GAPI/Vulkan/VulkanComputePipeline.h"
+#include "GAPI/Vulkan/VulkanDescriptorPool.h"
+#include "GAPI/Vulkan/VulkanDescriptorSet.h"
 
 namespace NodeBrain
 {
@@ -248,23 +251,53 @@ namespace NodeBrain
 		vkDeviceWaitIdle(VulkanRenderContext::Get()->GetDevice()->GetVkDevice());
 	}
 
-	void VulkanRendererAPI::BeginDynamicPass()
+	void VulkanRendererAPI::BeginComputePass(std::shared_ptr<ComputePipeline> pipeline)
+	{
+		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
+		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
+		VkImage swapchainImage = swapchain.GetCurrentVkImage();
+		VkImage drawImage = swapchain.GetDrawImage().GetVkImage();
+		VkImageView drawImageView = swapchain.GetDrawImage().GetVkImageView();
+		VkPipeline vkPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline)->GetVkPipeline();
+		VkPipelineLayout vkPipelineLayout = std::static_pointer_cast<VulkanComputePipeline>(pipeline)->GetVkPipelineLayout();
+		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline);
+		std::shared_ptr<VulkanShader> vulkanShader = std::static_pointer_cast<VulkanShader>(vulkanPipeline->GetComputeShader());
+		VkDescriptorSet descriptorSets = vulkanShader->GetVkDescriptorSet();
+
+		// Convert image to writable format. Not optimal
+		TransitionImage(cmdBuffer, drawImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+
+		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vkPipeline);
+
+		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vkPipelineLayout, 0, 1, &descriptorSets, 0, nullptr);
+		ClearColor({ 0.9f, 0.3f, 0.3f, 1.0f });
+
+		//Temp set image
+		VkDescriptorImageInfo imgInfo{};
+		imgInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		imgInfo.imageView = drawImageView;
+
+		VkWriteDescriptorSet drawImageWrite = {};
+		drawImageWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		drawImageWrite.pNext = nullptr;
+
+		drawImageWrite.dstBinding = 0;
+		drawImageWrite.dstSet = descriptorSets;
+		drawImageWrite.descriptorCount = 1;
+		drawImageWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		drawImageWrite.pImageInfo = &imgInfo;
+
+		vkUpdateDescriptorSets(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), 1, &drawImageWrite, 0, nullptr);
+	}
+	void VulkanRendererAPI::EndComputePass()
 	{
 		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
 		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
 		VkImage swapchainImage = swapchain.GetCurrentVkImage();
 		VkImage drawImage = swapchain.GetDrawImage().GetVkImage();
 
-		// Convert image to writable format. Not optimal
-		TransitionImage(cmdBuffer, drawImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
-		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
-	}
-	void VulkanRendererAPI::EndDynamicPass()
-	{
-		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
-		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
-		VkImage swapchainImage = swapchain.GetCurrentVkImage();
-		VkImage drawImage = swapchain.GetDrawImage().GetVkImage();
+		// Move to EndFrame?
 
 		// Convert image to transfer format
 		TransitionImage(cmdBuffer, drawImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
@@ -289,5 +322,14 @@ namespace NodeBrain
 		VkImageSubresourceRange clearRange = ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
 
 		vkCmdClearColorImage(cmdBuffer, drawImage, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+	}
+
+	void VulkanRendererAPI::Dispatch()
+	{
+		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
+		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
+		VkExtent2D extent = swapchain.GetVkExtent();
+
+		vkCmdDispatch(cmdBuffer, std::ceil(extent.width / 16.0f), std::ceil(extent.height / 16.0f), 1.0f);
 	}
 }

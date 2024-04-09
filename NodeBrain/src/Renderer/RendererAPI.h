@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include "Renderer/GraphicsPipeline.h"
+#include "Renderer/ComputePipeline.h"
 #include "Renderer/Framebuffer.h"
 
 namespace NodeBrain
@@ -18,11 +19,12 @@ namespace NodeBrain
 		virtual void BeginRenderPass(std::shared_ptr<RenderPass> renderPass = nullptr) = 0;
 		virtual void EndRenderPass() = 0;
 
-		virtual void BeginDynamicPass() = 0;
-		virtual void EndDynamicPass() = 0;
+		virtual void BeginComputePass(std::shared_ptr<ComputePipeline> pipeline) = 0;
+		virtual void EndComputePass() = 0;
 		virtual void ClearColor(const glm::vec4& color) = 0;
 
 		virtual void DrawTestTriangle(std::shared_ptr<GraphicsPipeline> pipeline) = 0;
+		virtual void Dispatch() = 0;
 
 		virtual void WaitForGPU() = 0;
 
