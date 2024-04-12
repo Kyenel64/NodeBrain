@@ -104,7 +104,7 @@ namespace NodeBrain
 		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
 
 		VkRenderPass renderPass = VK_NULL_HANDLE;
-		if (!m_Configuration.Framebuffer)
+		if (!m_Configuration.TargetFramebuffer)
 			renderPass = VulkanRenderContext::Get()->GetSwapchain().GetVkRenderPass();
 
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};

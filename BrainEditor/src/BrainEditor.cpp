@@ -28,10 +28,10 @@ namespace NodeBrain
 			NB_INFO("Left mousebutton released");
 
 		// Pseudo code. Eventually used in scene class
-		Renderer::Begin();
-		Renderer::DrawTestTriangle();
-		//Renderer::DrawDynamicMesh(transform, mesh, material, entityID);
-		Renderer::End();
+		Renderer::BeginScene();
+		//Renderer::SubmitMesh();
+		Renderer::EndScene();
+		Renderer::ProcessTestCompute();
 
 
 		//Renderer::Begin(framebuffer);

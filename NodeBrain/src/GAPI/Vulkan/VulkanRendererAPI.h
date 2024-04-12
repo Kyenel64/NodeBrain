@@ -14,6 +14,8 @@ namespace NodeBrain
 		VulkanRendererAPI();
 		virtual ~VulkanRendererAPI();
 
+		virtual void WaitForGPU() override;
+
 		virtual void BeginFrame() override;
 		virtual void EndFrame() override;
 
@@ -23,11 +25,13 @@ namespace NodeBrain
 
 		virtual void BeginComputePass(std::shared_ptr<ComputePipeline> pipeline) override;
 		virtual void EndComputePass() override;
+		virtual void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) override;
+
 		virtual void ClearColor(const glm::vec4& color) override;
 		
 		virtual void DrawTestTriangle(std::shared_ptr<GraphicsPipeline> pipeline) override;
-		virtual void Dispatch() override;
 
-		virtual void WaitForGPU() override;
+		virtual void TempUpdateImage(std::shared_ptr<Shader> shader) override;
+
 	};
 }

@@ -14,10 +14,10 @@ namespace NodeBrain
 		std::shared_ptr<Shader> FragmentShader;
 
 		// Uses swapchain if framebuffer is not provided
-		std::shared_ptr<Framebuffer> Framebuffer = nullptr;
+		std::shared_ptr<Framebuffer> TargetFramebuffer = nullptr;
 
 		TopologyType Topology = TopologyType::TriangleList;
-		PolygonFillMode PolygonFillMode = PolygonFillMode::Fill;
+		PolygonFillMode FillMode = PolygonFillMode::Fill;
 		float LineWidth = 1.0f;
 		// TODO:
 		// ColorBlendingMode

@@ -17,13 +17,15 @@ namespace NodeBrain
 		static void BeginFrame();
 		static void EndFrame();
 
-		// Ran at the beginning of each render pass.
-		static void Begin(std::shared_ptr<Framebuffer> framebuffer = nullptr);
-		static void End();
-		
+		//static void BeginScene(std::shared_ptr<Texture2D> targetTexture);
+		static void BeginScene();
+		static void EndScene();
+
 		static void DrawTestTriangle();
 
-		//static void SubmitStaticMesh();
+		static void ProcessTestCompute();
+
+		//static void SubmitMesh();
 		//static void DrawSubmitted();
 
 	};

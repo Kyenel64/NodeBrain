@@ -11,23 +11,23 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 		
 		// Create a new render pass if no render pass is provided
-		if (!m_Configuration.RenderPass)
+		if (!m_Configuration.TargetRenderPass)
 		{
-			m_Configuration.RenderPass = std::make_shared<VulkanRenderPass>();
+			m_Configuration.TargetRenderPass = std::make_shared<VulkanRenderPass>();
 		}
 
 		// Currently used for creating framebuffers from swapchain images
-		if (!m_Configuration.Image)
+		if (!m_Configuration.TargetImage)
 		{
 			ImageConfiguration config = {};
-			m_Configuration.Image = std::make_shared<VulkanImage>(config);
+			m_Configuration.TargetImage = std::make_shared<VulkanImage>(config);
 		}
-		VkImageView attachments[1] = { std::dynamic_pointer_cast<VulkanImage>(m_Configuration.Image)->GetVkImageView() };
+		VkImageView attachments[1] = { std::dynamic_pointer_cast<VulkanImage>(m_Configuration.TargetImage)->GetVkImageView() };
 
 
 		VkFramebufferCreateInfo framebufferCreateInfo = {};
 		framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferCreateInfo.renderPass = std::dynamic_pointer_cast<VulkanRenderPass>(m_Configuration.RenderPass)->GetVkRenderPass();
+		framebufferCreateInfo.renderPass = std::dynamic_pointer_cast<VulkanRenderPass>(m_Configuration.TargetRenderPass)->GetVkRenderPass();
 		framebufferCreateInfo.attachmentCount = 1;
 		framebufferCreateInfo.pAttachments = attachments;
 		framebufferCreateInfo.width = m_Configuration.Width;

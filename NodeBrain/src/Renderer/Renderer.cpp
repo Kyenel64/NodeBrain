@@ -6,6 +6,7 @@
 #include "Renderer/GraphicsPipeline.h"
 #include "Renderer/ComputePipeline.h"
 #include "RenderContext.h"
+#include "Core/App.h"
 
 namespace NodeBrain
 {
@@ -45,9 +46,9 @@ namespace NodeBrain
 
 		// Compute shader
 		s_Data->TestComputeShader = Shader::Create("Assets/Shaders/Compiled/gradient.comp.spv"); // Set descriptor layout
-		//s_Data->TestTexture = Texture2D::Create(); Create() allocates its own descriptor set and layout from the descriptor pool
-		//computePipelineConfig.AddImage(s_Data->TestTexture);
 		s_Data->TestComputePipeline = ComputePipeline::Create(s_Data->TestComputeShader);
+
+		s_RendererAPI->TempUpdateImage(s_Data->TestComputeShader);
 	}
 
 	void Renderer::Shutdown()
@@ -72,21 +73,29 @@ namespace NodeBrain
 		s_RendererAPI->EndFrame();
 	}
 
-	void Renderer::Begin(std::shared_ptr<Framebuffer> framebuffer)
+	void Renderer::BeginScene()
 	{
-		s_RendererAPI->BeginComputePass(s_Data->TestComputePipeline);
-		s_RendererAPI->Dispatch();
+		s_RendererAPI->ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f });
 	}
 
-	void Renderer::End()
+	void Renderer::EndScene()
 	{
-		s_RendererAPI->EndComputePass();
+
 	}
 
 	void Renderer::DrawTestTriangle()
 	{
 		//s_Data->TestTexture->Bind();
 		//s_RendererAPI->DrawTestTriangle(s_Data->TestPipeline);
+	}
+
+	void Renderer::ProcessTestCompute() //std::shared_ptr<Texture2D> targetTexture
+	{
+		s_RendererAPI->BeginComputePass(s_Data->TestComputePipeline);
+		uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
+		uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
+		s_RendererAPI->DispatchCompute(groupX, groupY, 1);
+		s_RendererAPI->EndComputePass();
 	}
 
 	GAPI Renderer::GetGAPI() { return s_GAPI; }

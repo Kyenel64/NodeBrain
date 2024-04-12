@@ -33,6 +33,12 @@ namespace NodeBrain
 			vkDestroyShaderModule(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkShaderModule, nullptr);
 			m_VkShaderModule = VK_NULL_HANDLE;
 		}
+
+		if (m_VkDescriptorSetLayout)
+		{
+			vkDestroyDescriptorSetLayout(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkDescriptorSetLayout, nullptr);
+			m_VkDescriptorSetLayout = VK_NULL_HANDLE;
+		}
 	}
 
 	void VulkanShader::CreateDescriptorSets()

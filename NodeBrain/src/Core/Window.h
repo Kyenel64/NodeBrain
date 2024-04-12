@@ -32,6 +32,8 @@ namespace NodeBrain
 		RenderContext& GetRenderContext() const { return *m_RenderContext; }
 		std::vector<const char*> GetVulkanExtensions() const { return m_VulkanExtensions; }
 		glm::vec2 GetFramebufferSize() const;
+		uint32_t GetWidth() const { return m_Data.Width; }
+		uint32_t GetHeight() const { return m_Data.Height; }
 
 	private:
 		void RegisterCallbacks();

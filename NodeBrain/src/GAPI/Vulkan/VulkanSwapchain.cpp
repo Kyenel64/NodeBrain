@@ -62,8 +62,8 @@ namespace NodeBrain
 		ImageConfiguration config = {};
 		config.Width = m_VkExtent.width;
 		config.Height = m_VkExtent.height;
-		config.ImageFormat = ImageFormat::RGBA16;
-		m_DrawImage = std::make_unique<VulkanImage>(config);
+		config.Format = ImageFormat::RGBA16;
+		m_DrawImage = std::make_shared<VulkanImage>(config);
 	}
 
 	VulkanSwapchain::~VulkanSwapchain()
@@ -89,7 +89,7 @@ namespace NodeBrain
 		m_VkColorSpace = surfaceFormat.colorSpace;
 		m_VkPresentationMode = Utils::ChooseSwapchainPresentationMode(swapChainSupport.PresentationModes);
 		m_VkExtent = Utils::ChooseSwapExtent(capabilities);
-		uint32_t minImageCount = (capabilities.maxImageCount > 0 && m_ImageCount > capabilities.maxImageCount) ? capabilities.maxImageCount + 1 : capabilities.maxImageCount;
+		uint32_t minImageCount = (capabilities.maxImageCount > 0 && m_ImageCount > capabilities.maxImageCount) ? capabilities.maxImageCount: capabilities.minImageCount + 1;
 
 		// --- Create swapchain ---
 		VkSwapchainCreateInfoKHR createInfo{};
@@ -380,7 +380,7 @@ namespace NodeBrain
 		ImageConfiguration config = {};
 		config.Width = m_VkExtent.width;
 		config.Height = m_VkExtent.height;
-		config.ImageFormat = ImageFormat::RGBA16;
+		config.Format = ImageFormat::RGBA16;
 		m_DrawImage = std::make_unique<VulkanImage>(config);
 	}
 }

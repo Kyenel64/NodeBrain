@@ -8,12 +8,10 @@
 
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanFramebuffer.h"
-#include "GAPI/Vulkan/VulkanSwapchain.h"
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanGraphicsPipeline.h"
 #include "GAPI/Vulkan/VulkanComputePipeline.h"
-#include "GAPI/Vulkan/VulkanDescriptorPool.h"
-#include "GAPI/Vulkan/VulkanDescriptorSet.h"
+#include "GAPI/Vulkan/VulkanSwapchain.h"
 
 namespace NodeBrain
 {
@@ -147,6 +145,11 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 	}
 
+		void VulkanRendererAPI::WaitForGPU()
+	{
+		vkDeviceWaitIdle(VulkanRenderContext::Get()->GetDevice()->GetVkDevice());
+	}
+
 	void VulkanRendererAPI::BeginFrame()
 	{
 		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
@@ -163,6 +166,9 @@ namespace NodeBrain
 	void VulkanRendererAPI::EndFrame()
 	{
 		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
+		VkImage swapchainImage = VulkanRenderContext::Get()->GetSwapchain().GetCurrentVkImage();
+
+		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
 		// End command buffer
 		VK_CHECK(vkEndCommandBuffer(cmdBuffer));
@@ -246,18 +252,15 @@ namespace NodeBrain
 		vkCmdDraw(cmdBuffer, 3, 1, 0, 0);
 	}
 
-	void VulkanRendererAPI::WaitForGPU()
-	{
-		vkDeviceWaitIdle(VulkanRenderContext::Get()->GetDevice()->GetVkDevice());
-	}
+
 
 	void VulkanRendererAPI::BeginComputePass(std::shared_ptr<ComputePipeline> pipeline)
 	{
 		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
 		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
 		VkImage swapchainImage = swapchain.GetCurrentVkImage();
-		VkImage drawImage = swapchain.GetDrawImage().GetVkImage();
-		VkImageView drawImageView = swapchain.GetDrawImage().GetVkImageView();
+		VkImage drawImage = swapchain.GetDrawImage()->GetVkImage();
+		VkImageView drawImageView = swapchain.GetDrawImage()->GetVkImageView();
 		VkPipeline vkPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline)->GetVkPipeline();
 		VkPipelineLayout vkPipelineLayout = std::static_pointer_cast<VulkanComputePipeline>(pipeline)->GetVkPipelineLayout();
 		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline);
@@ -271,7 +274,53 @@ namespace NodeBrain
 		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vkPipeline);
 
 		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vkPipelineLayout, 0, 1, &descriptorSets, 0, nullptr);
-		ClearColor({ 0.9f, 0.3f, 0.3f, 1.0f });
+	}
+	
+	void VulkanRendererAPI::EndComputePass()
+	{
+		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
+		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
+		VkImage swapchainImage = swapchain.GetCurrentVkImage();
+		VkImage drawImage = swapchain.GetDrawImage()->GetVkImage();
+
+		// Move to EndFrame?
+
+		// Convert image to transfer format
+		TransitionImage(cmdBuffer, drawImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+		// Transfer draw image to swapchain image
+		CopyImageToImage(cmdBuffer, drawImage, swapchainImage, swapchain.GetVkExtent(), swapchain.GetVkExtent());
+
+		// Convert newly copied swapchain image to presentable format
+		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+		TransitionImage(cmdBuffer, drawImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	}
+
+	void VulkanRendererAPI::DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) 
+	{
+		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
+		vkCmdDispatch(cmdBuffer, groupX, groupY, groupZ);
+	}
+
+	void VulkanRendererAPI::ClearColor(const glm::vec4& color)
+	{
+		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
+		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
+		VkImage drawImage = swapchain.GetDrawImage()->GetVkImage();
+
+		VkClearColorValue clearValue;
+		clearValue = { { color.x, color.y, color.z, color.w }};
+
+		VkImageSubresourceRange clearRange = ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
+
+		vkCmdClearColorImage(cmdBuffer, drawImage, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+	}
+
+	void VulkanRendererAPI::TempUpdateImage(std::shared_ptr<Shader> shader)
+	{
+		VkImageView drawImageView = VulkanRenderContext::Get()->GetSwapchain().GetDrawImage()->GetVkImageView();
+		std::shared_ptr<VulkanShader> vulkanShader = std::dynamic_pointer_cast<VulkanShader>(shader);
 
 		//Temp set image
 		VkDescriptorImageInfo imgInfo{};
@@ -283,53 +332,11 @@ namespace NodeBrain
 		drawImageWrite.pNext = nullptr;
 
 		drawImageWrite.dstBinding = 0;
-		drawImageWrite.dstSet = descriptorSets;
+		drawImageWrite.dstSet = vulkanShader->GetVkDescriptorSet();
 		drawImageWrite.descriptorCount = 1;
 		drawImageWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 		drawImageWrite.pImageInfo = &imgInfo;
 
 		vkUpdateDescriptorSets(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), 1, &drawImageWrite, 0, nullptr);
-	}
-	void VulkanRendererAPI::EndComputePass()
-	{
-		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
-		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
-		VkImage swapchainImage = swapchain.GetCurrentVkImage();
-		VkImage drawImage = swapchain.GetDrawImage().GetVkImage();
-
-		// Move to EndFrame?
-
-		// Convert image to transfer format
-		TransitionImage(cmdBuffer, drawImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
-		// Transfer draw image to swapchain image
-		CopyImageToImage(cmdBuffer, drawImage, swapchainImage, swapchain.GetVkExtent(), swapchain.GetVkExtent());
-
-		// Convert newly copied swapchain image to presentable format
-		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-	}
-
-	void VulkanRendererAPI::ClearColor(const glm::vec4& color)
-	{
-		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
-		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
-		VkImage drawImage = swapchain.GetDrawImage().GetVkImage();
-
-		VkClearColorValue clearValue;
-		clearValue = { { color.x, color.y, color.z, color.w }};
-
-		VkImageSubresourceRange clearRange = ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
-
-		vkCmdClearColorImage(cmdBuffer, drawImage, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
-	}
-
-	void VulkanRendererAPI::Dispatch()
-	{
-		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
-		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
-		VkExtent2D extent = swapchain.GetVkExtent();
-
-		vkCmdDispatch(cmdBuffer, std::ceil(extent.width / 16.0f), std::ceil(extent.height / 16.0f), 1.0f);
 	}
 }

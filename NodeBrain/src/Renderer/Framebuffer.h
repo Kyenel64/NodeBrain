@@ -14,8 +14,8 @@ namespace NodeBrain
 	{
 		uint32_t Width, Height;
 
-		std::shared_ptr<Image> Image = nullptr;
-		std::shared_ptr<RenderPass> RenderPass = nullptr;
+		std::shared_ptr<Image> TargetImage = nullptr;
+		std::shared_ptr<RenderPass> TargetRenderPass = nullptr;
 
 		std::vector<FramebufferAttachmentConfiguration> Attachments;
 	};

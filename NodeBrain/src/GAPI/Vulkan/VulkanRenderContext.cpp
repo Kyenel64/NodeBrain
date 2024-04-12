@@ -127,13 +127,41 @@ namespace NodeBrain
 		m_Allocator = std::make_unique<VulkanAllocator>();
 		m_Swapchain = std::make_unique<VulkanSwapchain>(m_VkSurface, m_Device);
 
-		std::vector<PoolSizeRatio> sizes = { { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 } };
-		m_DescriptorPool = std::make_unique<VulkanDescriptorPool>(10, sizes);
+		VK_CHECK(CreateDescriptorPools());
+	}
+
+	VkResult VulkanRenderContext::CreateDescriptorPools()
+	{
+		for (int i = 0; i < FRAMES_IN_FLIGHT; i++)
+		{
+			uint32_t maxSets = 10;
+			std::vector<VkDescriptorPoolSize> poolSizes;
+			poolSizes.push_back(VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10 * maxSets});
+
+			VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
+			descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+			descriptorPoolCreateInfo.flags = 0;
+			descriptorPoolCreateInfo.maxSets = maxSets;
+			descriptorPoolCreateInfo.poolSizeCount = (uint32_t)poolSizes.size();
+			descriptorPoolCreateInfo.pPoolSizes = &poolSizes[0];
+
+			VkResult result = vkCreateDescriptorPool(m_Device->GetVkDevice(), &descriptorPoolCreateInfo, nullptr, &m_VkDescriptorPools[i]);
+			if (result != VK_SUCCESS)
+				return result;
+		}
+		
+		return VK_SUCCESS;
 	}
 
 	VulkanRenderContext::~VulkanRenderContext()
 	{
 		NB_PROFILE_FN();
+
+		for (int i = 0; i < FRAMES_IN_FLIGHT; i++)
+		{
+			vkDestroyDescriptorPool(m_Device->GetVkDevice(), m_VkDescriptorPools[i], nullptr);
+			m_VkDescriptorPools[i] = VK_NULL_HANDLE;
+		}
 
 		m_Swapchain.reset();
 		m_Allocator.reset();

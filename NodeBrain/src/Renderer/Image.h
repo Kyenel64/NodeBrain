@@ -7,7 +7,7 @@ namespace NodeBrain
 	struct ImageConfiguration
 	{
 		uint32_t Width, Height;
-		ImageFormat ImageFormat;
+		ImageFormat Format;
 	};
 
 	class Image
