@@ -4,6 +4,7 @@
 #include "Core/Layer.h"
 #include "Core/Window.h"
 #include "Core/Event.h"
+#include "Core/ImGuiLayer.h"
 
 namespace NodeBrain
 {
@@ -33,6 +34,8 @@ namespace NodeBrain
 		bool m_Running = true;
 		std::vector<Layer*> m_Layers;
 		std::unique_ptr<Window> m_Window;
+		ImGuiLayer* m_ImGuiLayer;
+
 		float m_LastFrameTime = 0.0f;
 		Timer m_Timer;
 	};

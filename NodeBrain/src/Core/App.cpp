@@ -48,6 +48,9 @@ namespace NodeBrain
 
 		Renderer::Init();
 
+		m_ImGuiLayer = ImGuiLayer::Create();
+		PushLayer(m_ImGuiLayer);
+
 		return true;
 	}
 
@@ -71,8 +74,10 @@ namespace NodeBrain
 				layer->OnUpdate(deltaTime);
 
 			// Update GUI
+			m_ImGuiLayer->BeginFrame();
 			for (Layer* layer : m_Layers)
 				layer->OnUpdateGUI();
+			m_ImGuiLayer->EndFrame();
 
 			Renderer::EndFrame();
 
