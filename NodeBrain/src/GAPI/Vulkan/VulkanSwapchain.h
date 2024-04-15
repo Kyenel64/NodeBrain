@@ -49,6 +49,7 @@ namespace NodeBrain
 		uint32_t GetImageIndex() const { return m_ImageIndex; }
 		uint32_t GetCurrentFrameIndex() const { return m_CurrentFrame; }
 		VkImage GetCurrentVkImage() const { return m_ImageDatas[m_ImageIndex].Image; }
+		VkImageView GetCurrentVkImageView() const { return m_ImageDatas[m_ImageIndex].ImageView; }
 		std::shared_ptr<VulkanImage> GetDrawImage() const { return m_DrawImage; }
 		
 	private:

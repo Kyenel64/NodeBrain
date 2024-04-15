@@ -8,7 +8,7 @@ set (ImGuiSrcFiles "thirdparty/ImGui/imconfig.h" "thirdparty/ImGui/imgui.h" "thi
 
 set (CoreFiles "src/Core/App.h" "src/Core/App.cpp" "src/Core/Layer.h" "src/Core/Timer.h" "src/Core/Window.h" 
 "src/Core/Window.cpp"  "src/Core/Log.h" "src/Core/Log.cpp" "src/Core/Event.h" "src/Core/KeyCode.h" "src/Core/Input.h" "src/Core/Input.cpp" 
-"src/Core/Instrumentor.h" "src/Core/Instrumentor.cpp" "src/Core/ImGuiLayer.h" "src/Core/ImGuiLayer.cpp" "src/Core/ImGuiBackends.cpp")
+"src/Core/Instrumentor.h" "src/Core/Instrumentor.cpp" "src/Core/ImGuiLayer.h" "src/Core/ImGuiLayer.cpp")
 
 set (VulkanFiles "src/GAPI/Vulkan/VulkanRendererAPI.h" "src/GAPI/Vulkan/VulkanRendererAPI.cpp" 
 "src/GAPI/Vulkan/VulkanPhysicalDevice.h" "src/GAPI/Vulkan/VulkanPhysicalDevice.cpp"  "src/GAPI/Vulkan/VulkanDevice.h" 
@@ -32,7 +32,7 @@ add_library ( ${PROJECT_NAME}
     ${CoreFiles}
     ${RendererFiles}
     ${VulkanFiles}
-    ${ImGuiFiles} 
+    ${ImGuiSrcFiles} 
     "thirdparty/VMA/vk_mem_alloc.h" "thirdparty/VMA/vk_mem_alloc.cpp" 
     "src/Utils/FileUtils.h" "src/Utils/FileUtils.cpp")
 
@@ -50,7 +50,6 @@ add_subdirectory("thirdparty/spdlog")
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ImGui/)
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ImGui/backends)
 
 # Libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw Vulkan::Vulkan spdlog glm)

@@ -33,5 +33,7 @@ namespace NodeBrain
 
 		virtual void TempUpdateImage(std::shared_ptr<Shader> shader) override;
 
+		virtual void DrawGUI() override;
+
 	};
 }

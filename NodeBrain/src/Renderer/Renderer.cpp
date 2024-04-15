@@ -98,5 +98,10 @@ namespace NodeBrain
 		s_RendererAPI->EndComputePass();
 	}
 
+	void Renderer::DrawGUI()
+	{
+		s_RendererAPI->DrawGUI();
+	}
+
 	GAPI Renderer::GetGAPI() { return s_GAPI; }
 }

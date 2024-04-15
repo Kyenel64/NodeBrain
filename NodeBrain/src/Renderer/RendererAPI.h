@@ -30,6 +30,8 @@ namespace NodeBrain
 		virtual void DrawTestTriangle(std::shared_ptr<GraphicsPipeline> pipeline) = 0;
 		virtual void TempUpdateImage(std::shared_ptr<Shader> shader) = 0;
 
+		virtual void DrawGUI() = 0;
+
 
 		static std::unique_ptr<RendererAPI> Create();
 	};

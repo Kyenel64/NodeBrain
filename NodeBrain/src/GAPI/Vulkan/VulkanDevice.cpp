@@ -43,7 +43,9 @@ namespace NodeBrain
 		//dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
 		//dynamicRenderingFeatures.dynamicRendering = VK_TRUE;
 
+
 		deviceFeatures.pNext = &vulkan12Features;
+		#define NB_VULKAN_VERSION_1_3
 		#ifdef NB_VULKAN_VERSION_1_3
 			vulkan12Features.pNext = &vulkan13Features;
 		#else
@@ -56,7 +58,6 @@ namespace NodeBrain
 		createInfo.pNext = &deviceFeatures;
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		createInfo.pQueueCreateInfos = &queueCreateInfos[0];
-		//createInfo.pEnabledFeatures = &deviceFeatures;
 
 		// Extensions
 		createInfo.enabledExtensionCount = m_PhysicalDevice->GetEnabledDeviceExtensions().size();

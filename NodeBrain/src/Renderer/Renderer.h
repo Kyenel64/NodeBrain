@@ -22,6 +22,7 @@ namespace NodeBrain
 		static void EndScene();
 
 		static void DrawTestTriangle();
+		static void DrawGUI();
 
 		static void ProcessTestCompute();
 

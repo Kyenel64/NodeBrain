@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vulkan/vulkan.h>
+
 #include "Core/ImGuiLayer.h"
 #include "Core/Layer.h"
 
@@ -17,5 +19,6 @@ namespace NodeBrain
 		virtual void BeginFrame() override;
 		virtual void EndFrame() override;
 	private:
+		VkDescriptorPool m_ImGuiDescriptorPool = VK_NULL_HANDLE;
 	};
 }

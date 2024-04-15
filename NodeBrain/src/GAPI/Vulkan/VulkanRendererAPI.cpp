@@ -1,6 +1,9 @@
 #include "NBpch.h"
 #include "VulkanRendererAPI.h"
 
+#include <ImGui/imgui.h> // temp
+#include <ImGui/backends/imgui_impl_vulkan.h>
+
 #include "Core/App.h"
 #include "Renderer/Shader.h"
 #include "Renderer/RenderPass.h"
@@ -338,5 +341,41 @@ namespace NodeBrain
 		drawImageWrite.pImageInfo = &imgInfo;
 
 		vkUpdateDescriptorSets(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), 1, &drawImageWrite, 0, nullptr);
+	}
+
+	void VulkanRendererAPI::DrawGUI()
+	{
+		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
+		VkImage swapchainImage = swapchain.GetCurrentVkImage();
+		VkImageView swapchainImageView = swapchain.GetCurrentVkImageView();
+		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
+
+		VkRenderingAttachmentInfo colorAttachmentInfo = {};
+		colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+		colorAttachmentInfo.pNext = nullptr;
+		colorAttachmentInfo.imageView = swapchainImageView;
+		colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+		colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+		VkRenderingInfo renderingInfo = {};
+		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+		renderingInfo.pNext = nullptr;
+		renderingInfo.colorAttachmentCount = 1;
+		renderingInfo.pColorAttachments = &colorAttachmentInfo;
+		renderingInfo.renderArea.extent = swapchain.GetVkExtent();
+		renderingInfo.renderArea.offset = { 0, 0 };
+		renderingInfo.viewMask = 0;
+		renderingInfo.layerCount = 1;
+
+		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+		vkCmdBeginRendering(cmdBuffer, &renderingInfo);
+
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuffer);
+
+		vkCmdEndRendering(cmdBuffer);
+
+		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	}
 }
