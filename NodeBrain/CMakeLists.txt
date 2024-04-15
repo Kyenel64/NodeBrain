@@ -32,7 +32,7 @@ add_library ( ${PROJECT_NAME}
     ${CoreFiles}
     ${RendererFiles}
     ${VulkanFiles}
-    ${ImGuiFiles} 
+    ${ImGuiSrcFiles} 
     "thirdparty/VMA/vk_mem_alloc.h" "thirdparty/VMA/vk_mem_alloc.cpp" 
     "src/Utils/FileUtils.h" "src/Utils/FileUtils.cpp")
 
