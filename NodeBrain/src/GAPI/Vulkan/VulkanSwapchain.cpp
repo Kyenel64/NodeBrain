@@ -128,11 +128,8 @@ namespace NodeBrain
 
 	void VulkanSwapchain::DestroyVkSwapchain()
 	{
-		if (m_VkSwapchain)
-		{
-			vkDestroySwapchainKHR(m_Device->GetVkDevice(), m_VkSwapchain, nullptr);
-			m_VkSwapchain = VK_NULL_HANDLE;
-		}
+		vkDestroySwapchainKHR(m_Device->GetVkDevice(), m_VkSwapchain, nullptr);
+		m_VkSwapchain = VK_NULL_HANDLE;
 	}
 
 	VkResult VulkanSwapchain::CreateImageDatas()
@@ -313,25 +310,19 @@ namespace NodeBrain
 
 	void VulkanSwapchain::DestroyVkRenderPass()
 	{
-		if (m_VkRenderPass)
-		{
-			vkDestroyRenderPass(m_Device->GetVkDevice(), m_VkRenderPass, nullptr);
-			m_VkRenderPass = VK_NULL_HANDLE;
-		}
+		vkDestroyRenderPass(m_Device->GetVkDevice(), m_VkRenderPass, nullptr);
+		m_VkRenderPass = VK_NULL_HANDLE;
 	}
 
 	uint32_t VulkanSwapchain::AcquireNextImage()
 	{
-		vkWaitForFences(m_Device->GetVkDevice(), 1, &m_FrameDatas[m_CurrentFrame].InFlightFence, VK_TRUE, UINT64_MAX);
+		vkWaitForFences(m_Device->GetVkDevice(), 1, &m_FrameDatas[m_FrameIndex].InFlightFence, VK_TRUE, UINT64_MAX);
 
-		VkResult result = vkAcquireNextImageKHR(m_Device->GetVkDevice(), m_VkSwapchain, UINT64_MAX, m_FrameDatas[m_CurrentFrame].ImageAvailableSemaphore, VK_NULL_HANDLE, &m_ImageIndex);
+		VkResult result = vkAcquireNextImageKHR(m_Device->GetVkDevice(), m_VkSwapchain, UINT64_MAX, m_FrameDatas[m_FrameIndex].ImageAvailableSemaphore, VK_NULL_HANDLE, &m_ImageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
-		{
 			RecreateSwapchain();
-			NB_INFO("Swapchain recreated. New extent: {0}, {1}", m_VkExtent.width, m_VkExtent.height); 
-		}
 			
-		vkResetFences(m_Device->GetVkDevice(), 1, &m_FrameDatas[m_CurrentFrame].InFlightFence);
+		vkResetFences(m_Device->GetVkDevice(), 1, &m_FrameDatas[m_FrameIndex].InFlightFence);
 		return m_ImageIndex;
 	}
 
@@ -341,7 +332,7 @@ namespace NodeBrain
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
 		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = &m_FrameDatas[m_CurrentFrame].RenderFinishedSemaphore;
+		presentInfo.pWaitSemaphores = &m_FrameDatas[m_FrameIndex].RenderFinishedSemaphore;
 
 		VkSwapchainKHR swapChains[] = { m_VkSwapchain };
 		presentInfo.swapchainCount = 1;
@@ -351,17 +342,9 @@ namespace NodeBrain
 
 		VkResult result = vkQueuePresentKHR(m_Device->GetPresentationQueue(), &presentInfo);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-		{
 			RecreateSwapchain();
-			NB_INFO("Swapchain recreated. New extent: {0}, {1}", m_VkExtent.width, m_VkExtent.height); 
-		}
 
-		m_CurrentFrame = (m_CurrentFrame + 1) % FRAMES_IN_FLIGHT;
-	}
-
-	void VulkanSwapchain::CopyImage(std::shared_ptr<VulkanImage> image)
-	{
-
+		m_FrameIndex = (m_FrameIndex + 1) % FRAMES_IN_FLIGHT;
 	}
 
 	void VulkanSwapchain::RecreateSwapchain()
@@ -377,6 +360,6 @@ namespace NodeBrain
 		VK_CHECK(CreateVkSwapchain());
 		VK_CHECK(CreateImageDatas());
 
-		NB_TRACE("Recreated swapchain to size: {0}, {1}", m_VkExtent.width, m_VkExtent.height);
+		NB_INFO("Recreated swapchain to size: {0}, {1}", m_VkExtent.width, m_VkExtent.height);
 	}
 }

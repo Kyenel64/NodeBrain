@@ -16,11 +16,8 @@ namespace NodeBrain
 	{
 		ImGui_ImplVulkan_Shutdown();
 		
-		if (m_ImGuiDescriptorPool)
-		{
-			vkDestroyDescriptorPool(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_ImGuiDescriptorPool, nullptr);
-			m_ImGuiDescriptorPool = VK_NULL_HANDLE;
-		}
+		vkDestroyDescriptorPool(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_ImGuiDescriptorPool, nullptr);
+		m_ImGuiDescriptorPool = VK_NULL_HANDLE;
 	}
 
 	void VulkanImGuiLayer::OnAttach()
@@ -100,6 +97,10 @@ namespace NodeBrain
 	void VulkanImGuiLayer::EndFrame()
 	{
 		ImGui::Render();
+		
 		Renderer::DrawGUI();
+		//Renderer::BeginRenderPass();
+		//ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuffer);
+		//Renderer::EndRenderPass();
 	}
 }

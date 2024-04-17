@@ -56,10 +56,7 @@ namespace NodeBrain
 
 		m_TargetFramebuffer = nullptr;
 
-		if (m_VkRenderPass)
-		{
-			vkDestroyRenderPass(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkRenderPass, nullptr);
-			m_VkRenderPass = VK_NULL_HANDLE;
-		}
+		vkDestroyRenderPass(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkRenderPass, nullptr);
+		m_VkRenderPass = VK_NULL_HANDLE;
 	}
 }

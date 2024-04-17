@@ -14,17 +14,12 @@ namespace NodeBrain
 		allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
 
 		VK_CHECK(vmaCreateAllocator(&allocatorCreateInfo, &m_VMAAllocator));
-
-		// TODO: push to deletion queue
 	}
 
 	VulkanAllocator::~VulkanAllocator()
 	{
-		if (m_VMAAllocator)
-		{
-			vmaDestroyAllocator(m_VMAAllocator);
-			m_VMAAllocator = VK_NULL_HANDLE;
-		}
+		vmaDestroyAllocator(m_VMAAllocator);
+		m_VMAAllocator = VK_NULL_HANDLE;
 	}
 
 }

@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.h>
 
 #include "Core/ImGuiLayer.h"
-#include "Core/Layer.h"
 
 namespace NodeBrain
 {

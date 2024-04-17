@@ -41,10 +41,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		if (m_VkFramebuffer)
-		{
-			vkDestroyFramebuffer(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkFramebuffer, nullptr);
-			m_VkFramebuffer = VK_NULL_HANDLE;
-		}
+		vkDestroyFramebuffer(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkFramebuffer, nullptr);
+		m_VkFramebuffer = VK_NULL_HANDLE;
 	}
 }

@@ -14,6 +14,9 @@ namespace NodeBrain
 
 		static GAPI GetGAPI();
 
+		// Wait for GPU to finish all tasks.
+		static void WaitForGPU();
+
 		static void BeginFrame();
 		static void EndFrame();
 
@@ -26,11 +29,7 @@ namespace NodeBrain
 
 		static void ProcessTestCompute();
 
-		// Wait for GPU to finish all tasks.
-		static void WaitForGPU();
-
 		//static void SubmitMesh();
 		//static void DrawSubmitted();
-
 	};
 }

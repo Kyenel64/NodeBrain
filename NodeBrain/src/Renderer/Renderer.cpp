@@ -21,8 +21,6 @@ namespace NodeBrain
 
 		std::shared_ptr<Shader> TestComputeShader;
 		std::shared_ptr<ComputePipeline> TestComputePipeline;
-
-		//std::shared_ptr<Texture2D> TestTexture;
 	};
 
 	static RendererData* s_Data;
@@ -44,7 +42,7 @@ namespace NodeBrain
 		s_Data->TestPipeline = GraphicsPipeline::Create(pipelineConfig);
 
 
-		// Compute shader
+		// Test Compute shader.
 		s_Data->TestComputeShader = Shader::Create("Assets/Shaders/Compiled/gradient.comp.spv"); // Set descriptor layout
 		s_Data->TestComputePipeline = ComputePipeline::Create(s_Data->TestComputeShader);
 

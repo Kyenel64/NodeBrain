@@ -28,17 +28,11 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		if (m_VkShaderModule)
-		{
-			vkDestroyShaderModule(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkShaderModule, nullptr);
-			m_VkShaderModule = VK_NULL_HANDLE;
-		}
+		vkDestroyShaderModule(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkShaderModule, nullptr);
+		m_VkShaderModule = VK_NULL_HANDLE;
 
-		if (m_VkDescriptorSetLayout)
-		{
-			vkDestroyDescriptorSetLayout(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkDescriptorSetLayout, nullptr);
-			m_VkDescriptorSetLayout = VK_NULL_HANDLE;
-		}
+		vkDestroyDescriptorSetLayout(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkDescriptorSetLayout, nullptr);
+		m_VkDescriptorSetLayout = VK_NULL_HANDLE;
 	}
 
 	void VulkanShader::CreateDescriptorSets()

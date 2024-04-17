@@ -20,7 +20,7 @@ namespace NodeBrain
 		VkFramebuffer Framebuffer = VK_NULL_HANDLE;
 	};
 
-	// Contains data per processed frame
+	// Contains data per frame in flight
 	struct FrameData
 	{
 		VkCommandPool CommandPool = VK_NULL_HANDLE;
@@ -30,6 +30,8 @@ namespace NodeBrain
 		VkFence InFlightFence = VK_NULL_HANDLE;
 	};
 
+
+
 	class VulkanSwapchain
 	{
 	public:
@@ -38,19 +40,19 @@ namespace NodeBrain
 
 		uint32_t AcquireNextImage();
 		void PresentImage();
-		void CopyImage(std::shared_ptr<VulkanImage> image);
+		//void CopyImage(std::shared_ptr<VulkanImage> image);
 
 		VkSwapchainKHR GetVkSwapchain() const { return m_VkSwapchain; }
-		VkFormat GetVkFormat() const { return m_VkColorFormat; }
-		VkExtent2D GetVkExtent() const { return m_VkExtent; }
-		VkRenderPass GetVkRenderPass() const { return m_VkRenderPass; }
-		VkFramebuffer GetCurrentVkFramebuffer() const { return m_ImageDatas[m_ImageIndex].Framebuffer; }
-		const FrameData& GetCurrentFrameData() const { return m_FrameDatas[m_CurrentFrame]; }
+		std::shared_ptr<VulkanImage> GetDrawImage() const { return m_DrawImage; }	
+		const FrameData& GetCurrentFrameData() const { return m_FrameDatas[m_FrameIndex]; }
+		const ImageData& GetCurrentImageData() const { return m_ImageDatas[m_ImageIndex]; }	
 		uint32_t GetImageIndex() const { return m_ImageIndex; }
-		uint32_t GetCurrentFrameIndex() const { return m_CurrentFrame; }
-		VkImage GetCurrentVkImage() const { return m_ImageDatas[m_ImageIndex].Image; }
-		VkImageView GetCurrentVkImageView() const { return m_ImageDatas[m_ImageIndex].ImageView; }
-		std::shared_ptr<VulkanImage> GetDrawImage() const { return m_DrawImage; }
+		uint32_t GetFrameIndex() const { return m_FrameIndex; }
+		VkExtent2D GetVkExtent() const { return m_VkExtent; }
+		VkFormat GetVkFormat() const { return m_VkColorFormat; }
+		uint32_t GetImageCount() const { return m_ImageCount; }
+
+		VkRenderPass GetVkRenderPass() const { return m_VkRenderPass; }
 		
 	private:
 		void RecreateSwapchain();
@@ -74,18 +76,23 @@ namespace NodeBrain
 		std::shared_ptr<VulkanImage> m_DrawImage;
 
 		// Configuration
+		VkExtent2D m_VkExtent;
 		VkFormat m_VkColorFormat;
 		VkColorSpaceKHR m_VkColorSpace;
-		VkExtent2D m_VkExtent;
 		VkPresentModeKHR m_VkPresentationMode;
 		uint32_t m_ImageCount = 0;
 
-		uint32_t m_ImageIndex = 0;
-		uint32_t m_CurrentFrame = 0;
-
-		VkRenderPass m_VkRenderPass;
 		std::vector<ImageData> m_ImageDatas;
 		FrameData m_FrameDatas[FRAMES_IN_FLIGHT];
+
+		// Used for ImageData indexing. Index of current swapchain image retrieved by the GPU. 
+		// This can be any index from the swapchain that is ready to use.
+		uint32_t m_ImageIndex = 0;
+		// Used for FrameData indexing. Index of current processing frame.
+		// This loops through the number of frames in flight in ascending order.
+		uint32_t m_FrameIndex = 0;
+
+		VkRenderPass m_VkRenderPass;
 
 	};
 }

@@ -22,6 +22,8 @@ namespace NodeBrain
 		std::vector<VkPresentModeKHR> PresentationModes;
 	};
 
+
+
 	class VulkanPhysicalDevice
 	{
 	public:
@@ -42,7 +44,7 @@ namespace NodeBrain
 		VkInstance m_VkInstance = VK_NULL_HANDLE;
 		VkSurfaceKHR m_VkSurfaceKHR = VK_NULL_HANDLE;
 
-		uint32_t m_DeviceIndex;
+		uint32_t m_PhysicalDeviceIndex;
 		std::vector<const char*> m_EnabledDeviceExtensions;
 	};
 }

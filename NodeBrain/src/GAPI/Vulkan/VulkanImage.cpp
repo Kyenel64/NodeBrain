@@ -76,17 +76,10 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		if (m_VkImageView)
-		{
-			vkDestroyImageView(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkImageView, nullptr);
-			m_VkImageView = VK_NULL_HANDLE;
-		}
+		vkDestroyImageView(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkImageView, nullptr);
+		m_VkImageView = VK_NULL_HANDLE;
 
-		if (m_VkImage)
-		{
-			vmaDestroyImage(VulkanRenderContext::Get()->GetAllocator().GetVMAAllocator(), m_VkImage, m_VMAAllocation);
-			m_VkImage = VK_NULL_HANDLE;
-		}
-		
+		vmaDestroyImage(VulkanRenderContext::Get()->GetAllocator().GetVMAAllocator(), m_VkImage, m_VMAAllocation);
+		m_VkImage = VK_NULL_HANDLE;
 	}
 }

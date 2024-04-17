@@ -32,110 +32,44 @@ namespace NodeBrain
 
 	static void TransitionImage(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout)
 	{
-		#ifdef NB_VULKAN_VERSION_1_3
-			VkImageMemoryBarrier2 imageBarrier = {};
-			imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-			imageBarrier.pNext = nullptr;
+		VkImageMemoryBarrier imageBarrier = {};
+		imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		imageBarrier.pNext = nullptr;
 
-			imageBarrier.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-			imageBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
-			imageBarrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-			imageBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT;
+		imageBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+		imageBarrier.dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_MEMORY_READ_BIT;
+		imageBarrier.oldLayout = currentLayout;
+		imageBarrier.newLayout = newLayout;
 
-			imageBarrier.oldLayout = currentLayout;
-			imageBarrier.newLayout = newLayout;
+		VkImageAspectFlags aspectFlags = (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
+		imageBarrier.subresourceRange = ImageSubresourceRange(aspectFlags);
+		imageBarrier.image = image;
 
-			VkImageAspectFlags aspectFlags = (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
-			imageBarrier.subresourceRange = ImageSubresourceRange(aspectFlags);
-			imageBarrier.image = image;
-
-			VkDependencyInfo depInfo = {};
-			depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
-			depInfo.pNext = nullptr;
-			depInfo.imageMemoryBarrierCount = 1;
-			depInfo.pImageMemoryBarriers = &imageBarrier;
-
-			vkCmdPipelineBarrier(commandBuffer, &depInfo);
-
-		#else
-			VkImageMemoryBarrier imageBarrier = {};
-			imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-			imageBarrier.pNext = nullptr;
-
-			imageBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
-			imageBarrier.dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_MEMORY_READ_BIT;
-			imageBarrier.oldLayout = currentLayout;
-			imageBarrier.newLayout = newLayout;
-
-			VkImageAspectFlags aspectFlags = (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
-			imageBarrier.subresourceRange = ImageSubresourceRange(aspectFlags);
-			imageBarrier.image = image;
-
-			vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageBarrier);
-		#endif
+		vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageBarrier);
 	}
 
 	static void CopyImageToImage(VkCommandBuffer commandBuffer, VkImage srcImage, VkImage dstImage, VkExtent2D srcExtent, VkExtent2D dstExtent)
 	{
-		#ifdef NB_VULKAN_VERSION_1_3
-			VkImageBlit2 blitRegion = {};
-			blitRegion.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2;
+		VkImageBlit blitRegion = {};
+		blitRegion.srcOffsets[1].x = srcExtent.width;
+		blitRegion.srcOffsets[1].y = srcExtent.height;
+		blitRegion.srcOffsets[1].z = 1;
 
-			blitRegion.srcOffsets[1].x = srcExtent.width;
-			blitRegion.srcOffsets[1].y = srcExtent.height;
-			blitRegion.srcOffsets[1].z = 1;
+		blitRegion.dstOffsets[1].x = dstExtent.width;
+		blitRegion.dstOffsets[1].y = dstExtent.height;
+		blitRegion.dstOffsets[1].z = 1;
 
-			blitRegion.dstOffsets[1].x = dstExtent.width;
-			blitRegion.dstOffsets[1].y = dstExtent.height;
-			blitRegion.dstOffsets[1].z = 1;
+		blitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blitRegion.srcSubresource.baseArrayLayer = 0;
+		blitRegion.srcSubresource.layerCount = 1;
+		blitRegion.srcSubresource.mipLevel = 0;
 
-			blitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			blitRegion.srcSubresource.baseArrayLayer = 0;
-			blitRegion.srcSubresource.layerCount = 1;
-			blitRegion.srcSubresource.mipLevel = 0;
+		blitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blitRegion.dstSubresource.baseArrayLayer = 0;
+		blitRegion.dstSubresource.layerCount = 1;
+		blitRegion.dstSubresource.mipLevel = 0;
 
-			blitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			blitRegion.dstSubresource.baseArrayLayer = 0;
-			blitRegion.dstSubresource.layerCount = 1;
-			blitRegion.dstSubresource.mipLevel = 0;
-
-			VkBlitImageInfo2 blitImageInfo = {};
-			blitImageInfo.sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2;
-			blitImageInfo.dstImage = dstImage;
-			blitImageInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-			blitImageInfo.srcImage = srcImage;
-			blitImageInfo.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-			blitImageInfo.filter = VK_FILTER_LINEAR;
-			blitImageInfo.regionCount = 1;
-			blitImageInfo.pRegions = &blitRegion;
-
-			vkCmdBlitImage2(commandBuffer, &blitImageInfo);
-
-		#else
-			VkImageBlit blitRegion = {};
-			blitRegion.srcOffsets[1].x = srcExtent.width;
-			blitRegion.srcOffsets[1].y = srcExtent.height;
-			blitRegion.srcOffsets[1].z = 1;
-
-			blitRegion.dstOffsets[1].x = dstExtent.width;
-			blitRegion.dstOffsets[1].y = dstExtent.height;
-			blitRegion.dstOffsets[1].z = 1;
-
-			blitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			blitRegion.srcSubresource.baseArrayLayer = 0;
-			blitRegion.srcSubresource.layerCount = 1;
-			blitRegion.srcSubresource.mipLevel = 0;
-
-			blitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			blitRegion.dstSubresource.baseArrayLayer = 0;
-			blitRegion.dstSubresource.layerCount = 1;
-			blitRegion.dstSubresource.mipLevel = 0;
-
-			vkCmdBlitImage(commandBuffer, 
-			srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 
-			dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
-			1, &blitRegion, VK_FILTER_LINEAR);
-		#endif
+		vkCmdBlitImage(commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blitRegion, VK_FILTER_LINEAR);
 	}
 
 	VulkanRendererAPI::VulkanRendererAPI()
@@ -173,7 +107,7 @@ namespace NodeBrain
 	void VulkanRendererAPI::EndFrame()
 	{
 		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
-		VkImage swapchainImage = VulkanRenderContext::Get()->GetSwapchain().GetCurrentVkImage();
+		VkImage swapchainImage = VulkanRenderContext::Get()->GetSwapchain().GetCurrentImageData().Image;
 
 		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
@@ -209,7 +143,7 @@ namespace NodeBrain
 		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
 
 		VkRenderPass rp = VulkanRenderContext::Get()->GetSwapchain().GetVkRenderPass();
-		VkFramebuffer framebuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentVkFramebuffer();
+		VkFramebuffer framebuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentImageData().Framebuffer;
 			
 		VkRenderPassBeginInfo renderPassBeginInfo = {};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -265,9 +199,8 @@ namespace NodeBrain
 	{
 		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
 		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
-		VkImage swapchainImage = swapchain.GetCurrentVkImage();
+		VkImage swapchainImage = swapchain.GetCurrentImageData().Image;
 		VkImage drawImage = swapchain.GetDrawImage()->GetVkImage();
-		VkImageView drawImageView = swapchain.GetDrawImage()->GetVkImageView();
 		VkPipeline vkPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline)->GetVkPipeline();
 		VkPipelineLayout vkPipelineLayout = std::static_pointer_cast<VulkanComputePipeline>(pipeline)->GetVkPipelineLayout();
 		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline);
@@ -287,7 +220,7 @@ namespace NodeBrain
 	{
 		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
 		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
-		VkImage swapchainImage = swapchain.GetCurrentVkImage();
+		VkImage swapchainImage = swapchain.GetCurrentImageData().Image;
 		VkImage drawImage = swapchain.GetDrawImage()->GetVkImage();
 
 		// Move to EndFrame?
@@ -350,8 +283,8 @@ namespace NodeBrain
 	void VulkanRendererAPI::DrawGUI()
 	{
 		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
-		VkImage swapchainImage = swapchain.GetCurrentVkImage();
-		VkImageView swapchainImageView = swapchain.GetCurrentVkImageView();
+		VkImage swapchainImage = swapchain.GetCurrentImageData().Image;
+		VkImageView swapchainImageView = swapchain.GetCurrentImageData().ImageView;
 		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
 
 		VkRenderingAttachmentInfo colorAttachmentInfo = {};

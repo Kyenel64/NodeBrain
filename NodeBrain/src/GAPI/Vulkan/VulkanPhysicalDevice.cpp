@@ -4,7 +4,7 @@
 namespace NodeBrain
 {
 	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, uint32_t deviceIndex)
-		: m_VkInstance(instance), m_VkSurfaceKHR(surface), m_DeviceIndex(deviceIndex)
+		: m_VkInstance(instance), m_VkSurfaceKHR(surface), m_PhysicalDeviceIndex(deviceIndex)
 	{
 		NB_PROFILE_FN();
 
@@ -19,10 +19,10 @@ namespace NodeBrain
 		uint32_t deviceCount = 0;
 		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, nullptr);
 		NB_ASSERT(deviceCount, "Could not find any GPUs with Vulkan support");
-		NB_ASSERT(m_DeviceIndex < deviceCount, "Physical device index out of bounds");
+		NB_ASSERT(m_PhysicalDeviceIndex < deviceCount, "Physical device index out of bounds");
 		std::vector<VkPhysicalDevice> devices(deviceCount);
 		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, &devices[0]);
-		m_VkPhysicalDevice = devices[m_DeviceIndex];
+		m_VkPhysicalDevice = devices[m_PhysicalDeviceIndex];
 	}
 
 	bool VulkanPhysicalDevice::IsSuitable()

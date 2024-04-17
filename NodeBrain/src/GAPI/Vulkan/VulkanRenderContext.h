@@ -28,7 +28,7 @@ namespace NodeBrain
 		VulkanSwapchain& GetSwapchain() const { return *m_Swapchain; }
 		VulkanAllocator& GetAllocator() const { return *m_Allocator; }
 		const std::vector<const char*>& GetEnabledLayers() const { return m_EnabledLayers; }
-		VkDescriptorPool GetVkDescriptorPool() const { return m_VkDescriptorPools[m_Swapchain->GetCurrentFrameIndex()]; }
+		VkDescriptorPool GetVkDescriptorPool() const { return m_VkDescriptorPools[m_Swapchain->GetFrameIndex()]; }
 
 		static VulkanRenderContext* Get();
 

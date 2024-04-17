@@ -78,10 +78,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 		
-		if (m_VkDevice)
-		{
-			vkDestroyDevice(m_VkDevice, nullptr);
-			m_VkDevice = VK_NULL_HANDLE;
-		}
+		vkDestroyDevice(m_VkDevice, nullptr);
+		m_VkDevice = VK_NULL_HANDLE;
 	}
 }
