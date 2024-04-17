@@ -12,6 +12,17 @@
 
 namespace NodeBrain
 {
+	VulkanImGuiLayer::~VulkanImGuiLayer()
+	{
+		ImGui_ImplVulkan_Shutdown();
+		
+		if (m_ImGuiDescriptorPool)
+		{
+			vkDestroyDescriptorPool(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_ImGuiDescriptorPool, nullptr);
+			m_ImGuiDescriptorPool = VK_NULL_HANDLE;
+		}
+	}
+
 	void VulkanImGuiLayer::OnAttach()
 	{
 		IMGUI_CHECKVERSION();
@@ -55,11 +66,12 @@ namespace NodeBrain
 		initInfo.Instance = VulkanRenderContext::Get()->GetVkInstance();
 		initInfo.PhysicalDevice = VulkanRenderContext::Get()->GetPhysicalDevice()->GetVkPhysicalDevice();
 		initInfo.Device = VulkanRenderContext::Get()->GetDevice()->GetVkDevice();
+		initInfo.QueueFamily = VulkanRenderContext::Get()->GetPhysicalDevice()->FindQueueFamilies().Graphics.value();
 		initInfo.Queue = VulkanRenderContext::Get()->GetDevice()->GetGraphicsQueue();
 		initInfo.DescriptorPool = m_ImGuiDescriptorPool;
 		initInfo.MinImageCount = 3;
 		initInfo.ImageCount = 3;
-		initInfo.UseDynamicRendering = true;
+		initInfo.UseDynamicRendering = VK_TRUE;
 		initInfo.ColorAttachmentFormat = VulkanRenderContext::Get()->GetSwapchain().GetVkFormat();
 		initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		ImGui_ImplVulkan_Init(&initInfo, VK_NULL_HANDLE);
@@ -70,13 +82,7 @@ namespace NodeBrain
 
 	void VulkanImGuiLayer::OnDetach()
 	{
-		ImGui_ImplVulkan_Shutdown();
-
-		if (m_ImGuiDescriptorPool)
-		{
-			vkDestroyDescriptorPool(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_ImGuiDescriptorPool, nullptr);
-			m_ImGuiDescriptorPool = VK_NULL_HANDLE;
-		}
+		
 	}
 
 	void VulkanImGuiLayer::OnEvent(Event& e)
@@ -89,7 +95,6 @@ namespace NodeBrain
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-		ImGui::ShowDemoWindow();
 	}
 
 	void VulkanImGuiLayer::EndFrame()

@@ -55,10 +55,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		s_RendererAPI->WaitForGPU();
-
 		delete s_Data;
-
 		s_RendererAPI.reset();
 		NB_INFO("Shutdown renderer");
 	}
@@ -101,6 +98,11 @@ namespace NodeBrain
 	void Renderer::DrawGUI()
 	{
 		s_RendererAPI->DrawGUI();
+	}
+
+	void Renderer::WaitForGPU()
+	{
+		s_RendererAPI->WaitForGPU();
 	}
 
 	GAPI Renderer::GetGAPI() { return s_GAPI; }

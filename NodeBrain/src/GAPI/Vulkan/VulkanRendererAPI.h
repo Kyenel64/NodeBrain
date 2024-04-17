@@ -35,5 +35,9 @@ namespace NodeBrain
 
 		virtual void DrawGUI() override;
 
+	private:
+		// Needed for compatibility with Vulkan 1.2
+		PFN_vkCmdBeginRenderingKHR m_vkCmdBeginRenderingKHR = VK_NULL_HANDLE;
+		PFN_vkCmdEndRenderingKHR m_vkCmdEndRenderingKHR = VK_NULL_HANDLE;
 	};
 }

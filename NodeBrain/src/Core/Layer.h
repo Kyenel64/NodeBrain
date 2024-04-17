@@ -11,7 +11,7 @@ namespace NodeBrain
 	{
 	public:
 		Layer() = default;
-		~Layer() = default;
+		virtual ~Layer() = default;
 
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}

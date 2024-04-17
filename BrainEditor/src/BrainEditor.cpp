@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <ImGui/imgui.h>
+
 namespace NodeBrain
 {
 	void BrainEditor::OnAttach()
@@ -41,7 +43,7 @@ namespace NodeBrain
 
 	void BrainEditor::OnUpdateGUI()
 	{
-
+		ImGui::ShowDemoWindow();
 	}
 
 	void BrainEditor::OnKeyPressed(KeyPressedEvent& event)

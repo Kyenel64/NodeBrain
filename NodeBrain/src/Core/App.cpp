@@ -24,6 +24,8 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		Renderer::WaitForGPU();
+
 		for (Layer* layer : m_Layers)
 		{
 			layer->OnDetach();

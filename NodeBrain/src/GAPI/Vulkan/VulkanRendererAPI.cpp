@@ -141,6 +141,10 @@ namespace NodeBrain
 	VulkanRendererAPI::VulkanRendererAPI()
 	{
 		NB_PROFILE_FN();
+
+		VkInstance vkInstance = VulkanRenderContext::Get()->GetVkInstance();
+		m_vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)vkGetInstanceProcAddr(vkInstance, "vkCmdBeginRenderingKHR");
+		m_vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)vkGetInstanceProcAddr(vkInstance, "vkCmdEndRenderingKHR");
 	}
 
 	VulkanRendererAPI::~VulkanRendererAPI()
@@ -148,7 +152,7 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 	}
 
-		void VulkanRendererAPI::WaitForGPU()
+	void VulkanRendererAPI::WaitForGPU()
 	{
 		vkDeviceWaitIdle(VulkanRenderContext::Get()->GetDevice()->GetVkDevice());
 	}
@@ -370,11 +374,11 @@ namespace NodeBrain
 
 		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-		vkCmdBeginRendering(cmdBuffer, &renderingInfo);
+		m_vkCmdBeginRenderingKHR(cmdBuffer, &renderingInfo);
 
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuffer);
 
-		vkCmdEndRendering(cmdBuffer);
+		m_vkCmdEndRenderingKHR(cmdBuffer);
 
 		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	}

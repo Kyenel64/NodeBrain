@@ -10,6 +10,7 @@ namespace NodeBrain
 
 		m_EnabledDeviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 		m_EnabledDeviceExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
+		m_EnabledDeviceExtensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 		#if NB_APPLE
 			m_EnabledDeviceExtensions.push_back("VK_KHR_portability_subset");
 		#endif

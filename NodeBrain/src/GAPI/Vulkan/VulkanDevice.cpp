@@ -24,6 +24,7 @@ namespace NodeBrain
 			queueCreateInfo.pQueuePriorities = &queuePriority;
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
+
 		
 		// --- Features ---
 		VkPhysicalDeviceFeatures2 deviceFeatures = {}; // TODO:
@@ -34,23 +35,18 @@ namespace NodeBrain
 		vulkan12Features.bufferDeviceAddress = VK_TRUE;
 		vulkan12Features.descriptorIndexing = VK_TRUE;
 
-		VkPhysicalDeviceVulkan13Features vulkan13Features = {};
-		vulkan13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-		vulkan13Features.dynamicRendering = VK_TRUE;
-		vulkan13Features.synchronization2 = VK_TRUE;
+		VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures = {};
+		dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
+		dynamicRenderingFeatures.dynamicRendering = VK_TRUE;
 
-		//VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures = {};
-		//dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
-		//dynamicRenderingFeatures.dynamicRendering = VK_TRUE;
-
+		VkPhysicalDeviceSynchronization2FeaturesKHR synchronization2Features = {};
+		synchronization2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
+		synchronization2Features.synchronization2 = VK_TRUE;
 
 		deviceFeatures.pNext = &vulkan12Features;
-		#define NB_VULKAN_VERSION_1_3
-		#ifdef NB_VULKAN_VERSION_1_3
-			vulkan12Features.pNext = &vulkan13Features;
-		#else
-			vulkan12Features.pNext = VK_NULL_HANDLE;
-		#endif
+		vulkan12Features.pNext = &dynamicRenderingFeatures;
+		dynamicRenderingFeatures.pNext = &synchronization2Features;
+
 
 		// --- Device ---
 		VkDeviceCreateInfo createInfo = {};
@@ -58,8 +54,6 @@ namespace NodeBrain
 		createInfo.pNext = &deviceFeatures;
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		createInfo.pQueueCreateInfos = &queueCreateInfos[0];
-
-		// Extensions
 		createInfo.enabledExtensionCount = m_PhysicalDevice->GetEnabledDeviceExtensions().size();
 		createInfo.ppEnabledExtensionNames = m_PhysicalDevice->GetEnabledDeviceExtensions().data();
 

@@ -26,6 +26,9 @@ namespace NodeBrain
 
 		static void ProcessTestCompute();
 
+		// Wait for GPU to finish all tasks.
+		static void WaitForGPU();
+
 		//static void SubmitMesh();
 		//static void DrawSubmitted();
 
