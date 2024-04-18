@@ -34,8 +34,8 @@ namespace NodeBrain
 		s_RendererAPI = RendererAPI::Create();
 		NB_INFO("Initialized renderer");
 
-		s_Data->TestVertexShader = Shader::Create("Assets/Shaders/Compiled/triangle.vert.spv");
-		s_Data->TestFragmentShader = Shader::Create("Assets/Shaders/Compiled/triangle.frag.spv");
+		s_Data->TestVertexShader = Shader::Create("Assets/Shaders/Compiled/triangle.vert.spv", ShaderType::Vertex);
+		s_Data->TestFragmentShader = Shader::Create("Assets/Shaders/Compiled/triangle.frag.spv", ShaderType::Fragment);
 		PipelineConfiguration pipelineConfig = {};
 		pipelineConfig.VertexShader = s_Data->TestVertexShader;
 		pipelineConfig.FragmentShader = s_Data->TestFragmentShader;
@@ -43,7 +43,8 @@ namespace NodeBrain
 
 
 		// Test Compute shader.
-		s_Data->TestComputeShader = Shader::Create("Assets/Shaders/Compiled/gradient.comp.spv"); // Set descriptor layout
+		s_Data->TestComputeShader = Shader::Create("Assets/Shaders/Compiled/gradient.comp.spv", ShaderType::Compute);
+		s_Data->TestComputeShader->SetLayout({ { BindingType::StorageImage, 1} });
 		s_Data->TestComputePipeline = ComputePipeline::Create(s_Data->TestComputeShader);
 
 		s_RendererAPI->TempUpdateImage(s_Data->TestComputeShader);
