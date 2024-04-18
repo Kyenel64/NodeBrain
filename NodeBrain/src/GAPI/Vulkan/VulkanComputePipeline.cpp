@@ -16,7 +16,7 @@ namespace NodeBrain
 		computeLayout.pSetLayouts = &layouts[0];
 		computeLayout.setLayoutCount = 1;
 
-		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &computeLayout, nullptr, &m_VkPipelineLayout));
+		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), &computeLayout, nullptr, &m_VkPipelineLayout));
 
 		VkPipelineShaderStageCreateInfo stageinfo{};
 		stageinfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -31,12 +31,12 @@ namespace NodeBrain
 		computePipelineCreateInfo.layout = m_VkPipelineLayout;
 		computePipelineCreateInfo.stage = stageinfo;
 		
-		VK_CHECK(vkCreateComputePipelines(VulkanRenderContext::Get()->GetDevice()->GetVkDevice() , VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &m_VkPipeline));
+		VK_CHECK(vkCreateComputePipelines(VulkanRenderContext::Get()->GetVkDevice() , VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &m_VkPipeline));
 	}
 
 	VulkanComputePipeline::~VulkanComputePipeline()
 	{
-		vkDestroyPipelineLayout(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkPipelineLayout, nullptr);
-		vkDestroyPipeline(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkPipeline, nullptr);
+		vkDestroyPipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), m_VkPipelineLayout, nullptr);
+		vkDestroyPipeline(VulkanRenderContext::Get()->GetVkDevice(), m_VkPipeline, nullptr);
 	}
 }

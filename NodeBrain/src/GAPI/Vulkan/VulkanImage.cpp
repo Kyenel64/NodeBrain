@@ -49,7 +49,7 @@ namespace NodeBrain
 		allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 		allocationCreateInfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-		VK_CHECK(vmaCreateImage(VulkanRenderContext::Get()->GetAllocator().GetVMAAllocator(), &imageCreateInfo, &allocationCreateInfo, &m_VkImage, &m_VMAAllocation, nullptr));
+		VK_CHECK(vmaCreateImage(VulkanRenderContext::Get()->GetVMAAllocator(), &imageCreateInfo, &allocationCreateInfo, &m_VkImage, &m_VMAAllocation, nullptr));
 
 
 		// --- Create Image View ---
@@ -69,17 +69,17 @@ namespace NodeBrain
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 		imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-		VK_CHECK(vkCreateImageView(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &imageViewCreateInfo, nullptr, &m_VkImageView));
+		VK_CHECK(vkCreateImageView(VulkanRenderContext::Get()->GetVkDevice(), &imageViewCreateInfo, nullptr, &m_VkImageView));
 	}
 
 	VulkanImage::~VulkanImage()
 	{
 		NB_PROFILE_FN();
 
-		vkDestroyImageView(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkImageView, nullptr);
+		vkDestroyImageView(VulkanRenderContext::Get()->GetVkDevice(), m_VkImageView, nullptr);
 		m_VkImageView = VK_NULL_HANDLE;
 
-		vmaDestroyImage(VulkanRenderContext::Get()->GetAllocator().GetVMAAllocator(), m_VkImage, m_VMAAllocation);
+		vmaDestroyImage(VulkanRenderContext::Get()->GetVMAAllocator(), m_VkImage, m_VMAAllocation);
 		m_VkImage = VK_NULL_HANDLE;
 	}
 }

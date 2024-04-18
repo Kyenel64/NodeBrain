@@ -16,7 +16,7 @@ namespace NodeBrain
 	{
 		ImGui_ImplVulkan_Shutdown();
 		
-		vkDestroyDescriptorPool(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_ImGuiDescriptorPool, nullptr);
+		vkDestroyDescriptorPool(VulkanRenderContext::Get()->GetVkDevice(), m_ImGuiDescriptorPool, nullptr);
 		m_ImGuiDescriptorPool = VK_NULL_HANDLE;
 	}
 
@@ -56,15 +56,15 @@ namespace NodeBrain
 		descriptorPoolCreateInfo.poolSizeCount = (uint32_t)std::size(poolSizes);
 		descriptorPoolCreateInfo.pPoolSizes = poolSizes;
 
-		VK_CHECK(vkCreateDescriptorPool(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &descriptorPoolCreateInfo, nullptr, &m_ImGuiDescriptorPool));
+		VK_CHECK(vkCreateDescriptorPool(VulkanRenderContext::Get()->GetVkDevice(), &descriptorPoolCreateInfo, nullptr, &m_ImGuiDescriptorPool));
 
 
 		ImGui_ImplVulkan_InitInfo initInfo = {};
 		initInfo.Instance = VulkanRenderContext::Get()->GetVkInstance();
-		initInfo.PhysicalDevice = VulkanRenderContext::Get()->GetPhysicalDevice()->GetVkPhysicalDevice();
-		initInfo.Device = VulkanRenderContext::Get()->GetDevice()->GetVkDevice();
-		initInfo.QueueFamily = VulkanRenderContext::Get()->GetPhysicalDevice()->FindQueueFamilies().Graphics.value();
-		initInfo.Queue = VulkanRenderContext::Get()->GetDevice()->GetGraphicsQueue();
+		initInfo.PhysicalDevice = VulkanRenderContext::Get()->GetPhysicalDevice().GetVkPhysicalDevice();
+		initInfo.Device = VulkanRenderContext::Get()->GetVkDevice();
+		initInfo.QueueFamily = VulkanRenderContext::Get()->GetPhysicalDevice().FindQueueFamilies().Graphics.value();
+		initInfo.Queue = VulkanRenderContext::Get()->GetDevice().GetGraphicsQueue();
 		initInfo.DescriptorPool = m_ImGuiDescriptorPool;
 		initInfo.MinImageCount = 3;
 		initInfo.ImageCount = 3;

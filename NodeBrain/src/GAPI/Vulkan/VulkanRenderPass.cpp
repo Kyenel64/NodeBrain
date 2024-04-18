@@ -47,7 +47,7 @@ namespace NodeBrain
 		renderPassCreateInfo.dependencyCount = 1;
 		renderPassCreateInfo.pDependencies = &dependency;
 
-		VK_CHECK(vkCreateRenderPass(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &renderPassCreateInfo, nullptr, &m_VkRenderPass));
+		VK_CHECK(vkCreateRenderPass(VulkanRenderContext::Get()->GetVkDevice(), &renderPassCreateInfo, nullptr, &m_VkRenderPass));
 	}
 
 	VulkanRenderPass::~VulkanRenderPass()
@@ -56,7 +56,7 @@ namespace NodeBrain
 
 		m_TargetFramebuffer = nullptr;
 
-		vkDestroyRenderPass(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkRenderPass, nullptr);
+		vkDestroyRenderPass(VulkanRenderContext::Get()->GetVkDevice(), m_VkRenderPass, nullptr);
 		m_VkRenderPass = VK_NULL_HANDLE;
 	}
 }

@@ -41,7 +41,7 @@ namespace NodeBrain
 		createInfo.codeSize = buffer.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(buffer.data());
 
-		VK_CHECK(vkCreateShaderModule(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &createInfo, nullptr, &m_VkShaderModule));
+		VK_CHECK(vkCreateShaderModule(VulkanRenderContext::Get()->GetVkDevice(), &createInfo, nullptr, &m_VkShaderModule));
 		NB_INFO("Created shader module of size: {0}", buffer.size());
 	}
 
@@ -49,12 +49,12 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		vkDestroyShaderModule(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkShaderModule, nullptr);
+		vkDestroyShaderModule(VulkanRenderContext::Get()->GetVkDevice(), m_VkShaderModule, nullptr);
 		m_VkShaderModule = VK_NULL_HANDLE;
 
 		if (m_VkDescriptorSetLayout)
 		{
-			vkDestroyDescriptorSetLayout(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkDescriptorSetLayout, nullptr);
+			vkDestroyDescriptorSetLayout(VulkanRenderContext::Get()->GetVkDevice(), m_VkDescriptorSetLayout, nullptr);
 			m_VkDescriptorSetLayout = VK_NULL_HANDLE;
 		}
 	}
@@ -81,7 +81,7 @@ namespace NodeBrain
 		descriptorSetLayoutCreateInfo.pBindings = &layoutBindings[0];
 		descriptorSetLayoutCreateInfo.flags = 0;
 		
-		VK_CHECK(vkCreateDescriptorSetLayout(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &descriptorSetLayoutCreateInfo, nullptr, &m_VkDescriptorSetLayout));
+		VK_CHECK(vkCreateDescriptorSetLayout(VulkanRenderContext::Get()->GetVkDevice(), &descriptorSetLayoutCreateInfo, nullptr, &m_VkDescriptorSetLayout));
 		
 		// Create descriptor set
 		std::vector<VkDescriptorSetLayout> setLayouts = { m_VkDescriptorSetLayout };
@@ -91,6 +91,6 @@ namespace NodeBrain
 		descriptorSetAllocateInfo.descriptorSetCount = 1;
 		descriptorSetAllocateInfo.pSetLayouts = &setLayouts[0];
 		
-		VK_CHECK(vkAllocateDescriptorSets(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &descriptorSetAllocateInfo, &m_VkDescriptorSet));
+		VK_CHECK(vkAllocateDescriptorSets(VulkanRenderContext::Get()->GetVkDevice(), &descriptorSetAllocateInfo, &m_VkDescriptorSet));
 	}
 }

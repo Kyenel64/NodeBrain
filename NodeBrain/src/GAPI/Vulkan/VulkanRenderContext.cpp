@@ -123,11 +123,25 @@ namespace NodeBrain
 		#endif
 
 		m_PhysicalDevice = FindFirstSuitablePhysicalDevice();
-		m_Device = std::make_shared<VulkanDevice>(m_PhysicalDevice);
-		m_Allocator = std::make_unique<VulkanAllocator>();
-		m_Swapchain = std::make_unique<VulkanSwapchain>(m_VkSurface, m_Device);
 
+		m_Device = std::make_unique<VulkanDevice>(*m_PhysicalDevice);
+
+		VK_CHECK(CreateAllocator());
+
+		m_Swapchain = std::make_unique<VulkanSwapchain>(m_VkSurface, *m_Device);
+		
 		VK_CHECK(CreateDescriptorPools());
+	}
+
+	VkResult VulkanRenderContext::CreateAllocator()
+	{
+		VmaAllocatorCreateInfo allocatorCreateInfo = {};
+		allocatorCreateInfo.physicalDevice = m_PhysicalDevice->GetVkPhysicalDevice();
+		allocatorCreateInfo.device = m_Device->GetVkDevice();;
+		allocatorCreateInfo.instance = m_VkInstance;
+		allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+
+		return vmaCreateAllocator(&allocatorCreateInfo, &m_VMAAllocator);
 	}
 
 	VkResult VulkanRenderContext::CreateDescriptorPools()
@@ -164,7 +178,10 @@ namespace NodeBrain
 		}
 
 		m_Swapchain.reset();
-		m_Allocator.reset();
+
+		vmaDestroyAllocator(m_VMAAllocator);
+		m_VMAAllocator = VK_NULL_HANDLE;
+
 		m_Device.reset();
 
 		DestroyDebugUtilsMessenger();
@@ -181,7 +198,7 @@ namespace NodeBrain
 		return s_Instance; 
 	}
 
-	std::shared_ptr<VulkanPhysicalDevice> VulkanRenderContext::FindFirstSuitablePhysicalDevice()
+	std::unique_ptr<VulkanPhysicalDevice> VulkanRenderContext::FindFirstSuitablePhysicalDevice()
 	{
 		NB_PROFILE_FN();
 
@@ -193,7 +210,7 @@ namespace NodeBrain
 
 		for (int i = 0; i < devices.size(); i++)
 		{
-			std::shared_ptr<VulkanPhysicalDevice> physicalDevice = std::make_shared<VulkanPhysicalDevice>(m_VkInstance, m_VkSurface, i);
+			std::unique_ptr<VulkanPhysicalDevice> physicalDevice = std::make_unique<VulkanPhysicalDevice>(m_VkInstance, m_VkSurface, i);
 			if (physicalDevice->IsSuitable())
 				return physicalDevice;
 		}

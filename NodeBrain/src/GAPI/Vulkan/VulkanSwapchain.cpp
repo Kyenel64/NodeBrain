@@ -49,7 +49,7 @@ namespace NodeBrain
 
 
 
-	VulkanSwapchain::VulkanSwapchain(VkSurfaceKHR surface, std::shared_ptr<VulkanDevice> device)
+	VulkanSwapchain::VulkanSwapchain(VkSurfaceKHR surface, VulkanDevice& device)
 		: m_VkSurface(surface), m_Device(device), m_ImageIndex(0)
 	{
 		NB_PROFILE_FN();
@@ -70,7 +70,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		vkDeviceWaitIdle(m_Device->GetVkDevice());
+		vkDeviceWaitIdle(m_Device.GetVkDevice());
 
 		m_DrawImage.reset();
 		DestroyFrameDatas();
@@ -82,7 +82,7 @@ namespace NodeBrain
 	VkResult VulkanSwapchain::CreateVkSwapchain()
 	{
 		// --- Set configurations ---
-		SwapchainSupportDetails swapChainSupport = m_Device->GetPhysicalDevice()->QuerySwapchainSupport();
+		SwapchainSupportDetails swapChainSupport = m_Device.GetPhysicalDevice().QuerySwapchainSupport();
 		VkSurfaceFormatKHR surfaceFormat = Utils::ChooseSwapchainFormat(swapChainSupport.Formats);
 		VkSurfaceCapabilitiesKHR capabilities = swapChainSupport.Capabilities;
 		m_VkColorFormat = surfaceFormat.format;
@@ -102,7 +102,7 @@ namespace NodeBrain
 		createInfo.imageArrayLayers = 1;
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-		QueueFamilyIndices indices = m_Device->GetPhysicalDevice()->FindQueueFamilies();
+		QueueFamilyIndices indices = m_Device.GetPhysicalDevice().FindQueueFamilies();
 		uint32_t queueFamilyIndices[] = { indices.Graphics.value(), indices.Presentation.value() };
 
 		if (indices.Graphics != indices.Presentation) 
@@ -123,12 +123,12 @@ namespace NodeBrain
 		createInfo.clipped = VK_TRUE;
 		createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-		return vkCreateSwapchainKHR(m_Device->GetVkDevice(), &createInfo, nullptr, &m_VkSwapchain);
+		return vkCreateSwapchainKHR(m_Device.GetVkDevice(), &createInfo, nullptr, &m_VkSwapchain);
 	}
 
 	void VulkanSwapchain::DestroyVkSwapchain()
 	{
-		vkDestroySwapchainKHR(m_Device->GetVkDevice(), m_VkSwapchain, nullptr);
+		vkDestroySwapchainKHR(m_Device.GetVkDevice(), m_VkSwapchain, nullptr);
 		m_VkSwapchain = VK_NULL_HANDLE;
 	}
 
@@ -136,13 +136,13 @@ namespace NodeBrain
 	{
 		// --- Image ---
 		// Create temporary contiguous array to get vkImages from swapchain
-		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapchain, &m_ImageCount, nullptr);
+		vkGetSwapchainImagesKHR(m_Device.GetVkDevice(), m_VkSwapchain, &m_ImageCount, nullptr);
 		m_ImageDatas.resize(m_ImageCount);
 		std::vector<VkImage> images;
 		images.resize(m_ImageCount);
 		for (size_t i = 0; i < m_ImageCount; i++)
 			images[i] = m_ImageDatas[i].Image;
-		vkGetSwapchainImagesKHR(m_Device->GetVkDevice(), m_VkSwapchain, &m_ImageCount, &images[0]);
+		vkGetSwapchainImagesKHR(m_Device.GetVkDevice(), m_VkSwapchain, &m_ImageCount, &images[0]);
 		for (size_t i = 0; i < m_ImageCount; i++)
 			m_ImageDatas[i].Image = images[i];
 
@@ -167,7 +167,7 @@ namespace NodeBrain
 			imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 			imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-			VkResult result = vkCreateImageView(m_Device->GetVkDevice(), &imageViewCreateInfo, nullptr, &m_ImageDatas[i].ImageView);
+			VkResult result = vkCreateImageView(m_Device.GetVkDevice(), &imageViewCreateInfo, nullptr, &m_ImageDatas[i].ImageView);
 			if (result != VK_SUCCESS)
 				return result;
 		}
@@ -186,7 +186,7 @@ namespace NodeBrain
 			framebufferCreateInfo.height = m_VkExtent.height;
 			framebufferCreateInfo.layers = 1;
 
-			VkResult result = vkCreateFramebuffer(m_Device->GetVkDevice(), &framebufferCreateInfo, nullptr, &m_ImageDatas[i].Framebuffer);
+			VkResult result = vkCreateFramebuffer(m_Device.GetVkDevice(), &framebufferCreateInfo, nullptr, &m_ImageDatas[i].Framebuffer);
 			if (result != VK_SUCCESS)
 				return result;
 		}
@@ -198,9 +198,9 @@ namespace NodeBrain
 	{
 		for (size_t i = 0; i < m_ImageCount; i++)
 		{
-			vkDestroyImageView(m_Device->GetVkDevice(), m_ImageDatas[i].ImageView, nullptr);
+			vkDestroyImageView(m_Device.GetVkDevice(), m_ImageDatas[i].ImageView, nullptr);
 			m_ImageDatas[i].ImageView = VK_NULL_HANDLE;
-			vkDestroyFramebuffer(m_Device->GetVkDevice(), m_ImageDatas[i].Framebuffer, nullptr);
+			vkDestroyFramebuffer(m_Device.GetVkDevice(), m_ImageDatas[i].Framebuffer, nullptr);
 			m_ImageDatas[i].Framebuffer = VK_NULL_HANDLE;
 		}
 	}
@@ -210,12 +210,12 @@ namespace NodeBrain
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
 			// CommandPool
-			QueueFamilyIndices queueFamilyIndices = m_Device->GetPhysicalDevice()->FindQueueFamilies();
+			QueueFamilyIndices queueFamilyIndices = m_Device.GetPhysicalDevice().FindQueueFamilies();
 			VkCommandPoolCreateInfo commandPoolCreateInfo = {};
 			commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 			commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 			commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.Graphics.value();
-			VkResult result = vkCreateCommandPool(m_Device->GetVkDevice(), &commandPoolCreateInfo, nullptr, &m_FrameDatas[i].CommandPool);
+			VkResult result = vkCreateCommandPool(m_Device.GetVkDevice(), &commandPoolCreateInfo, nullptr, &m_FrameDatas[i].CommandPool);
 			if (result != VK_SUCCESS)
 				return result;
 
@@ -225,17 +225,17 @@ namespace NodeBrain
 			commandBufferAllocateInfo.commandPool = m_FrameDatas[i].CommandPool;
 			commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 			commandBufferAllocateInfo.commandBufferCount = 1;
-			result = vkAllocateCommandBuffers(m_Device->GetVkDevice(), &commandBufferAllocateInfo, &m_FrameDatas[i].CommandBuffer);
+			result = vkAllocateCommandBuffers(m_Device.GetVkDevice(), &commandBufferAllocateInfo, &m_FrameDatas[i].CommandBuffer);
 			if (result != VK_SUCCESS)
 				return result;
 
 			// Semaphores
 			VkSemaphoreCreateInfo semaphoreCreateInfo = {};
 			semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-			result = vkCreateSemaphore(m_Device->GetVkDevice(), &semaphoreCreateInfo, nullptr, &m_FrameDatas[i].ImageAvailableSemaphore);
+			result = vkCreateSemaphore(m_Device.GetVkDevice(), &semaphoreCreateInfo, nullptr, &m_FrameDatas[i].ImageAvailableSemaphore);
 			if (result != VK_SUCCESS)
 				return result;
-			result = vkCreateSemaphore(m_Device->GetVkDevice(), &semaphoreCreateInfo, nullptr, &m_FrameDatas[i].RenderFinishedSemaphore);
+			result = vkCreateSemaphore(m_Device.GetVkDevice(), &semaphoreCreateInfo, nullptr, &m_FrameDatas[i].RenderFinishedSemaphore);
 			if (result != VK_SUCCESS)
 				return result;
 
@@ -243,7 +243,7 @@ namespace NodeBrain
 			VkFenceCreateInfo fenceCreateInfo = {};
 			fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 			fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-			result = vkCreateFence(m_Device->GetVkDevice(), &fenceCreateInfo, nullptr, &m_FrameDatas[i].InFlightFence);
+			result = vkCreateFence(m_Device.GetVkDevice(), &fenceCreateInfo, nullptr, &m_FrameDatas[i].InFlightFence);
 			if (result != VK_SUCCESS)
 				return result;
 		}
@@ -255,13 +255,13 @@ namespace NodeBrain
 	{
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
-			vkDestroyFence(m_Device->GetVkDevice(), m_FrameDatas[i].InFlightFence, nullptr);
+			vkDestroyFence(m_Device.GetVkDevice(), m_FrameDatas[i].InFlightFence, nullptr);
 			m_FrameDatas[i].InFlightFence = VK_NULL_HANDLE;
-			vkDestroySemaphore(m_Device->GetVkDevice(), m_FrameDatas[i].RenderFinishedSemaphore, nullptr);
+			vkDestroySemaphore(m_Device.GetVkDevice(), m_FrameDatas[i].RenderFinishedSemaphore, nullptr);
 			m_FrameDatas[i].RenderFinishedSemaphore = VK_NULL_HANDLE;
-			vkDestroySemaphore(m_Device->GetVkDevice(), m_FrameDatas[i].ImageAvailableSemaphore, nullptr);
+			vkDestroySemaphore(m_Device.GetVkDevice(), m_FrameDatas[i].ImageAvailableSemaphore, nullptr);
 			m_FrameDatas[i].ImageAvailableSemaphore = VK_NULL_HANDLE;
-			vkDestroyCommandPool(m_Device->GetVkDevice(), m_FrameDatas[i].CommandPool, nullptr);
+			vkDestroyCommandPool(m_Device.GetVkDevice(), m_FrameDatas[i].CommandPool, nullptr);
 			m_FrameDatas[i].CommandPool = VK_NULL_HANDLE;
 		}
 	}
@@ -305,24 +305,24 @@ namespace NodeBrain
 		renderPassCreateInfo.dependencyCount = 1;
 		renderPassCreateInfo.pDependencies = &dependency;
 
-		return vkCreateRenderPass(m_Device->GetVkDevice(), &renderPassCreateInfo, nullptr, &m_VkRenderPass);
+		return vkCreateRenderPass(m_Device.GetVkDevice(), &renderPassCreateInfo, nullptr, &m_VkRenderPass);
 	}
 
 	void VulkanSwapchain::DestroyVkRenderPass()
 	{
-		vkDestroyRenderPass(m_Device->GetVkDevice(), m_VkRenderPass, nullptr);
+		vkDestroyRenderPass(m_Device.GetVkDevice(), m_VkRenderPass, nullptr);
 		m_VkRenderPass = VK_NULL_HANDLE;
 	}
 
 	uint32_t VulkanSwapchain::AcquireNextImage()
 	{
-		vkWaitForFences(m_Device->GetVkDevice(), 1, &m_FrameDatas[m_FrameIndex].InFlightFence, VK_TRUE, UINT64_MAX);
+		vkWaitForFences(m_Device.GetVkDevice(), 1, &m_FrameDatas[m_FrameIndex].InFlightFence, VK_TRUE, UINT64_MAX);
 
-		VkResult result = vkAcquireNextImageKHR(m_Device->GetVkDevice(), m_VkSwapchain, UINT64_MAX, m_FrameDatas[m_FrameIndex].ImageAvailableSemaphore, VK_NULL_HANDLE, &m_ImageIndex);
+		VkResult result = vkAcquireNextImageKHR(m_Device.GetVkDevice(), m_VkSwapchain, UINT64_MAX, m_FrameDatas[m_FrameIndex].ImageAvailableSemaphore, VK_NULL_HANDLE, &m_ImageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 			RecreateSwapchain();
 			
-		vkResetFences(m_Device->GetVkDevice(), 1, &m_FrameDatas[m_FrameIndex].InFlightFence);
+		vkResetFences(m_Device.GetVkDevice(), 1, &m_FrameDatas[m_FrameIndex].InFlightFence);
 		return m_ImageIndex;
 	}
 
@@ -340,7 +340,7 @@ namespace NodeBrain
 		presentInfo.pImageIndices = &m_ImageIndex;
 		presentInfo.pResults = nullptr; // Optional
 
-		VkResult result = vkQueuePresentKHR(m_Device->GetPresentationQueue(), &presentInfo);
+		VkResult result = vkQueuePresentKHR(m_Device.GetPresentationQueue(), &presentInfo);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 			RecreateSwapchain();
 
@@ -349,7 +349,7 @@ namespace NodeBrain
 
 	void VulkanSwapchain::RecreateSwapchain()
 	{
-		vkDeviceWaitIdle(m_Device->GetVkDevice());
+		vkDeviceWaitIdle(m_Device.GetVkDevice());
 
 		// --- Destroy ---
 		DestroyImageDatas();

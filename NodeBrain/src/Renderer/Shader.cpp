@@ -6,12 +6,12 @@
 
 namespace NodeBrain
 {
-	std::unique_ptr<Shader> Shader::Create(const std::filesystem::path& path, ShaderType shaderType)
+	std::shared_ptr<Shader> Shader::Create(const std::filesystem::path& path, ShaderType shaderType)
 	{
 		switch (Renderer::GetGAPI())
 		{
 			case GAPI::None: NB_ERROR("Graphics API not detected"); return nullptr;
-			case GAPI::Vulkan: return std::make_unique<VulkanShader>(path, shaderType);
+			case GAPI::Vulkan: return std::make_shared<VulkanShader>(path, shaderType);
 		}
 
 		NB_ASSERT(false, "Graphics API not detected!");

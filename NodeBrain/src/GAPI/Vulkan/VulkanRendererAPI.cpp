@@ -88,7 +88,7 @@ namespace NodeBrain
 
 	void VulkanRendererAPI::WaitForGPU()
 	{
-		vkDeviceWaitIdle(VulkanRenderContext::Get()->GetDevice()->GetVkDevice());
+		vkDeviceWaitIdle(VulkanRenderContext::Get()->GetVkDevice());
 	}
 
 	void VulkanRendererAPI::BeginFrame()
@@ -135,7 +135,7 @@ namespace NodeBrain
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		VK_CHECK(vkQueueSubmit(VulkanRenderContext::Get()->GetDevice()->GetGraphicsQueue(), 1, &submitInfo, inFlightFence));
+		VK_CHECK(vkQueueSubmit(VulkanRenderContext::Get()->GetDevice().GetGraphicsQueue(), 1, &submitInfo, inFlightFence));
 	}
 
 	void VulkanRendererAPI::BeginRenderPass(std::shared_ptr<RenderPass> renderPass)
@@ -277,7 +277,7 @@ namespace NodeBrain
 		drawImageWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 		drawImageWrite.pImageInfo = &imgInfo;
 
-		vkUpdateDescriptorSets(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), 1, &drawImageWrite, 0, nullptr);
+		vkUpdateDescriptorSets(VulkanRenderContext::Get()->GetVkDevice(), 1, &drawImageWrite, 0, nullptr);
 	}
 
 	void VulkanRendererAPI::DrawGUI()

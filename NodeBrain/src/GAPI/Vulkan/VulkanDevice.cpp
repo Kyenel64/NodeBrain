@@ -5,13 +5,13 @@
 
 namespace NodeBrain
 {
-	VulkanDevice::VulkanDevice(std::shared_ptr<VulkanPhysicalDevice> physicalDevice)
+	VulkanDevice::VulkanDevice(VulkanPhysicalDevice& physicalDevice)
 		: m_PhysicalDevice(physicalDevice)
 	{
 		NB_PROFILE_FN();
 
 		// --- Queue info ---
-		QueueFamilyIndices indices = m_PhysicalDevice->FindQueueFamilies();
+		QueueFamilyIndices indices = m_PhysicalDevice.FindQueueFamilies();
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 		std::set<uint32_t> uniqueQueueFamilies = { indices.Graphics.value(), indices.Presentation.value() };
 		float queuePriority = 1.0f;
@@ -54,8 +54,8 @@ namespace NodeBrain
 		createInfo.pNext = &deviceFeatures;
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		createInfo.pQueueCreateInfos = &queueCreateInfos[0];
-		createInfo.enabledExtensionCount = m_PhysicalDevice->GetEnabledDeviceExtensions().size();
-		createInfo.ppEnabledExtensionNames = m_PhysicalDevice->GetEnabledDeviceExtensions().data();
+		createInfo.enabledExtensionCount = m_PhysicalDevice.GetEnabledDeviceExtensions().size();
+		createInfo.ppEnabledExtensionNames = m_PhysicalDevice.GetEnabledDeviceExtensions().data();
 
 		// Validation layers
 		createInfo.enabledLayerCount = 0;
@@ -67,7 +67,7 @@ namespace NodeBrain
 		}
 
 		// Create device
-		VK_CHECK(vkCreateDevice(m_PhysicalDevice->GetVkPhysicalDevice(), &createInfo, nullptr, &m_VkDevice));
+		VK_CHECK(vkCreateDevice(m_PhysicalDevice.GetVkPhysicalDevice(), &createInfo, nullptr, &m_VkDevice));
 
 		// Retrieve queues
 		vkGetDeviceQueue(m_VkDevice, indices.Graphics.value(), 0, &m_GraphicsQueue);

@@ -1,13 +1,13 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <VMA/vk_mem_alloc.h>
 
 #include "Core/Window.h"
 #include "Renderer/RenderContext.h"
 #include "GAPI/Vulkan/VulkanPhysicalDevice.h"
 #include "GAPI/Vulkan/VulkanDevice.h"
 #include "GAPI/Vulkan/VulkanSwapchain.h"
-#include "GAPI/Vulkan/VulkanAllocator.h"
 
 namespace NodeBrain
 {
@@ -23,10 +23,11 @@ namespace NodeBrain
 
 		// Getters
 		VkInstance GetVkInstance() const { return m_VkInstance; }
-		std::shared_ptr<VulkanDevice> GetDevice() const { return m_Device; }
-		std::shared_ptr<VulkanPhysicalDevice> GetPhysicalDevice() const { return m_PhysicalDevice; }
+		VkDevice GetVkDevice() const { return m_Device->GetVkDevice(); }
+		VulkanDevice& GetDevice() const { return *m_Device; }
+		VulkanPhysicalDevice& GetPhysicalDevice() const { return *m_PhysicalDevice; }
 		VulkanSwapchain& GetSwapchain() const { return *m_Swapchain; }
-		VulkanAllocator& GetAllocator() const { return *m_Allocator; }
+		VmaAllocator GetVMAAllocator() const { return m_VMAAllocator; }
 		const std::vector<const char*>& GetEnabledLayers() const { return m_EnabledLayers; }
 		VkDescriptorPool GetVkDescriptorPool() const { return m_VkDescriptorPools[m_Swapchain->GetFrameIndex()]; }
 
@@ -36,24 +37,24 @@ namespace NodeBrain
 		VkResult CreateInstance();
 		VkResult CreateDescriptorPools();
 		VkResult CreateDebugUtilsMessenger();
+		VkResult CreateAllocator();
 		void DestroyDebugUtilsMessenger();
 
-		std::shared_ptr<VulkanPhysicalDevice> FindFirstSuitablePhysicalDevice();
+		std::unique_ptr<VulkanPhysicalDevice> FindFirstSuitablePhysicalDevice();
 
 	private:
 		Window* m_Window = nullptr;
 		VkInstance m_VkInstance = VK_NULL_HANDLE;
 		VkSurfaceKHR m_VkSurface = VK_NULL_HANDLE;
-
-		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice; // TODO: make unique
-		std::shared_ptr<VulkanDevice> m_Device;
-		std::unique_ptr<VulkanSwapchain> m_Swapchain;
-		std::unique_ptr<VulkanAllocator> m_Allocator;
+		VmaAllocator m_VMAAllocator = VK_NULL_HANDLE;
 		VkDescriptorPool m_VkDescriptorPools[FRAMES_IN_FLIGHT];
+		VkDebugUtilsMessengerEXT m_DebugMessenger = VK_NULL_HANDLE;
+
+		std::unique_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
+		std::unique_ptr<VulkanDevice> m_Device;
+		std::unique_ptr<VulkanSwapchain> m_Swapchain;
 
 		std::vector<const char*> m_EnabledLayers;
 		std::vector<const char*> m_EnabledInstanceExtensions;
-
-		VkDebugUtilsMessengerEXT m_DebugMessenger = nullptr;
 	};
 }

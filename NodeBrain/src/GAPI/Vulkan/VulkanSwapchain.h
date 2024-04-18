@@ -35,7 +35,7 @@ namespace NodeBrain
 	class VulkanSwapchain
 	{
 	public:
-		VulkanSwapchain(VkSurfaceKHR surface, std::shared_ptr<VulkanDevice> device);
+		VulkanSwapchain(VkSurfaceKHR surface, VulkanDevice& device);
 		~VulkanSwapchain();
 
 		uint32_t AcquireNextImage();
@@ -70,7 +70,7 @@ namespace NodeBrain
 	private:
 		VkSwapchainKHR m_VkSwapchain = VK_NULL_HANDLE;
 		VkSurfaceKHR m_VkSurface = VK_NULL_HANDLE;
-		std::shared_ptr<VulkanDevice> m_Device;
+		VulkanDevice& m_Device;
 
 		// Draw Image
 		std::shared_ptr<VulkanImage> m_DrawImage;

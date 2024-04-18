@@ -34,14 +34,14 @@ namespace NodeBrain
 		framebufferCreateInfo.height = m_Configuration.Height;
 		framebufferCreateInfo.layers = 1;
 
-		VK_CHECK(vkCreateFramebuffer(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), &framebufferCreateInfo, nullptr, &m_VkFramebuffer));
+		VK_CHECK(vkCreateFramebuffer(VulkanRenderContext::Get()->GetVkDevice(), &framebufferCreateInfo, nullptr, &m_VkFramebuffer));
 	}
 
 	VulkanFramebuffer::~VulkanFramebuffer()
 	{
 		NB_PROFILE_FN();
 
-		vkDestroyFramebuffer(VulkanRenderContext::Get()->GetDevice()->GetVkDevice(), m_VkFramebuffer, nullptr);
+		vkDestroyFramebuffer(VulkanRenderContext::Get()->GetVkDevice(), m_VkFramebuffer, nullptr);
 		m_VkFramebuffer = VK_NULL_HANDLE;
 	}
 }
