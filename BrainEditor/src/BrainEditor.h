@@ -19,5 +19,13 @@ namespace NodeBrain
 	private:
 		void OnKeyPressed(KeyPressedEvent& event);
 		void OnMousePressed(MousePressedEvent& event);
+
+	private:
+		bool m_SwitchShader = true;
+
+		// Demo
+		std::shared_ptr<Shader> m_GradientShader;
+		std::shared_ptr<ComputePipeline> m_GradientPipeline;
+
 	};
 }

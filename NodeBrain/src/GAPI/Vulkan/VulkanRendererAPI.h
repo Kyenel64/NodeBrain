@@ -31,9 +31,10 @@ namespace NodeBrain
 		
 		virtual void DrawTestTriangle(std::shared_ptr<GraphicsPipeline> pipeline) override;
 
-		virtual void TempUpdateImage(std::shared_ptr<Shader> shader) override;
-
 		virtual void DrawGUI() override;
+
+		// Temp
+		virtual void TempUpdateImage(std::shared_ptr<Shader> shader) override;
 
 	private:
 		// Needed for compatibility with Vulkan 1.2

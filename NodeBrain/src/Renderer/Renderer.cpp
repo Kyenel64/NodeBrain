@@ -25,6 +25,8 @@ namespace NodeBrain
 
 	static RendererData* s_Data;
 
+	GAPI Renderer::GetGAPI() { return s_GAPI; }
+
 	void Renderer::Init()
 	{
 		NB_PROFILE_FN();
@@ -104,5 +106,25 @@ namespace NodeBrain
 		s_RendererAPI->WaitForGPU();
 	}
 
-	GAPI Renderer::GetGAPI() { return s_GAPI; }
+	void Renderer::BeginComputePass(std::shared_ptr<ComputePipeline> pipeline)
+	{
+		s_RendererAPI->BeginComputePass(pipeline);
+	}
+
+	void Renderer::EndComputePass()
+	{
+		s_RendererAPI->EndComputePass();
+	}
+
+	void Renderer::DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ)
+	{
+		s_RendererAPI->DispatchCompute(groupX, groupY, groupZ);
+	}
+
+	// Temp
+	void Renderer::TempUpdateImage(std::shared_ptr<Shader> shader)
+	{
+		s_RendererAPI->TempUpdateImage(shader);
+	}
+
 }

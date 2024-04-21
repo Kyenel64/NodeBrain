@@ -15,6 +15,9 @@ namespace NodeBrain
 				case BindingType::StorageImage: return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 				case BindingType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			}
+
+			NB_ASSERT(false, "Unavailable binding type");
+			return VK_DESCRIPTOR_TYPE_MAX_ENUM;
 		}
 
 		static VkShaderStageFlags ShaderTypeToVkShaderStageFlags(ShaderType type)
@@ -25,6 +28,9 @@ namespace NodeBrain
 				case ShaderType::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
 				case ShaderType::Compute: return VK_SHADER_STAGE_COMPUTE_BIT;
 			}
+
+			NB_ASSERT(false, "Unavailable shader type");
+			return 0;
 		}
 	}
 

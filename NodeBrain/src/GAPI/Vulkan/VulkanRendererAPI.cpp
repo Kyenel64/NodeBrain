@@ -193,18 +193,16 @@ namespace NodeBrain
 		vkCmdDraw(cmdBuffer, 3, 1, 0, 0);
 	}
 
-
-
 	void VulkanRendererAPI::BeginComputePass(std::shared_ptr<ComputePipeline> pipeline)
 	{
+		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline);
+		std::shared_ptr<VulkanShader> vulkanShader = std::static_pointer_cast<VulkanShader>(vulkanPipeline->GetComputeShader());
 		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
 		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
 		VkImage swapchainImage = swapchain.GetCurrentImageData().Image;
 		VkImage drawImage = swapchain.GetDrawImage()->GetVkImage();
-		VkPipeline vkPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline)->GetVkPipeline();
-		VkPipelineLayout vkPipelineLayout = std::static_pointer_cast<VulkanComputePipeline>(pipeline)->GetVkPipelineLayout();
-		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline);
-		std::shared_ptr<VulkanShader> vulkanShader = std::static_pointer_cast<VulkanShader>(vulkanPipeline->GetComputeShader());
+		VkPipeline vkPipeline = vulkanPipeline->GetVkPipeline();
+		VkPipelineLayout vkPipelineLayout = vulkanPipeline->GetVkPipelineLayout();
 		VkDescriptorSet descriptorSets = vulkanShader->GetVkDescriptorSet();
 
 		// Convert image to writable format. Not optimal
@@ -223,8 +221,6 @@ namespace NodeBrain
 		VkImage swapchainImage = swapchain.GetCurrentImageData().Image;
 		VkImage drawImage = swapchain.GetDrawImage()->GetVkImage();
 
-		// Move to EndFrame?
-
 		// Convert image to transfer format
 		TransitionImage(cmdBuffer, drawImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 		TransitionImage(cmdBuffer, swapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
@@ -240,6 +236,7 @@ namespace NodeBrain
 	void VulkanRendererAPI::DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) 
 	{
 		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
+
 		vkCmdDispatch(cmdBuffer, groupX, groupY, groupZ);
 	}
 
