@@ -16,6 +16,12 @@ namespace NodeBrain
 		computeLayout.pSetLayouts = &layouts[0];
 		computeLayout.setLayoutCount = 1;
 
+		if (computeShader->GetPushConstantRange())
+		{
+			computeLayout.pPushConstantRanges = computeShader->GetPushConstantRange();
+			computeLayout.pushConstantRangeCount = 1;
+		}
+
 		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), &computeLayout, nullptr, &m_VkPipelineLayout));
 
 		VkPipelineShaderStageCreateInfo stageinfo{};
@@ -38,5 +44,10 @@ namespace NodeBrain
 	{
 		vkDestroyPipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), m_VkPipelineLayout, nullptr);
 		vkDestroyPipeline(VulkanRenderContext::Get()->GetVkDevice(), m_VkPipeline, nullptr);
+	}
+
+	void VulkanComputePipeline::SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset)
+	{
+		vkCmdPushConstants(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, offset, size, buffer);
 	}
 }

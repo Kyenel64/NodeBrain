@@ -40,17 +40,19 @@ namespace NodeBrain
 		//Renderer::SubmitMesh();
 		Renderer::EndScene();
 
-		if (m_SwitchShader)
-			Renderer::ProcessTestCompute();
-		else
+		if (m_ShaderIndex == 0)
+			Renderer::ProcessGradientCompute();
+		else if (m_ShaderIndex == 1)
 		{
-			// Renderer backend
+			// Demonstrate renderer backend
 			Renderer::BeginComputePass(m_GradientPipeline);
 			uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 			uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
 			Renderer::DispatchCompute(groupX, groupY, 1);
 			Renderer::EndComputePass();
 		}
+		else if (m_ShaderIndex == 2)
+			Renderer::ProcessFlatColorCompute();
 	}
 
 	void BrainEditor::OnUpdateGUI()
@@ -59,7 +61,7 @@ namespace NodeBrain
 
 		ImGui::Begin("TestWindow");
 
-		ImGui::Checkbox("Switch Shader", &m_SwitchShader);
+		ImGui::SliderInt("Switch Shader", &m_ShaderIndex, 0, 3);
 
 		ImGui::End();
 	}

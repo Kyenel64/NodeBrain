@@ -21,15 +21,9 @@ namespace NodeBrain
 		static void BeginFrame();
 		static void EndFrame();
 
-		//static void BeginScene(std::shared_ptr<Texture2D> targetTexture);
 		static void BeginScene();
 		static void EndScene();
-		//static void SubmitMesh();
 
-		static void DrawTestTriangle();
-		static void DrawGUI();
-
-		static void ProcessTestCompute();
 
 		// Back End Functions. 
 		static void BeginComputePass(std::shared_ptr<ComputePipeline> pipeline);
@@ -37,7 +31,9 @@ namespace NodeBrain
 		static void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ);
 
 		// Temp
+		static void DrawGUI();
 		static void TempUpdateImage(std::shared_ptr<Shader> shader);
-
+		static void ProcessGradientCompute();
+		static void ProcessFlatColorCompute();
 	};
 }

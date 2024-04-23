@@ -21,6 +21,7 @@ namespace NodeBrain
 		virtual ~Shader() = default;
 
 		virtual void SetLayout(const std::vector<LayoutBinding> layout) = 0;
+		virtual void SetPushConstantLayout(uint32_t size, uint32_t offset) = 0;
 
 		virtual const std::filesystem::path& GetShaderPath() const = 0;
 

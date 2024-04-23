@@ -21,7 +21,7 @@ namespace NodeBrain
 		void OnMousePressed(MousePressedEvent& event);
 
 	private:
-		bool m_SwitchShader = true;
+		int m_ShaderIndex = 0;
 
 		// Demo
 		std::shared_ptr<Shader> m_GradientShader;
