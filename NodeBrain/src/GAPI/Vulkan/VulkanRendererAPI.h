@@ -5,6 +5,7 @@
 
 #include "Renderer/RendererAPI.h"
 #include "GAPI/Vulkan/VulkanImage.h"
+#include "GAPI/Vulkan/VulkanSwapchain.h"
 
 namespace NodeBrain
 {
@@ -34,6 +35,11 @@ namespace NodeBrain
 		virtual void TempUpdateImage(std::shared_ptr<Shader> shader) override;
 
 	private:
+		VulkanSwapchain& m_Swapchain;
+		VkCommandBuffer m_ActiveCmdBuffer = VK_NULL_HANDLE;
+		VkImage m_ActiveSwapchainImage = VK_NULL_HANDLE;
+		VkImage m_DrawImage = VK_NULL_HANDLE;
+
 		// Needed for compatibility with Vulkan 1.2
 		PFN_vkCmdBeginRenderingKHR m_vkCmdBeginRenderingKHR = VK_NULL_HANDLE;
 		PFN_vkCmdEndRenderingKHR m_vkCmdEndRenderingKHR = VK_NULL_HANDLE;
