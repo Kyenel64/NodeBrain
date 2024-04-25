@@ -35,11 +35,6 @@ namespace NodeBrain
 		if (Input::IsMouseButtonReleased(MouseButton::Left))
 			NB_INFO("Left mousebutton released");
 
-		// Pseudo code. Eventually used in scene class
-		Renderer::BeginScene();
-		//Renderer::SubmitMesh();
-		Renderer::EndScene();
-
 		if (m_ShaderIndex == 0)
 			Renderer::ProcessGradientCompute();
 		else if (m_ShaderIndex == 1)
@@ -53,6 +48,11 @@ namespace NodeBrain
 		}
 		else if (m_ShaderIndex == 2)
 			Renderer::ProcessFlatColorCompute();
+			
+		// Pseudo code. Eventually used in scene class
+		Renderer::BeginScene();
+		//Renderer::SubmitMesh();
+		Renderer::EndScene();
 	}
 
 	void BrainEditor::OnUpdateGUI()

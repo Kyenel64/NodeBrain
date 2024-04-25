@@ -97,10 +97,10 @@ namespace NodeBrain
 	void VulkanImGuiLayer::EndFrame()
 	{
 		ImGui::Render();
-		
-		Renderer::DrawGUI();
-		//Renderer::BeginRenderPass();
-		//ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuffer);
-		//Renderer::EndRenderPass();
+
+		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
+		Renderer::BeginRenderPass();
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuffer);
+		Renderer::EndRenderPass();
 	}
 }

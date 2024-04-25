@@ -103,12 +103,16 @@ namespace NodeBrain
 
 		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
 
-		VkRenderPass renderPass = VK_NULL_HANDLE;
-		if (!m_Configuration.TargetFramebuffer)
-			renderPass = VulkanRenderContext::Get()->GetSwapchain().GetVkRenderPass();
+
+		VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo = {};
+		pipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+		pipelineRenderingCreateInfo.colorAttachmentCount = 1;
+		VkFormat format = VK_FORMAT_B8G8R8A8_SRGB; // temp
+		pipelineRenderingCreateInfo.pColorAttachmentFormats = &format;
 
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
 		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		pipelineCreateInfo.pNext = &pipelineRenderingCreateInfo;
 		pipelineCreateInfo.stageCount = 2;
 		pipelineCreateInfo.pStages = shaderStages;
 
@@ -122,7 +126,7 @@ namespace NodeBrain
 		pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
 
 		pipelineCreateInfo.layout = m_VkPipelineLayout;
-		pipelineCreateInfo.renderPass = renderPass;
+		pipelineCreateInfo.renderPass = VK_NULL_HANDLE;
 		pipelineCreateInfo.subpass = 0;
 		pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 		pipelineCreateInfo.basePipelineIndex = -1; // Optional

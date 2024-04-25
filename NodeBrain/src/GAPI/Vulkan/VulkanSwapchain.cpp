@@ -62,7 +62,7 @@ namespace NodeBrain
 		ImageConfiguration config = {};
 		config.Width = m_VkExtent.width;
 		config.Height = m_VkExtent.height;
-		config.Format = ImageFormat::RGBA16;
+		config.Format = ImageFormat::RGBA8;
 		m_DrawImage = std::make_shared<VulkanImage>(config);
 	}
 

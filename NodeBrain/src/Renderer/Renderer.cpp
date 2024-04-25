@@ -5,8 +5,6 @@
 
 #include "Renderer/RendererAPI.h"
 #include "Renderer/Shader.h"
-#include "Renderer/GraphicsPipeline.h"
-#include "Renderer/ComputePipeline.h"
 #include "RenderContext.h"
 #include "Core/App.h"
 
@@ -95,23 +93,22 @@ namespace NodeBrain
 
 	void Renderer::BeginScene()
 	{
-		s_RendererAPI->ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f });
-
-		s_Data->ColorGradientBuffer.TopColor = { 1, 0, 0, 1 };
-		s_Data->ColorGradientBuffer.BottomColor = { 0, 0, 1, 1 };
-		s_Data->ColorGradientPipeline->SetPushConstantData(&s_Data->ColorGradientBuffer, sizeof(ColorGradientData), 0);
-
-		s_Data->Color = { 0, 1, 0, 1 };
-		s_Data->FlatColorPipeline->SetPushConstantData(&s_Data->Color, sizeof(glm::vec4), 64);
+		//s_RendererAPI->ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f });
 	}
 
 	void Renderer::EndScene()
 	{
-
+		s_RendererAPI->BeginRenderPass(s_Data->TestPipeline);
+		s_RendererAPI->DrawTestTriangle();
+		s_RendererAPI->EndRenderPass();
 	}
 
 	void Renderer::ProcessGradientCompute()
 	{
+		s_Data->ColorGradientBuffer.TopColor = { 1, 0, 0, 1 };
+		s_Data->ColorGradientBuffer.BottomColor = { 0, 0, 1, 1 };
+		s_Data->ColorGradientPipeline->SetPushConstantData(&s_Data->ColorGradientBuffer, sizeof(ColorGradientData), 0);
+
 		s_RendererAPI->BeginComputePass(s_Data->ColorGradientPipeline);
 		uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 		uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
@@ -121,6 +118,9 @@ namespace NodeBrain
 	
 	void Renderer::ProcessFlatColorCompute()
 	{
+		s_Data->Color = { 0, 1, 0, 1 };
+		s_Data->FlatColorPipeline->SetPushConstantData(&s_Data->Color, sizeof(glm::vec4), 64);
+
 		s_RendererAPI->BeginComputePass(s_Data->FlatColorPipeline);
 		uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 		uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
@@ -131,6 +131,16 @@ namespace NodeBrain
 	void Renderer::WaitForGPU()
 	{
 		s_RendererAPI->WaitForGPU();
+	}
+
+	void Renderer::BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline)
+	{
+		s_RendererAPI->BeginRenderPass(pipeline);
+	}
+
+	void Renderer::EndRenderPass()
+	{
+		s_RendererAPI->EndRenderPass();
 	}
 
 	void Renderer::BeginComputePass(std::shared_ptr<ComputePipeline> pipeline)
@@ -149,14 +159,8 @@ namespace NodeBrain
 	}
 
 	// Temp
-	void Renderer::DrawGUI()
-	{
-		s_RendererAPI->DrawGUI();
-	}
-
 	void Renderer::TempUpdateImage(std::shared_ptr<Shader> shader)
 	{
 		s_RendererAPI->TempUpdateImage(shader);
 	}
-
 }

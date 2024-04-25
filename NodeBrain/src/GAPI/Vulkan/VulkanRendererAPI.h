@@ -19,8 +19,7 @@ namespace NodeBrain
 		virtual void BeginFrame() override;
 		virtual void EndFrame() override;
 
-		// Use swapchain renderpass if renderPass == nullptr
-		virtual void BeginRenderPass(std::shared_ptr<RenderPass> renderPass = nullptr) override;
+		virtual void BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline) override;
 		virtual void EndRenderPass() override;
 
 		virtual void BeginComputePass(std::shared_ptr<ComputePipeline> pipeline) override;
@@ -29,9 +28,7 @@ namespace NodeBrain
 
 		virtual void ClearColor(const glm::vec4& color) override;
 		
-		virtual void DrawTestTriangle(std::shared_ptr<GraphicsPipeline> pipeline) override;
-
-		virtual void DrawGUI() override;
+		virtual void DrawTestTriangle() override;
 
 		// Temp
 		virtual void TempUpdateImage(std::shared_ptr<Shader> shader) override;

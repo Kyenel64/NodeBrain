@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Renderer/GraphicsPipeline.h"
 #include "Renderer/ComputePipeline.h"
 #include "Renderer/Shader.h"
 
@@ -25,13 +26,15 @@ namespace NodeBrain
 		static void EndScene();
 
 
-		// Back End Functions. 
+		// Back End Functions.
+		static void BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline = nullptr);
+		static void EndRenderPass();
+
 		static void BeginComputePass(std::shared_ptr<ComputePipeline> pipeline);
 		static void EndComputePass();
 		static void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ);
 
 		// Temp
-		static void DrawGUI();
 		static void TempUpdateImage(std::shared_ptr<Shader> shader);
 		static void ProcessGradientCompute();
 		static void ProcessFlatColorCompute();
