@@ -45,8 +45,12 @@ namespace NodeBrain
 			m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_WindowName.c_str(), NULL, NULL);
 			NB_ASSERT(m_Window, "Failed to create GLFW window");
 			NB_INFO("Created Window {0}, size: {1}, {2}", m_WindowName, m_Data.Width, m_Data.Height);
-			// Set data when calling glfwGetWindowUserPointer
+			// Set data that can be accessed when calling glfwGetWindowUserPointer
 			glfwSetWindowUserPointer(m_Window, &m_Data);
+
+			// TODO: Figure out proper DPI scaling. 
+			// 	Setting window size to framebuffer size solves proper DPI scaling for now but could be wrong.
+			glfwGetFramebufferSize(m_Window, &m_Data.Width, &m_Data.Height);
 
 			// Vulkan extensions
 			uint32_t extensionCount = 0;

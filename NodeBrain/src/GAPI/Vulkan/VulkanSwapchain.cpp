@@ -31,7 +31,7 @@ namespace NodeBrain
 
 		static VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 		{
-			if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+			if (capabilities.currentExtent.width != 0xFFFFFFFF)
 			{
 				return capabilities.currentExtent;
 			}
