@@ -107,7 +107,7 @@ namespace NodeBrain
 		VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo = {};
 		pipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
 		pipelineRenderingCreateInfo.colorAttachmentCount = 1;
-		VkFormat format = VK_FORMAT_B8G8R8A8_SRGB; // temp
+		VkFormat format = VK_FORMAT_R16G16B16A16_SFLOAT; // temp
 		pipelineRenderingCreateInfo.pColorAttachmentFormats = &format;
 
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};

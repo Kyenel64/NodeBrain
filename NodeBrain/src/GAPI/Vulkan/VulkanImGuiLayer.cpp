@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 
 #include "GAPI/Vulkan/VulkanRenderContext.h"
+#include "GAPI/Vulkan/VulkanImage.h"
 #include "Core/App.h"
 #include "Renderer/Renderer.h"
 
@@ -69,7 +70,7 @@ namespace NodeBrain
 		initInfo.MinImageCount = 3;
 		initInfo.ImageCount = 3;
 		initInfo.UseDynamicRendering = VK_TRUE;
-		initInfo.ColorAttachmentFormat = VulkanRenderContext::Get()->GetSwapchain().GetVkFormat();
+		initInfo.ColorAttachmentFormat = ImageFormatToVulkanFormat(VulkanRenderContext::Get()->GetSwapchain().GetDrawImage()->GetConfiguration().Format); // temp
 		initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		ImGui_ImplVulkan_Init(&initInfo, VK_NULL_HANDLE);
 

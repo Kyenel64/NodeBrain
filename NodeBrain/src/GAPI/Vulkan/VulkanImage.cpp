@@ -1,26 +1,11 @@
 #include "NBpch.h"
 #include "VulkanImage.h"
 
-#include "VulkanRenderContext.h"
+#include "GAPI/Vulkan/VulkanRenderContext.h"
+#include "GAPI/Vulkan/VulkanUtils.h"
 
 namespace NodeBrain
-{
-	namespace Utils
-	{
-		VkFormat ImageFormatToVulkanFormat(ImageFormat format)
-		{
-			switch (format)
-			{
-				case ImageFormat::None: return VK_FORMAT_UNDEFINED; break;
-				case ImageFormat::RGBA16: return VK_FORMAT_R16G16B16A16_SFLOAT; break;
-				case ImageFormat::RGBA8: return VK_FORMAT_B8G8R8A8_SRGB; break;
-			}
-
-			return VK_FORMAT_UNDEFINED;
-		}
-	}
-	
-
+{	
 	VulkanImage::VulkanImage(const ImageConfiguration& configuration)
 		: m_Configuration(configuration)
 	{
@@ -30,7 +15,7 @@ namespace NodeBrain
 		VkImageCreateInfo imageCreateInfo = {};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageCreateInfo.format = Utils::ImageFormatToVulkanFormat(m_Configuration.Format);
+		imageCreateInfo.format = ImageFormatToVulkanFormat(m_Configuration.Format);
 		imageCreateInfo.extent = { m_Configuration.Width, m_Configuration.Height, 1 };
 		imageCreateInfo.mipLevels = 1;
 		imageCreateInfo.arrayLayers = 1;
@@ -58,7 +43,7 @@ namespace NodeBrain
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.image = m_VkImage;
 		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D; // TODO: parameterize
-		imageViewCreateInfo.format = Utils::ImageFormatToVulkanFormat(m_Configuration.Format);
+		imageViewCreateInfo.format = ImageFormatToVulkanFormat(m_Configuration.Format);
 
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;

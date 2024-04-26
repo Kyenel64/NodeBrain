@@ -149,7 +149,7 @@ namespace NodeBrain
 		VkRenderingAttachmentInfo colorAttachmentInfo = {};
 		colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 		colorAttachmentInfo.pNext = nullptr;
-		colorAttachmentInfo.imageView = drawImageView;
+		colorAttachmentInfo.imageView = drawImageView; // Target image
 		colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
 		colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -166,6 +166,7 @@ namespace NodeBrain
 
 		m_vkCmdBeginRenderingKHR(m_ActiveCmdBuffer, &renderingInfo);
 
+		// Probably should be separated
 		if (pipeline)
 		{
 			vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, std::dynamic_pointer_cast<VulkanGraphicsPipeline>(pipeline)->GetVkPipeline());

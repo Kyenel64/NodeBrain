@@ -15,7 +15,8 @@ namespace NodeBrain
 					return format;
 			}
 
-			return availableFormats[0];
+			NB_ASSERT(false, "No suitable image format for swapchain");
+			return { VK_FORMAT_UNDEFINED, VK_COLORSPACE_SRGB_NONLINEAR_KHR };
 		}
 
 		static VkPresentModeKHR ChooseSwapchainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes)
@@ -62,7 +63,7 @@ namespace NodeBrain
 		ImageConfiguration config = {};
 		config.Width = m_VkExtent.width;
 		config.Height = m_VkExtent.height;
-		config.Format = ImageFormat::RGBA8;
+		config.Format = ImageFormat::RGBA16;
 		m_DrawImage = std::make_shared<VulkanImage>(config);
 	}
 
