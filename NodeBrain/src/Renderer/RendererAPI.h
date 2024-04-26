@@ -18,16 +18,18 @@ namespace NodeBrain
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
 
-		virtual void BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline) = 0;
+		virtual void BeginRenderPass() = 0;
 		virtual void EndRenderPass() = 0;
+		virtual void BindGraphicsPipeline(std::shared_ptr<GraphicsPipeline> pipeline) = 0;
+		virtual void Draw(uint32_t vertexCount, uint32_t vertexIndex = 0, uint32_t instanceCount = 1, uint32_t instanceIndex = 0) = 0;
 
-		virtual void BeginComputePass(std::shared_ptr<ComputePipeline> pipeline) = 0;
+		virtual void BeginComputePass() = 0;
 		virtual void EndComputePass() = 0;
+		virtual void BindComputePipeline(std::shared_ptr<ComputePipeline> pipeline) = 0;
 		virtual void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) = 0;
 
 		virtual void ClearColor(const glm::vec4& color) = 0;
 
-		virtual void DrawTestTriangle() = 0;
 		virtual void TempUpdateImage(std::shared_ptr<Shader> shader) = 0;
 
 		static std::unique_ptr<RendererAPI> Create();

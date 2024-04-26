@@ -16,9 +16,6 @@ namespace NodeBrain
 
 		static GAPI GetGAPI();
 
-		// Wait for GPU to finish all tasks.
-		static void WaitForGPU();
-
 		static void BeginFrame();
 		static void EndFrame();
 
@@ -27,12 +24,19 @@ namespace NodeBrain
 
 
 		// Back End Functions.
-		static void BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline = nullptr);
-		static void EndRenderPass();
+		static void WaitForGPU();
 
-		static void BeginComputePass(std::shared_ptr<ComputePipeline> pipeline);
+		static void BeginRenderPass();
+		static void EndRenderPass();
+		static void BindGraphicsPipeline(std::shared_ptr<GraphicsPipeline> pipeline);
+		static void Draw(uint32_t vertexCount, uint32_t vertexIndex, uint32_t instanceCount = 0, uint32_t instanceIndex = 0);
+
+		static void BeginComputePass();
 		static void EndComputePass();
+		static void BindComputePipeline(std::shared_ptr<ComputePipeline> pipeline);
 		static void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ);
+
+
 
 		// Temp
 		static void TempUpdateImage(std::shared_ptr<Shader> shader);

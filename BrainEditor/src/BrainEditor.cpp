@@ -40,7 +40,8 @@ namespace NodeBrain
 		else if (m_ShaderIndex == 1)
 		{
 			// Demonstrate renderer backend
-			Renderer::BeginComputePass(m_GradientPipeline);
+			Renderer::BeginComputePass();
+			Renderer::BindComputePipeline(m_GradientPipeline);
 			uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 			uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
 			Renderer::DispatchCompute(groupX, groupY, 1);

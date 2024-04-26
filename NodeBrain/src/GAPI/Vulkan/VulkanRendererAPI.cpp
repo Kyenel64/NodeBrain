@@ -114,12 +114,7 @@ namespace NodeBrain
 
 	void VulkanRendererAPI::EndFrame()
 	{
-		// Copy draw image to swapchain image. 
-		TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-		TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-		CopyImageToImage(m_ActiveCmdBuffer, m_DrawImage, m_ActiveSwapchainImage, m_Swapchain.GetVkExtent(), m_Swapchain.GetVkExtent());
-
-		TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
 		VK_CHECK(vkEndCommandBuffer(m_ActiveCmdBuffer));
 
@@ -139,10 +134,10 @@ namespace NodeBrain
 		VK_CHECK(vkQueueSubmit(VulkanRenderContext::Get()->GetDevice().GetGraphicsQueue(), 1, &submitInfo, frameData.InFlightFence));
 	}
 
-	void VulkanRendererAPI::BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline)
+	void VulkanRendererAPI::BeginRenderPass()
 	{
+		// Use swapchain draw image if no target image
 		VkImageView drawImageView = m_Swapchain.GetDrawImage()->GetVkImageView();
-		VkImageView swapchainImageView = m_Swapchain.GetCurrentImageData().ImageView;
 
 		TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
@@ -165,42 +160,47 @@ namespace NodeBrain
 		renderingInfo.layerCount = 1;
 
 		m_vkCmdBeginRenderingKHR(m_ActiveCmdBuffer, &renderingInfo);
-
-		// Probably should be separated
-		if (pipeline)
-		{
-			vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, std::dynamic_pointer_cast<VulkanGraphicsPipeline>(pipeline)->GetVkPipeline());
-
-			// Update dynamic states
-			VkViewport viewport = {};
-			viewport.x = 0.0f;
-			viewport.y = 0.0f;
-			viewport.width = VulkanRenderContext::Get()->GetSwapchain().GetVkExtent().width;
-			viewport.height = VulkanRenderContext::Get()->GetSwapchain().GetVkExtent().height;
-			viewport.minDepth = 0.0f;
-			viewport.maxDepth = 1.0f;
-			vkCmdSetViewport(m_ActiveCmdBuffer, 0, 1, &viewport);
-
-			VkRect2D scissor{};
-			scissor.offset = { 0, 0 };
-			scissor.extent = { VulkanRenderContext::Get()->GetSwapchain().GetVkExtent().width, VulkanRenderContext::Get()->GetSwapchain().GetVkExtent().height };
-			vkCmdSetScissor(m_ActiveCmdBuffer, 0, 1, &scissor);
-		}
 	}
 
 	void VulkanRendererAPI::EndRenderPass()
 	{
 		m_vkCmdEndRenderingKHR(m_ActiveCmdBuffer);
 
-		TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+		TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		CopyImageToImage(m_ActiveCmdBuffer, m_DrawImage, m_ActiveSwapchainImage, m_Swapchain.GetVkExtent(), m_Swapchain.GetVkExtent());
+		TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+		TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	}
 
-	void VulkanRendererAPI::DrawTestTriangle()
+	void VulkanRendererAPI::Draw(uint32_t vertexCount, uint32_t vertexIndex, uint32_t instanceCount, uint32_t instanceIndex)
 	{
-		vkCmdDraw(m_ActiveCmdBuffer, 3, 1, 0, 0);
+		vkCmdDraw(m_ActiveCmdBuffer, vertexCount, instanceCount, vertexIndex, instanceIndex);
 	}
 
-	void VulkanRendererAPI::BeginComputePass(std::shared_ptr<ComputePipeline> pipeline)
+	void VulkanRendererAPI::BindGraphicsPipeline(std::shared_ptr<GraphicsPipeline> pipeline)
+	{
+		std::shared_ptr<VulkanGraphicsPipeline> vulkanPipeline = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline);
+
+		vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVkPipeline());
+
+		// Update dynamic states
+		VkViewport viewport = {};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = m_Swapchain.GetVkExtent().width;
+		viewport.height = m_Swapchain.GetVkExtent().height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(m_ActiveCmdBuffer, 0, 1, &viewport);
+
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = { m_Swapchain.GetVkExtent().width, m_Swapchain.GetVkExtent().height };
+		vkCmdSetScissor(m_ActiveCmdBuffer, 0, 1, &scissor);
+	}
+
+	void VulkanRendererAPI::BindComputePipeline(std::shared_ptr<ComputePipeline> pipeline)
 	{
 		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline);
 		std::shared_ptr<VulkanShader> vulkanShader = std::static_pointer_cast<VulkanShader>(vulkanPipeline->GetComputeShader());
@@ -210,6 +210,11 @@ namespace NodeBrain
 
 		vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vkPipeline);
 		vkCmdBindDescriptorSets(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vkPipelineLayout, 0, 1, &descriptorSets, 0, nullptr);
+	}
+
+	void VulkanRendererAPI::BeginComputePass()
+	{
+
 	}
 	
 	void VulkanRendererAPI::EndComputePass()

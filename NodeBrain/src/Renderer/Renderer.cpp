@@ -98,9 +98,63 @@ namespace NodeBrain
 
 	void Renderer::EndScene()
 	{
-		s_RendererAPI->BeginRenderPass(s_Data->TestPipeline);
-		s_RendererAPI->DrawTestTriangle();
+		s_RendererAPI->BeginRenderPass();
+		s_RendererAPI->BindGraphicsPipeline(s_Data->TestPipeline);
+		s_RendererAPI->Draw(3); // temp
 		s_RendererAPI->EndRenderPass();
+	}
+
+	// Backend
+	void Renderer::WaitForGPU()
+	{
+		s_RendererAPI->WaitForGPU();
+	}
+
+	void Renderer::BeginRenderPass()
+	{
+		s_RendererAPI->BeginRenderPass();
+	}
+
+	void Renderer::EndRenderPass()
+	{
+		s_RendererAPI->EndRenderPass();
+	}
+
+	void Renderer::Draw(uint32_t vertexCount, uint32_t vertexIndex, uint32_t instanceCount, uint32_t instanceIndex)
+	{
+		s_RendererAPI->Draw(vertexCount, vertexIndex, instanceCount, instanceIndex);
+	}
+
+	void Renderer::BindGraphicsPipeline(std::shared_ptr<GraphicsPipeline> pipeline)
+	{
+		s_RendererAPI->BindGraphicsPipeline(pipeline);
+	}
+
+	void Renderer::BeginComputePass()
+	{
+		s_RendererAPI->BeginComputePass();
+	}
+
+	void Renderer::EndComputePass()
+	{
+		s_RendererAPI->EndComputePass();
+	}
+
+	void Renderer::BindComputePipeline(std::shared_ptr<ComputePipeline> pipeline)
+	{
+		s_RendererAPI->BindComputePipeline(pipeline);
+	}
+
+	void Renderer::DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ)
+	{
+		s_RendererAPI->DispatchCompute(groupX, groupY, groupZ);
+	}
+
+
+	// Temp
+	void Renderer::TempUpdateImage(std::shared_ptr<Shader> shader)
+	{
+		s_RendererAPI->TempUpdateImage(shader);
 	}
 
 	void Renderer::ProcessGradientCompute()
@@ -109,7 +163,8 @@ namespace NodeBrain
 		s_Data->ColorGradientBuffer.BottomColor = { 0, 0, 1, 1 };
 		s_Data->ColorGradientPipeline->SetPushConstantData(&s_Data->ColorGradientBuffer, sizeof(ColorGradientData), 0);
 
-		s_RendererAPI->BeginComputePass(s_Data->ColorGradientPipeline);
+		s_RendererAPI->BeginComputePass();
+		s_RendererAPI->BindComputePipeline(s_Data->ColorGradientPipeline);
 		uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 		uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
 		s_RendererAPI->DispatchCompute(groupX, groupY, 1);
@@ -121,46 +176,11 @@ namespace NodeBrain
 		s_Data->Color = { 0, 1, 0, 1 };
 		s_Data->FlatColorPipeline->SetPushConstantData(&s_Data->Color, sizeof(glm::vec4), 64);
 
-		s_RendererAPI->BeginComputePass(s_Data->FlatColorPipeline);
+		s_RendererAPI->BeginComputePass();
+		s_RendererAPI->BindComputePipeline(s_Data->FlatColorPipeline);
 		uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 		uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
 		s_RendererAPI->DispatchCompute(groupX, groupY, 1);
 		s_RendererAPI->EndComputePass();
-	}
-
-	void Renderer::WaitForGPU()
-	{
-		s_RendererAPI->WaitForGPU();
-	}
-
-	void Renderer::BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline)
-	{
-		s_RendererAPI->BeginRenderPass(pipeline);
-	}
-
-	void Renderer::EndRenderPass()
-	{
-		s_RendererAPI->EndRenderPass();
-	}
-
-	void Renderer::BeginComputePass(std::shared_ptr<ComputePipeline> pipeline)
-	{
-		s_RendererAPI->BeginComputePass(pipeline);
-	}
-
-	void Renderer::EndComputePass()
-	{
-		s_RendererAPI->EndComputePass();
-	}
-
-	void Renderer::DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ)
-	{
-		s_RendererAPI->DispatchCompute(groupX, groupY, groupZ);
-	}
-
-	// Temp
-	void Renderer::TempUpdateImage(std::shared_ptr<Shader> shader)
-	{
-		s_RendererAPI->TempUpdateImage(shader);
 	}
 }
