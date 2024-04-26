@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Renderer/RenderPass.h"
-
 namespace NodeBrain
 {
 	class Window;

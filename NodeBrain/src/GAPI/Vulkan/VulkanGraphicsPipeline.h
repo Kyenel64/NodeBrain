@@ -4,7 +4,6 @@
 
 #include "GAPI/Vulkan/VulkanDevice.h"
 #include "Renderer/GraphicsPipeline.h"
-#include "Renderer/Framebuffer.h"
 
 namespace NodeBrain
 {

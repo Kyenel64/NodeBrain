@@ -13,6 +13,7 @@
 #include "Renderer/Renderer.h"
 #include "Renderer/RendererAPI.h"
 #include "Renderer/RenderContext.h"
+#include "Renderer/Image.h"
 #include "Renderer/Shader.h"
 #include "Renderer/GraphicsPipeline.h"
-#include "Renderer/RenderPass.h"
+#include "Renderer/ComputePipeline.h"

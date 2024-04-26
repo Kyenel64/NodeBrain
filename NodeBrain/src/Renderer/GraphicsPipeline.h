@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Renderer/Shader.h"
-#include "Renderer/Framebuffer.h"
 
 namespace NodeBrain
 {
@@ -12,9 +11,6 @@ namespace NodeBrain
 	{
 		std::shared_ptr<Shader> VertexShader;
 		std::shared_ptr<Shader> FragmentShader;
-
-		// Uses swapchain if framebuffer is not provided
-		std::shared_ptr<Framebuffer> TargetFramebuffer = nullptr;
 
 		TopologyType Topology = TopologyType::TriangleList;
 		PolygonFillMode FillMode = PolygonFillMode::Fill;

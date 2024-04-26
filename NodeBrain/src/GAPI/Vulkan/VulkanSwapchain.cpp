@@ -56,7 +56,6 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		VK_CHECK(CreateVkSwapchain());
-		VK_CHECK(CreateVkRenderPass());
 		VK_CHECK(CreateImageDatas());
 		VK_CHECK(CreateFrameDatas());
 
@@ -76,7 +75,6 @@ namespace NodeBrain
 		m_DrawImage.reset();
 		DestroyFrameDatas();
 		DestroyImageDatas();
-		DestroyVkRenderPass();
 		DestroyVkSwapchain();
 	}
 
@@ -173,25 +171,6 @@ namespace NodeBrain
 				return result;
 		}
 
-		// --- Create framebuffers ---
-		for (int i = 0; i < m_ImageCount; i++)
-		{
-			VkImageView attachments[] = { m_ImageDatas[i].ImageView };
-
-			VkFramebufferCreateInfo framebufferCreateInfo = {};
-			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferCreateInfo.renderPass = m_VkRenderPass;
-			framebufferCreateInfo.attachmentCount = 1;
-			framebufferCreateInfo.pAttachments = attachments;
-			framebufferCreateInfo.width = m_VkExtent.width;
-			framebufferCreateInfo.height = m_VkExtent.height;
-			framebufferCreateInfo.layers = 1;
-
-			VkResult result = vkCreateFramebuffer(m_Device.GetVkDevice(), &framebufferCreateInfo, nullptr, &m_ImageDatas[i].Framebuffer);
-			if (result != VK_SUCCESS)
-				return result;
-		}
-
 		return VK_SUCCESS;
 	}
 
@@ -201,8 +180,6 @@ namespace NodeBrain
 		{
 			vkDestroyImageView(m_Device.GetVkDevice(), m_ImageDatas[i].ImageView, nullptr);
 			m_ImageDatas[i].ImageView = VK_NULL_HANDLE;
-			vkDestroyFramebuffer(m_Device.GetVkDevice(), m_ImageDatas[i].Framebuffer, nullptr);
-			m_ImageDatas[i].Framebuffer = VK_NULL_HANDLE;
 		}
 	}
 
@@ -265,54 +242,6 @@ namespace NodeBrain
 			vkDestroyCommandPool(m_Device.GetVkDevice(), m_FrameDatas[i].CommandPool, nullptr);
 			m_FrameDatas[i].CommandPool = VK_NULL_HANDLE;
 		}
-	}
-
-	VkResult VulkanSwapchain::CreateVkRenderPass()
-	{
-		// Color attachment
-		VkAttachmentDescription colorAttachment = {};
-		colorAttachment.format = VK_FORMAT_B8G8R8A8_SRGB; // temp. parametrize
-		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-		// Color attachment subpass
-		VkAttachmentReference colorAttachmentRef = {};
-		colorAttachmentRef.attachment = 0;
-		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		VkSubpassDescription subpass{};
-		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = &colorAttachmentRef;
-		VkSubpassDependency dependency = {};
-		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependency.dstSubpass = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.srcAccessMask = 0;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-		// Render pass
-		VkRenderPassCreateInfo renderPassCreateInfo = {};
-		renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassCreateInfo.attachmentCount = 1;
-		renderPassCreateInfo.pAttachments = &colorAttachment;
-		renderPassCreateInfo.subpassCount = 1;
-		renderPassCreateInfo.pSubpasses = &subpass;
-		renderPassCreateInfo.dependencyCount = 1;
-		renderPassCreateInfo.pDependencies = &dependency;
-
-		return vkCreateRenderPass(m_Device.GetVkDevice(), &renderPassCreateInfo, nullptr, &m_VkRenderPass);
-	}
-
-	void VulkanSwapchain::DestroyVkRenderPass()
-	{
-		vkDestroyRenderPass(m_Device.GetVkDevice(), m_VkRenderPass, nullptr);
-		m_VkRenderPass = VK_NULL_HANDLE;
 	}
 
 	uint32_t VulkanSwapchain::AcquireNextImage()

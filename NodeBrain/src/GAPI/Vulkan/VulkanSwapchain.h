@@ -5,8 +5,6 @@
 #include "GAPI/Vulkan/VulkanPhysicalDevice.h"
 #include "GAPI/Vulkan/VulkanDevice.h"
 #include "GAPI/Vulkan/VulkanImage.h"
-#include "GAPI/Vulkan/VulkanFramebuffer.h"
-#include "GAPI/Vulkan/VulkanRenderPass.h"
 
 namespace NodeBrain
 {
@@ -17,7 +15,6 @@ namespace NodeBrain
 	{
 		VkImage Image = VK_NULL_HANDLE;
 		VkImageView ImageView = VK_NULL_HANDLE;
-		VkFramebuffer Framebuffer = VK_NULL_HANDLE;
 	};
 
 	// Contains data per frame in flight
@@ -52,20 +49,16 @@ namespace NodeBrain
 		VkFormat GetVkFormat() const { return m_VkColorFormat; }
 		uint32_t GetImageCount() const { return m_ImageCount; }
 
-		VkRenderPass GetVkRenderPass() const { return m_VkRenderPass; }
-		
 	private:
 		void RecreateSwapchain();
 
 		VkResult CreateVkSwapchain();
 		VkResult CreateImageDatas();
 		VkResult CreateFrameDatas();
-		VkResult CreateVkRenderPass();
 
 		void DestroyVkSwapchain();
 		void DestroyImageDatas();
 		void DestroyFrameDatas();
-		void DestroyVkRenderPass();
 
 	private:
 		VkSwapchainKHR m_VkSwapchain = VK_NULL_HANDLE;
@@ -91,8 +84,5 @@ namespace NodeBrain
 		// Used for FrameData indexing. Index of current processing frame.
 		// This loops through the number of frames in flight in ascending order.
 		uint32_t m_FrameIndex = 0;
-
-		VkRenderPass m_VkRenderPass;
-
 	};
 }
