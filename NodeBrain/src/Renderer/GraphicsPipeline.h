@@ -24,6 +24,8 @@ namespace NodeBrain
 	public:
 		virtual ~GraphicsPipeline() = default;
 
+		virtual void Bind() = 0;
+
 		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) = 0;
 
 		virtual const PipelineConfiguration& GetConfiguration() const = 0;

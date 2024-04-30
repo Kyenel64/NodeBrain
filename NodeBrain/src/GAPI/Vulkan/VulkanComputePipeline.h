@@ -13,6 +13,8 @@ namespace NodeBrain
 		VulkanComputePipeline(std::shared_ptr<VulkanShader> computeShader);
 		~VulkanComputePipeline();
 
+		virtual void Bind() override;
+
 		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) override; 
 
 		VkPipeline GetVkPipeline() const { return m_VkPipeline; }

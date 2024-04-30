@@ -13,6 +13,8 @@ namespace NodeBrain
 		VulkanIndexBuffer(uint32_t* data, uint32_t size);
 		virtual ~VulkanIndexBuffer();
 
+		virtual void Bind() override;
+
 		virtual void SetData(const void* data, uint32_t size) override;
 
 		VkBuffer GetVkBuffer() const { return m_VkBuffer; }

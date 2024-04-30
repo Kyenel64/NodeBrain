@@ -153,9 +153,9 @@ namespace NodeBrain
 		s_Data->TestVertexData[0].Position = { y, -y, 0.0f };
 		s_Data->TestVertexBuffer->SetData(s_Data->TestVertexData, sizeof(QuadVertex) * 4);
 		s_RendererAPI->BeginRenderPass();
-		s_RendererAPI->BindGraphicsPipeline(s_Data->TestPipeline);
-		s_RendererAPI->BindIndexBuffer(s_Data->TestIndexBuffer);
-		s_RendererAPI->DrawIndexed(6, 0); // temp
+		s_Data->TestPipeline->Bind();
+		s_Data->TestIndexBuffer->Bind();
+		s_RendererAPI->DrawIndexed(6, 0);
 		s_RendererAPI->EndRenderPass();
 	}
 
@@ -185,16 +185,6 @@ namespace NodeBrain
 		s_RendererAPI->DrawIndexed(indexCount, firstIndex, instanceCount, instanceIndex);
 	}
 
-	void Renderer::BindGraphicsPipeline(std::shared_ptr<GraphicsPipeline> pipeline)
-	{
-		s_RendererAPI->BindGraphicsPipeline(pipeline);
-	}
-
-	void Renderer::BindIndexBuffer(std::shared_ptr<IndexBuffer> indexBuffer)
-	{
-		s_RendererAPI->BindIndexBuffer(indexBuffer);
-	}
-
 	void Renderer::BeginComputePass()
 	{
 		s_RendererAPI->BeginComputePass();
@@ -203,11 +193,6 @@ namespace NodeBrain
 	void Renderer::EndComputePass()
 	{
 		s_RendererAPI->EndComputePass();
-	}
-
-	void Renderer::BindComputePipeline(std::shared_ptr<ComputePipeline> pipeline)
-	{
-		s_RendererAPI->BindComputePipeline(pipeline);
 	}
 
 	void Renderer::DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ)
@@ -229,7 +214,7 @@ namespace NodeBrain
 		s_Data->ColorGradientPipeline->SetPushConstantData(&s_Data->ColorGradientBuffer, sizeof(ColorGradientData), 0);
 
 		s_RendererAPI->BeginComputePass();
-		s_RendererAPI->BindComputePipeline(s_Data->ColorGradientPipeline);
+		s_Data->ColorGradientPipeline->Bind();
 		uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 		uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
 		s_RendererAPI->DispatchCompute(groupX, groupY, 1);
@@ -242,7 +227,7 @@ namespace NodeBrain
 		s_Data->FlatColorPipeline->SetPushConstantData(&s_Data->Color, sizeof(glm::vec4), 64);
 
 		s_RendererAPI->BeginComputePass();
-		s_RendererAPI->BindComputePipeline(s_Data->FlatColorPipeline);
+		s_Data->FlatColorPipeline->Bind();
 		uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 		uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
 		s_RendererAPI->DispatchCompute(groupX, groupY, 1);

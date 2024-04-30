@@ -168,28 +168,6 @@ namespace NodeBrain
 		TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	}
 
-	void VulkanRendererAPI::BindGraphicsPipeline(std::shared_ptr<GraphicsPipeline> pipeline)
-	{
-		std::shared_ptr<VulkanGraphicsPipeline> vulkanPipeline = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline);
-
-		vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVkPipeline());
-
-		// Update dynamic states
-		VkViewport viewport = {};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = m_Swapchain.GetVkExtent().width;
-		viewport.height = m_Swapchain.GetVkExtent().height;
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(m_ActiveCmdBuffer, 0, 1, &viewport);
-
-		VkRect2D scissor{};
-		scissor.offset = { 0, 0 };
-		scissor.extent = { m_Swapchain.GetVkExtent().width, m_Swapchain.GetVkExtent().height };
-		vkCmdSetScissor(m_ActiveCmdBuffer, 0, 1, &scissor);
-	}
-
 	void VulkanRendererAPI::Draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t instanceIndex)
 	{
 		vkCmdDraw(m_ActiveCmdBuffer, vertexCount, instanceCount, firstVertex, instanceIndex);
@@ -200,13 +178,6 @@ namespace NodeBrain
 		vkCmdDrawIndexed(m_ActiveCmdBuffer, indexCount, instanceCount, firstIndex, 0, instanceIndex);
 	}
 
-	void VulkanRendererAPI::BindIndexBuffer(std::shared_ptr<IndexBuffer> indexBuffer)
-	{
-		std::shared_ptr<VulkanIndexBuffer> vkIndexBuffer = std::static_pointer_cast<VulkanIndexBuffer>(indexBuffer);
-
-		vkCmdBindIndexBuffer(m_ActiveCmdBuffer, vkIndexBuffer->GetVkBuffer(), 0, VK_INDEX_TYPE_UINT32);
-	}
-
 	void VulkanRendererAPI::BeginComputePass()
 	{
 
@@ -215,18 +186,6 @@ namespace NodeBrain
 	void VulkanRendererAPI::EndComputePass()
 	{
 
-	}
-
-	void VulkanRendererAPI::BindComputePipeline(std::shared_ptr<ComputePipeline> pipeline)
-	{
-		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline);
-		std::shared_ptr<VulkanShader> vulkanShader = std::static_pointer_cast<VulkanShader>(vulkanPipeline->GetComputeShader());
-		VkPipeline vkPipeline = vulkanPipeline->GetVkPipeline();
-		VkPipelineLayout vkPipelineLayout = vulkanPipeline->GetVkPipelineLayout();
-		VkDescriptorSet descriptorSets = vulkanShader->GetVkDescriptorSet();
-
-		vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vkPipeline);
-		vkCmdBindDescriptorSets(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vkPipelineLayout, 0, 1, &descriptorSets, 0, nullptr);
 	}
 
 	void VulkanRendererAPI::DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) 

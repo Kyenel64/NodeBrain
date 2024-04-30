@@ -166,4 +166,26 @@ namespace NodeBrain
 	{
 		vkCmdPushConstants(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, offset, size, buffer);
 	}
+
+	void VulkanGraphicsPipeline::Bind()
+	{
+		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
+		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
+		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_VkPipeline);
+
+		// Update dynamic states
+		VkViewport viewport = {};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = swapchain.GetVkExtent().width;
+		viewport.height = swapchain.GetVkExtent().height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
+
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = { swapchain.GetVkExtent().width, swapchain.GetVkExtent().height };
+		vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
+	}
 }

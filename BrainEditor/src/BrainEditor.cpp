@@ -41,7 +41,7 @@ namespace NodeBrain
 		{
 			// Demonstrate renderer backend
 			Renderer::BeginComputePass();
-			Renderer::BindComputePipeline(m_GradientPipeline);
+			m_GradientPipeline->Bind();
 			uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 			uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
 			Renderer::DispatchCompute(groupX, groupY, 1);

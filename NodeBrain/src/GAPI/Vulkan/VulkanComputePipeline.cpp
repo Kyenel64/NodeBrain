@@ -52,4 +52,14 @@ namespace NodeBrain
 	{
 		vkCmdPushConstants(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, offset, size, buffer);
 	}
+
+	void VulkanComputePipeline::Bind()
+	{
+		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
+		std::shared_ptr<VulkanShader> vulkanShader = std::static_pointer_cast<VulkanShader>(m_ComputeShader);
+		VkDescriptorSet descriptorSets = vulkanShader->GetVkDescriptorSet();
+
+		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_VkPipeline);
+		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_VkPipelineLayout, 0, 1, &descriptorSets, 0, nullptr);
+	}
 }
