@@ -17,7 +17,6 @@ namespace NodeBrain
 		float LineWidth = 1.0f;
 		// TODO:
 		// ColorBlendingMode
-		// Uniforms & Push constants
 	};
 
 	class GraphicsPipeline

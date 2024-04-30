@@ -5,7 +5,7 @@
 
 namespace NodeBrain
 {
-    VkFormat ImageFormatToVulkanFormat(ImageFormat format)
+    VkFormat ImageFormatToVkFormat(ImageFormat format)
 	{
 		switch (format)
 		{

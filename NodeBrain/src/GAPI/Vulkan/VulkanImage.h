@@ -21,7 +21,7 @@ namespace NodeBrain
 	private:
 		VkImage m_VkImage = VK_NULL_HANDLE;
 		VkImageView m_VkImageView = VK_NULL_HANDLE;
-		VmaAllocation m_VMAAllocation = VK_NULL_HANDLE;
+		VmaAllocation m_VmaAllocation = VK_NULL_HANDLE;
 
 		ImageConfiguration m_Configuration;
 	};

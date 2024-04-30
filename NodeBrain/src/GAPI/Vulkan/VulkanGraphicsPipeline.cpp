@@ -156,7 +156,10 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		vkDestroyPipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), m_VkPipelineLayout, nullptr);
+		m_VkPipelineLayout = VK_NULL_HANDLE;
+		
 		vkDestroyPipeline(VulkanRenderContext::Get()->GetVkDevice(), m_VkPipeline, nullptr);
+		m_VkPipeline = VK_NULL_HANDLE;
 	}
 
 	void VulkanGraphicsPipeline::SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset)

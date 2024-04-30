@@ -29,9 +29,6 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		if (!m_VkPhysicalDevice)
-			return false;
-
 		bool extensionSupported = CheckDeviceExtensionSupport();
 		SwapchainSupportDetails swapchainSupportDetails = QuerySwapchainSupport();
 		QueueFamilyIndices queueFamilyIndices = FindQueueFamilies();

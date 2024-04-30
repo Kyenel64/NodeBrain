@@ -1,9 +1,6 @@
 #include "NBpch.h"
 #include "VulkanVertexBuffer.h"
 
-#define VMA_IMPLEMENTATION
-#include "VMA/vk_mem_alloc.h"
-
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
@@ -19,7 +16,7 @@ namespace NodeBrain
 		allocationCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 		allocationCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
-		VK_CHECK(vmaCreateBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), &bufferCreateInfo, &allocationCreateInfo, &m_VkBuffer, &m_VMAAllocation, nullptr));
+		VK_CHECK(vmaCreateBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), &bufferCreateInfo, &allocationCreateInfo, &m_VkBuffer, &m_VmaAllocation, nullptr));
 
 		VkBufferDeviceAddressInfo deviceAddressInfo = {};
 		deviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
@@ -30,14 +27,16 @@ namespace NodeBrain
 
 	VulkanVertexBuffer::~VulkanVertexBuffer()
 	{
-		vmaDestroyBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), m_VkBuffer, m_VMAAllocation);
+		vmaDestroyBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), m_VkBuffer, m_VmaAllocation);
+		m_VkBuffer = VK_NULL_HANDLE;
+		m_VmaAllocation = VK_NULL_HANDLE;
 	}
 
 	void VulkanVertexBuffer::SetData(const void* data, uint32_t size)
 	{
 		void* gpuBuffer = nullptr;
-		vmaMapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_VMAAllocation, &gpuBuffer);
+		vmaMapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_VmaAllocation, &gpuBuffer);
 		memcpy(gpuBuffer, data, size);
-		vmaUnmapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_VMAAllocation);
+		vmaUnmapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_VmaAllocation);
 	}
 }

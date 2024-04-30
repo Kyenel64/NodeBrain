@@ -23,6 +23,7 @@ namespace NodeBrain
 		virtual void EndRenderPass() = 0;
 		virtual void BindGraphicsPipeline(std::shared_ptr<GraphicsPipeline> pipeline) = 0;
 		virtual void BindIndexBuffer(std::shared_ptr<IndexBuffer> indexBuffer) = 0;
+		
 		virtual void Draw(uint32_t vertexCount, uint32_t firstVertex = 0, uint32_t instanceCount = 1, uint32_t instanceIndex = 0) = 0;
 		virtual void DrawIndexed(uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount = 1, uint32_t instanceIndex = 0) = 0;
 

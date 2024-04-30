@@ -19,6 +19,6 @@ namespace NodeBrain
 
 	private:
 		VkBuffer m_VkBuffer = VK_NULL_HANDLE;
-		VmaAllocation m_VMAAllocation = VK_NULL_HANDLE;
+		VmaAllocation m_VmaAllocation = VK_NULL_HANDLE;
 	};
 }

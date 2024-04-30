@@ -15,14 +15,14 @@ namespace NodeBrain
 		VkImageCreateInfo imageCreateInfo = {};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageCreateInfo.format = ImageFormatToVulkanFormat(m_Configuration.Format);
+		imageCreateInfo.format = ImageFormatToVkFormat(m_Configuration.Format);
 		imageCreateInfo.extent = { m_Configuration.Width, m_Configuration.Height, 1 };
 		imageCreateInfo.mipLevels = 1;
 		imageCreateInfo.arrayLayers = 1;
 		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 
-		// Usage flags TEMP
+		// Usage flags
 		VkImageUsageFlags usage = {};
 		usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 		usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
@@ -35,7 +35,7 @@ namespace NodeBrain
 		allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 		allocationCreateInfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-		VK_CHECK(vmaCreateImage(VulkanRenderContext::Get()->GetVMAAllocator(), &imageCreateInfo, &allocationCreateInfo, &m_VkImage, &m_VMAAllocation, nullptr));
+		VK_CHECK(vmaCreateImage(VulkanRenderContext::Get()->GetVMAAllocator(), &imageCreateInfo, &allocationCreateInfo, &m_VkImage, &m_VmaAllocation, nullptr));
 
 
 		// --- Create Image View ---
@@ -43,7 +43,7 @@ namespace NodeBrain
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.image = m_VkImage;
 		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D; // TODO: parameterize
-		imageViewCreateInfo.format = ImageFormatToVulkanFormat(m_Configuration.Format);
+		imageViewCreateInfo.format = ImageFormatToVkFormat(m_Configuration.Format);
 
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -65,7 +65,8 @@ namespace NodeBrain
 		vkDestroyImageView(VulkanRenderContext::Get()->GetVkDevice(), m_VkImageView, nullptr);
 		m_VkImageView = VK_NULL_HANDLE;
 
-		vmaDestroyImage(VulkanRenderContext::Get()->GetVMAAllocator(), m_VkImage, m_VMAAllocation);
+		vmaDestroyImage(VulkanRenderContext::Get()->GetVMAAllocator(), m_VkImage, m_VmaAllocation);
 		m_VkImage = VK_NULL_HANDLE;
+		m_VmaAllocation = VK_NULL_HANDLE;
 	}
 }

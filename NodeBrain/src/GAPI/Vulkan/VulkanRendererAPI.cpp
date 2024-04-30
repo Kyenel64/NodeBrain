@@ -31,7 +31,6 @@ namespace NodeBrain
 	{
 		VkImageMemoryBarrier imageBarrier = {};
 		imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		imageBarrier.pNext = nullptr;
 
 		imageBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
 		imageBarrier.dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_MEMORY_READ_BIT;
@@ -141,7 +140,6 @@ namespace NodeBrain
 
 		VkRenderingAttachmentInfo colorAttachmentInfo = {};
 		colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-		colorAttachmentInfo.pNext = nullptr;
 		colorAttachmentInfo.imageView = drawImageView; // Target image
 		colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
@@ -149,7 +147,6 @@ namespace NodeBrain
 
 		VkRenderingInfo renderingInfo = {};
 		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-		renderingInfo.pNext = nullptr;
 		renderingInfo.colorAttachmentCount = 1;
 		renderingInfo.pColorAttachments = &colorAttachmentInfo;
 		renderingInfo.renderArea.extent = m_Swapchain.GetVkExtent();
@@ -258,7 +255,6 @@ namespace NodeBrain
 
 		VkWriteDescriptorSet drawImageWrite = {};
 		drawImageWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		drawImageWrite.pNext = nullptr;
 
 		drawImageWrite.dstBinding = 0;
 		drawImageWrite.dstSet = vulkanShader->GetVkDescriptorSet();

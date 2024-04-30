@@ -27,7 +27,7 @@ namespace NodeBrain
 
 		
 		// --- Features ---
-		VkPhysicalDeviceFeatures2 deviceFeatures = {}; // TODO:
+		VkPhysicalDeviceFeatures2 deviceFeatures = {};
 		deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
 
 		VkPhysicalDeviceVulkan12Features vulkan12Features = {};
@@ -66,7 +66,6 @@ namespace NodeBrain
 			createInfo.ppEnabledLayerNames = &validationLayers[0];
 		}
 
-		// Create device
 		VK_CHECK(vkCreateDevice(m_PhysicalDevice.GetVkPhysicalDevice(), &createInfo, nullptr, &m_VkDevice));
 
 		// Retrieve queues

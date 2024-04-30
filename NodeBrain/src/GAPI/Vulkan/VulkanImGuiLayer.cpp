@@ -4,15 +4,21 @@
 #include <ImGui/imgui.h>
 #include <ImGui/backends/imgui_impl_glfw.h>
 #include <ImGui/backends/imgui_impl_vulkan.h>
-#include <GLFW/glfw3.h>
 
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanImage.h"
 #include "Core/App.h"
 #include "Renderer/Renderer.h"
 
+class GLFWwindow;
+
 namespace NodeBrain
 {
+	VulkanImGuiLayer::VulkanImGuiLayer()
+	{
+
+	}
+
 	VulkanImGuiLayer::~VulkanImGuiLayer()
 	{
 		ImGui_ImplVulkan_Shutdown();
@@ -70,12 +76,9 @@ namespace NodeBrain
 		initInfo.MinImageCount = 3;
 		initInfo.ImageCount = 3;
 		initInfo.UseDynamicRendering = VK_TRUE;
-		initInfo.ColorAttachmentFormat = ImageFormatToVulkanFormat(VulkanRenderContext::Get()->GetSwapchain().GetDrawImage()->GetConfiguration().Format); // temp
+		initInfo.ColorAttachmentFormat = ImageFormatToVkFormat(VulkanRenderContext::Get()->GetSwapchain().GetDrawImage()->GetConfiguration().Format); // temp
 		initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		ImGui_ImplVulkan_Init(&initInfo, VK_NULL_HANDLE);
-
-		// Upload imgui font textures to GPU
-		// VulkanRendererAPI::ImmediateSubmit([&](VkCommandBuffer cmd){ ImGui_ImplVulkan_CreateFontsTexture(cmd); });
 	}
 
 	void VulkanImGuiLayer::OnDetach()

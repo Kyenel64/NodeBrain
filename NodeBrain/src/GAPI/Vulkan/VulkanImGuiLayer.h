@@ -9,7 +9,7 @@ namespace NodeBrain
 	class VulkanImGuiLayer : public ImGuiLayer
 	{
 	public:
-		VulkanImGuiLayer() = default;
+		VulkanImGuiLayer();
 		virtual ~VulkanImGuiLayer();
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;

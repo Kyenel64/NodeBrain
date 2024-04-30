@@ -82,7 +82,6 @@ namespace NodeBrain
 		// Create descriptor layout
 		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {};
 		descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		descriptorSetLayoutCreateInfo.pNext = nullptr;
 		descriptorSetLayoutCreateInfo.bindingCount = (uint32_t)layoutBindings.size();
 		descriptorSetLayoutCreateInfo.pBindings = &layoutBindings[0];
 		descriptorSetLayoutCreateInfo.flags = 0;
