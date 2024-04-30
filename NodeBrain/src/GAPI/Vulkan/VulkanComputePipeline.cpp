@@ -16,9 +16,9 @@ namespace NodeBrain
 		computeLayout.pSetLayouts = &layouts[0];
 		computeLayout.setLayoutCount = 1;
 
-		if (computeShader->GetPushConstantRange())
+		if (computeShader->GetPushConstantRange().size)
 		{
-			computeLayout.pPushConstantRanges = computeShader->GetPushConstantRange();
+			computeLayout.pPushConstantRanges = &computeShader->GetPushConstantRange();
 			computeLayout.pushConstantRangeCount = 1;
 		}
 

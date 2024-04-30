@@ -20,7 +20,7 @@ namespace NodeBrain
 
 		VkDescriptorSetLayout GetVkDescriptorSetLayout() const { return m_VkDescriptorSetLayout; }
 		VkDescriptorSet GetVkDescriptorSet() const { return m_VkDescriptorSet; }
-		VkPushConstantRange* GetPushConstantRange() const { return m_VkPushConstantRange; }
+		const VkPushConstantRange& GetPushConstantRange() const { return m_VkPushConstantRange; }
 
 	private:
 		VkShaderModule m_VkShaderModule = VK_NULL_HANDLE;
@@ -30,6 +30,6 @@ namespace NodeBrain
 		VkDescriptorSetLayout m_VkDescriptorSetLayout = VK_NULL_HANDLE;
 		VkDescriptorSet m_VkDescriptorSet = VK_NULL_HANDLE;
 
-		VkPushConstantRange* m_VkPushConstantRange = nullptr;
+		VkPushConstantRange m_VkPushConstantRange;
 	};
 }

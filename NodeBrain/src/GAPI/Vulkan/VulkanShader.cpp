@@ -36,7 +36,7 @@ namespace NodeBrain
 
 
 	VulkanShader::VulkanShader(const std::filesystem::path& path, ShaderType shaderType)
-		: m_ShaderPath(path), m_ShaderType(shaderType)
+		: m_ShaderPath(path), m_ShaderType(shaderType), m_VkPushConstantRange({})
 	{
 		NB_PROFILE_FN();
 
@@ -63,8 +63,6 @@ namespace NodeBrain
 			vkDestroyDescriptorSetLayout(VulkanRenderContext::Get()->GetVkDevice(), m_VkDescriptorSetLayout, nullptr);
 			m_VkDescriptorSetLayout = VK_NULL_HANDLE;
 		}
-
-		delete m_VkPushConstantRange;
 	}
 
 	void VulkanShader::SetLayout(const std::vector<LayoutBinding> layout)
@@ -104,9 +102,16 @@ namespace NodeBrain
 
 	void VulkanShader::SetPushConstantLayout(uint32_t size, uint32_t offset)
 	{
-		m_VkPushConstantRange = new VkPushConstantRange();
-		m_VkPushConstantRange->offset = offset;
-		m_VkPushConstantRange->size = size;
-		m_VkPushConstantRange->stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+		VkShaderStageFlagBits stageFlag;
+		switch (m_ShaderType)
+		{
+			case ShaderType::Compute: stageFlag = VK_SHADER_STAGE_COMPUTE_BIT; break;
+			case ShaderType::Vertex: stageFlag = VK_SHADER_STAGE_VERTEX_BIT; break;
+			case ShaderType::Fragment: stageFlag = VK_SHADER_STAGE_FRAGMENT_BIT; break;
+		}
+
+		m_VkPushConstantRange.offset = offset;
+		m_VkPushConstantRange.size = size;
+		m_VkPushConstantRange.stageFlags = stageFlag;
 	}
 }

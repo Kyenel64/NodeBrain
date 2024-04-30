@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Renderer/GraphicsPipeline.h"
+#include "Renderer/IndexBuffer.h"
 #include "Renderer/ComputePipeline.h"
 #include "Renderer/Shader.h"
 
@@ -29,7 +30,9 @@ namespace NodeBrain
 		static void BeginRenderPass();
 		static void EndRenderPass();
 		static void BindGraphicsPipeline(std::shared_ptr<GraphicsPipeline> pipeline);
+		static void BindIndexBuffer(std::shared_ptr<IndexBuffer> indexBuffer);
 		static void Draw(uint32_t vertexCount, uint32_t vertexIndex, uint32_t instanceCount = 0, uint32_t instanceIndex = 0);
+		static void DrawIndexed(uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount = 1, uint32_t instanceIndex = 0);
 
 		static void BeginComputePass();
 		static void EndComputePass();

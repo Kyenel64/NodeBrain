@@ -6,6 +6,7 @@
 #include "Renderer/RendererAPI.h"
 #include "GAPI/Vulkan/VulkanImage.h"
 #include "GAPI/Vulkan/VulkanSwapchain.h"
+#include "GAPI/Vulkan/VulkanIndexBuffer.h"
 
 namespace NodeBrain
 {
@@ -24,7 +25,10 @@ namespace NodeBrain
 		virtual void BeginRenderPass() override;
 		virtual void EndRenderPass() override;
 		virtual void BindGraphicsPipeline(std::shared_ptr<GraphicsPipeline> pipeline) override;
-		virtual void Draw(uint32_t vertexCount, uint32_t vertexIndex = 0, uint32_t instanceCount = 1, uint32_t instanceIndex = 0) override;
+		virtual void Draw(uint32_t vertexCount, uint32_t firstVertex = 0, uint32_t instanceCount = 1, uint32_t instanceIndex = 0) override;
+		virtual void DrawIndexed(uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount = 1, uint32_t instanceIndex = 0) override;
+
+		virtual void BindIndexBuffer(std::shared_ptr<IndexBuffer> indexBuffer) override;
 
 		virtual void BeginComputePass() override;
 		virtual void EndComputePass() override;

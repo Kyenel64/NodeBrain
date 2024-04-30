@@ -193,9 +193,21 @@ namespace NodeBrain
 		vkCmdSetScissor(m_ActiveCmdBuffer, 0, 1, &scissor);
 	}
 
-	void VulkanRendererAPI::Draw(uint32_t vertexCount, uint32_t vertexIndex, uint32_t instanceCount, uint32_t instanceIndex)
+	void VulkanRendererAPI::Draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t instanceIndex)
 	{
-		vkCmdDraw(m_ActiveCmdBuffer, vertexCount, instanceCount, vertexIndex, instanceIndex);
+		vkCmdDraw(m_ActiveCmdBuffer, vertexCount, instanceCount, firstVertex, instanceIndex);
+	}
+
+	void VulkanRendererAPI::DrawIndexed(uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount, uint32_t instanceIndex)
+	{
+		vkCmdDrawIndexed(m_ActiveCmdBuffer, indexCount, instanceCount, firstIndex, 0, instanceIndex);
+	}
+
+	void VulkanRendererAPI::BindIndexBuffer(std::shared_ptr<IndexBuffer> indexBuffer)
+	{
+		std::shared_ptr<VulkanIndexBuffer> vkIndexBuffer = std::static_pointer_cast<VulkanIndexBuffer>(indexBuffer);
+
+		vkCmdBindIndexBuffer(m_ActiveCmdBuffer, vkIndexBuffer->GetVkBuffer(), 0, VK_INDEX_TYPE_UINT32);
 	}
 
 	void VulkanRendererAPI::BeginComputePass()

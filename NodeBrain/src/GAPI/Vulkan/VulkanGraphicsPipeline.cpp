@@ -10,19 +10,22 @@ namespace NodeBrain
 		: m_Configuration(configuration)
 	{
 		NB_PROFILE_FN();
+
+		std::shared_ptr<VulkanShader> vertexShader = std::dynamic_pointer_cast<VulkanShader>(m_Configuration.VertexShader);
+		std::shared_ptr<VulkanShader> fragShader = std::dynamic_pointer_cast<VulkanShader>(m_Configuration.FragmentShader);
 		
 		// Vertex
 		VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo = {};
 		vertShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		vertShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-		vertShaderStageCreateInfo.module = std::dynamic_pointer_cast<VulkanShader>(m_Configuration.VertexShader)->GetVkShaderModule();
+		vertShaderStageCreateInfo.module = vertexShader->GetVkShaderModule();
 		vertShaderStageCreateInfo.pName = "main";
 
 		// Fragment
 		VkPipelineShaderStageCreateInfo fragShaderStageCreateInfo = {};
 		fragShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		fragShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		fragShaderStageCreateInfo.module = std::dynamic_pointer_cast<VulkanShader>(m_Configuration.FragmentShader)->GetVkShaderModule();
+		fragShaderStageCreateInfo.module = fragShader->GetVkShaderModule();
 		fragShaderStageCreateInfo.pName = "main";
 
 		VkPipelineShaderStageCreateInfo shaderStages[2] = { vertShaderStageCreateInfo, fragShaderStageCreateInfo };
@@ -93,13 +96,27 @@ namespace NodeBrain
 		viewportStateCreateInfo.viewportCount = 1;
 		viewportStateCreateInfo.scissorCount = 1;
 
+		// Push constants
+		uint32_t pushConstantCount = 0;
+		VkPushConstantRange pushConstantRanges[2] = {};
+		if (vertexShader->GetPushConstantRange().size)
+		{
+			pushConstantRanges[pushConstantCount] = vertexShader->GetPushConstantRange();
+			pushConstantCount++;
+		}
+		if (fragShader->GetPushConstantRange().size)
+		{
+			pushConstantRanges[pushConstantCount] = fragShader->GetPushConstantRange();
+			pushConstantCount++;
+		}
+
 		// Pipeline layout
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
 		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutCreateInfo.setLayoutCount = 0;
 		pipelineLayoutCreateInfo.pSetLayouts = nullptr;
-		pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-		pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+		pipelineLayoutCreateInfo.pushConstantRangeCount = pushConstantCount;
+		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRanges[0];
 
 		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
 
@@ -140,5 +157,10 @@ namespace NodeBrain
 
 		vkDestroyPipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), m_VkPipelineLayout, nullptr);
 		vkDestroyPipeline(VulkanRenderContext::Get()->GetVkDevice(), m_VkPipeline, nullptr);
+	}
+
+	void VulkanGraphicsPipeline::SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset)
+	{
+		vkCmdPushConstants(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, offset, size, buffer);
 	}
 }

@@ -25,6 +25,8 @@ namespace NodeBrain
 	public:
 		virtual ~GraphicsPipeline() = default;
 
+		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) = 0;
+
 		virtual const PipelineConfiguration& GetConfiguration() const = 0;
 		static std::shared_ptr<GraphicsPipeline> Create(const PipelineConfiguration& configuration);
 	};

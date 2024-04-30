@@ -13,6 +13,8 @@ namespace NodeBrain
 		VulkanGraphicsPipeline(const PipelineConfiguration& config);
 		virtual ~VulkanGraphicsPipeline();
 
+		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) override;
+
 		virtual const PipelineConfiguration& GetConfiguration() const override { return m_Configuration; }
 		VkPipeline GetVkPipeline() const { return m_VkPipeline; }
 
