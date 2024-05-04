@@ -7,8 +7,6 @@ namespace NodeBrain
 	public:
 		virtual ~IndexBuffer() = default;
 
-		virtual void Bind() = 0;
-
 		virtual void SetData(const void* data, uint32_t size) = 0;
 
 		static std::shared_ptr<IndexBuffer> Create(uint32_t* data, uint32_t size);

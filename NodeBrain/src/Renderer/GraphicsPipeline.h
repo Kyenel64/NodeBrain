@@ -12,6 +12,8 @@ namespace NodeBrain
 		std::shared_ptr<Shader> VertexShader;
 		std::shared_ptr<Shader> FragmentShader;
 
+		std::shared_ptr<Image> TargetImage = nullptr;
+
 		TopologyType Topology = TopologyType::TriangleList;
 		PolygonFillMode FillMode = PolygonFillMode::Fill;
 		float LineWidth = 1.0f;
@@ -24,11 +26,11 @@ namespace NodeBrain
 	public:
 		virtual ~GraphicsPipeline() = default;
 
-		virtual void Bind() = 0;
-
 		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) = 0;
+		virtual void SetTargetImage(std::shared_ptr<Image> targetImage) = 0;
 
 		virtual const PipelineConfiguration& GetConfiguration() const = 0;
+		
 		static std::shared_ptr<GraphicsPipeline> Create(const PipelineConfiguration& configuration);
 	};
 }

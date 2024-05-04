@@ -4,6 +4,8 @@
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanUtils.h"
 
+#include <ImGui/backends/imgui_impl_vulkan.h>
+
 namespace NodeBrain
 {	
 	VulkanImage::VulkanImage(const ImageConfiguration& configuration)
@@ -28,6 +30,7 @@ namespace NodeBrain
 		usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		usage |= VK_IMAGE_USAGE_STORAGE_BIT;
 		usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
 		imageCreateInfo.usage = usage;
 
 		// Allocation
@@ -56,11 +59,36 @@ namespace NodeBrain
 		imageViewCreateInfo.subresourceRange.layerCount = 1;
 
 		VK_CHECK(vkCreateImageView(VulkanRenderContext::Get()->GetVkDevice(), &imageViewCreateInfo, nullptr, &m_VkImageView));
+
+
+		// --- Create sampler ---
+		VkSamplerCreateInfo samplerCreateInfo = {};
+		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
+		samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
+		samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.anisotropyEnable = VK_FALSE;
+		samplerCreateInfo.maxAnisotropy = 1;
+		samplerCreateInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
+		samplerCreateInfo.compareEnable = VK_FALSE;
+		samplerCreateInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+		samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerCreateInfo.mipLodBias = 0.0f;
+		samplerCreateInfo.minLod = 0.0f;
+		samplerCreateInfo.maxLod = 0.0f;
+
+		VK_CHECK(vkCreateSampler(VulkanRenderContext::Get()->GetVkDevice(), &samplerCreateInfo, nullptr, &m_VkSampler));
 	}
 
 	VulkanImage::~VulkanImage()
 	{
 		NB_PROFILE_FN();
+
+		vkDestroySampler(VulkanRenderContext::Get()->GetVkDevice(), m_VkSampler, nullptr);
+		m_VkSampler = VK_NULL_HANDLE;
 
 		vkDestroyImageView(VulkanRenderContext::Get()->GetVkDevice(), m_VkImageView, nullptr);
 		m_VkImageView = VK_NULL_HANDLE;
@@ -68,5 +96,13 @@ namespace NodeBrain
 		vmaDestroyImage(VulkanRenderContext::Get()->GetVMAAllocator(), m_VkImage, m_VmaAllocation);
 		m_VkImage = VK_NULL_HANDLE;
 		m_VmaAllocation = VK_NULL_HANDLE;
+	}
+
+	uint64_t VulkanImage::GetAddress()
+	{
+		if (!m_Address)
+			m_Address = (uint64_t)ImGui_ImplVulkan_AddTexture(m_VkSampler, m_VkImageView, VK_IMAGE_LAYOUT_GENERAL);
+
+		return m_Address;
 	}
 }

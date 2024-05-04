@@ -14,6 +14,10 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		Log::Init(); // Init first so we can utilize logging during subsystem startup.
+
+		NB_ASSERT(!s_Instance, "Instance already exists");
+
 		s_Instance = this;
 		m_Timer.StartTimer();
 
@@ -42,8 +46,6 @@ namespace NodeBrain
 	bool App::StartupSubSystems()
 	{
 		NB_PROFILE_FN();
-
-		Log::Init();
 
 		m_Window = std::make_unique<Window>("NodeBrain");
 		m_Window->SetEventCallback(std::bind(&App::OnEvent, this, std::placeholders::_1));

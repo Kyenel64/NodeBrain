@@ -27,5 +27,6 @@ namespace NodeBrain
 		std::shared_ptr<Shader> m_GradientShader;
 		std::shared_ptr<ComputePipeline> m_GradientPipeline;
 
+		std::shared_ptr<Image> m_TargetImage;
 	};
 }

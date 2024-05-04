@@ -14,6 +14,35 @@ class GLFWwindow;
 
 namespace NodeBrain
 {
+	static VkImageSubresourceRange ImageSubresourceRange(VkImageAspectFlags aspectMask)
+	{
+		VkImageSubresourceRange subImage = {};
+		subImage.aspectMask = aspectMask;
+		subImage.baseMipLevel = 0;
+		subImage.levelCount = VK_REMAINING_MIP_LEVELS;
+		subImage.baseArrayLayer = 0;
+		subImage.layerCount = VK_REMAINING_ARRAY_LAYERS;
+
+		return subImage;
+	}
+
+	static void TransitionImage(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout)
+	{
+		VkImageMemoryBarrier imageBarrier = {};
+		imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+
+		imageBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+		imageBarrier.dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_MEMORY_READ_BIT;
+		imageBarrier.oldLayout = currentLayout;
+		imageBarrier.newLayout = newLayout;
+
+		VkImageAspectFlags aspectFlags = (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
+		imageBarrier.subresourceRange = ImageSubresourceRange(aspectFlags);
+		imageBarrier.image = image;
+
+		vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageBarrier);
+	}
+
 	VulkanImGuiLayer::VulkanImGuiLayer()
 	{
 
@@ -76,9 +105,13 @@ namespace NodeBrain
 		initInfo.MinImageCount = 3;
 		initInfo.ImageCount = 3;
 		initInfo.UseDynamicRendering = VK_TRUE;
-		initInfo.ColorAttachmentFormat = ImageFormatToVkFormat(VulkanRenderContext::Get()->GetSwapchain().GetDrawImage()->GetConfiguration().Format); // temp
+		initInfo.ColorAttachmentFormat = VK_FORMAT_B8G8R8A8_SRGB; // temp
 		initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		ImGui_ImplVulkan_Init(&initInfo, VK_NULL_HANDLE);
+
+		VkInstance vkInstance = VulkanRenderContext::Get()->GetVkInstance();
+		m_vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)vkGetInstanceProcAddr(vkInstance, "vkCmdBeginRenderingKHR");
+		m_vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)vkGetInstanceProcAddr(vkInstance, "vkCmdEndRenderingKHR");
 	}
 
 	void VulkanImGuiLayer::OnDetach()
@@ -102,9 +135,33 @@ namespace NodeBrain
 	{
 		ImGui::Render();
 
-		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
-		Renderer::BeginRenderPass();
+		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
+		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
+		VkImage image = swapchain.GetCurrentImageData().Image;
+		VkImageView imageView = swapchain.GetCurrentImageData().ImageView;
+
+		TransitionImage(cmdBuffer, image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+		VkRenderingAttachmentInfo colorAttachmentInfo = {};
+		colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+		colorAttachmentInfo.imageView = imageView; // Target image
+		colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+		colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+		VkRenderingInfo renderingInfo = {};
+		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+		renderingInfo.colorAttachmentCount = 1;
+		renderingInfo.pColorAttachments = &colorAttachmentInfo;
+		renderingInfo.renderArea.extent = swapchain.GetVkExtent();
+		renderingInfo.renderArea.offset = { 0, 0 };
+		renderingInfo.viewMask = 0;
+		renderingInfo.layerCount = 1;
+
+		m_vkCmdBeginRenderingKHR(cmdBuffer, &renderingInfo);
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuffer);
-		Renderer::EndRenderPass();
+		m_vkCmdEndRenderingKHR(cmdBuffer);
+
+		TransitionImage(cmdBuffer, image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	}
 }

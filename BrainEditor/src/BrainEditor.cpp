@@ -15,6 +15,13 @@ namespace NodeBrain
 		m_GradientShader->SetLayout({ { BindingType::StorageImage, 1} });
 		m_GradientPipeline = ComputePipeline::Create(m_GradientShader);
 		Renderer::TempUpdateImage(m_GradientShader); // Temp
+
+
+		ImageConfiguration config = {};
+		config.Width = 1280 / 2;
+		config.Height = 720 / 2;
+		config.Format = ImageFormat::RGBA16;
+		m_TargetImage = Image::Create(config);
 	}
 
 	void BrainEditor::OnDetach()
@@ -50,8 +57,7 @@ namespace NodeBrain
 		else if (m_ShaderIndex == 2)
 			Renderer::ProcessFlatColorCompute();
 			
-		// Pseudo code. Eventually used in scene class
-		Renderer::BeginScene();
+		Renderer::BeginScene(m_TargetImage);
 		//Renderer::SubmitMesh();
 		Renderer::EndScene();
 	}
@@ -63,6 +69,8 @@ namespace NodeBrain
 		ImGui::Begin("TestWindow");
 
 		ImGui::SliderInt("Switch Shader", &m_ShaderIndex, 0, 3);
+
+		ImGui::Image((ImTextureID)m_TargetImage->GetAddress(), { 1280 / 2, 720 / 2 });
 
 		ImGui::End();
 	}

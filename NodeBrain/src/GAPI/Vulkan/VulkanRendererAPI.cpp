@@ -83,13 +83,6 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 	}
 
-	void VulkanRendererAPI::WaitForGPU()
-	{
-		NB_PROFILE_FN();
-
-		vkDeviceWaitIdle(VulkanRenderContext::Get()->GetVkDevice());
-	}
-
 	void VulkanRendererAPI::BeginFrame()
 	{
 		m_ActiveCmdBuffer = m_Swapchain.GetCurrentFrameData().CommandBuffer;
@@ -131,16 +124,55 @@ namespace NodeBrain
 		VK_CHECK(vkQueueSubmit(VulkanRenderContext::Get()->GetDevice().GetGraphicsQueue(), 1, &submitInfo, frameData.InFlightFence));
 	}
 
-	void VulkanRendererAPI::BeginRenderPass()
+	void VulkanRendererAPI::WaitForGPU()
 	{
-		// Use swapchain draw image if no target image
-		VkImageView drawImageView = m_Swapchain.GetDrawImage()->GetVkImageView();
+		NB_PROFILE_FN();
 
-		TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		vkDeviceWaitIdle(VulkanRenderContext::Get()->GetVkDevice());
+	}
+
+	void VulkanRendererAPI::ClearColor(const glm::vec4& color, std::shared_ptr<Image> image)
+	{
+		std::shared_ptr<VulkanImage> vulkanImage = image ? std::static_pointer_cast<VulkanImage>(image) : m_Swapchain.GetDrawImage();
+
+		VkClearColorValue clearValue;
+		clearValue = { { color.x, color.y, color.z, color.w }};
+
+		VkImageSubresourceRange clearRange = ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
+
+		vkCmdClearColorImage(m_ActiveCmdBuffer, vulkanImage->GetVkImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+	}
+
+	void VulkanRendererAPI::BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline)
+	{
+		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetConfiguration().TargetImage ? std::static_pointer_cast<VulkanImage>(pipeline->GetConfiguration().TargetImage) : m_Swapchain.GetDrawImage();
+		std::shared_ptr<VulkanGraphicsPipeline> vulkanPipeline = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline);
+
+		// --- Bind pipeline ---
+		vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVkPipeline());
+
+		// Update dynamic states
+		VkViewport viewport = {};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = vulkanImage->GetConfiguration().Width;
+		viewport.height = vulkanImage->GetConfiguration().Height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(m_ActiveCmdBuffer, 0, 1, &viewport);
+
+		VkRect2D scissor = {};
+		scissor.offset = { 0, 0 };
+		scissor.extent = { vulkanImage->GetConfiguration().Width, vulkanImage->GetConfiguration().Height };
+		vkCmdSetScissor(m_ActiveCmdBuffer, 0, 1, &scissor);
+
+
+		// --- Begin rendering ---
+		TransitionImage(m_ActiveCmdBuffer, vulkanImage->GetVkImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
 		VkRenderingAttachmentInfo colorAttachmentInfo = {};
 		colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-		colorAttachmentInfo.imageView = drawImageView; // Target image
+		colorAttachmentInfo.imageView = vulkanImage->GetVkImageView(); // Target image
 		colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
 		colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -149,7 +181,7 @@ namespace NodeBrain
 		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
 		renderingInfo.colorAttachmentCount = 1;
 		renderingInfo.pColorAttachments = &colorAttachmentInfo;
-		renderingInfo.renderArea.extent = m_Swapchain.GetVkExtent();
+		renderingInfo.renderArea.extent = { vulkanImage->GetConfiguration().Width, vulkanImage->GetConfiguration().Height };
 		renderingInfo.renderArea.offset = { 0, 0 };
 		renderingInfo.viewMask = 0;
 		renderingInfo.layerCount = 1;
@@ -157,11 +189,18 @@ namespace NodeBrain
 		m_vkCmdBeginRenderingKHR(m_ActiveCmdBuffer, &renderingInfo);
 	}
 
-	void VulkanRendererAPI::EndRenderPass()
+	void VulkanRendererAPI::EndRenderPass(std::shared_ptr<GraphicsPipeline> pipeline)
 	{
+		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetConfiguration().TargetImage ? std::static_pointer_cast<VulkanImage>(pipeline->GetConfiguration().TargetImage) : m_Swapchain.GetDrawImage();
+		
 		m_vkCmdEndRenderingKHR(m_ActiveCmdBuffer);
 
-		TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		TransitionImage(m_ActiveCmdBuffer, vulkanImage->GetVkImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+
+
+
+		// temp
+		TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 		TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 		CopyImageToImage(m_ActiveCmdBuffer, m_DrawImage, m_ActiveSwapchainImage, m_Swapchain.GetVkExtent(), m_Swapchain.GetVkExtent());
 		TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
@@ -173,8 +212,11 @@ namespace NodeBrain
 		vkCmdDraw(m_ActiveCmdBuffer, vertexCount, instanceCount, firstVertex, instanceIndex);
 	}
 
-	void VulkanRendererAPI::DrawIndexed(uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount, uint32_t instanceIndex)
+	void VulkanRendererAPI::DrawIndexed(std::shared_ptr<IndexBuffer> indexBuffer, uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount, uint32_t instanceIndex)
 	{
+		std::shared_ptr<VulkanIndexBuffer> vulkanIndexBuffer = std::static_pointer_cast<VulkanIndexBuffer>(indexBuffer);
+
+		vkCmdBindIndexBuffer(m_ActiveCmdBuffer, vulkanIndexBuffer->GetVkBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(m_ActiveCmdBuffer, indexCount, instanceCount, firstIndex, 0, instanceIndex);
 	}
 
@@ -191,16 +233,6 @@ namespace NodeBrain
 	void VulkanRendererAPI::DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) 
 	{
 		vkCmdDispatch(m_ActiveCmdBuffer, groupX, groupY, groupZ);
-	}
-
-	void VulkanRendererAPI::ClearColor(const glm::vec4& color)
-	{
-		VkClearColorValue clearValue;
-		clearValue = { { color.x, color.y, color.z, color.w }};
-
-		VkImageSubresourceRange clearRange = ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
-
-		vkCmdClearColorImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
 	}
 
 	void VulkanRendererAPI::TempUpdateImage(std::shared_ptr<Shader> shader)

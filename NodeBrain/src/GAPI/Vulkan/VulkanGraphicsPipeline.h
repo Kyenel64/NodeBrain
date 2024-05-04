@@ -13,9 +13,8 @@ namespace NodeBrain
 		VulkanGraphicsPipeline(const PipelineConfiguration& config);
 		virtual ~VulkanGraphicsPipeline();
 
-		virtual void Bind() override;
-
 		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) override;
+		virtual void SetTargetImage(std::shared_ptr<Image> targetImage) override { m_Configuration.TargetImage = targetImage; }
 
 		virtual const PipelineConfiguration& GetConfiguration() const override { return m_Configuration; }
 		VkPipeline GetVkPipeline() const { return m_VkPipeline; }

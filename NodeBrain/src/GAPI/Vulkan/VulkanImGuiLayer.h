@@ -19,5 +19,8 @@ namespace NodeBrain
 		virtual void EndFrame() override;
 	private:
 		VkDescriptorPool m_ImGuiDescriptorPool = VK_NULL_HANDLE;
+
+		PFN_vkCmdBeginRenderingKHR m_vkCmdBeginRenderingKHR = VK_NULL_HANDLE;
+		PFN_vkCmdEndRenderingKHR m_vkCmdEndRenderingKHR = VK_NULL_HANDLE;
 	};
 }

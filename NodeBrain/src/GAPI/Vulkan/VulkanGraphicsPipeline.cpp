@@ -13,6 +13,8 @@ namespace NodeBrain
 
 		std::shared_ptr<VulkanShader> vertexShader = std::dynamic_pointer_cast<VulkanShader>(m_Configuration.VertexShader);
 		std::shared_ptr<VulkanShader> fragShader = std::dynamic_pointer_cast<VulkanShader>(m_Configuration.FragmentShader);
+		std::shared_ptr<VulkanImage> targetImage = m_Configuration.TargetImage ? 
+			std::dynamic_pointer_cast<VulkanImage>(m_Configuration.TargetImage) : VulkanRenderContext::Get()->GetSwapchain().GetDrawImage();
 		
 		// Vertex
 		VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo = {};
@@ -124,8 +126,8 @@ namespace NodeBrain
 		VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo = {};
 		pipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
 		pipelineRenderingCreateInfo.colorAttachmentCount = 1;
-		VkFormat format = VK_FORMAT_R16G16B16A16_SFLOAT; // temp
-		pipelineRenderingCreateInfo.pColorAttachmentFormats = &format;
+		std::vector<VkFormat> formats = { VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_B8G8R8A8_SRGB };
+		pipelineRenderingCreateInfo.pColorAttachmentFormats = &formats[0];
 
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
 		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -165,27 +167,5 @@ namespace NodeBrain
 	void VulkanGraphicsPipeline::SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset)
 	{
 		vkCmdPushConstants(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, offset, size, buffer);
-	}
-
-	void VulkanGraphicsPipeline::Bind()
-	{
-		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
-		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
-		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_VkPipeline);
-
-		// Update dynamic states
-		VkViewport viewport = {};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = swapchain.GetVkExtent().width;
-		viewport.height = swapchain.GetVkExtent().height;
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
-
-		VkRect2D scissor{};
-		scissor.offset = { 0, 0 };
-		scissor.extent = { swapchain.GetVkExtent().width, swapchain.GetVkExtent().height };
-		vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 	}
 }

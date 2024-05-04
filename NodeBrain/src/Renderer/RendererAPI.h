@@ -13,16 +13,16 @@ namespace NodeBrain
 	public:
 		virtual ~RendererAPI() = default;
 
-		virtual void WaitForGPU() = 0;
-		virtual void ClearColor(const glm::vec4& color) = 0;
-
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
 
-		virtual void BeginRenderPass() = 0;
-		virtual void EndRenderPass() = 0;
+		virtual void WaitForGPU() = 0;
+		virtual void ClearColor(const glm::vec4& color, std::shared_ptr<Image> image = nullptr) = 0;
+
+		virtual void BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline) = 0;
+		virtual void EndRenderPass(std::shared_ptr<GraphicsPipeline> pipeline) = 0;
 		virtual void Draw(uint32_t vertexCount, uint32_t firstVertex = 0, uint32_t instanceCount = 1, uint32_t instanceIndex = 0) = 0;
-		virtual void DrawIndexed(uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount = 1, uint32_t instanceIndex = 0) = 0;
+		virtual void DrawIndexed(std::shared_ptr<IndexBuffer> indexBuffer, uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount = 1, uint32_t instanceIndex = 0) = 0;
 
 		virtual void BeginComputePass() = 0;
 		virtual void EndComputePass() = 0;

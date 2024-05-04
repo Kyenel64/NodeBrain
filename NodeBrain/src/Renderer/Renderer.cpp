@@ -1,7 +1,6 @@
 #include "NBpch.h"
 #include "Renderer.h"
 
-#include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 
 #include "Renderer/RendererAPI.h"
@@ -139,9 +138,11 @@ namespace NodeBrain
 		s_RendererAPI->EndFrame();
 	}
 
-	void Renderer::BeginScene()
+	void Renderer::BeginScene(std::shared_ptr<Image> targetImage)
 	{
-		//s_RendererAPI->ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f });
+		s_Data->TestPipeline->SetTargetImage(targetImage);
+
+		s_RendererAPI->ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetImage);
 	}
 
 	void Renderer::EndScene()
@@ -152,27 +153,33 @@ namespace NodeBrain
 		float y = sin(glfwGetTime()) * 1.0f;
 		s_Data->TestVertexData[0].Position = { y, -y, 0.0f };
 		s_Data->TestVertexBuffer->SetData(s_Data->TestVertexData, sizeof(QuadVertex) * 4);
-		s_RendererAPI->BeginRenderPass();
-		s_Data->TestPipeline->Bind();
-		s_Data->TestIndexBuffer->Bind();
-		s_RendererAPI->DrawIndexed(6, 0);
-		s_RendererAPI->EndRenderPass();
+
+
+		s_RendererAPI->BeginRenderPass(s_Data->TestPipeline);
+		s_RendererAPI->DrawIndexed(s_Data->TestIndexBuffer, 6, 0);
+		s_RendererAPI->EndRenderPass(s_Data->TestPipeline);
 	}
 
-	// Backend
+
+	// --- Backend ---
 	void Renderer::WaitForGPU()
 	{
 		s_RendererAPI->WaitForGPU();
 	}
 
-	void Renderer::BeginRenderPass()
+	void Renderer::ClearColor(const glm::vec4& color, std::shared_ptr<Image> image)
 	{
-		s_RendererAPI->BeginRenderPass();
+		s_RendererAPI->ClearColor(color, image);
 	}
 
-	void Renderer::EndRenderPass()
+	void Renderer::BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline)
 	{
-		s_RendererAPI->EndRenderPass();
+		s_RendererAPI->BeginRenderPass(pipeline);
+	}
+
+	void Renderer::EndRenderPass(std::shared_ptr<GraphicsPipeline> pipeline)
+	{
+		s_RendererAPI->EndRenderPass(pipeline);
 	}
 
 	void Renderer::Draw(uint32_t vertexCount, uint32_t vertexIndex, uint32_t instanceCount, uint32_t instanceIndex)
@@ -180,9 +187,9 @@ namespace NodeBrain
 		s_RendererAPI->Draw(vertexCount, vertexIndex, instanceCount, instanceIndex);
 	}
 
-	void Renderer::DrawIndexed(uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount, uint32_t instanceIndex)
+	void Renderer::DrawIndexed(std::shared_ptr<IndexBuffer> indexBuffer, uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount, uint32_t instanceIndex)
 	{
-		s_RendererAPI->DrawIndexed(indexCount, firstIndex, instanceCount, instanceIndex);
+		s_RendererAPI->DrawIndexed(indexBuffer, indexCount, firstIndex, instanceCount, instanceIndex);
 	}
 
 	void Renderer::BeginComputePass()

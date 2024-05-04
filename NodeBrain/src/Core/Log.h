@@ -6,13 +6,13 @@
 
 namespace NodeBrain
 {
-    class Log
-    {
-    public:
-        static void Init();
-
-        static std::shared_ptr<spdlog::logger>& GetLogger();
-    };
+	class Log
+	{
+	public:
+		static void Init();
+		
+		static std::shared_ptr<spdlog::logger>& GetLogger();
+	};
 }
 
 #define NB_INFO(...)  NodeBrain::Log::GetLogger()->info(__VA_ARGS__)
@@ -22,13 +22,13 @@ namespace NodeBrain
 #define NB_CRITICAL(...) NodeBrain::Log::GetLogger()->critical(__VA_ARGS__)
 
 #ifdef NB_DEBUG
-    #ifdef NB_WINDOWS
-        #define NB_ASSERT(x, ...) { if(!(x)) { NB_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
-    #elif NB_APPLE
-        #define NB_ASSERT(x, ...) { if(!(x)) { NB_ERROR("Assertion Failed: {0}", __VA_ARGS__); raise(SIGTRAP); } }
-    #elif NB_LINUX
-        #define NB_ASSERT(x, ...) // TODO: implement
-    #endif
+	#ifdef NB_WINDOWS
+		#define NB_ASSERT(x, ...) { if(!(x)) { NB_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
+	#elif NB_APPLE
+		#define NB_ASSERT(x, ...) { if(!(x)) { NB_ERROR("Assertion Failed: {0}", __VA_ARGS__); raise(SIGTRAP); } }
+	#elif NB_LINUX
+		#define NB_ASSERT(x, ...) { if(!(x)) { NB_ERROR("Assertion Failed: {0}", __VA_ARGS__); raise(SIGTRAP); } }
+	#endif
 #else
-    #define NB_ASSERT(x, ...)
+	#define NB_ASSERT(x, ...)
 #endif

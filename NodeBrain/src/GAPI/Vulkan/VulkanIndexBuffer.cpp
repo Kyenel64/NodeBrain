@@ -38,10 +38,4 @@ namespace NodeBrain
 		memcpy(gpuBuffer, data, size);
 		vmaUnmapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_VmaAllocation);
 	}
-
-	void VulkanIndexBuffer::Bind()
-	{
-		VkCommandBuffer cmdBuffer = VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer;
-		vkCmdBindIndexBuffer(cmdBuffer, m_VkBuffer, 0, VK_INDEX_TYPE_UINT32);
-	}
 }
