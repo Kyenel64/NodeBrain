@@ -37,13 +37,13 @@ namespace NodeBrain
 		static void Draw(uint32_t vertexCount, uint32_t vertexIndex, uint32_t instanceCount = 0, uint32_t instanceIndex = 0);
 		static void DrawIndexed(std::shared_ptr<IndexBuffer> indexBuffer, uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount = 1, uint32_t instanceIndex = 0);
 
-		static void BeginComputePass();
-		static void EndComputePass();
+		static void BeginComputePass(std::shared_ptr<ComputePipeline> pipeline);
+		static void EndComputePass(std::shared_ptr<ComputePipeline> pipeline);
 		static void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ);
 
 
 		// Temp. Still figuring out API structure.
-		static void TempUpdateImage(std::shared_ptr<Shader> shader);
+		static void TempUpdateImage(std::shared_ptr<Shader> shader, std::shared_ptr<Image> image = nullptr);
 		static void ProcessGradientCompute();
 		static void ProcessFlatColorCompute();
 	};

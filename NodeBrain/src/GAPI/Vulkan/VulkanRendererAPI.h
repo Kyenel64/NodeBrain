@@ -27,13 +27,13 @@ namespace NodeBrain
 		virtual void Draw(uint32_t vertexCount, uint32_t firstVertex = 0, uint32_t instanceCount = 1, uint32_t instanceIndex = 0) override;
 		virtual void DrawIndexed(std::shared_ptr<IndexBuffer> indexBuffer, uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount = 1, uint32_t instanceIndex = 0) override;
 
-		virtual void BeginComputePass() override;
-		virtual void EndComputePass() override;
+		virtual void BeginComputePass(std::shared_ptr<ComputePipeline> pipeline) override;
+		virtual void EndComputePass(std::shared_ptr<ComputePipeline> pipeline) override;
 		virtual void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) override;
 
 
 		// Temp
-		virtual void TempUpdateImage(std::shared_ptr<Shader> shader) override;
+		virtual void TempUpdateImage(std::shared_ptr<Shader> shader, std::shared_ptr<Image> image = nullptr) override;
 
 	private:
 		VulkanSwapchain& m_Swapchain;

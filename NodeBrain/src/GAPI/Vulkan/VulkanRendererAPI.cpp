@@ -15,59 +15,6 @@
 
 namespace NodeBrain
 {
-	static VkImageSubresourceRange ImageSubresourceRange(VkImageAspectFlags aspectMask)
-	{
-		VkImageSubresourceRange subImage = {};
-		subImage.aspectMask = aspectMask;
-		subImage.baseMipLevel = 0;
-		subImage.levelCount = VK_REMAINING_MIP_LEVELS;
-		subImage.baseArrayLayer = 0;
-		subImage.layerCount = VK_REMAINING_ARRAY_LAYERS;
-
-		return subImage;
-	}
-
-	static void TransitionImage(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout)
-	{
-		VkImageMemoryBarrier imageBarrier = {};
-		imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-
-		imageBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
-		imageBarrier.dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_MEMORY_READ_BIT;
-		imageBarrier.oldLayout = currentLayout;
-		imageBarrier.newLayout = newLayout;
-
-		VkImageAspectFlags aspectFlags = (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
-		imageBarrier.subresourceRange = ImageSubresourceRange(aspectFlags);
-		imageBarrier.image = image;
-
-		vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageBarrier);
-	}
-
-	static void CopyImageToImage(VkCommandBuffer commandBuffer, VkImage srcImage, VkImage dstImage, VkExtent2D srcExtent, VkExtent2D dstExtent)
-	{
-		VkImageBlit blitRegion = {};
-		blitRegion.srcOffsets[1].x = srcExtent.width;
-		blitRegion.srcOffsets[1].y = srcExtent.height;
-		blitRegion.srcOffsets[1].z = 1;
-
-		blitRegion.dstOffsets[1].x = dstExtent.width;
-		blitRegion.dstOffsets[1].y = dstExtent.height;
-		blitRegion.dstOffsets[1].z = 1;
-
-		blitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		blitRegion.srcSubresource.baseArrayLayer = 0;
-		blitRegion.srcSubresource.layerCount = 1;
-		blitRegion.srcSubresource.mipLevel = 0;
-
-		blitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		blitRegion.dstSubresource.baseArrayLayer = 0;
-		blitRegion.dstSubresource.layerCount = 1;
-		blitRegion.dstSubresource.mipLevel = 0;
-
-		vkCmdBlitImage(commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blitRegion, VK_FILTER_LINEAR);
-	}
-
 	VulkanRendererAPI::VulkanRendererAPI()
 		: m_Swapchain(VulkanRenderContext::Get()->GetSwapchain())
 	{
@@ -98,13 +45,13 @@ namespace NodeBrain
 
 		VK_CHECK(vkBeginCommandBuffer(m_ActiveCmdBuffer, &commandBufferBeginInfo));
 
-		TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
-		TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+		Utils::TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+		Utils::TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 	}
 
 	void VulkanRendererAPI::EndFrame()
 	{
-		TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		Utils::TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
 		VK_CHECK(vkEndCommandBuffer(m_ActiveCmdBuffer));
 
@@ -138,14 +85,14 @@ namespace NodeBrain
 		VkClearColorValue clearValue;
 		clearValue = { { color.x, color.y, color.z, color.w }};
 
-		VkImageSubresourceRange clearRange = ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
+		VkImageSubresourceRange clearRange = Utils::ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
 
 		vkCmdClearColorImage(m_ActiveCmdBuffer, vulkanImage->GetVkImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
 	}
 
 	void VulkanRendererAPI::BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline)
 	{
-		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetConfiguration().TargetImage ? std::static_pointer_cast<VulkanImage>(pipeline->GetConfiguration().TargetImage) : m_Swapchain.GetDrawImage();
+		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? std::static_pointer_cast<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
 		std::shared_ptr<VulkanGraphicsPipeline> vulkanPipeline = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline);
 
 		// --- Bind pipeline ---
@@ -168,7 +115,7 @@ namespace NodeBrain
 
 
 		// --- Begin rendering ---
-		TransitionImage(m_ActiveCmdBuffer, vulkanImage->GetVkImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		Utils::TransitionImage(m_ActiveCmdBuffer, vulkanImage->GetVkImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
 		VkRenderingAttachmentInfo colorAttachmentInfo = {};
 		colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -191,20 +138,20 @@ namespace NodeBrain
 
 	void VulkanRendererAPI::EndRenderPass(std::shared_ptr<GraphicsPipeline> pipeline)
 	{
-		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetConfiguration().TargetImage ? std::static_pointer_cast<VulkanImage>(pipeline->GetConfiguration().TargetImage) : m_Swapchain.GetDrawImage();
+		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? std::static_pointer_cast<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
 		
 		m_vkCmdEndRenderingKHR(m_ActiveCmdBuffer);
 
-		TransitionImage(m_ActiveCmdBuffer, vulkanImage->GetVkImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+		Utils::TransitionImage(m_ActiveCmdBuffer, vulkanImage->GetVkImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 
 
 
 		// temp
-		TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-		TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-		CopyImageToImage(m_ActiveCmdBuffer, m_DrawImage, m_ActiveSwapchainImage, m_Swapchain.GetVkExtent(), m_Swapchain.GetVkExtent());
-		TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-		TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+		Utils::TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		Utils::TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		Utils::CopyImageToImage(m_ActiveCmdBuffer, m_DrawImage, m_ActiveSwapchainImage, m_Swapchain.GetVkExtent(), m_Swapchain.GetVkExtent());
+		Utils::TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+		Utils::TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	}
 
 	void VulkanRendererAPI::Draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t instanceIndex)
@@ -220,14 +167,27 @@ namespace NodeBrain
 		vkCmdDrawIndexed(m_ActiveCmdBuffer, indexCount, instanceCount, firstIndex, 0, instanceIndex);
 	}
 
-	void VulkanRendererAPI::BeginComputePass()
+	void VulkanRendererAPI::BeginComputePass(std::shared_ptr<ComputePipeline> pipeline)
 	{
+		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline);
+		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? std::static_pointer_cast<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
+		std::shared_ptr<VulkanShader> vulkanShader = vulkanPipeline->GetComputeShader();
+		VkDescriptorSet descriptorSets = vulkanShader->GetVkDescriptorSet();
 
+		vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vulkanPipeline->GetVkPipeline());
+		vkCmdBindDescriptorSets(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vulkanPipeline->GetVkPipelineLayout(), 0, 1, &descriptorSets, 0, nullptr);
+
+		Utils::TransitionImage(m_ActiveCmdBuffer, vulkanImage->GetVkImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 	}
 	
-	void VulkanRendererAPI::EndComputePass()
+	void VulkanRendererAPI::EndComputePass(std::shared_ptr<ComputePipeline> pipeline)
 	{
-
+		// temp
+		Utils::TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		Utils::TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		Utils::CopyImageToImage(m_ActiveCmdBuffer, m_DrawImage, m_ActiveSwapchainImage, m_Swapchain.GetVkExtent(), m_Swapchain.GetVkExtent());
+		Utils::TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+		Utils::TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	}
 
 	void VulkanRendererAPI::DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) 
@@ -235,18 +195,19 @@ namespace NodeBrain
 		vkCmdDispatch(m_ActiveCmdBuffer, groupX, groupY, groupZ);
 	}
 
-	void VulkanRendererAPI::TempUpdateImage(std::shared_ptr<Shader> shader)
+	void VulkanRendererAPI::TempUpdateImage(std::shared_ptr<Shader> shader, std::shared_ptr<Image> image)
 	{
-		std::shared_ptr<VulkanShader> vulkanShader = std::dynamic_pointer_cast<VulkanShader>(shader);
+		std::shared_ptr<VulkanShader> vulkanShader = std::static_pointer_cast<VulkanShader>(shader);
+		std::shared_ptr<VulkanImage> vulkanImage = image ? std::static_pointer_cast<VulkanImage>(image) : m_Swapchain.GetDrawImage();
+
 
 		//Temp set image
-		VkDescriptorImageInfo imgInfo{};
+		VkDescriptorImageInfo imgInfo = {};
 		imgInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-		imgInfo.imageView = m_Swapchain.GetDrawImage()->GetVkImageView();
+		imgInfo.imageView = vulkanImage->GetVkImageView();
 
 		VkWriteDescriptorSet drawImageWrite = {};
 		drawImageWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
 		drawImageWrite.dstBinding = 0;
 		drawImageWrite.dstSet = vulkanShader->GetVkDescriptorSet();
 		drawImageWrite.descriptorCount = 1;

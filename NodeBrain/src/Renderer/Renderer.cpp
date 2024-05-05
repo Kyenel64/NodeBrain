@@ -142,7 +142,7 @@ namespace NodeBrain
 	{
 		s_Data->TestPipeline->SetTargetImage(targetImage);
 
-		s_RendererAPI->ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetImage);
+		//s_RendererAPI->ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetImage);
 	}
 
 	void Renderer::EndScene()
@@ -192,14 +192,14 @@ namespace NodeBrain
 		s_RendererAPI->DrawIndexed(indexBuffer, indexCount, firstIndex, instanceCount, instanceIndex);
 	}
 
-	void Renderer::BeginComputePass()
+	void Renderer::BeginComputePass(std::shared_ptr<ComputePipeline> pipeline)
 	{
-		s_RendererAPI->BeginComputePass();
+		s_RendererAPI->BeginComputePass(pipeline);
 	}
 
-	void Renderer::EndComputePass()
+	void Renderer::EndComputePass(std::shared_ptr<ComputePipeline> pipeline)
 	{
-		s_RendererAPI->EndComputePass();
+		s_RendererAPI->EndComputePass(pipeline);
 	}
 
 	void Renderer::DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ)
@@ -209,9 +209,9 @@ namespace NodeBrain
 
 
 	// Temp
-	void Renderer::TempUpdateImage(std::shared_ptr<Shader> shader)
+	void Renderer::TempUpdateImage(std::shared_ptr<Shader> shader, std::shared_ptr<Image> image)
 	{
-		s_RendererAPI->TempUpdateImage(shader);
+		s_RendererAPI->TempUpdateImage(shader, image);
 	}
 
 	void Renderer::ProcessGradientCompute()
@@ -220,12 +220,11 @@ namespace NodeBrain
 		s_Data->ColorGradientBuffer.BottomColor = { 0, 0, 1, 1 };
 		s_Data->ColorGradientPipeline->SetPushConstantData(&s_Data->ColorGradientBuffer, sizeof(ColorGradientData), 0);
 
-		s_RendererAPI->BeginComputePass();
-		s_Data->ColorGradientPipeline->Bind();
+		s_RendererAPI->BeginComputePass(s_Data->ColorGradientPipeline);
 		uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 		uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
 		s_RendererAPI->DispatchCompute(groupX, groupY, 1);
-		s_RendererAPI->EndComputePass();
+		s_RendererAPI->EndComputePass(s_Data->ColorGradientPipeline);
 	}
 	
 	void Renderer::ProcessFlatColorCompute()
@@ -233,11 +232,10 @@ namespace NodeBrain
 		s_Data->Color = { 0, 1, 0, 1 };
 		s_Data->FlatColorPipeline->SetPushConstantData(&s_Data->Color, sizeof(glm::vec4), 64);
 
-		s_RendererAPI->BeginComputePass();
-		s_Data->FlatColorPipeline->Bind();
+		s_RendererAPI->BeginComputePass(s_Data->FlatColorPipeline);
 		uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 		uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
 		s_RendererAPI->DispatchCompute(groupX, groupY, 1);
-		s_RendererAPI->EndComputePass();
+		s_RendererAPI->EndComputePass(s_Data->ColorGradientPipeline);
 	}
 }

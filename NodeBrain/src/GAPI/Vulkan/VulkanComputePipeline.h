@@ -10,12 +10,13 @@ namespace NodeBrain
 	class VulkanComputePipeline : public ComputePipeline
 	{
 	public:
-		VulkanComputePipeline(std::shared_ptr<VulkanShader> computeShader);
+		VulkanComputePipeline(std::shared_ptr<VulkanShader> computeShader, std::shared_ptr<Image> targetImage = nullptr);
 		~VulkanComputePipeline();
 
-		virtual void Bind() override;
-
 		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) override; 
+		virtual void SetTargetImage(std::shared_ptr<Image> targetImage) override { m_TargetImage = targetImage; }
+
+		virtual std::shared_ptr<Image> GetTargetImage() const override { return m_TargetImage; }
 
 		VkPipeline GetVkPipeline() const { return m_VkPipeline; }
 		VkPipelineLayout GetVkPipelineLayout() const { return m_VkPipelineLayout; }
@@ -26,5 +27,7 @@ namespace NodeBrain
 		VkPipeline m_VkPipeline = VK_NULL_HANDLE;
 
 		std::shared_ptr<VulkanShader> m_ComputeShader;
+
+		std::shared_ptr<Image> m_TargetImage = nullptr;
 	};
 }

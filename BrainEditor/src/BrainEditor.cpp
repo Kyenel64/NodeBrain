@@ -14,7 +14,6 @@ namespace NodeBrain
 		m_GradientShader = Shader::Create("Assets/Shaders/Compiled/gradient2.comp.spv", ShaderType::Compute);
 		m_GradientShader->SetLayout({ { BindingType::StorageImage, 1} });
 		m_GradientPipeline = ComputePipeline::Create(m_GradientShader);
-		Renderer::TempUpdateImage(m_GradientShader); // Temp
 
 
 		ImageConfiguration config = {};
@@ -22,6 +21,8 @@ namespace NodeBrain
 		config.Height = 720 / 2;
 		config.Format = ImageFormat::RGBA16;
 		m_TargetImage = Image::Create(config);
+
+		Renderer::TempUpdateImage(m_GradientShader, m_TargetImage); // Temp
 	}
 
 	void BrainEditor::OnDetach()
@@ -47,12 +48,12 @@ namespace NodeBrain
 		else if (m_ShaderIndex == 1)
 		{
 			// Demonstrate renderer backend
-			Renderer::BeginComputePass();
-			m_GradientPipeline->Bind();
+			m_GradientPipeline->SetTargetImage(m_TargetImage);
+			Renderer::BeginComputePass(m_GradientPipeline);
 			uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 			uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
 			Renderer::DispatchCompute(groupX, groupY, 1);
-			Renderer::EndComputePass();
+			Renderer::EndComputePass(m_GradientPipeline);
 		}
 		else if (m_ShaderIndex == 2)
 			Renderer::ProcessFlatColorCompute();

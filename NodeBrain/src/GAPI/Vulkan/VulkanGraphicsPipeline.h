@@ -16,7 +16,7 @@ namespace NodeBrain
 		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) override;
 		virtual void SetTargetImage(std::shared_ptr<Image> targetImage) override { m_Configuration.TargetImage = targetImage; }
 
-		virtual const PipelineConfiguration& GetConfiguration() const override { return m_Configuration; }
+		virtual std::shared_ptr<Image> GetTargetImage() const override { return m_Configuration.TargetImage; }
 		VkPipeline GetVkPipeline() const { return m_VkPipeline; }
 
 	private:

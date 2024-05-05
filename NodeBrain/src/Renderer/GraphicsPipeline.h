@@ -29,8 +29,8 @@ namespace NodeBrain
 		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) = 0;
 		virtual void SetTargetImage(std::shared_ptr<Image> targetImage) = 0;
 
-		virtual const PipelineConfiguration& GetConfiguration() const = 0;
-		
+		virtual std::shared_ptr<Image> GetTargetImage() const = 0;
+
 		static std::shared_ptr<GraphicsPipeline> Create(const PipelineConfiguration& configuration);
 	};
 }

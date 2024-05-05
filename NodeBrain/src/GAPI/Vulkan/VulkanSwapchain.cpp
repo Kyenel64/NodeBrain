@@ -5,45 +5,42 @@
 
 namespace NodeBrain
 {
-	namespace Utils
+	static VkSurfaceFormatKHR ChooseSwapchainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
 	{
-		static VkSurfaceFormatKHR ChooseSwapchainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
+		for (const auto& format : availableFormats)
 		{
-			for (const auto& format : availableFormats)
-			{
-				if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)
-					return format;
-			}
-
-			NB_ASSERT(false, "No suitable image format for swapchain");
-			return { VK_FORMAT_UNDEFINED, VK_COLORSPACE_SRGB_NONLINEAR_KHR };
+			if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)
+				return format;
 		}
 
-		static VkPresentModeKHR ChooseSwapchainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes)
+		NB_ASSERT(false, "No suitable image format for swapchain");
+		return { VK_FORMAT_UNDEFINED, VK_COLORSPACE_SRGB_NONLINEAR_KHR };
+	}
+
+	static VkPresentModeKHR ChooseSwapchainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes)
+	{
+		for (const auto& presentationMode : availablePresentationModes)
 		{
-			for (const auto& presentationMode : availablePresentationModes)
-			{
-				if (presentationMode == VK_PRESENT_MODE_MAILBOX_KHR)
-					return presentationMode;
-			}
-			return VK_PRESENT_MODE_FIFO_KHR;
+			if (presentationMode == VK_PRESENT_MODE_MAILBOX_KHR)
+				return presentationMode;
 		}
+		return VK_PRESENT_MODE_FIFO_KHR;
+	}
 
-		static VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
+	static VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
+	{
+		if (capabilities.currentExtent.width != 0xFFFFFFFF)
 		{
-			if (capabilities.currentExtent.width != 0xFFFFFFFF)
-			{
-				return capabilities.currentExtent;
-			}
-			else
-			{
-				glm::vec2 framebufferSize = App::Get()->GetWindow().GetFramebufferSize();
-				VkExtent2D actualExtent = { static_cast<uint32_t>(framebufferSize.x), static_cast<uint32_t>(framebufferSize.y) };
-				actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-				actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+			return capabilities.currentExtent;
+		}
+		else
+		{
+			glm::vec2 framebufferSize = App::Get()->GetWindow().GetFramebufferSize();
+			VkExtent2D actualExtent = { static_cast<uint32_t>(framebufferSize.x), static_cast<uint32_t>(framebufferSize.y) };
+			actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+			actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
-				return actualExtent;
-			}
+			return actualExtent;
 		}
 	}
 
@@ -82,12 +79,12 @@ namespace NodeBrain
 	{
 		// --- Set configurations ---
 		SwapchainSupportDetails swapChainSupport = m_Device.GetPhysicalDevice().QuerySwapchainSupport();
-		VkSurfaceFormatKHR surfaceFormat = Utils::ChooseSwapchainFormat(swapChainSupport.Formats);
+		VkSurfaceFormatKHR surfaceFormat = ChooseSwapchainFormat(swapChainSupport.Formats);
 		VkSurfaceCapabilitiesKHR capabilities = swapChainSupport.Capabilities;
 		m_VkColorFormat = surfaceFormat.format;
 		m_VkColorSpace = surfaceFormat.colorSpace;
-		m_VkPresentationMode = Utils::ChooseSwapchainPresentationMode(swapChainSupport.PresentationModes);
-		m_VkExtent = Utils::ChooseSwapExtent(capabilities);
+		m_VkPresentationMode = ChooseSwapchainPresentationMode(swapChainSupport.PresentationModes);
+		m_VkExtent = ChooseSwapExtent(capabilities);
 		uint32_t minImageCount = (capabilities.maxImageCount > 0 && m_ImageCount > capabilities.maxImageCount) ? capabilities.maxImageCount: capabilities.minImageCount + 1;
 
 		// --- Create swapchain ---
@@ -169,6 +166,8 @@ namespace NodeBrain
 			VkResult result = vkCreateImageView(m_Device.GetVkDevice(), &imageViewCreateInfo, nullptr, &m_ImageDatas[i].ImageView);
 			if (result != VK_SUCCESS)
 				return result;
+			
+			// TODO: Immediate submit transition image to general layout
 		}
 
 		return VK_SUCCESS;
