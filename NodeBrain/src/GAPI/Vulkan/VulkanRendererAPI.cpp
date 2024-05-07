@@ -45,7 +45,6 @@ namespace NodeBrain
 
 		VK_CHECK(vkBeginCommandBuffer(m_ActiveCmdBuffer, &commandBufferBeginInfo));
 
-		Utils::TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 		Utils::TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 	}
 

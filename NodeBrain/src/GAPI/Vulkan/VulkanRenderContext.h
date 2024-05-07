@@ -17,9 +17,10 @@ namespace NodeBrain
 		VulkanRenderContext(Window* window);
 		~VulkanRenderContext();
 
-		virtual void Init() override;
 		virtual void AcquireNextImage() override;
 		virtual void SwapBuffers() override;
+
+		void ImmediateSubmit(std::function<void(VkCommandBuffer cmdBuffer)> func);
 
 		// Getters
 		VkInstance GetVkInstance() const { return m_VkInstance; }
@@ -38,7 +39,10 @@ namespace NodeBrain
 		VkResult CreateDescriptorPools();
 		VkResult CreateDebugUtilsMessenger();
 		VkResult CreateAllocator();
+		VkResult CreateImmediateObjects();
+		
 		void DestroyDebugUtilsMessenger();
+		void DestroyImmediateObjects();
 
 		std::unique_ptr<VulkanPhysicalDevice> FindFirstSuitablePhysicalDevice();
 
@@ -56,5 +60,9 @@ namespace NodeBrain
 
 		std::vector<const char*> m_EnabledLayers;
 		std::vector<const char*> m_EnabledInstanceExtensions;
+
+		VkFence m_ImmediateFence = VK_NULL_HANDLE;
+		VkCommandPool m_ImmediateCmdPool = VK_NULL_HANDLE;
+		VkCommandBuffer m_ImmediateCmdBuffer = VK_NULL_HANDLE;
 	};
 }

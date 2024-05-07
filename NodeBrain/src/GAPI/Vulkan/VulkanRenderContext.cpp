@@ -93,6 +93,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(!s_Instance, "Instance already exists");
 		s_Instance = this;
 
 		#ifdef NB_DEBUG
@@ -107,12 +108,7 @@ namespace NodeBrain
 			m_EnabledInstanceExtensions.push_back("VK_KHR_get_physical_device_properties2");
 		#endif
 
-		Init();
-	}
 
-	void VulkanRenderContext::Init()
-	{
-		NB_PROFILE_FN();
 
 		VK_CHECK(CreateInstance());
 
@@ -126,45 +122,13 @@ namespace NodeBrain
 
 		m_Device = std::make_unique<VulkanDevice>(*m_PhysicalDevice);
 
+		VK_CHECK(CreateImmediateObjects());
+
 		VK_CHECK(CreateAllocator());
 
 		m_Swapchain = std::make_unique<VulkanSwapchain>(m_VkSurface, *m_Device);
 		
 		VK_CHECK(CreateDescriptorPools());
-	}
-
-	VkResult VulkanRenderContext::CreateAllocator()
-	{
-		VmaAllocatorCreateInfo allocatorCreateInfo = {};
-		allocatorCreateInfo.physicalDevice = m_PhysicalDevice->GetVkPhysicalDevice();
-		allocatorCreateInfo.device = m_Device->GetVkDevice();;
-		allocatorCreateInfo.instance = m_VkInstance;
-		allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
-
-		return vmaCreateAllocator(&allocatorCreateInfo, &m_VMAAllocator);
-	}
-
-	VkResult VulkanRenderContext::CreateDescriptorPools()
-	{
-		for (int i = 0; i < FRAMES_IN_FLIGHT; i++)
-		{
-			uint32_t maxSets = 10;
-			std::vector<VkDescriptorPoolSize> poolSizes;
-			poolSizes.push_back(VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10 * maxSets});
-
-			VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
-			descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-			descriptorPoolCreateInfo.flags = 0;
-			descriptorPoolCreateInfo.maxSets = maxSets;
-			descriptorPoolCreateInfo.poolSizeCount = (uint32_t)poolSizes.size();
-			descriptorPoolCreateInfo.pPoolSizes = &poolSizes[0];
-
-			VkResult result = vkCreateDescriptorPool(m_Device->GetVkDevice(), &descriptorPoolCreateInfo, nullptr, &m_VkDescriptorPools[i]);
-			if (result != VK_SUCCESS)
-				return result;
-		}
-		
-		return VK_SUCCESS;
 	}
 
 	VulkanRenderContext::~VulkanRenderContext()
@@ -182,6 +146,8 @@ namespace NodeBrain
 		vmaDestroyAllocator(m_VMAAllocator);
 		m_VMAAllocator = VK_NULL_HANDLE;
 
+		DestroyImmediateObjects();
+
 		m_Device.reset();
 
 		DestroyDebugUtilsMessenger();
@@ -193,33 +159,46 @@ namespace NodeBrain
 		m_VkInstance = VK_NULL_HANDLE;
 	}
 
+	void VulkanRenderContext::AcquireNextImage()
+	{
+		m_Swapchain->AcquireNextImage();
+	}
+
+	void VulkanRenderContext::SwapBuffers()
+	{
+		m_Swapchain->PresentImage();
+	}
+
+	void VulkanRenderContext::ImmediateSubmit(std::function<void(VkCommandBuffer cmdBuffer)> func)
+	{
+		VK_CHECK(vkResetFences(m_Device->GetVkDevice(), 1, &m_ImmediateFence));
+		VK_CHECK(vkResetCommandBuffer(m_ImmediateCmdBuffer, 0));
+
+		VkCommandBuffer cmdBuffer = m_ImmediateCmdBuffer;
+
+		VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
+		cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+		VK_CHECK(vkBeginCommandBuffer(cmdBuffer, &cmdBufferBeginInfo));
+		func(cmdBuffer);
+		VK_CHECK(vkEndCommandBuffer(cmdBuffer));
+
+		VkSubmitInfo submitInfo = {};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &cmdBuffer;
+
+		VK_CHECK(vkQueueSubmit(m_Device->GetGraphicsQueue(), 1, &submitInfo, m_ImmediateFence));
+
+		VK_CHECK(vkWaitForFences(m_Device->GetVkDevice(), 1, &m_ImmediateFence, true, UINT64_MAX));
+	}
+
 	VulkanRenderContext* VulkanRenderContext::Get() 
 	{ 
 		return s_Instance; 
 	}
 
-	std::unique_ptr<VulkanPhysicalDevice> VulkanRenderContext::FindFirstSuitablePhysicalDevice()
-	{
-		NB_PROFILE_FN();
-
-		uint32_t deviceCount = 0;
-		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, nullptr);
-		NB_ASSERT(deviceCount, "Could not find any GPUs with Vulkan support");
-		std::vector<VkPhysicalDevice> devices(deviceCount);
-		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, &devices[0]);
-
-		for (int i = 0; i < devices.size(); i++)
-		{
-			std::unique_ptr<VulkanPhysicalDevice> physicalDevice = std::make_unique<VulkanPhysicalDevice>(m_VkInstance, m_VkSurface, i);
-			if (physicalDevice->IsSuitable())
-				return physicalDevice;
-		}
-
-		NB_ASSERT(false, "Could not find suitable GPU");
-		return nullptr;
-	}
-
-	VkResult VulkanRenderContext::CreateInstance()
+		VkResult VulkanRenderContext::CreateInstance()
 	{
 		NB_PROFILE_FN();
 
@@ -266,6 +245,40 @@ namespace NodeBrain
 		return vkCreateInstance(&instanceCreateInfo, nullptr, &m_VkInstance);
 	}
 
+	VkResult VulkanRenderContext::CreateDescriptorPools()
+	{
+		for (int i = 0; i < FRAMES_IN_FLIGHT; i++)
+		{
+			uint32_t maxSets = 10;
+			std::vector<VkDescriptorPoolSize> poolSizes;
+			poolSizes.push_back(VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10 * maxSets});
+
+			VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
+			descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+			descriptorPoolCreateInfo.flags = 0;
+			descriptorPoolCreateInfo.maxSets = maxSets;
+			descriptorPoolCreateInfo.poolSizeCount = (uint32_t)poolSizes.size();
+			descriptorPoolCreateInfo.pPoolSizes = &poolSizes[0];
+
+			VkResult result = vkCreateDescriptorPool(m_Device->GetVkDevice(), &descriptorPoolCreateInfo, nullptr, &m_VkDescriptorPools[i]);
+			if (result != VK_SUCCESS)
+				return result;
+		}
+		
+		return VK_SUCCESS;
+	}
+
+	VkResult VulkanRenderContext::CreateAllocator()
+	{
+		VmaAllocatorCreateInfo allocatorCreateInfo = {};
+		allocatorCreateInfo.physicalDevice = m_PhysicalDevice->GetVkPhysicalDevice();
+		allocatorCreateInfo.device = m_Device->GetVkDevice();;
+		allocatorCreateInfo.instance = m_VkInstance;
+		allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+
+		return vmaCreateAllocator(&allocatorCreateInfo, &m_VMAAllocator);
+	}
+
 	VkResult VulkanRenderContext::CreateDebugUtilsMessenger()
 	{
 		NB_PROFILE_FN();
@@ -279,6 +292,61 @@ namespace NodeBrain
 		return func(m_VkInstance, &debugCreateInfo, nullptr, &m_DebugMessenger);
 	}
 
+	VkResult VulkanRenderContext::CreateImmediateObjects()
+	{
+		VkResult result;
+		
+		VkCommandPoolCreateInfo cmdPoolCreateInfo = {};
+		cmdPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		cmdPoolCreateInfo.queueFamilyIndex = m_PhysicalDevice->FindQueueFamilies().Graphics.value();
+
+		result = vkCreateCommandPool(m_Device->GetVkDevice(), &cmdPoolCreateInfo, nullptr, &m_ImmediateCmdPool);
+		if (result != VK_SUCCESS)
+			return result;
+
+		VkCommandBufferAllocateInfo cmdBufferAllocInfo = {};
+		cmdBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		cmdBufferAllocInfo.commandPool = m_ImmediateCmdPool;
+		cmdBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		cmdBufferAllocInfo.commandBufferCount = 1;
+
+		result = vkAllocateCommandBuffers(m_Device->GetVkDevice(), &cmdBufferAllocInfo, &m_ImmediateCmdBuffer);
+		if (result != VK_SUCCESS)
+			return result;
+
+		VkFenceCreateInfo fenceCreateInfo = {};
+		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+		result = vkCreateFence(m_Device->GetVkDevice(), &fenceCreateInfo, nullptr, &m_ImmediateFence);
+		if (result != VK_SUCCESS)
+			return result;
+
+		return VK_SUCCESS;
+	}
+
+	std::unique_ptr<VulkanPhysicalDevice> VulkanRenderContext::FindFirstSuitablePhysicalDevice()
+	{
+		NB_PROFILE_FN();
+
+		uint32_t deviceCount = 0;
+		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, nullptr);
+		NB_ASSERT(deviceCount, "Could not find any GPUs with Vulkan support");
+		std::vector<VkPhysicalDevice> devices(deviceCount);
+		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, &devices[0]);
+
+		for (int i = 0; i < devices.size(); i++)
+		{
+			std::unique_ptr<VulkanPhysicalDevice> physicalDevice = std::make_unique<VulkanPhysicalDevice>(m_VkInstance, m_VkSurface, i);
+			if (physicalDevice->IsSuitable())
+				return physicalDevice;
+		}
+
+		NB_ASSERT(false, "Could not find suitable GPU");
+		return nullptr;
+	}
+
 	void VulkanRenderContext::DestroyDebugUtilsMessenger()
 	{
 		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VkInstance, "vkDestroyDebugUtilsMessengerEXT");
@@ -287,13 +355,11 @@ namespace NodeBrain
 		m_DebugMessenger = VK_NULL_HANDLE;
 	}
 
-	void VulkanRenderContext::AcquireNextImage()
+	void VulkanRenderContext::DestroyImmediateObjects()
 	{
-		m_Swapchain->AcquireNextImage();
-	}
-
-	void VulkanRenderContext::SwapBuffers()
-	{
-		m_Swapchain->PresentImage();
+		vkDestroyCommandPool(m_Device->GetVkDevice(), m_ImmediateCmdPool, nullptr);
+		m_ImmediateCmdPool = VK_NULL_HANDLE;
+		vkDestroyFence(m_Device->GetVkDevice(), m_ImmediateFence, nullptr);
+		m_ImmediateFence = VK_NULL_HANDLE;
 	}
 }

@@ -142,7 +142,7 @@ namespace NodeBrain
 	{
 		s_Data->TestPipeline->SetTargetImage(targetImage);
 
-		//s_RendererAPI->ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetImage);
+		s_RendererAPI->ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetImage);
 	}
 
 	void Renderer::EndScene()

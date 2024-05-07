@@ -2,6 +2,7 @@
 #include "VulkanSwapchain.h"
 
 #include "Core/App.h"
+#include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
 {
@@ -166,8 +167,15 @@ namespace NodeBrain
 			VkResult result = vkCreateImageView(m_Device.GetVkDevice(), &imageViewCreateInfo, nullptr, &m_ImageDatas[i].ImageView);
 			if (result != VK_SUCCESS)
 				return result;
-			
-			// TODO: Immediate submit transition image to general layout
+		}
+
+		// Set image layouts
+		for (size_t i = 0; i < m_ImageCount; i++)
+		{
+			VulkanRenderContext::Get()->ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
+			{
+				Utils::TransitionImage(cmdBuffer, m_ImageDatas[i].Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+			});
 		}
 
 		return VK_SUCCESS;

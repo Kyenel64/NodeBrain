@@ -83,6 +83,10 @@ namespace NodeBrain
 		VK_CHECK(vkCreateSampler(VulkanRenderContext::Get()->GetVkDevice(), &samplerCreateInfo, nullptr, &m_VkSampler));
 
 		// TODO: Immediate submit transition image to general layout
+		VulkanRenderContext::Get()->ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
+		{
+			Utils::TransitionImage(cmdBuffer, m_VkImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+		});
 	}
 
 	VulkanImage::~VulkanImage()
