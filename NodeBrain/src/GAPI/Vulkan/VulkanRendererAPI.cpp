@@ -114,7 +114,7 @@ namespace NodeBrain
 
 
 		// --- Begin rendering ---
-		Utils::TransitionImage(m_ActiveCmdBuffer, vulkanImage->GetVkImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		Utils::TransitionImage(m_ActiveCmdBuffer, vulkanImage->GetVkImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
 		VkRenderingAttachmentInfo colorAttachmentInfo = {};
 		colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;

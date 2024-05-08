@@ -25,6 +25,10 @@ namespace NodeBrain
 		static void BeginScene(std::shared_ptr<Image> targetImage = nullptr);
 		static void EndScene();
 
+		static void RenderSubmitted();
+
+		static void SubmitQuad(const glm::mat4& transform, const glm::vec4& color);
+
 
 		// --- Backend ---
 		static GAPI GetGAPI();
@@ -45,6 +49,5 @@ namespace NodeBrain
 		// Temp. Still figuring out API structure.
 		static void TempUpdateImage(std::shared_ptr<Shader> shader, std::shared_ptr<Image> image = nullptr);
 		static void ProcessGradientCompute();
-		static void ProcessFlatColorCompute();
 	};
 }

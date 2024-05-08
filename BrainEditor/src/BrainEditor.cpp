@@ -1,6 +1,7 @@
 #include "BrainEditor.h"
 
-#include <iostream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <ImGui/imgui.h>
 
@@ -11,7 +12,7 @@ namespace NodeBrain
 		NB_INFO("Attached Brain Editor layer");
 
 		// Demonstrating renderer backend
-		m_GradientShader = Shader::Create("Assets/Shaders/Compiled/gradient2.comp.spv", ShaderType::Compute);
+		m_GradientShader = Shader::Create("Assets/Shaders/Compiled/gradient.comp.spv", ShaderType::Compute);
 		m_GradientShader->SetLayout({ { BindingType::StorageImage, 1} });
 		m_GradientPipeline = ComputePipeline::Create(m_GradientShader);
 
@@ -22,7 +23,7 @@ namespace NodeBrain
 		config.Format = ImageFormat::RGBA16;
 		m_TargetImage = Image::Create(config);
 
-		Renderer::TempUpdateImage(m_GradientShader, m_TargetImage); // Temp
+		Renderer::TempUpdateImage(m_GradientShader); // Temp
 	}
 
 	void BrainEditor::OnDetach()
@@ -38,28 +39,25 @@ namespace NodeBrain
 
 	void BrainEditor::OnUpdate(float deltaTime)
 	{
-		if (Input::IsKeyReleased(Key::T))
-			NB_INFO("'T' released");
-		if (Input::IsMouseButtonReleased(MouseButton::Left))
-			NB_INFO("Left mousebutton released");
-
 		if (m_ShaderIndex == 0)
 			Renderer::ProcessGradientCompute();
 		else if (m_ShaderIndex == 1)
 		{
 			// Demonstrate renderer backend
-			m_GradientPipeline->SetTargetImage(m_TargetImage);
+			//m_GradientPipeline->SetTargetImage(m_TargetImage);
 			Renderer::BeginComputePass(m_GradientPipeline);
 			uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 			uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
 			Renderer::DispatchCompute(groupX, groupY, 1);
 			Renderer::EndComputePass(m_GradientPipeline);
 		}
-		else if (m_ShaderIndex == 2)
-			Renderer::ProcessFlatColorCompute();
+
+		glm::mat4 transform  = glm::translate(glm::mat4(1.0f), { 0.5f, -0.5f, 0.5f }) * glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 0.5f }) * glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), { 1.0f, 1.0f, 0.0f });
+		glm::mat4 transform1 = glm::translate(glm::mat4(1.0f), { -0.5f, 0.5f, 0.0f }) * glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 0.5f });
 			
 		Renderer::BeginScene(m_TargetImage);
-		//Renderer::SubmitMesh();
+		Renderer::SubmitQuad(transform, { 1.0f, 0.0f, 0.0f, 1.0f });
+		Renderer::SubmitQuad(transform1, { 0.0f, 1.0f, 0.0f, 1.0f });
 		Renderer::EndScene();
 	}
 
@@ -69,7 +67,7 @@ namespace NodeBrain
 
 		ImGui::Begin("TestWindow");
 
-		ImGui::SliderInt("Switch Shader", &m_ShaderIndex, 0, 3);
+		ImGui::SliderInt("Switch Shader", &m_ShaderIndex, 0, 1);
 
 		ImGui::Image((ImTextureID)m_TargetImage->GetAddress(), { 1280 / 2, 720 / 2 });
 
