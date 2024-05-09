@@ -87,7 +87,7 @@ namespace NodeBrain
 		pipelineConfig.FragmentShader = s_Data->QuadFragmentShader;
 		s_Data->QuadPipeline = GraphicsPipeline::Create(pipelineConfig);
 
-		s_Data->QuadVertexBuffer = VertexBuffer::Create(sizeof(QuadVertex) * s_Data->MaxVertices);
+		s_Data->QuadVertexBuffer = VertexBuffer::Create(nullptr, sizeof(QuadVertex) * s_Data->MaxVertices);
 
 		uint32_t* quadIndices = new uint32_t[s_Data->MaxIndices];
 		uint32_t offset = 0;

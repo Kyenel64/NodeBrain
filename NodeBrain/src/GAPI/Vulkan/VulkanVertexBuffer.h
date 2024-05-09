@@ -10,7 +10,7 @@ namespace NodeBrain
 	class VulkanVertexBuffer : public VertexBuffer
 	{
 	public:
-		VulkanVertexBuffer(uint32_t size);
+		VulkanVertexBuffer(const void* data, uint32_t size);
 		virtual ~VulkanVertexBuffer();
 
 		virtual void SetData(const void* data, uint32_t size) override;

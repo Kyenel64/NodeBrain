@@ -5,8 +5,9 @@
 
 namespace NodeBrain
 {
-	VulkanVertexBuffer::VulkanVertexBuffer(uint32_t size)
+	VulkanVertexBuffer::VulkanVertexBuffer(const void* data, uint32_t size)
 	{
+		// --- GPU Buffer ---
 		VkBufferCreateInfo bufferCreateInfo = {};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferCreateInfo.size = size;
@@ -18,24 +19,47 @@ namespace NodeBrain
 
 		VK_CHECK(vmaCreateBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), &bufferCreateInfo, &allocationCreateInfo, &m_GPUBuffer, &m_GPUAllocation, nullptr));
 
+		VkBufferDeviceAddressInfo deviceAddressInfo = {};
+		deviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+		deviceAddressInfo.buffer = m_GPUBuffer;
+
+		m_VkDeviceAddress = vkGetBufferDeviceAddress(VulkanRenderContext::Get()->GetVkDevice(), &deviceAddressInfo);
+
+		
+		// --- CPU Buffer ---
 		VkBufferCreateInfo cpuBufferCreateInfo = {};
 		cpuBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		cpuBufferCreateInfo.size = size;
 		cpuBufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
 		VmaAllocationCreateInfo cpuAllocationCreateInfo = {};
-		cpuAllocationCreateInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
+		cpuAllocationCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 		cpuAllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
 		VK_CHECK(vmaCreateBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), &cpuBufferCreateInfo, &cpuAllocationCreateInfo, &m_CPUBuffer, &m_CPUAllocation, nullptr));
 
+		
+		// Set initial data if provided
+		if (data)
+		{
+			VulkanRenderContext::Get()->ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
+			{
+				void* cpuBuffer = nullptr;
+				vmaMapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_CPUAllocation, &cpuBuffer);
+				memcpy(cpuBuffer, data, size);
+				vmaUnmapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_CPUAllocation);
 
+				memcpy(cpuBuffer, data, size);
 
-		VkBufferDeviceAddressInfo deviceAddressInfo = {};
-		deviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
-		deviceAddressInfo.buffer = m_GPUBuffer;
+				VkBufferCopy copy = {};
+				copy.dstOffset = 0;
+				copy.srcOffset = 0;
+				copy.size = size;
 
-		m_VkDeviceAddress = vkGetBufferDeviceAddress(VulkanRenderContext::Get()->GetVkDevice(), &deviceAddressInfo);
+				vkCmdCopyBuffer(cmdBuffer, m_CPUBuffer, m_GPUBuffer, 1, &copy);
+			});
+		}
+		
 	}
 
 	VulkanVertexBuffer::~VulkanVertexBuffer()
