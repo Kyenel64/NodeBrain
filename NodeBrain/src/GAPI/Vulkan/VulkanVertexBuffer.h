@@ -16,11 +16,13 @@ namespace NodeBrain
 		virtual void SetData(const void* data, uint32_t size) override;
 		
 		virtual uint64_t GetAddress() const override { return m_VkDeviceAddress; }
-		VkBuffer GetVkBuffer() const { return m_VkBuffer; }
+		VkBuffer GetVkBuffer() const { return m_CPUBuffer; }
 
 	private:
-		VkBuffer m_VkBuffer = VK_NULL_HANDLE;
-		VmaAllocation m_VmaAllocation = VK_NULL_HANDLE;
+		VkBuffer m_CPUBuffer = VK_NULL_HANDLE;
+		VkBuffer m_GPUBuffer = VK_NULL_HANDLE;
+		VmaAllocation m_CPUAllocation = VK_NULL_HANDLE;
+		VmaAllocation m_GPUAllocation = VK_NULL_HANDLE;
 		VkDeviceAddress m_VkDeviceAddress;
 	};
 }
