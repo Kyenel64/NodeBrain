@@ -4,6 +4,8 @@
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include <Utils/FileUtils.h>
 
+#include "GAPI/Vulkan/VulkanUniformBuffer.h"
+
 namespace NodeBrain
 {
 	namespace Utils
@@ -69,14 +71,14 @@ namespace NodeBrain
 	{
 		// Create vulkan binding for each LayoutBinding.
 		std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
-		for (size_t i = 0; i < layout.size(); i++)
+		for (auto& binding : layout)
 		{
-			VkDescriptorSetLayoutBinding binding = {};
-			binding.binding = i;
-			binding.descriptorCount = layout[i].Count;
-			binding.descriptorType = Utils::BindingTypeToVkDescriptorType(layout[i].Type);
-			binding.stageFlags |= Utils::ShaderTypeToVkShaderStageFlags(m_ShaderType);
-			layoutBindings.push_back(binding);
+			VkDescriptorSetLayoutBinding descriptorSetLayoutBinding = {};
+			descriptorSetLayoutBinding.binding = binding.Binding;
+			descriptorSetLayoutBinding.descriptorCount = 1;
+			descriptorSetLayoutBinding.descriptorType = Utils::BindingTypeToVkDescriptorType(binding.Type);
+			descriptorSetLayoutBinding.stageFlags = Utils::ShaderTypeToVkShaderStageFlags(m_ShaderType);
+			layoutBindings.push_back(descriptorSetLayoutBinding);
 		}
 		
 		// Create descriptor layout
@@ -89,14 +91,64 @@ namespace NodeBrain
 		VK_CHECK(vkCreateDescriptorSetLayout(VulkanRenderContext::Get()->GetVkDevice(), &descriptorSetLayoutCreateInfo, nullptr, &m_VkDescriptorSetLayout));
 		
 		// Create descriptor set
-		std::vector<VkDescriptorSetLayout> setLayouts = { m_VkDescriptorSetLayout };
+		std::vector<VkDescriptorSetLayout> setLayouts(FRAMES_IN_FLIGHT, m_VkDescriptorSetLayout);
 		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = {};
 		descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		descriptorSetAllocateInfo.descriptorPool = VulkanRenderContext::Get()->GetVkDescriptorPool();
-		descriptorSetAllocateInfo.descriptorSetCount = 1;
+		descriptorSetAllocateInfo.descriptorSetCount = FRAMES_IN_FLIGHT;
 		descriptorSetAllocateInfo.pSetLayouts = &setLayouts[0];
 		
-		VK_CHECK(vkAllocateDescriptorSets(VulkanRenderContext::Get()->GetVkDevice(), &descriptorSetAllocateInfo, &m_VkDescriptorSet));
+		VK_CHECK(vkAllocateDescriptorSets(VulkanRenderContext::Get()->GetVkDevice(), &descriptorSetAllocateInfo, &m_VkDescriptorSets[0]));
+
+
+		// Update descriptors
+		for (auto& binding : layout)
+		{
+			if (binding.Type == BindingType::StorageImage)
+			{
+				for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+				{
+					std::shared_ptr<VulkanImage> vulkanImage = std::static_pointer_cast<VulkanImage>(binding.BindingImage);
+
+					VkDescriptorImageInfo imgInfo = {};
+					imgInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+					imgInfo.imageView = vulkanImage->GetVkImageView();
+
+					VkWriteDescriptorSet drawImageWrite = {};
+					drawImageWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+					drawImageWrite.dstBinding = binding.Binding;
+					drawImageWrite.dstSet = m_VkDescriptorSets[i];
+					drawImageWrite.descriptorCount = 1;
+					drawImageWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+					drawImageWrite.pImageInfo = &imgInfo;
+
+					vkUpdateDescriptorSets(VulkanRenderContext::Get()->GetVkDevice(), 1, &drawImageWrite, 0, nullptr);
+				}
+			}
+			else if (binding.Type == BindingType::UniformBuffer)
+			{
+				for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+				{
+					std::shared_ptr<VulkanUniformBuffer> vulkanBuffer = std::static_pointer_cast<VulkanUniformBuffer>(binding.BindingBuffer);
+
+					VkDescriptorBufferInfo bufferInfo = {};
+					bufferInfo.offset = 0;
+					bufferInfo.range = vulkanBuffer->GetSize();
+					bufferInfo.buffer = vulkanBuffer->GetVkBuffer();
+
+					VkWriteDescriptorSet write = {};
+					write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+					write.dstBinding = 1;
+					write.dstSet = m_VkDescriptorSets[i];
+					write.descriptorCount = 1;
+					write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+					write.pBufferInfo = &bufferInfo;
+
+					vkUpdateDescriptorSets(VulkanRenderContext::Get()->GetVkDevice(), 1, &write, 0, nullptr);
+				}
+			}
+		}
+		
 	}
 
 	void VulkanShader::SetPushConstantLayout(uint32_t size, uint32_t offset)

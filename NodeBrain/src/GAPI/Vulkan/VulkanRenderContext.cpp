@@ -250,14 +250,29 @@ namespace NodeBrain
 		for (int i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
 			uint32_t maxSets = 10;
-			std::vector<VkDescriptorPoolSize> poolSizes;
-			poolSizes.push_back(VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10 * maxSets});
+			//std::vector<VkDescriptorPoolSize> poolSizes;
+			//poolSizes.push_back(VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10 * maxSets});
+
+			VkDescriptorPoolSize poolSizes[] = 
+			{
+				{ VK_DESCRIPTOR_TYPE_SAMPLER, maxSets },
+				{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, maxSets },
+				{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, maxSets },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, maxSets },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, maxSets },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, maxSets },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, maxSets },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, maxSets },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, maxSets },
+				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, maxSets },
+				{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, maxSets }
+			};
 
 			VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
 			descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 			descriptorPoolCreateInfo.flags = 0;
-			descriptorPoolCreateInfo.maxSets = maxSets;
-			descriptorPoolCreateInfo.poolSizeCount = (uint32_t)poolSizes.size();
+			descriptorPoolCreateInfo.maxSets = maxSets; // TODO: Double check
+			descriptorPoolCreateInfo.poolSizeCount = 11;
 			descriptorPoolCreateInfo.pPoolSizes = &poolSizes[0];
 
 			VkResult result = vkCreateDescriptorPool(m_Device->GetVkDevice(), &descriptorPoolCreateInfo, nullptr, &m_VkDescriptorPools[i]);

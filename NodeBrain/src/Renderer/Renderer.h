@@ -45,9 +45,9 @@ namespace NodeBrain
 		static void EndComputePass(std::shared_ptr<ComputePipeline> pipeline);
 		static void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ);
 
+		static std::shared_ptr<Image> GetSwapchainDrawImage();
 
-		// Temp. Still figuring out API structure.
-		static void TempUpdateImage(std::shared_ptr<Shader> shader, std::shared_ptr<Image> image = nullptr);
+		// Temp
 		static void ProcessGradientCompute();
 	};
 }

@@ -6,6 +6,7 @@
 #include "Renderer/RendererAPI.h"
 #include "Renderer/Shader.h"
 #include "Renderer/VertexBuffer.h"
+#include "Renderer/UniformBuffer.h"
 #include "RenderContext.h"
 #include "Core/App.h"
 
@@ -13,14 +14,6 @@ namespace NodeBrain
 {
 	std::unique_ptr<RendererAPI> s_RendererAPI = nullptr;
 	GAPI s_GAPI = GAPI::Vulkan;
-
-	struct ColorGradientData
-	{
-		glm::vec4 TopColor;
-		glm::vec4 BottomColor;
-		glm::vec4 Data3;
-		glm::vec4 Data4;
-	};
 
 	struct QuadVertex
 	{
@@ -35,6 +28,12 @@ namespace NodeBrain
 	{
 		glm::mat4 ViewProjectionMatrix;
 		uint64_t Address;
+	};
+
+	struct TestUniformData
+	{
+		glm::vec4 Color;
+		glm::vec4 Color2;
 	};
 
 	struct RendererData
@@ -62,7 +61,8 @@ namespace NodeBrain
 		// --- Color Gradient ---
 		std::shared_ptr<Shader> ColorGradientShader;
 		std::shared_ptr<ComputePipeline> ColorGradientPipeline;
-		ColorGradientData ColorGradientBuffer;
+		TestUniformData TestUniformDataBuffer;
+		std::shared_ptr<UniformBuffer> TestUniformBuffer;
 
 	};
 
@@ -115,12 +115,14 @@ namespace NodeBrain
 
 
 		// --- Color Gradient ---
+		s_Data->TestUniformBuffer = UniformBuffer::Create(nullptr, sizeof(TestUniformData));
+
 		s_Data->ColorGradientShader = Shader::Create("Assets/Shaders/Compiled/gradientColor.comp.spv", ShaderType::Compute);
-		// TODO: Setting layouts will most likely be done automatically by parsing shader file.
-		s_Data->ColorGradientShader->SetLayout({ { BindingType::StorageImage, 1} });
-		s_Data->ColorGradientShader->SetPushConstantLayout(sizeof(ColorGradientData), 0);
+		s_Data->ColorGradientShader->SetLayout({ 
+			{ .Type = BindingType::StorageImage,  .Binding = 0, .BindingImage = s_RendererAPI->GetSwapchainDrawImage() }, 
+			{ .Type = BindingType::UniformBuffer, .Binding = 1, .BindingBuffer = s_Data->TestUniformBuffer } 
+		});
 		s_Data->ColorGradientPipeline = ComputePipeline::Create(s_Data->ColorGradientShader);
-		s_RendererAPI->TempUpdateImage(s_Data->ColorGradientShader);
 
 
 		NB_INFO("Initialized renderer");
@@ -148,6 +150,7 @@ namespace NodeBrain
 		s_RendererAPI->EndFrame();
 	}
 
+	#include <GLFW/glfw3.h>
 	void Renderer::BeginScene(std::shared_ptr<Image> targetImage)
 	{
 		s_Data->QuadPipeline->SetTargetImage(targetImage);
@@ -155,8 +158,17 @@ namespace NodeBrain
 		s_RendererAPI->ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetImage);
 
 		s_Data->PushConstantBuffer.ViewProjectionMatrix = glm::mat4(1.0f);
+
+		const float radius = 1.0f;
+		float camX = sin(glfwGetTime()) * radius;
+		float camZ = cos(glfwGetTime()) * radius;
+		s_Data->TestUniformDataBuffer.Color = { camX, camZ, camX * camZ, 1.0f };
+		s_Data->TestUniformDataBuffer.Color2 = { camZ, camX, camZ * camZ, 1.0f };
+		s_Data->TestUniformBuffer->SetData(&s_Data->TestUniformDataBuffer, sizeof(TestUniformData));
+
 		s_Data->PushConstantBuffer.Address = s_Data->QuadVertexBuffer->GetAddress();
 		s_Data->QuadPipeline->SetPushConstantData(&s_Data->PushConstantBuffer, sizeof(PushConstantData), 0);
+
 
 		s_Data->QuadIndexCount = 0;
 		s_Data->QuadVertexBufferPtr = s_Data->QuadVertexBufferBase;
@@ -253,19 +265,14 @@ namespace NodeBrain
 		s_RendererAPI->DispatchCompute(groupX, groupY, groupZ);
 	}
 
-
-	// Temp
-	void Renderer::TempUpdateImage(std::shared_ptr<Shader> shader, std::shared_ptr<Image> image)
+	std::shared_ptr<Image> Renderer::GetSwapchainDrawImage()
 	{
-		s_RendererAPI->TempUpdateImage(shader, image);
+		return s_RendererAPI->GetSwapchainDrawImage();
 	}
 
+	// Temp
 	void Renderer::ProcessGradientCompute()
 	{
-		s_Data->ColorGradientBuffer.TopColor = { 1, 0, 0, 1 };
-		s_Data->ColorGradientBuffer.BottomColor = { 0, 0, 1, 1 };
-		s_Data->ColorGradientPipeline->SetPushConstantData(&s_Data->ColorGradientBuffer, sizeof(ColorGradientData), 0);
-
 		s_RendererAPI->BeginComputePass(s_Data->ColorGradientPipeline);
 		uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 		uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;

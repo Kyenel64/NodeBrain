@@ -1,9 +1,6 @@
 #include "NBpch.h"
 #include "VulkanRendererAPI.h"
 
-#include <ImGui/imgui.h> // temp
-#include <ImGui/backends/imgui_impl_vulkan.h>
-
 #include "Core/App.h"
 #include "Renderer/Shader.h"
 #include "Renderer/GraphicsPipeline.h"
@@ -192,27 +189,5 @@ namespace NodeBrain
 	void VulkanRendererAPI::DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) 
 	{
 		vkCmdDispatch(m_ActiveCmdBuffer, groupX, groupY, groupZ);
-	}
-
-	void VulkanRendererAPI::TempUpdateImage(std::shared_ptr<Shader> shader, std::shared_ptr<Image> image)
-	{
-		std::shared_ptr<VulkanShader> vulkanShader = std::static_pointer_cast<VulkanShader>(shader);
-		std::shared_ptr<VulkanImage> vulkanImage = image ? std::static_pointer_cast<VulkanImage>(image) : m_Swapchain.GetDrawImage();
-
-
-		//Temp set image
-		VkDescriptorImageInfo imgInfo = {};
-		imgInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-		imgInfo.imageView = vulkanImage->GetVkImageView();
-
-		VkWriteDescriptorSet drawImageWrite = {};
-		drawImageWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		drawImageWrite.dstBinding = 0;
-		drawImageWrite.dstSet = vulkanShader->GetVkDescriptorSet();
-		drawImageWrite.descriptorCount = 1;
-		drawImageWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		drawImageWrite.pImageInfo = &imgInfo;
-
-		vkUpdateDescriptorSets(VulkanRenderContext::Get()->GetVkDevice(), 1, &drawImageWrite, 0, nullptr);
 	}
 }

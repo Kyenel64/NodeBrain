@@ -16,6 +16,8 @@ namespace NodeBrain
 		VulkanRendererAPI();
 		virtual ~VulkanRendererAPI();
 
+		virtual std::shared_ptr<Image> GetSwapchainDrawImage() const override { return m_Swapchain.GetDrawImage(); };
+
 		virtual void BeginFrame() override;
 		virtual void EndFrame() override;
 
@@ -30,10 +32,6 @@ namespace NodeBrain
 		virtual void BeginComputePass(std::shared_ptr<ComputePipeline> pipeline) override;
 		virtual void EndComputePass(std::shared_ptr<ComputePipeline> pipeline) override;
 		virtual void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) override;
-
-
-		// Temp
-		virtual void TempUpdateImage(std::shared_ptr<Shader> shader, std::shared_ptr<Image> image = nullptr) override;
 
 	private:
 		VulkanSwapchain& m_Swapchain;

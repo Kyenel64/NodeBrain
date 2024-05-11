@@ -4,6 +4,11 @@
 
 namespace NodeBrain
 {
+	struct GradientData
+	{
+		glm::vec4 Color1;
+	};
+
 	class BrainEditor : public Layer
 	{
 	public:
@@ -28,5 +33,8 @@ namespace NodeBrain
 		std::shared_ptr<ComputePipeline> m_GradientPipeline;
 
 		std::shared_ptr<Image> m_TargetImage;
+		
+		std::shared_ptr<UniformBuffer> m_GradientUB;
+		GradientData m_GradientBuffer;
 	};
 }

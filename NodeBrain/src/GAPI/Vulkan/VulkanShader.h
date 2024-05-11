@@ -3,6 +3,9 @@
 #include <vulkan/vulkan.h>
 
 #include "Renderer/Shader.h"
+#include "Renderer/UniformBuffer.h"
+#include "GAPI/Vulkan/VulkanRenderContext.h"
+#include "GAPI/Vulkan/VulkanSwapchain.h"
 
 namespace NodeBrain
 {
@@ -19,7 +22,7 @@ namespace NodeBrain
 		VkShaderModule GetVkShaderModule() const { return m_VkShaderModule; }
 
 		VkDescriptorSetLayout GetVkDescriptorSetLayout() const { return m_VkDescriptorSetLayout; }
-		VkDescriptorSet GetVkDescriptorSet() const { return m_VkDescriptorSet; }
+		VkDescriptorSet GetVkDescriptorSet() const { return m_VkDescriptorSets[VulkanRenderContext::Get()->GetSwapchain().GetFrameIndex()]; }
 		const VkPushConstantRange& GetPushConstantRange() const { return m_VkPushConstantRange; }
 
 	private:
@@ -28,7 +31,7 @@ namespace NodeBrain
 		ShaderType m_ShaderType;
 
 		VkDescriptorSetLayout m_VkDescriptorSetLayout = VK_NULL_HANDLE;
-		VkDescriptorSet m_VkDescriptorSet = VK_NULL_HANDLE;
+		VkDescriptorSet m_VkDescriptorSets[FRAMES_IN_FLIGHT];
 
 		VkPushConstantRange m_VkPushConstantRange;
 	};

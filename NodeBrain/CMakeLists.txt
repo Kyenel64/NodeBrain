@@ -32,7 +32,8 @@ set (VulkanFiles
 "src/GAPI/Vulkan/VulkanComputePipeline.h" "src/GAPI/Vulkan/VulkanComputePipeline.cpp"
 "src/GAPI/Vulkan/VulkanImGuiLayer.h" "src/GAPI/Vulkan/VulkanImGuiLayer.cpp"
 "src/GAPI/Vulkan/VulkanVertexBuffer.h" "src/GAPI/Vulkan/VulkanVertexBuffer.cpp"
-"src/GAPI/Vulkan/VulkanIndexBuffer.h" "src/GAPI/Vulkan/VulkanIndexBuffer.cpp")
+"src/GAPI/Vulkan/VulkanIndexBuffer.h" "src/GAPI/Vulkan/VulkanIndexBuffer.cpp"
+"src/GAPI/Vulkan/VulkanUniformBuffer.h" "src/GAPI/Vulkan/VulkanUniformBuffer.cpp")
 
 set (RendererFiles 
 "src/Renderer/Renderer.h" "src/Renderer/Renderer.cpp"
@@ -43,7 +44,8 @@ set (RendererFiles
 "src/Renderer/Image.h" "src/Renderer/Image.cpp"
 "src/Renderer/ComputePipeline.h" "src/Renderer/ComputePipeline.cpp"
 "src/Renderer/VertexBuffer.h" "src/Renderer/VertexBuffer.cpp"
-"src/Renderer/IndexBuffer.h" "src/Renderer/IndexBuffer.cpp")
+"src/Renderer/IndexBuffer.h" "src/Renderer/IndexBuffer.cpp"
+"src/Renderer/UniformBuffer.h" "src/Renderer/UniformBuffer.cpp")
 
 # Source files
 add_library ( ${PROJECT_NAME} 

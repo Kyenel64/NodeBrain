@@ -28,8 +28,7 @@ namespace NodeBrain
 		virtual void EndComputePass(std::shared_ptr<ComputePipeline> pipeline) = 0;
 		virtual void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) = 0;
 
-
-		virtual void TempUpdateImage(std::shared_ptr<Shader> shader, std::shared_ptr<Image> image = nullptr) = 0;
+		virtual std::shared_ptr<Image> GetSwapchainDrawImage() const = 0;
 
 		static std::unique_ptr<RendererAPI> Create();
 	};

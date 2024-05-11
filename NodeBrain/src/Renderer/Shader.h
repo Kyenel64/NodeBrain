@@ -2,6 +2,9 @@
 
 #include <filesystem>
 
+#include "Renderer/Image.h"
+#include "Renderer/UniformBuffer.h"
+
 namespace NodeBrain
 {
 	enum class ShaderType { Vertex, Fragment, Compute };
@@ -10,7 +13,9 @@ namespace NodeBrain
 	struct LayoutBinding
 	{
 		BindingType Type;
-		uint32_t Count;
+		uint32_t Binding;
+		std::shared_ptr<Image> BindingImage = nullptr;
+		std::shared_ptr<UniformBuffer> BindingBuffer = nullptr;
 	};
 
 
