@@ -71,6 +71,31 @@ namespace NodeBrain
 
 			vkCmdBlitImage(commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blitRegion, VK_FILTER_LINEAR);
 		}
+
+		VkDescriptorType BindingTypeToVkDescriptorType(BindingType type)
+		{
+			switch (type)
+			{
+				case BindingType::StorageImage: return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+				case BindingType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			}
+
+			NB_ASSERT(false, "Unavailable binding type");
+			return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+		}
+
+		VkShaderStageFlags ShaderTypeToVkShaderStageFlags(ShaderType type)
+		{
+			switch (type)
+			{
+				case ShaderType::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
+				case ShaderType::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
+				case ShaderType::Compute: return VK_SHADER_STAGE_COMPUTE_BIT;
+			}
+
+			NB_ASSERT(false, "Unavailable shader type");
+			return 0;
+		}
 	}
 	
 }

@@ -36,5 +36,7 @@ namespace NodeBrain
 		
 		std::shared_ptr<UniformBuffer> m_GradientUB;
 		GradientData m_GradientBuffer;
+
+		std::shared_ptr<DescriptorSet> m_GradientDescriptorSet;
 	};
 }

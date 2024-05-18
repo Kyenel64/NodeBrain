@@ -91,7 +91,6 @@ namespace NodeBrain
 		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? std::static_pointer_cast<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
 		std::shared_ptr<VulkanGraphicsPipeline> vulkanPipeline = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline);
 
-		// --- Bind pipeline ---
 		vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVkPipeline());
 
 		// Update dynamic states
@@ -167,11 +166,8 @@ namespace NodeBrain
 	{
 		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline);
 		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? std::static_pointer_cast<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
-		std::shared_ptr<VulkanShader> vulkanShader = vulkanPipeline->GetComputeShader();
-		VkDescriptorSet descriptorSets = vulkanShader->GetVkDescriptorSet();
 
 		vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vulkanPipeline->GetVkPipeline());
-		vkCmdBindDescriptorSets(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vulkanPipeline->GetVkPipelineLayout(), 0, 1, &descriptorSets, 0, nullptr);
 
 		Utils::TransitionImage(m_ActiveCmdBuffer, vulkanImage->GetVkImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 	}

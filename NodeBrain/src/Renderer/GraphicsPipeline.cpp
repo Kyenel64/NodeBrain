@@ -6,7 +6,7 @@
 
 namespace NodeBrain
 {
-	std::shared_ptr<GraphicsPipeline> GraphicsPipeline::Create(const PipelineConfiguration& configuration)
+	std::shared_ptr<GraphicsPipeline> GraphicsPipeline::Create(const GraphicsPipelineConfiguration& configuration)
 	{
 		switch (Renderer::GetGAPI())
 		{

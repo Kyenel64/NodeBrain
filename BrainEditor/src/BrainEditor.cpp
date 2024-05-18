@@ -21,12 +21,16 @@ namespace NodeBrain
 
 		m_GradientUB = UniformBuffer::Create(nullptr, sizeof(GradientData));
 
+		m_GradientDescriptorSet = DescriptorSet::Create({ { BindingType::StorageImage, 0 }, { BindingType::UniformBuffer, 1} });
+		m_GradientDescriptorSet->WriteImage(m_TargetImage, 0);
+		m_GradientDescriptorSet->WriteBuffer(m_GradientUB, 1);
+
 		m_GradientShader = Shader::Create("Assets/Shaders/Compiled/gradient.comp.spv", ShaderType::Compute);
-		m_GradientShader->SetLayout({
-			{ .Type = BindingType::StorageImage, .Binding = 0, .BindingImage = Renderer::GetSwapchainDrawImage() },
-			{ .Type = BindingType::UniformBuffer, .Binding = 1, .BindingBuffer = m_GradientUB}
-		 });
-		m_GradientPipeline = ComputePipeline::Create(m_GradientShader);
+		ComputePipelineConfiguration gradientConfig = {};
+		gradientConfig.ComputeShader = m_GradientShader;
+		gradientConfig.TargetImage = m_TargetImage;
+		gradientConfig.AddDescriptorSet(m_GradientDescriptorSet, 0);
+		m_GradientPipeline = ComputePipeline::Create(gradientConfig);
 	}
 
 	void BrainEditor::OnDetach()
@@ -47,27 +51,30 @@ namespace NodeBrain
 		float camZ = cos(glfwGetTime()) * radius;
 
 		if (m_ShaderIndex == 0)
-			Renderer::ProcessGradientCompute();
+		{
+			glm::mat4 transform  = glm::translate(glm::mat4(1.0f), { camX, -0.5f, 0.5f }) * glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 0.5f }) * glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), { 1.0f, 1.0f, 0.0f });
+			glm::mat4 transform1 = glm::translate(glm::mat4(1.0f), { -0.5f, 0.5f, 0.0f }) * glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 0.5f });
+
+			Renderer::BeginScene();
+			Renderer::SubmitQuad(transform, { 1.0f, 0.0f, 0.0f, 1.0f });
+			Renderer::SubmitQuad(transform1, { 0.0f, 1.0f, 0.0f, 1.0f });
+			Renderer::EndScene();
+		}
 		else if (m_ShaderIndex == 1)
 		{
-			// Demonstrate renderer backend
-			m_GradientPipeline->SetTargetImage(m_TargetImage);
-			m_GradientBuffer.Color1 = { camX, camZ, 1.0f, 1.0f };
+			Renderer::ProcessGradientCompute();
+		}
+		else if (m_ShaderIndex == 2)
+		{
+			m_GradientBuffer.Color1 = { camX, 0.0f, camZ, 1.0f };
 			m_GradientUB->SetData(&m_GradientBuffer, sizeof(GradientData));
+			m_GradientPipeline->BindDescriptorSet(m_GradientDescriptorSet, 0);
 			Renderer::BeginComputePass(m_GradientPipeline);
 			uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 			uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
 			Renderer::DispatchCompute(groupX, groupY, 1);
 			Renderer::EndComputePass(m_GradientPipeline);
 		}
-
-		glm::mat4 transform  = glm::translate(glm::mat4(1.0f), { camX, -0.5f, 0.5f }) * glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 0.5f }) * glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), { 1.0f, 1.0f, 0.0f });
-		glm::mat4 transform1 = glm::translate(glm::mat4(1.0f), { -0.5f, 0.5f, 0.0f }) * glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 0.5f });
-			
-		Renderer::BeginScene(m_TargetImage);
-		Renderer::SubmitQuad(transform, { 1.0f, 0.0f, 0.0f, 1.0f });
-		Renderer::SubmitQuad(transform1, { 0.0f, 1.0f, 0.0f, 1.0f });
-		Renderer::EndScene();
 	}
 
 	void BrainEditor::OnUpdateGUI()
@@ -76,7 +83,7 @@ namespace NodeBrain
 
 		ImGui::Begin("TestWindow");
 
-		ImGui::SliderInt("Switch Shader", &m_ShaderIndex, 0, 1);
+		ImGui::SliderInt("Switch Shader", &m_ShaderIndex, 0, 2);
 
 		ImGui::Image((ImTextureID)m_TargetImage->GetAddress(), { 1280 / 2, 720 / 2 });
 

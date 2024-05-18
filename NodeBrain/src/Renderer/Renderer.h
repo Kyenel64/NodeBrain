@@ -6,7 +6,6 @@
 #include "Renderer/GraphicsPipeline.h"
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/ComputePipeline.h"
-#include "Renderer/Shader.h"
 #include "Renderer/Image.h"
 
 namespace NodeBrain

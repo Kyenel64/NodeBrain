@@ -20,3 +20,5 @@
 #include "Renderer/ComputePipeline.h"
 #include "Renderer/VertexBuffer.h"
 #include "Renderer/IndexBuffer.h"
+#include "Renderer/UniformBuffer.h"
+#include "Renderer/DescriptorSet.h"

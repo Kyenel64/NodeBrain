@@ -18,6 +18,7 @@ namespace NodeBrain
 
 		VkImage GetVkImage() const { return m_VkImage; }
 		VkImageView GetVkImageView() const { return m_VkImageView; }
+		VkSampler GetVkSampler() const { return m_VkSampler; }
 
 		virtual const ImageConfiguration& GetConfiguration() const override { return m_Configuration; }
 

@@ -3,18 +3,18 @@
 
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanShader.h"
+#include "GAPI/Vulkan/VulkanUniformBuffer.h"
+#include "GAPI/Vulkan/VulkanDescriptorSet.h"
 
 namespace NodeBrain
 {
-	VulkanGraphicsPipeline::VulkanGraphicsPipeline(const PipelineConfiguration& configuration)
+	VulkanGraphicsPipeline::VulkanGraphicsPipeline(const GraphicsPipelineConfiguration& configuration)
 		: m_Configuration(configuration)
 	{
 		NB_PROFILE_FN();
 
 		std::shared_ptr<VulkanShader> vertexShader = std::dynamic_pointer_cast<VulkanShader>(m_Configuration.VertexShader);
 		std::shared_ptr<VulkanShader> fragShader = std::dynamic_pointer_cast<VulkanShader>(m_Configuration.FragmentShader);
-		std::shared_ptr<VulkanImage> targetImage = m_Configuration.TargetImage ? 
-			std::dynamic_pointer_cast<VulkanImage>(m_Configuration.TargetImage) : VulkanRenderContext::Get()->GetSwapchain().GetDrawImage();
 		
 		// Vertex
 		VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo = {};
@@ -98,43 +98,42 @@ namespace NodeBrain
 		viewportStateCreateInfo.viewportCount = 1;
 		viewportStateCreateInfo.scissorCount = 1;
 
-		// Push constants
-		uint32_t pushConstantCount = 0;
-		VkPushConstantRange pushConstantRanges[2] = {};
-		if (vertexShader->GetPushConstantRange().size)
-		{
-			pushConstantRanges[pushConstantCount] = vertexShader->GetPushConstantRange();
-			pushConstantCount++;
-		}
-		if (fragShader->GetPushConstantRange().size)
-		{
-			pushConstantRanges[pushConstantCount] = fragShader->GetPushConstantRange();
-			pushConstantCount++;
-		}
-
-		// Pipeline layout
-		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
-		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutCreateInfo.setLayoutCount = 0;
-		pipelineLayoutCreateInfo.pSetLayouts = nullptr;
-		pipelineLayoutCreateInfo.pushConstantRangeCount = pushConstantCount;
-		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRanges[0];
-
-		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
-
-
+		// Rendering
 		VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo = {};
 		pipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
 		pipelineRenderingCreateInfo.colorAttachmentCount = 1;
 		std::vector<VkFormat> formats = { VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_B8G8R8A8_SRGB };
 		pipelineRenderingCreateInfo.pColorAttachmentFormats = &formats[0];
 
+
+		// --- Pipeline Layout ---
+		VkPushConstantRange pushConstantRange = {};
+		pushConstantRange.offset = 0;
+		pushConstantRange.size = 128;
+		pushConstantRange.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+
+		std::vector<VkDescriptorSetLayout> layouts;
+		for (auto& set : m_Configuration.GetDescriptorSets())
+		{
+			std::shared_ptr<VulkanDescriptorSet> vulkanSet = std::static_pointer_cast<VulkanDescriptorSet>(set);
+			layouts.push_back(vulkanSet->GetVkDescriptorSetLayout());
+		}
+		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
+		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutCreateInfo.setLayoutCount = (uint32_t)layouts.size();;
+		pipelineLayoutCreateInfo.pSetLayouts = &layouts[0];
+		pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
+		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
+		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
+
+
+		// --- Pipeline ---
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
 		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		pipelineCreateInfo.pNext = &pipelineRenderingCreateInfo;
 		pipelineCreateInfo.stageCount = 2;
 		pipelineCreateInfo.pStages = shaderStages;
-
+		pipelineCreateInfo.layout = m_VkPipelineLayout;
 		pipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
 		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
 		pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
@@ -143,13 +142,10 @@ namespace NodeBrain
 		pipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 		pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
-
-		pipelineCreateInfo.layout = m_VkPipelineLayout;
 		pipelineCreateInfo.renderPass = VK_NULL_HANDLE;
 		pipelineCreateInfo.subpass = 0;
 		pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 		pipelineCreateInfo.basePipelineIndex = -1; // Optional
-
 		VK_CHECK(vkCreateGraphicsPipelines(VulkanRenderContext::Get()->GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_VkPipeline));
 	}
 
@@ -166,6 +162,13 @@ namespace NodeBrain
 
 	void VulkanGraphicsPipeline::SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset)
 	{
-		vkCmdPushConstants(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, offset, size, buffer);
+		vkCmdPushConstants(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_ALL_GRAPHICS, 0, 128, buffer);
+	}
+
+	void VulkanGraphicsPipeline::BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet, uint32_t setIndex)
+	{
+		std::shared_ptr<VulkanDescriptorSet> vulkanSet = std::static_pointer_cast<VulkanDescriptorSet>(descriptorSet);
+		VkDescriptorSet vkDescriptorSet = vulkanSet->GetVkDescriptorSet();
+		vkCmdBindDescriptorSets(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_VkPipelineLayout, setIndex, 1, &vkDescriptorSet, 0, nullptr);
 	}
 }

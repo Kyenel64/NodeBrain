@@ -23,11 +23,6 @@ layout (set = 0, binding = 0) uniform GlobalUBO1
     vec4 Color2;
 } globalUBO1;
 
-layout (set = 1, binding = 0) uniform LocalUBO
-{
-    vec4 Color3;
-} localUBO;
-
 layout (push_constant) uniform constants
 {
     mat4 ViewMatrix;
@@ -39,5 +34,5 @@ void main()
     Vertex v = PushConstants.vertexBuffer.vertices[gl_VertexIndex];
 
     gl_Position = PushConstants.ViewMatrix * vec4(v.Position, 1.0f);
-    outColor = vec4(globalUBO1.Color1.xy, localUBO.Color3.zw);
+    outColor = vec4(globalUBO1.Color2.xy, globalUBO1.Color2.zw);
 }

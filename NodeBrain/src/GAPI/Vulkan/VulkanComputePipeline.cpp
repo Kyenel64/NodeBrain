@@ -2,29 +2,37 @@
 #include "VulkanComputePipeline.h"
 
 #include "GAPI/Vulkan/VulkanRenderContext.h"
+#include "GAPI/Vulkan/VulkanDescriptorSet.h"
 
 namespace NodeBrain
 {
-	VulkanComputePipeline::VulkanComputePipeline(std::shared_ptr<VulkanShader> computeShader, std::shared_ptr<Image> targetImage)
-		: m_ComputeShader(computeShader), m_TargetImage(targetImage)
+	VulkanComputePipeline::VulkanComputePipeline(const ComputePipelineConfiguration& configuration)
+		: m_Configuration(configuration)
 	{
-		// Pipeline layout
-		std::vector<VkDescriptorSetLayout> layouts = { computeShader->GetVkDescriptorSetLayout() };
+		std::shared_ptr<VulkanShader> computeShader = std::static_pointer_cast<VulkanShader>(m_Configuration.ComputeShader);
 
-		VkPipelineLayoutCreateInfo computeLayout{};
-		computeLayout.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		computeLayout.setLayoutCount = 1;
-		computeLayout.pSetLayouts = &layouts[0];
+		// --- Pipeline Layout ---
+		VkPushConstantRange pushConstantRange = {};
+		pushConstantRange.offset = 0;
+		pushConstantRange.size = 128;
+		pushConstantRange.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 
-		if (computeShader->GetPushConstantRange().size)
+		std::vector<VkDescriptorSetLayout> layouts;
+		for (auto& set : m_Configuration.GetDescriptorSets())
 		{
-			computeLayout.pushConstantRangeCount = 1;
-			computeLayout.pPushConstantRanges = &computeShader->GetPushConstantRange();
+			std::shared_ptr<VulkanDescriptorSet> vulkanSet = std::static_pointer_cast<VulkanDescriptorSet>(set);
+			layouts.push_back(vulkanSet->GetVkDescriptorSetLayout());
 		}
+		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
+		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutCreateInfo.setLayoutCount = (uint32_t)layouts.size();;
+		pipelineLayoutCreateInfo.pSetLayouts = &layouts[0];
+		pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
+		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
+		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
 
-		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), &computeLayout, nullptr, &m_VkPipelineLayout));
 
-		// Pipeline
+		// --- Pipeline ---
 		VkPipelineShaderStageCreateInfo stageinfo{};
 		stageinfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		stageinfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
@@ -51,6 +59,13 @@ namespace NodeBrain
 	void VulkanComputePipeline::SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset)
 	{
 		vkCmdPushConstants(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, offset, size, buffer);
+	}
+
+	void VulkanComputePipeline::BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet, uint32_t setIndex)
+	{
+		std::shared_ptr<VulkanDescriptorSet> vulkanSet = std::static_pointer_cast<VulkanDescriptorSet>(descriptorSet);
+		VkDescriptorSet vkDescriptorSet = vulkanSet->GetVkDescriptorSet();
+		vkCmdBindDescriptorSets(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_VkPipelineLayout, setIndex, 1, &vkDescriptorSet, 0, nullptr);
 	}
 	
 }

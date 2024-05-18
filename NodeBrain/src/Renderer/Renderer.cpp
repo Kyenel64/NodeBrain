@@ -4,10 +4,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Renderer/RendererAPI.h"
-#include "Renderer/Shader.h"
 #include "Renderer/VertexBuffer.h"
 #include "Renderer/UniformBuffer.h"
-#include "RenderContext.h"
+#include "Renderer/DescriptorSet.h"
+#include "Renderer/RenderContext.h"
 #include "Core/App.h"
 
 namespace NodeBrain
@@ -36,6 +36,11 @@ namespace NodeBrain
 		glm::vec4 Color2;
 	};
 
+	struct TestUniformData2
+	{
+		glm::vec4 Color3;
+	};
+
 	struct RendererData
 	{
 		const uint32_t MaxQuads = 20000;
@@ -46,8 +51,10 @@ namespace NodeBrain
 
 		// --- Quad ---
 		std::shared_ptr<Shader> QuadVertexShader;
+		std::shared_ptr<Shader> QuadVertexShader2;
 		std::shared_ptr<Shader> QuadFragmentShader;
 		std::shared_ptr<GraphicsPipeline> QuadPipeline;
+		std::shared_ptr<GraphicsPipeline> QuadPipeline2;
 
 		uint32_t QuadIndexCount = 0;
 		std::shared_ptr<VertexBuffer> QuadVertexBuffer;
@@ -61,8 +68,22 @@ namespace NodeBrain
 		// --- Color Gradient ---
 		std::shared_ptr<Shader> ColorGradientShader;
 		std::shared_ptr<ComputePipeline> ColorGradientPipeline;
+
 		TestUniformData TestUniformDataBuffer;
 		std::shared_ptr<UniformBuffer> TestUniformBuffer;
+
+		TestUniformData2 TestUniformDataBuffer2;
+		std::shared_ptr<UniformBuffer> TestUniformBuffer2;
+
+
+		TestUniformData2 TestUniformDataBuffer3;
+		std::shared_ptr<UniformBuffer> TestUniformBuffer3;
+
+
+
+		std::shared_ptr<DescriptorSet> GlobalDescriptorSet;
+		std::shared_ptr<DescriptorSet> LocalDescriptorSet;
+		std::shared_ptr<DescriptorSet> GradientDescriptorSet;
 
 	};
 
@@ -77,15 +98,39 @@ namespace NodeBrain
 		s_Data = new RendererData();
 		s_RendererAPI = RendererAPI::Create();
 
+		// --- Uniforms ---
+		s_Data->TestUniformBuffer = UniformBuffer::Create(nullptr, sizeof(TestUniformData));
+		s_Data->TestUniformBuffer2 = UniformBuffer::Create(nullptr, sizeof(TestUniformData2));
+		s_Data->TestUniformBuffer3 = UniformBuffer::Create(nullptr, sizeof(TestUniformData2));
 
+		s_Data->GlobalDescriptorSet = DescriptorSet::Create({
+			{ BindingType::UniformBuffer, 0 },
+			{ BindingType::UniformBuffer, 1 }});
+		s_Data->GlobalDescriptorSet->WriteBuffer(s_Data->TestUniformBuffer, 0);
+		s_Data->GlobalDescriptorSet->WriteBuffer(s_Data->TestUniformBuffer2, 1);
+
+		s_Data->LocalDescriptorSet = DescriptorSet::Create({ { BindingType::UniformBuffer, 0 }});
+		s_Data->LocalDescriptorSet->WriteBuffer(s_Data->TestUniformBuffer3, 0);
+
+		s_Data->GradientDescriptorSet = DescriptorSet::Create({ { BindingType::StorageImage, 0}});
+		s_Data->GradientDescriptorSet->WriteImage(GetSwapchainDrawImage(), 0);
+		
 		// --- Quads ---
 		s_Data->QuadVertexShader = Shader::Create("Assets/Shaders/Compiled/triangle.vert.spv", ShaderType::Vertex);
-		s_Data->QuadVertexShader->SetPushConstantLayout(sizeof(PushConstantData), 0);
 		s_Data->QuadFragmentShader = Shader::Create("Assets/Shaders/Compiled/triangle.frag.spv", ShaderType::Fragment);
-		PipelineConfiguration pipelineConfig = {};
+		GraphicsPipelineConfiguration pipelineConfig = {};
 		pipelineConfig.VertexShader = s_Data->QuadVertexShader;
 		pipelineConfig.FragmentShader = s_Data->QuadFragmentShader;
+		pipelineConfig.AddDescriptorSet(s_Data->GlobalDescriptorSet, 0);
+		pipelineConfig.AddDescriptorSet(s_Data->LocalDescriptorSet, 1);
 		s_Data->QuadPipeline = GraphicsPipeline::Create(pipelineConfig);
+
+		s_Data->QuadVertexShader2 = Shader::Create("Assets/Shaders/Compiled/triangle2.vert.spv", ShaderType::Vertex);
+		GraphicsPipelineConfiguration pipelineConfig2 = {};
+		pipelineConfig2.VertexShader = s_Data->QuadVertexShader2;
+		pipelineConfig2.FragmentShader = s_Data->QuadFragmentShader;
+		pipelineConfig2.AddDescriptorSet(s_Data->GlobalDescriptorSet, 0);
+		s_Data->QuadPipeline2 = GraphicsPipeline::Create(pipelineConfig2);
 
 		s_Data->QuadVertexBuffer = VertexBuffer::Create(nullptr, sizeof(QuadVertex) * s_Data->MaxVertices);
 
@@ -115,14 +160,13 @@ namespace NodeBrain
 
 
 		// --- Color Gradient ---
-		s_Data->TestUniformBuffer = UniformBuffer::Create(nullptr, sizeof(TestUniformData));
 
 		s_Data->ColorGradientShader = Shader::Create("Assets/Shaders/Compiled/gradientColor.comp.spv", ShaderType::Compute);
-		s_Data->ColorGradientShader->SetLayout({ 
-			{ .Type = BindingType::StorageImage,  .Binding = 0, .BindingImage = s_RendererAPI->GetSwapchainDrawImage() }, 
-			{ .Type = BindingType::UniformBuffer, .Binding = 1, .BindingBuffer = s_Data->TestUniformBuffer } 
-		});
-		s_Data->ColorGradientPipeline = ComputePipeline::Create(s_Data->ColorGradientShader);
+		ComputePipelineConfiguration computePipelineConfig = {};
+		computePipelineConfig.ComputeShader = s_Data->ColorGradientShader;
+		computePipelineConfig.AddDescriptorSet(s_Data->GradientDescriptorSet, 0);
+		computePipelineConfig.AddDescriptorSet(s_Data->GlobalDescriptorSet, 1);
+		s_Data->ColorGradientPipeline = ComputePipeline::Create(computePipelineConfig);
 
 
 		NB_INFO("Initialized renderer");
@@ -143,6 +187,11 @@ namespace NodeBrain
 	void Renderer::BeginFrame()
 	{
 		s_RendererAPI->BeginFrame();
+
+		// Bind per frame descriptors
+		s_Data->QuadPipeline->BindDescriptorSet(s_Data->GlobalDescriptorSet, 0);
+		s_Data->QuadPipeline2->BindDescriptorSet(s_Data->GlobalDescriptorSet, 0);
+		s_Data->ColorGradientPipeline->BindDescriptorSet(s_Data->GlobalDescriptorSet, 1);
 	}
 
 	void Renderer::EndFrame()
@@ -162,9 +211,15 @@ namespace NodeBrain
 		const float radius = 1.0f;
 		float camX = sin(glfwGetTime()) * radius;
 		float camZ = cos(glfwGetTime()) * radius;
-		s_Data->TestUniformDataBuffer.Color = { camX, camZ, camX * camZ, 1.0f };
-		s_Data->TestUniformDataBuffer.Color2 = { camZ, camX, camZ * camZ, 1.0f };
+		s_Data->TestUniformDataBuffer.Color = { 0, 1, 0, 1.0f };
+		s_Data->TestUniformDataBuffer.Color2 = { 1, 0, 0, 1.0f };
 		s_Data->TestUniformBuffer->SetData(&s_Data->TestUniformDataBuffer, sizeof(TestUniformData));
+
+		s_Data->TestUniformDataBuffer2.Color3 = { 1, 0, 1, 1.0f };
+		s_Data->TestUniformBuffer2->SetData(&s_Data->TestUniformDataBuffer2, sizeof(TestUniformData2));
+
+		s_Data->TestUniformDataBuffer3.Color3 = { 0, 0, 1, 1.0f };
+		s_Data->TestUniformBuffer3->SetData(&s_Data->TestUniformDataBuffer3, sizeof(TestUniformData2));
 
 		s_Data->PushConstantBuffer.Address = s_Data->QuadVertexBuffer->GetAddress();
 		s_Data->QuadPipeline->SetPushConstantData(&s_Data->PushConstantBuffer, sizeof(PushConstantData), 0);
@@ -211,6 +266,7 @@ namespace NodeBrain
 			uint32_t size = (uint32_t)((uint8_t*)s_Data->QuadVertexBufferPtr - (uint8_t*)s_Data->QuadVertexBufferBase);
 			s_Data->QuadVertexBuffer->SetData(s_Data->QuadVertexBufferBase, size);
 
+			s_Data->QuadPipeline->BindDescriptorSet(s_Data->LocalDescriptorSet, 1);
 			s_RendererAPI->BeginRenderPass(s_Data->QuadPipeline);
 			s_RendererAPI->DrawIndexed(s_Data->QuadIndexBuffer, s_Data->QuadIndexCount, 0);
 			s_RendererAPI->EndRenderPass(s_Data->QuadPipeline);
@@ -273,6 +329,7 @@ namespace NodeBrain
 	// Temp
 	void Renderer::ProcessGradientCompute()
 	{
+		s_Data->ColorGradientPipeline->BindDescriptorSet(s_Data->GradientDescriptorSet, 0);
 		s_RendererAPI->BeginComputePass(s_Data->ColorGradientPipeline);
 		uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 		uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;
