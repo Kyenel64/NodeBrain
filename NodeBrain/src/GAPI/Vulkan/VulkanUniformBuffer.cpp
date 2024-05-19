@@ -19,14 +19,7 @@ namespace NodeBrain
 		{
 			VK_CHECK(vmaCreateBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), &bufferCreateInfo, &allocationCreateInfo, &m_VkBuffers[i], &m_VmaAllocations[i], nullptr));
 			VK_CHECK(vmaMapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_VmaAllocations[i], &m_MappedData[i]));
-
-			VkBufferDeviceAddressInfo deviceAddressInfo = {};
-			deviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
-			deviceAddressInfo.buffer = m_VkBuffers[i];
-
-			m_VkDeviceAddresses[i] = vkGetBufferDeviceAddress(VulkanRenderContext::Get()->GetVkDevice(), &deviceAddressInfo);
 		}
-
 
 		// Set initial data if provided
 		if (data)

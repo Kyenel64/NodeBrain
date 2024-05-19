@@ -8,24 +8,15 @@ namespace NodeBrain
 	VulkanVertexBuffer::VulkanVertexBuffer(const void* data, uint32_t size)
 	{
 		// --- GPU Buffer ---
-		VkBufferCreateInfo bufferCreateInfo = {};
-		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferCreateInfo.size = size;
-		bufferCreateInfo.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+		VkBufferCreateInfo gpuBufferCreateInfo = {};
+		gpuBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		gpuBufferCreateInfo.size = size;
+		gpuBufferCreateInfo.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 
 		VmaAllocationCreateInfo allocationCreateInfo = {};
 		allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 		allocationCreateInfo.flags = 0;
 
-		VK_CHECK(vmaCreateBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), &bufferCreateInfo, &allocationCreateInfo, &m_GPUBuffer, &m_GPUAllocation, nullptr));
-
-		VkBufferDeviceAddressInfo deviceAddressInfo = {};
-		deviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
-		deviceAddressInfo.buffer = m_GPUBuffer;
-
-		m_VkDeviceAddress = vkGetBufferDeviceAddress(VulkanRenderContext::Get()->GetVkDevice(), &deviceAddressInfo);
-
-		
 		// --- CPU Buffer ---
 		VkBufferCreateInfo cpuBufferCreateInfo = {};
 		cpuBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -36,57 +27,68 @@ namespace NodeBrain
 		cpuAllocationCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 		cpuAllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
-		VK_CHECK(vmaCreateBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), &cpuBufferCreateInfo, &cpuAllocationCreateInfo, &m_CPUBuffer, &m_CPUAllocation, nullptr));
-
-		
-		// Set initial data if provided
-		if (data)
+		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
-			VulkanRenderContext::Get()->ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
+			VK_CHECK(vmaCreateBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), &gpuBufferCreateInfo, &allocationCreateInfo, &m_GPUBuffer[i], &m_GPUAllocation[i], nullptr));
+			VK_CHECK(vmaCreateBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), &cpuBufferCreateInfo, &cpuAllocationCreateInfo, &m_CPUBuffer[i], &m_CPUAllocation[i], nullptr));
+
+			VkBufferDeviceAddressInfo deviceAddressInfo = {};
+			deviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+			deviceAddressInfo.buffer = m_GPUBuffer[i];
+			m_VkDeviceAddress[i] = vkGetBufferDeviceAddress(VulkanRenderContext::Get()->GetVkDevice(), &deviceAddressInfo);
+
+			
+			// Set initial data if provided
+			if (data)
 			{
-				void* cpuBuffer = nullptr;
-				vmaMapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_CPUAllocation, &cpuBuffer);
-				memcpy(cpuBuffer, data, size);
-				vmaUnmapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_CPUAllocation);
+				VulkanRenderContext::Get()->ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
+				{
+					void* cpuBuffer = nullptr;
+					vmaMapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_CPUAllocation[i], &cpuBuffer);
+					memcpy(cpuBuffer, data, size);
+					vmaUnmapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_CPUAllocation[i]);
 
-				memcpy(cpuBuffer, data, size);
+					memcpy(cpuBuffer, data, size);
 
-				VkBufferCopy copy = {};
-				copy.dstOffset = 0;
-				copy.srcOffset = 0;
-				copy.size = size;
+					VkBufferCopy copy = {};
+					copy.dstOffset = 0;
+					copy.srcOffset = 0;
+					copy.size = size;
 
-				vkCmdCopyBuffer(cmdBuffer, m_CPUBuffer, m_GPUBuffer, 1, &copy);
-			});
+					vkCmdCopyBuffer(cmdBuffer, m_CPUBuffer[i], m_GPUBuffer[i], 1, &copy);
+				});
+			}
 		}
-		
 	}
 
 	VulkanVertexBuffer::~VulkanVertexBuffer()
 	{
-		vmaDestroyBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), m_GPUBuffer, m_GPUAllocation);
-		m_GPUBuffer = VK_NULL_HANDLE;
-		m_GPUAllocation = VK_NULL_HANDLE;
+		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+		{
+			vmaDestroyBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), m_GPUBuffer[i], m_GPUAllocation[i]);
+			m_GPUBuffer[i] = VK_NULL_HANDLE;
+			m_GPUAllocation[i] = VK_NULL_HANDLE;
 
-		vmaDestroyBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), m_CPUBuffer, m_CPUAllocation);
-		m_CPUBuffer = VK_NULL_HANDLE;
-		m_CPUAllocation = VK_NULL_HANDLE;
+			vmaDestroyBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), m_CPUBuffer[i], m_CPUAllocation[i]);
+			m_CPUBuffer[i] = VK_NULL_HANDLE;
+			m_CPUAllocation[i] = VK_NULL_HANDLE;
+		}
 	}
 
 	void VulkanVertexBuffer::SetData(const void* data, uint32_t size)
 	{
-		void* cpuBuffer = nullptr;
-		vmaMapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_CPUAllocation, &cpuBuffer);
-		memcpy(cpuBuffer, data, size);
-		vmaUnmapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_CPUAllocation);
+		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+		{
+			void* cpuBuffer = nullptr;
+			vmaMapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_CPUAllocation[i], &cpuBuffer);
+			memcpy(cpuBuffer, data, size);
+			vmaUnmapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_CPUAllocation[i]);
 
-		memcpy(cpuBuffer, data, size);
-
-		VkBufferCopy copy = {};
-		copy.dstOffset = 0;
-		copy.srcOffset = 0;
-		copy.size = size;
-
-		vkCmdCopyBuffer(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_CPUBuffer, m_GPUBuffer, 1, &copy);
+			VkBufferCopy copy = {};
+			copy.dstOffset = 0;
+			copy.srcOffset = 0;
+			copy.size = size;
+			vkCmdCopyBuffer(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_CPUBuffer[i], m_GPUBuffer[i], 1, &copy);
+		}
 	}
 }

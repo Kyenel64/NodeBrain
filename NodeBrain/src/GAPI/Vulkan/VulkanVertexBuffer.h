@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 #include <VMA/vk_mem_alloc.h>
 
+#include "GAPI/Vulkan/VulkanSwapchain.h"
 #include "Renderer/VertexBuffer.h"
 
 namespace NodeBrain
@@ -15,14 +16,14 @@ namespace NodeBrain
 
 		virtual void SetData(const void* data, uint32_t size) override;
 		
-		virtual uint64_t GetAddress() const override { return m_VkDeviceAddress; }
-		VkBuffer GetVkBuffer() const { return m_CPUBuffer; }
+		virtual uint64_t GetAddress() const override { return m_VkDeviceAddress[VulkanRenderContext::Get()->GetSwapchain().GetFrameIndex()]; }
+		VkBuffer GetVkBuffer() const { return m_CPUBuffer[VulkanRenderContext::Get()->GetSwapchain().GetFrameIndex()]; }
 
 	private:
-		VkBuffer m_CPUBuffer = VK_NULL_HANDLE;
-		VkBuffer m_GPUBuffer = VK_NULL_HANDLE;
-		VmaAllocation m_CPUAllocation = VK_NULL_HANDLE;
-		VmaAllocation m_GPUAllocation = VK_NULL_HANDLE;
-		VkDeviceAddress m_VkDeviceAddress;
+		VkBuffer m_CPUBuffer[FRAMES_IN_FLIGHT];
+		VkBuffer m_GPUBuffer[FRAMES_IN_FLIGHT];
+		VmaAllocation m_CPUAllocation[FRAMES_IN_FLIGHT];
+		VmaAllocation m_GPUAllocation[FRAMES_IN_FLIGHT];
+		VkDeviceAddress m_VkDeviceAddress[FRAMES_IN_FLIGHT];
 	};
 }
