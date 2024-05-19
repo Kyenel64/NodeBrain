@@ -3,7 +3,6 @@
 
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanShader.h"
-#include "GAPI/Vulkan/VulkanUniformBuffer.h"
 #include "GAPI/Vulkan/VulkanDescriptorSet.h"
 
 namespace NodeBrain
@@ -13,8 +12,8 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		std::shared_ptr<VulkanShader> vertexShader = std::dynamic_pointer_cast<VulkanShader>(m_Configuration.VertexShader);
-		std::shared_ptr<VulkanShader> fragShader = std::dynamic_pointer_cast<VulkanShader>(m_Configuration.FragmentShader);
+		std::shared_ptr<VulkanShader> vertexShader = std::static_pointer_cast<VulkanShader>(m_Configuration.VertexShader);
+		std::shared_ptr<VulkanShader> fragShader = std::static_pointer_cast<VulkanShader>(m_Configuration.FragmentShader);
 		
 		// Vertex
 		VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo = {};
@@ -118,6 +117,7 @@ namespace NodeBrain
 			std::shared_ptr<VulkanDescriptorSet> vulkanSet = std::static_pointer_cast<VulkanDescriptorSet>(set);
 			layouts.push_back(vulkanSet->GetVkDescriptorSetLayout());
 		}
+
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
 		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutCreateInfo.setLayoutCount = (uint32_t)layouts.size();;
@@ -134,6 +134,7 @@ namespace NodeBrain
 		pipelineCreateInfo.stageCount = 2;
 		pipelineCreateInfo.pStages = shaderStages;
 		pipelineCreateInfo.layout = m_VkPipelineLayout;
+
 		pipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
 		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
 		pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
@@ -142,6 +143,7 @@ namespace NodeBrain
 		pipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 		pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
+
 		pipelineCreateInfo.renderPass = VK_NULL_HANDLE;
 		pipelineCreateInfo.subpass = 0;
 		pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
@@ -162,11 +164,15 @@ namespace NodeBrain
 
 	void VulkanGraphicsPipeline::SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset)
 	{
+		NB_PROFILE_FN();
+
 		vkCmdPushConstants(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_ALL_GRAPHICS, 0, 128, buffer);
 	}
 
 	void VulkanGraphicsPipeline::BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet, uint32_t setIndex)
 	{
+		NB_PROFILE_FN();
+		
 		std::shared_ptr<VulkanDescriptorSet> vulkanSet = std::static_pointer_cast<VulkanDescriptorSet>(descriptorSet);
 		VkDescriptorSet vkDescriptorSet = vulkanSet->GetVkDescriptorSet();
 		vkCmdBindDescriptorSets(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_VkPipelineLayout, setIndex, 1, &vkDescriptorSet, 0, nullptr);

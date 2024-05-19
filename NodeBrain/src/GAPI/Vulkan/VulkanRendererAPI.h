@@ -4,9 +4,8 @@
 #include <glm/glm.hpp>
 
 #include "Renderer/RendererAPI.h"
-#include "GAPI/Vulkan/VulkanImage.h"
-#include "GAPI/Vulkan/VulkanSwapchain.h"
-#include "GAPI/Vulkan/VulkanIndexBuffer.h"
+#include "Renderer/GraphicsPipeline.h"
+#include "Renderer/Shader.h"
 
 namespace NodeBrain
 {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Renderer/UniformBuffer.h"
+#include "Renderer/Image.h"
 
 namespace NodeBrain
 {

@@ -15,7 +15,7 @@ namespace NodeBrain
 	{
 	public:
 		VulkanRenderContext(Window* window);
-		~VulkanRenderContext();
+		virtual ~VulkanRenderContext();
 
 		virtual void AcquireNextImage() override;
 		virtual void SwapBuffers() override;

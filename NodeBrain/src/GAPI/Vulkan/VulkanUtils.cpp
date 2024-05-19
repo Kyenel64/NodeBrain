@@ -9,6 +9,8 @@ namespace NodeBrain
 	{
 		VkFormat ImageFormatToVkFormat(ImageFormat format)
 		{
+			NB_PROFILE_FN();
+
 			switch (format)
 			{
 				case ImageFormat::None: return VK_FORMAT_UNDEFINED; break;
@@ -21,6 +23,8 @@ namespace NodeBrain
 
 		VkImageSubresourceRange ImageSubresourceRange(VkImageAspectFlags aspectMask)
 		{
+			NB_PROFILE_FN();
+
 			VkImageSubresourceRange subImage = {};
 			subImage.aspectMask = aspectMask;
 			subImage.baseMipLevel = 0;
@@ -33,6 +37,8 @@ namespace NodeBrain
 
 		void TransitionImage(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout)
 		{
+			NB_PROFILE_FN();
+
 			VkImageMemoryBarrier imageBarrier = {};
 			imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 
@@ -50,6 +56,8 @@ namespace NodeBrain
 
 		void CopyImageToImage(VkCommandBuffer commandBuffer, VkImage srcImage, VkImage dstImage, VkExtent2D srcExtent, VkExtent2D dstExtent)
 		{
+			NB_PROFILE_FN();
+
 			VkImageBlit blitRegion = {};
 			blitRegion.srcOffsets[1].x = srcExtent.width;
 			blitRegion.srcOffsets[1].y = srcExtent.height;
@@ -74,6 +82,8 @@ namespace NodeBrain
 
 		VkDescriptorType BindingTypeToVkDescriptorType(BindingType type)
 		{
+			NB_PROFILE_FN();
+
 			switch (type)
 			{
 				case BindingType::StorageImage: return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
@@ -86,6 +96,8 @@ namespace NodeBrain
 
 		VkShaderStageFlags ShaderTypeToVkShaderStageFlags(ShaderType type)
 		{
+			NB_PROFILE_FN();
+			
 			switch (type)
 			{
 				case ShaderType::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;

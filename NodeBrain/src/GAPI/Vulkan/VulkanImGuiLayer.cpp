@@ -14,42 +14,15 @@ class GLFWwindow;
 
 namespace NodeBrain
 {
-	static VkImageSubresourceRange ImageSubresourceRange(VkImageAspectFlags aspectMask)
-	{
-		VkImageSubresourceRange subImage = {};
-		subImage.aspectMask = aspectMask;
-		subImage.baseMipLevel = 0;
-		subImage.levelCount = VK_REMAINING_MIP_LEVELS;
-		subImage.baseArrayLayer = 0;
-		subImage.layerCount = VK_REMAINING_ARRAY_LAYERS;
-
-		return subImage;
-	}
-
-	static void TransitionImage(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout)
-	{
-		VkImageMemoryBarrier imageBarrier = {};
-		imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-
-		imageBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
-		imageBarrier.dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_MEMORY_READ_BIT;
-		imageBarrier.oldLayout = currentLayout;
-		imageBarrier.newLayout = newLayout;
-
-		VkImageAspectFlags aspectFlags = (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
-		imageBarrier.subresourceRange = ImageSubresourceRange(aspectFlags);
-		imageBarrier.image = image;
-
-		vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageBarrier);
-	}
-
 	VulkanImGuiLayer::VulkanImGuiLayer()
 	{
-
+		NB_PROFILE_FN();
 	}
 
 	VulkanImGuiLayer::~VulkanImGuiLayer()
 	{
+		NB_PROFILE_FN();
+
 		ImGui_ImplVulkan_Shutdown();
 		
 		vkDestroyDescriptorPool(VulkanRenderContext::Get()->GetVkDevice(), m_ImGuiDescriptorPool, nullptr);
@@ -58,6 +31,8 @@ namespace NodeBrain
 
 	void VulkanImGuiLayer::OnAttach()
 	{
+		NB_PROFILE_FN();
+
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
@@ -116,16 +91,18 @@ namespace NodeBrain
 
 	void VulkanImGuiLayer::OnDetach()
 	{
-		
+		NB_PROFILE_FN();
 	}
 
 	void VulkanImGuiLayer::OnEvent(Event& e)
 	{
-
+		NB_PROFILE_FN();
 	}
 
 	void VulkanImGuiLayer::BeginFrame()
 	{
+		NB_PROFILE_FN();
+
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -133,6 +110,8 @@ namespace NodeBrain
 
 	void VulkanImGuiLayer::EndFrame()
 	{
+		NB_PROFILE_FN();
+		
 		ImGui::Render();
 
 		VulkanSwapchain& swapchain = VulkanRenderContext::Get()->GetSwapchain();
@@ -140,7 +119,7 @@ namespace NodeBrain
 		VkImage image = swapchain.GetCurrentImageData().Image;
 		VkImageView imageView = swapchain.GetCurrentImageData().ImageView;
 
-		TransitionImage(cmdBuffer, image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		Utils::TransitionImage(cmdBuffer, image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
 		VkRenderingAttachmentInfo colorAttachmentInfo = {};
 		colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -162,6 +141,6 @@ namespace NodeBrain
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuffer);
 		m_vkCmdEndRenderingKHR(cmdBuffer);
 
-		TransitionImage(cmdBuffer, image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+		Utils::TransitionImage(cmdBuffer, image, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	}
 }

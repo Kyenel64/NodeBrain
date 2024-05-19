@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.h>
 #include <VMA/vk_mem_alloc.h>
 
-#include "Renderer/Renderer.h"
 #include "Renderer/Image.h"
 
 namespace NodeBrain
@@ -15,13 +14,12 @@ namespace NodeBrain
 		virtual ~VulkanImage();
 
 		virtual uint64_t GetAddress() override;
+		virtual const ImageConfiguration& GetConfiguration() const override { return m_Configuration; }
 
 		VkImage GetVkImage() const { return m_VkImage; }
 		VkImageView GetVkImageView() const { return m_VkImageView; }
 		VkSampler GetVkSampler() const { return m_VkSampler; }
-
-		virtual const ImageConfiguration& GetConfiguration() const override { return m_Configuration; }
-
+		
 	private:
 		VkImage m_VkImage = VK_NULL_HANDLE;
 		VkImageView m_VkImageView = VK_NULL_HANDLE;

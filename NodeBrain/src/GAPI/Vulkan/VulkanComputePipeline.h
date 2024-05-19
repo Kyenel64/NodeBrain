@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.h>
 
 #include "Renderer/ComputePipeline.h"
-#include "GAPI/Vulkan/VulkanShader.h"
 
 namespace NodeBrain
 {
@@ -11,7 +10,7 @@ namespace NodeBrain
 	{
 	public:
 		VulkanComputePipeline(const ComputePipelineConfiguration& configuration);
-		~VulkanComputePipeline();
+		virtual ~VulkanComputePipeline();
 
 		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) override; 
 		virtual void SetTargetImage(std::shared_ptr<Image> targetImage) override { m_Configuration.TargetImage = targetImage; }

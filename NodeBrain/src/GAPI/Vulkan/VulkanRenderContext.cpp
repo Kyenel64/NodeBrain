@@ -161,16 +161,22 @@ namespace NodeBrain
 
 	void VulkanRenderContext::AcquireNextImage()
 	{
+		NB_PROFILE_FN();
+
 		m_Swapchain->AcquireNextImage();
 	}
 
 	void VulkanRenderContext::SwapBuffers()
 	{
+		NB_PROFILE_FN();
+
 		m_Swapchain->PresentImage();
 	}
 
 	void VulkanRenderContext::ImmediateSubmit(std::function<void(VkCommandBuffer cmdBuffer)> func)
 	{
+		NB_PROFILE_FN();
+
 		VK_CHECK(vkResetFences(m_Device->GetVkDevice(), 1, &m_ImmediateFence));
 		VK_CHECK(vkResetCommandBuffer(m_ImmediateCmdBuffer, 0));
 
@@ -194,11 +200,13 @@ namespace NodeBrain
 	}
 
 	VulkanRenderContext* VulkanRenderContext::Get() 
-	{ 
+	{
+		NB_PROFILE_FN();
+
 		return s_Instance; 
 	}
 
-		VkResult VulkanRenderContext::CreateInstance()
+	VkResult VulkanRenderContext::CreateInstance()
 	{
 		NB_PROFILE_FN();
 
@@ -247,13 +255,13 @@ namespace NodeBrain
 
 	VkResult VulkanRenderContext::CreateDescriptorPools()
 	{
+		NB_PROFILE_FN();
+
 		for (int i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
 			uint32_t maxSets = 10;
-			//std::vector<VkDescriptorPoolSize> poolSizes;
-			//poolSizes.push_back(VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10 * maxSets});
 
-			VkDescriptorPoolSize poolSizes[] = 
+			std::vector<VkDescriptorPoolSize> poolSizes = 
 			{
 				{ VK_DESCRIPTOR_TYPE_SAMPLER, maxSets },
 				{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, maxSets },
@@ -272,7 +280,7 @@ namespace NodeBrain
 			descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 			descriptorPoolCreateInfo.flags = 0;
 			descriptorPoolCreateInfo.maxSets = maxSets; // TODO: Double check
-			descriptorPoolCreateInfo.poolSizeCount = 11;
+			descriptorPoolCreateInfo.poolSizeCount = (uint32_t)poolSizes.size();;
 			descriptorPoolCreateInfo.pPoolSizes = &poolSizes[0];
 
 			VkResult result = vkCreateDescriptorPool(m_Device->GetVkDevice(), &descriptorPoolCreateInfo, nullptr, &m_VkDescriptorPools[i]);
@@ -285,6 +293,8 @@ namespace NodeBrain
 
 	VkResult VulkanRenderContext::CreateAllocator()
 	{
+		NB_PROFILE_FN();
+
 		VmaAllocatorCreateInfo allocatorCreateInfo = {};
 		allocatorCreateInfo.physicalDevice = m_PhysicalDevice->GetVkPhysicalDevice();
 		allocatorCreateInfo.device = m_Device->GetVkDevice();;
@@ -309,13 +319,14 @@ namespace NodeBrain
 
 	VkResult VulkanRenderContext::CreateImmediateObjects()
 	{
+		NB_PROFILE_FN();
+
 		VkResult result;
 		
 		VkCommandPoolCreateInfo cmdPoolCreateInfo = {};
 		cmdPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		cmdPoolCreateInfo.queueFamilyIndex = m_PhysicalDevice->FindQueueFamilies().Graphics.value();
-
 		result = vkCreateCommandPool(m_Device->GetVkDevice(), &cmdPoolCreateInfo, nullptr, &m_ImmediateCmdPool);
 		if (result != VK_SUCCESS)
 			return result;
@@ -325,7 +336,6 @@ namespace NodeBrain
 		cmdBufferAllocInfo.commandPool = m_ImmediateCmdPool;
 		cmdBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		cmdBufferAllocInfo.commandBufferCount = 1;
-
 		result = vkAllocateCommandBuffers(m_Device->GetVkDevice(), &cmdBufferAllocInfo, &m_ImmediateCmdBuffer);
 		if (result != VK_SUCCESS)
 			return result;
@@ -333,7 +343,6 @@ namespace NodeBrain
 		VkFenceCreateInfo fenceCreateInfo = {};
 		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
 		result = vkCreateFence(m_Device->GetVkDevice(), &fenceCreateInfo, nullptr, &m_ImmediateFence);
 		if (result != VK_SUCCESS)
 			return result;
@@ -364,6 +373,8 @@ namespace NodeBrain
 
 	void VulkanRenderContext::DestroyDebugUtilsMessenger()
 	{
+		NB_PROFILE_FN();
+
 		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VkInstance, "vkDestroyDebugUtilsMessengerEXT");
 		NB_ASSERT(func, "Failed to retrieve vkDestroyDebugUtilsMessengerEXT function");
 		func(m_VkInstance, m_DebugMessenger, nullptr);
@@ -372,6 +383,8 @@ namespace NodeBrain
 
 	void VulkanRenderContext::DestroyImmediateObjects()
 	{
+		NB_PROFILE_FN();
+
 		vkDestroyCommandPool(m_Device->GetVkDevice(), m_ImmediateCmdPool, nullptr);
 		m_ImmediateCmdPool = VK_NULL_HANDLE;
 		vkDestroyFence(m_Device->GetVkDevice(), m_ImmediateFence, nullptr);

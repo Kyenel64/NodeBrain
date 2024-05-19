@@ -2,7 +2,6 @@
 
 #include <vulkan/vulkan.h>
 
-#include "GAPI/Vulkan/VulkanDevice.h"
 #include "Renderer/GraphicsPipeline.h"
 
 namespace NodeBrain

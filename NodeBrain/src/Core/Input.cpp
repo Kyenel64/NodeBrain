@@ -16,6 +16,7 @@ namespace NodeBrain
 	bool Input::IsKeyPressed(Key key)
 	{
 		NB_PROFILE_FN();
+		
 		return s_KeyState.find(key) != s_KeyState.end() && s_KeyState[key] == InputState::Pressed;
 	}
 

@@ -20,5 +20,7 @@ namespace NodeBrain
 	private:
 		VkBuffer m_VkBuffer = VK_NULL_HANDLE;
 		VmaAllocation m_VmaAllocation = VK_NULL_HANDLE;
+
+		void* m_MappedData = nullptr;
 	};
 }

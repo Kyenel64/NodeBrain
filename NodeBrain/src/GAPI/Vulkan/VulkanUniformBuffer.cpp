@@ -6,10 +6,12 @@ namespace NodeBrain
 	VulkanUniformBuffer::VulkanUniformBuffer(const void* data, uint32_t size)
 		: m_Size(size)
 	{
+		NB_PROFILE_FN();
+
 		VkBufferCreateInfo bufferCreateInfo = {};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferCreateInfo.size = size;
-		bufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+		bufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 
 		VmaAllocationCreateInfo allocationCreateInfo = {};
 		allocationCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
@@ -31,6 +33,8 @@ namespace NodeBrain
 
 	VulkanUniformBuffer::~VulkanUniformBuffer()
 	{
+		NB_PROFILE_FN();
+
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
 			vmaUnmapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_VmaAllocations[i]);
@@ -42,6 +46,8 @@ namespace NodeBrain
 
 	void VulkanUniformBuffer::SetData(const void* data, uint32_t size)
 	{
+		NB_PROFILE_FN();
+
 		m_Size = size;
 		memcpy(m_MappedData[VulkanRenderContext::Get()->GetSwapchain().GetFrameIndex()], data, size);
 	}

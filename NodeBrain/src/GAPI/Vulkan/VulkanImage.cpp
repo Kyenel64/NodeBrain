@@ -1,10 +1,10 @@
 #include "NBpch.h"
 #include "VulkanImage.h"
 
+#include <ImGui/backends/imgui_impl_vulkan.h>
+
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanUtils.h"
-
-#include <ImGui/backends/imgui_impl_vulkan.h>
 
 namespace NodeBrain
 {	
@@ -106,6 +106,8 @@ namespace NodeBrain
 
 	uint64_t VulkanImage::GetAddress()
 	{
+		NB_PROFILE_FN();
+		
 		if (!m_Address)
 			m_Address = (uint64_t)ImGui_ImplVulkan_AddTexture(m_VkSampler, m_VkImageView, VK_IMAGE_LAYOUT_GENERAL);
 

@@ -8,6 +8,8 @@ namespace NodeBrain
 {
 	static VkSurfaceFormatKHR ChooseSwapchainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
 	{
+		NB_PROFILE_FN();
+
 		for (const auto& format : availableFormats)
 		{
 			if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)
@@ -20,6 +22,8 @@ namespace NodeBrain
 
 	static VkPresentModeKHR ChooseSwapchainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes)
 	{
+		NB_PROFILE_FN();
+
 		for (const auto& presentationMode : availablePresentationModes)
 		{
 			if (presentationMode == VK_PRESENT_MODE_MAILBOX_KHR)
@@ -30,6 +34,8 @@ namespace NodeBrain
 
 	static VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 	{
+		NB_PROFILE_FN();
+
 		if (capabilities.currentExtent.width != 0xFFFFFFFF)
 		{
 			return capabilities.currentExtent;
@@ -78,6 +84,8 @@ namespace NodeBrain
 
 	VkResult VulkanSwapchain::CreateVkSwapchain()
 	{
+		NB_PROFILE_FN();
+
 		// --- Set configurations ---
 		SwapchainSupportDetails swapChainSupport = m_Device.GetPhysicalDevice().QuerySwapchainSupport();
 		VkSurfaceFormatKHR surfaceFormat = ChooseSwapchainFormat(swapChainSupport.Formats);
@@ -125,12 +133,16 @@ namespace NodeBrain
 
 	void VulkanSwapchain::DestroyVkSwapchain()
 	{
+		NB_PROFILE_FN();
+
 		vkDestroySwapchainKHR(m_Device.GetVkDevice(), m_VkSwapchain, nullptr);
 		m_VkSwapchain = VK_NULL_HANDLE;
 	}
 
 	VkResult VulkanSwapchain::CreateImageDatas()
 	{
+		NB_PROFILE_FN();
+
 		// --- Image ---
 		// Create temporary contiguous array to get vkImages from swapchain
 		vkGetSwapchainImagesKHR(m_Device.GetVkDevice(), m_VkSwapchain, &m_ImageCount, nullptr);
@@ -183,6 +195,8 @@ namespace NodeBrain
 
 	void VulkanSwapchain::DestroyImageDatas()
 	{
+		NB_PROFILE_FN();
+
 		for (size_t i = 0; i < m_ImageCount; i++)
 		{
 			vkDestroyImageView(m_Device.GetVkDevice(), m_ImageDatas[i].ImageView, nullptr);
@@ -192,6 +206,8 @@ namespace NodeBrain
 
 	VkResult VulkanSwapchain::CreateFrameDatas()
 	{
+		NB_PROFILE_FN();
+
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
 			// CommandPool
@@ -238,6 +254,8 @@ namespace NodeBrain
 
 	void VulkanSwapchain::DestroyFrameDatas()
 	{
+		NB_PROFILE_FN();
+
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
 			vkDestroyFence(m_Device.GetVkDevice(), m_FrameDatas[i].InFlightFence, nullptr);
@@ -253,6 +271,8 @@ namespace NodeBrain
 
 	uint32_t VulkanSwapchain::AcquireNextImage()
 	{
+		NB_PROFILE_FN();
+
 		vkWaitForFences(m_Device.GetVkDevice(), 1, &m_FrameDatas[m_FrameIndex].InFlightFence, VK_TRUE, UINT64_MAX);
 
 		VkResult result = vkAcquireNextImageKHR(m_Device.GetVkDevice(), m_VkSwapchain, UINT64_MAX, m_FrameDatas[m_FrameIndex].ImageAvailableSemaphore, VK_NULL_HANDLE, &m_ImageIndex);
@@ -265,6 +285,8 @@ namespace NodeBrain
 
 	void VulkanSwapchain::PresentImage()
 	{
+		NB_PROFILE_FN();
+
 		VkPresentInfoKHR presentInfo = {};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
@@ -286,6 +308,8 @@ namespace NodeBrain
 
 	void VulkanSwapchain::RecreateSwapchain()
 	{
+		NB_PROFILE_FN();
+
 		vkDeviceWaitIdle(m_Device.GetVkDevice());
 
 		// --- Destroy ---

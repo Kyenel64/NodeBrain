@@ -1,10 +1,8 @@
 #include "NBpch.h"
 #include "VulkanShader.h"
 
+#include "Utils/FileUtils.h"
 #include "GAPI/Vulkan/VulkanRenderContext.h"
-#include <Utils/FileUtils.h>
-
-#include "GAPI/Vulkan/VulkanUniformBuffer.h"
 
 namespace NodeBrain
 {
@@ -19,7 +17,6 @@ namespace NodeBrain
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		createInfo.codeSize = buffer.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(buffer.data());
-
 		VK_CHECK(vkCreateShaderModule(VulkanRenderContext::Get()->GetVkDevice(), &createInfo, nullptr, &m_VkShaderModule));
 		NB_INFO("Created shader module of size: {0}", buffer.size());
 	}

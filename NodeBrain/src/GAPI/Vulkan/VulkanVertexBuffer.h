@@ -17,13 +17,14 @@ namespace NodeBrain
 		virtual void SetData(const void* data, uint32_t size) override;
 		
 		virtual uint64_t GetAddress() const override { return m_VkDeviceAddress[VulkanRenderContext::Get()->GetSwapchain().GetFrameIndex()]; }
-		VkBuffer GetVkBuffer() const { return m_CPUBuffer[VulkanRenderContext::Get()->GetSwapchain().GetFrameIndex()]; }
+		VkBuffer GetVkBuffer() const { return m_StagingBuffer[VulkanRenderContext::Get()->GetSwapchain().GetFrameIndex()]; }
 
 	private:
-		VkBuffer m_CPUBuffer[FRAMES_IN_FLIGHT];
+		VkBuffer m_StagingBuffer[FRAMES_IN_FLIGHT];
 		VkBuffer m_GPUBuffer[FRAMES_IN_FLIGHT];
-		VmaAllocation m_CPUAllocation[FRAMES_IN_FLIGHT];
+		VmaAllocation m_StagingAllocation[FRAMES_IN_FLIGHT];
 		VmaAllocation m_GPUAllocation[FRAMES_IN_FLIGHT];
 		VkDeviceAddress m_VkDeviceAddress[FRAMES_IN_FLIGHT];
+		void* m_StagingMappedData[FRAMES_IN_FLIGHT];
 	};
 }

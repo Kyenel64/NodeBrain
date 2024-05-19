@@ -4,11 +4,15 @@
 #include "GAPI/Vulkan/VulkanUtils.h"
 
 #include "GAPI/Vulkan/VulkanUniformBuffer.h"
+#include "GAPI/Vulkan/VulkanImage.h"
 
 namespace NodeBrain
 {
 	VulkanDescriptorSet::VulkanDescriptorSet(const std::vector<LayoutBinding>& layout)
 	{
+		NB_PROFILE_FN();
+
+		// --- Descriptor Layout ---
 		std::vector<VkDescriptorSetLayoutBinding> setLayoutbindings;
 		for (const auto& binding : layout)
 		{
@@ -26,6 +30,7 @@ namespace NodeBrain
 		VK_CHECK(vkCreateDescriptorSetLayout(VulkanRenderContext::Get()->GetVkDevice(), &descriptorLayoutCreateInfo, nullptr, &m_VkDescriptorSetLayout));
 
 
+		// --- Descriptor Set ---
 		std::vector<VkDescriptorSetLayout> layouts(2, m_VkDescriptorSetLayout);
 		VkDescriptorSetAllocateInfo descriptorAllocateInfo = {};
 		descriptorAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -37,12 +42,16 @@ namespace NodeBrain
 
 	VulkanDescriptorSet::~VulkanDescriptorSet()
 	{
+		NB_PROFILE_FN();
+
 		vkDestroyDescriptorSetLayout(VulkanRenderContext::Get()->GetVkDevice(), m_VkDescriptorSetLayout, nullptr);
 		m_VkDescriptorSetLayout = VK_NULL_HANDLE;
 	}
 
 	void VulkanDescriptorSet::WriteBuffer(std::shared_ptr<UniformBuffer> buffer, uint32_t binding)
 	{
+		NB_PROFILE_FN();
+
 		std::shared_ptr<VulkanUniformBuffer> vulkanUBO = std::static_pointer_cast<VulkanUniformBuffer>(buffer);
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
@@ -59,13 +68,14 @@ namespace NodeBrain
 			write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			write.dstSet = m_VkDescriptorSet[i];
 			write.pBufferInfo = &bufferInfo;
-
 			vkUpdateDescriptorSets(VulkanRenderContext::Get()->GetVkDevice(), 1, &write, 0, nullptr);
 		}
 	}
 
 	void VulkanDescriptorSet::WriteImage(std::shared_ptr<Image> image, uint32_t binding)
 	{
+		NB_PROFILE_FN();
+		
 		std::shared_ptr<VulkanImage> vulkanImage = std::static_pointer_cast<VulkanImage>(image);
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
@@ -82,7 +92,6 @@ namespace NodeBrain
 			write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 			write.dstSet = m_VkDescriptorSet[i];
 			write.pImageInfo = &imageinfo;
-
 			vkUpdateDescriptorSets(VulkanRenderContext::Get()->GetVkDevice(), 1, &write, 0, nullptr);
 		}
 	}

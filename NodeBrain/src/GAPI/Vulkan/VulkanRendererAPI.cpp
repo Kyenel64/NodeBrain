@@ -1,14 +1,12 @@
 #include "NBpch.h"
 #include "VulkanRendererAPI.h"
 
-#include "Core/App.h"
-#include "Renderer/Shader.h"
-#include "Renderer/GraphicsPipeline.h"
-
-#include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanGraphicsPipeline.h"
 #include "GAPI/Vulkan/VulkanComputePipeline.h"
+#include "GAPI/Vulkan/VulkanImage.h"
+#include "GAPI/Vulkan/VulkanSwapchain.h"
+#include "GAPI/Vulkan/VulkanIndexBuffer.h"
 
 namespace NodeBrain
 {
@@ -29,6 +27,8 @@ namespace NodeBrain
 
 	void VulkanRendererAPI::BeginFrame()
 	{
+		NB_PROFILE_FN();
+
 		m_ActiveCmdBuffer = m_Swapchain.GetCurrentFrameData().CommandBuffer;
 		m_ActiveSwapchainImage = m_Swapchain.GetCurrentImageData().Image;
 		m_DrawImage = m_Swapchain.GetDrawImage()->GetVkImage();
@@ -39,7 +39,6 @@ namespace NodeBrain
 		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		commandBufferBeginInfo.flags = 0;
 		commandBufferBeginInfo.pInheritanceInfo = nullptr;
-
 		VK_CHECK(vkBeginCommandBuffer(m_ActiveCmdBuffer, &commandBufferBeginInfo));
 
 		Utils::TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
@@ -47,10 +46,11 @@ namespace NodeBrain
 
 	void VulkanRendererAPI::EndFrame()
 	{
+		NB_PROFILE_FN();
+
 		Utils::TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
 		VK_CHECK(vkEndCommandBuffer(m_ActiveCmdBuffer));
-
 
 		const FrameData& frameData = m_Swapchain.GetCurrentFrameData();
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
@@ -63,7 +63,6 @@ namespace NodeBrain
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &m_ActiveCmdBuffer;
-
 		VK_CHECK(vkQueueSubmit(VulkanRenderContext::Get()->GetDevice().GetGraphicsQueue(), 1, &submitInfo, frameData.InFlightFence));
 	}
 
@@ -76,18 +75,19 @@ namespace NodeBrain
 
 	void VulkanRendererAPI::ClearColor(const glm::vec4& color, std::shared_ptr<Image> image)
 	{
+		NB_PROFILE_FN();
+
 		std::shared_ptr<VulkanImage> vulkanImage = image ? std::static_pointer_cast<VulkanImage>(image) : m_Swapchain.GetDrawImage();
 
-		VkClearColorValue clearValue;
-		clearValue = { { color.x, color.y, color.z, color.w }};
-
+		VkClearColorValue clearValue = { { color.x, color.y, color.z, color.w }};
 		VkImageSubresourceRange clearRange = Utils::ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
-
 		vkCmdClearColorImage(m_ActiveCmdBuffer, vulkanImage->GetVkImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
 	}
 
 	void VulkanRendererAPI::BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline)
 	{
+		NB_PROFILE_FN();
+
 		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? std::static_pointer_cast<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
 		std::shared_ptr<VulkanGraphicsPipeline> vulkanPipeline = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline);
 
@@ -127,12 +127,13 @@ namespace NodeBrain
 		renderingInfo.renderArea.offset = { 0, 0 };
 		renderingInfo.viewMask = 0;
 		renderingInfo.layerCount = 1;
-
 		m_vkCmdBeginRenderingKHR(m_ActiveCmdBuffer, &renderingInfo);
 	}
 
 	void VulkanRendererAPI::EndRenderPass(std::shared_ptr<GraphicsPipeline> pipeline)
 	{
+		NB_PROFILE_FN();
+
 		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? std::static_pointer_cast<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
 		
 		m_vkCmdEndRenderingKHR(m_ActiveCmdBuffer);
@@ -151,11 +152,15 @@ namespace NodeBrain
 
 	void VulkanRendererAPI::Draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t instanceIndex)
 	{
+		NB_PROFILE_FN();
+
 		vkCmdDraw(m_ActiveCmdBuffer, vertexCount, instanceCount, firstVertex, instanceIndex);
 	}
 
 	void VulkanRendererAPI::DrawIndexed(std::shared_ptr<IndexBuffer> indexBuffer, uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount, uint32_t instanceIndex)
 	{
+		NB_PROFILE_FN();
+
 		std::shared_ptr<VulkanIndexBuffer> vulkanIndexBuffer = std::static_pointer_cast<VulkanIndexBuffer>(indexBuffer);
 
 		vkCmdBindIndexBuffer(m_ActiveCmdBuffer, vulkanIndexBuffer->GetVkBuffer(), 0, VK_INDEX_TYPE_UINT32);
@@ -164,6 +169,8 @@ namespace NodeBrain
 
 	void VulkanRendererAPI::BeginComputePass(std::shared_ptr<ComputePipeline> pipeline)
 	{
+		NB_PROFILE_FN();
+
 		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline);
 		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? std::static_pointer_cast<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
 
@@ -174,6 +181,8 @@ namespace NodeBrain
 	
 	void VulkanRendererAPI::EndComputePass(std::shared_ptr<ComputePipeline> pipeline)
 	{
+		NB_PROFILE_FN();
+
 		// temp
 		Utils::TransitionImage(m_ActiveCmdBuffer, m_DrawImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 		Utils::TransitionImage(m_ActiveCmdBuffer, m_ActiveSwapchainImage, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
@@ -184,6 +193,8 @@ namespace NodeBrain
 
 	void VulkanRendererAPI::DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) 
 	{
+		NB_PROFILE_FN();
+
 		vkCmdDispatch(m_ActiveCmdBuffer, groupX, groupY, groupZ);
 	}
 }

@@ -2,6 +2,7 @@
 
 #include <vulkan/vk_enum_string_helper.h>
 
+#include "Renderer/DescriptorSet.h"
 #include "Renderer/Image.h"
 #include "GAPI/Vulkan/VulkanShader.h"
 
