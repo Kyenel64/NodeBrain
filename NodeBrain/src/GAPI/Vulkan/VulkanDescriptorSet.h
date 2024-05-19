@@ -24,5 +24,7 @@ namespace NodeBrain
 	private:
 		VkDescriptorSetLayout m_VkDescriptorSetLayout = VK_NULL_HANDLE;
 		VkDescriptorSet m_VkDescriptorSet[FRAMES_IN_FLIGHT];
+
+		std::vector<LayoutBinding> m_Layout;
 	};
 }

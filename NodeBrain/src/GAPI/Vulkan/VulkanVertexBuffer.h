@@ -26,5 +26,7 @@ namespace NodeBrain
 		VmaAllocation m_GPUAllocation[FRAMES_IN_FLIGHT];
 		VkDeviceAddress m_VkDeviceAddress[FRAMES_IN_FLIGHT];
 		void* m_StagingMappedData[FRAMES_IN_FLIGHT];
+
+		uint32_t m_Size;
 	};
 }

@@ -22,5 +22,7 @@ namespace NodeBrain
 		VmaAllocation m_VmaAllocation = VK_NULL_HANDLE;
 
 		void* m_MappedData = nullptr;
+
+		uint32_t m_Size;
 	};
 }

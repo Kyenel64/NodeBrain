@@ -51,10 +51,8 @@ namespace NodeBrain
 
 		// --- Quad ---
 		std::shared_ptr<Shader> QuadVertexShader;
-		std::shared_ptr<Shader> QuadVertexShader2;
 		std::shared_ptr<Shader> QuadFragmentShader;
 		std::shared_ptr<GraphicsPipeline> QuadPipeline;
-		std::shared_ptr<GraphicsPipeline> QuadPipeline2;
 
 		uint32_t QuadIndexCount = 0;
 		std::shared_ptr<VertexBuffer> QuadVertexBuffer;
@@ -125,12 +123,6 @@ namespace NodeBrain
 		pipelineConfig.AddDescriptorSet(s_Data->LocalDescriptorSet, 1);
 		s_Data->QuadPipeline = GraphicsPipeline::Create(pipelineConfig);
 
-		s_Data->QuadVertexShader2 = Shader::Create("Assets/Shaders/Compiled/triangle2.vert.spv", ShaderType::Vertex);
-		GraphicsPipelineConfiguration pipelineConfig2 = {};
-		pipelineConfig2.VertexShader = s_Data->QuadVertexShader2;
-		pipelineConfig2.FragmentShader = s_Data->QuadFragmentShader;
-		pipelineConfig2.AddDescriptorSet(s_Data->GlobalDescriptorSet, 0);
-		s_Data->QuadPipeline2 = GraphicsPipeline::Create(pipelineConfig2);
 
 		s_Data->QuadVertexBuffer = VertexBuffer::Create(nullptr, sizeof(QuadVertex) * s_Data->MaxVertices);
 
@@ -189,9 +181,8 @@ namespace NodeBrain
 		s_RendererAPI->BeginFrame();
 
 		// Bind per frame descriptors
-		s_Data->QuadPipeline->BindDescriptorSet(s_Data->GlobalDescriptorSet, 0);
-		s_Data->QuadPipeline2->BindDescriptorSet(s_Data->GlobalDescriptorSet, 0);
-		s_Data->ColorGradientPipeline->BindDescriptorSet(s_Data->GlobalDescriptorSet, 1);
+		s_Data->QuadPipeline->BindDescriptorSet(s_Data->GlobalDescriptorSet);
+		s_Data->ColorGradientPipeline->BindDescriptorSet(s_Data->GlobalDescriptorSet);
 	}
 
 	void Renderer::EndFrame()
@@ -266,7 +257,7 @@ namespace NodeBrain
 			uint32_t size = (uint32_t)((uint8_t*)s_Data->QuadVertexBufferPtr - (uint8_t*)s_Data->QuadVertexBufferBase);
 			s_Data->QuadVertexBuffer->SetData(s_Data->QuadVertexBufferBase, size);
 
-			s_Data->QuadPipeline->BindDescriptorSet(s_Data->LocalDescriptorSet, 1);
+			s_Data->QuadPipeline->BindDescriptorSet(s_Data->LocalDescriptorSet);
 			s_RendererAPI->BeginRenderPass(s_Data->QuadPipeline);
 			s_RendererAPI->DrawIndexed(s_Data->QuadIndexBuffer, s_Data->QuadIndexCount, 0);
 			s_RendererAPI->EndRenderPass(s_Data->QuadPipeline);
@@ -329,7 +320,7 @@ namespace NodeBrain
 	// Temp
 	void Renderer::ProcessGradientCompute()
 	{
-		s_Data->ColorGradientPipeline->BindDescriptorSet(s_Data->GradientDescriptorSet, 0);
+		s_Data->ColorGradientPipeline->BindDescriptorSet(s_Data->GradientDescriptorSet);
 		s_RendererAPI->BeginComputePass(s_Data->ColorGradientPipeline);
 		uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 		uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;

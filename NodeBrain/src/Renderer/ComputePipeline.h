@@ -28,7 +28,7 @@ namespace NodeBrain
 		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) = 0;
 		virtual void SetTargetImage(std::shared_ptr<Image> targetImage) = 0;
 
-		virtual void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet, uint32_t setIndex) = 0;
+		virtual void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet) = 0;
 
 		virtual std::shared_ptr<Image> GetTargetImage() const = 0;
 

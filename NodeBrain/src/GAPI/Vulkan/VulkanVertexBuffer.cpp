@@ -6,6 +6,7 @@
 namespace NodeBrain
 {
 	VulkanVertexBuffer::VulkanVertexBuffer(const void* data, uint32_t size)
+		: m_Size(size)
 	{
 		NB_PROFILE_FN();
 
@@ -79,6 +80,9 @@ namespace NodeBrain
 	void VulkanVertexBuffer::SetData(const void* data, uint32_t size)
 	{
 		NB_PROFILE_FN();
+
+		NB_ASSERT(data, "Invalid data. Provided data must not be null.");
+		NB_ASSERT(size <= m_Size, "Buffer overflow. The size of data being set must be less than the allocated buffer size.");
 		
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{

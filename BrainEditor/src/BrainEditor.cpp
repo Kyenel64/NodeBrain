@@ -68,7 +68,7 @@ namespace NodeBrain
 		{
 			m_GradientBuffer.Color1 = { camX, 0.0f, camZ, 1.0f };
 			m_GradientUB->SetData(&m_GradientBuffer, sizeof(GradientData));
-			m_GradientPipeline->BindDescriptorSet(m_GradientDescriptorSet, 0);
+			m_GradientPipeline->BindDescriptorSet(m_GradientDescriptorSet);
 			Renderer::BeginComputePass(m_GradientPipeline);
 			uint32_t groupX = App::Get()->GetWindow().GetWidth() / 16;
 			uint32_t groupY = App::Get()->GetWindow().GetHeight() / 16;

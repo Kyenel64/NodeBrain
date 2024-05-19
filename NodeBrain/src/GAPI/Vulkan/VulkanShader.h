@@ -14,6 +14,7 @@ namespace NodeBrain
 		virtual ~VulkanShader();
 
 		virtual const std::filesystem::path& GetShaderPath() const override { return m_ShaderPath; }
+		virtual ShaderType GetShaderType() const override { return m_ShaderType; }
 		VkShaderModule GetVkShaderModule() const { return m_VkShaderModule; }
 
 	private:

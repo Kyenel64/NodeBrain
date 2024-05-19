@@ -25,7 +25,7 @@ namespace NodeBrain
 	#ifdef NB_WINDOWS
 		#define NB_ASSERT(x, ...) { if(!(x)) { NB_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
 	#elif NB_APPLE
-		#define NB_ASSERT(x, ...) { if(!(x)) { NB_ERROR("Assertion Failed: {0}", __VA_ARGS__); raise(SIGTRAP); } }
+		#define NB_ASSERT(x, ...) { if(!(x)) { NB_ERROR("Assertion Failed: {0}", std::format(__VA_ARGS__)); raise(SIGTRAP); } }
 	#elif NB_LINUX
 		#define NB_ASSERT(x, ...) { if(!(x)) { NB_ERROR("Assertion Failed: {0}", __VA_ARGS__); raise(SIGTRAP); } }
 	#endif

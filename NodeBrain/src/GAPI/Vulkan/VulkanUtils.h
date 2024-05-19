@@ -8,7 +8,7 @@
 
 namespace NodeBrain
 {
-	#define VK_CHECK(result) if (result) NB_ASSERT(false, string_VkResult(result));
+	#define VK_CHECK(result) if (result) NB_ERROR(string_VkResult(result));
 
 	namespace Utils
 	{

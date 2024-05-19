@@ -12,6 +12,12 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(m_Configuration.VertexShader, "VertexShader null. Graphics pipeline must contain a valid vertex shader.");
+		NB_ASSERT(m_Configuration.VertexShader->GetShaderType() == ShaderType::Vertex, "Shader type invalid. Graphics pipeline must contain a vertex shader.")
+
+		NB_ASSERT(m_Configuration.FragmentShader, "FragmentShader null. Graphics pipeline must contain a valid fragment shader.");
+		NB_ASSERT(m_Configuration.FragmentShader->GetShaderType() == ShaderType::Fragment, "Shader type invalid. Graphics pipeline must contain a fragment shader.")
+
 		std::shared_ptr<VulkanShader> vertexShader = std::static_pointer_cast<VulkanShader>(m_Configuration.VertexShader);
 		std::shared_ptr<VulkanShader> fragShader = std::static_pointer_cast<VulkanShader>(m_Configuration.FragmentShader);
 		
@@ -166,13 +172,19 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(size + offset <= 128, "Push constant overflow. Push constant offset and size must fit within the max push constant size: {0}.", 128);
+
 		vkCmdPushConstants(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_ALL_GRAPHICS, 0, 128, buffer);
 	}
 
-	void VulkanGraphicsPipeline::BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet, uint32_t setIndex)
+	void VulkanGraphicsPipeline::BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet)
 	{
 		NB_PROFILE_FN();
-		
+
+		const std::vector<std::shared_ptr<DescriptorSet>>& descriptorSets = m_Configuration.GetDescriptorSets();
+		NB_ASSERT(std::find(descriptorSets.begin(), descriptorSets.end(), descriptorSet) != descriptorSets.end(), "Descriptor set not found. Descriptor set being bound must exist during pipeline creation.")
+
+		uint32_t setIndex = std::find(descriptorSets.begin(), descriptorSets.end(), descriptorSet) - descriptorSets.begin();
 		std::shared_ptr<VulkanDescriptorSet> vulkanSet = std::static_pointer_cast<VulkanDescriptorSet>(descriptorSet);
 		VkDescriptorSet vkDescriptorSet = vulkanSet->GetVkDescriptorSet();
 		vkCmdBindDescriptorSets(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_VkPipelineLayout, setIndex, 1, &vkDescriptorSet, 0, nullptr);

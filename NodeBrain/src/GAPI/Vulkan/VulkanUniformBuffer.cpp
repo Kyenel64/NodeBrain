@@ -48,7 +48,9 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		m_Size = size;
+		NB_ASSERT(data, "Invalid data. Provided data must not be null.");
+		NB_ASSERT(size <= m_Size, "Buffer overflow. The size of data being set must be less than the allocated buffer size.");
+
 		memcpy(m_MappedData[VulkanRenderContext::Get()->GetSwapchain().GetFrameIndex()], data, size);
 	}
 }

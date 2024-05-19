@@ -15,6 +15,7 @@ namespace NodeBrain
 		virtual ~Shader() = default;
 
 		virtual const std::filesystem::path& GetShaderPath() const = 0;
+		virtual ShaderType GetShaderType() const = 0;
 		
 		static std::shared_ptr<Shader> Create(const std::filesystem::path& path, ShaderType shaderType);
 	};

@@ -36,7 +36,7 @@ namespace NodeBrain
 		// Allocation
 		VmaAllocationCreateInfo allocationCreateInfo = {};
 		allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-		allocationCreateInfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		allocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
 		VK_CHECK(vmaCreateImage(VulkanRenderContext::Get()->GetVMAAllocator(), &imageCreateInfo, &allocationCreateInfo, &m_VkImage, &m_VmaAllocation, nullptr));
 

@@ -9,12 +9,15 @@
 namespace NodeBrain
 {
 	VulkanDescriptorSet::VulkanDescriptorSet(const std::vector<LayoutBinding>& layout)
+		: m_Layout(layout)
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(m_Layout.size(), "layout contains 0 elements. Descriptor set must be created with a valid layout.");
+
 		// --- Descriptor Layout ---
 		std::vector<VkDescriptorSetLayoutBinding> setLayoutbindings;
-		for (const auto& binding : layout)
+		for (const auto& binding : m_Layout)
 		{
 			VkDescriptorSetLayoutBinding setLayoutBinding = {};
 			setLayoutBinding.binding = binding.Binding;
@@ -52,6 +55,13 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(buffer, "Invalid uniform buffer");
+		for (auto& layout : m_Layout)
+		{
+			if (layout.Binding == binding)
+				NB_ASSERT(layout.Type == BindingType::UniformBuffer, "Invalid binding type at index {0}. Binding must be of type UniformBuffer.", binding);
+		}
+
 		std::shared_ptr<VulkanUniformBuffer> vulkanUBO = std::static_pointer_cast<VulkanUniformBuffer>(buffer);
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
@@ -75,6 +85,13 @@ namespace NodeBrain
 	void VulkanDescriptorSet::WriteImage(std::shared_ptr<Image> image, uint32_t binding)
 	{
 		NB_PROFILE_FN();
+
+		NB_ASSERT(image, "Invalid uniform buffer");
+		for (auto& layout : m_Layout)
+		{
+			if (layout.Binding == binding)
+				NB_ASSERT(layout.Type == BindingType::StorageImage, "Invalid binding type at index {0}. Binding must be of type StorageImage.", binding);
+		}
 		
 		std::shared_ptr<VulkanImage> vulkanImage = std::static_pointer_cast<VulkanImage>(image);
 
