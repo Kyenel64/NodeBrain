@@ -4,7 +4,9 @@
 
 #include "Core/Timer.h"
 
-#define NB_ENABLE_PROFILING
+#ifdef NB_DEBUG
+	#define NB_ENABLE_PROFILING
+#endif
 
 namespace NodeBrain
 {
