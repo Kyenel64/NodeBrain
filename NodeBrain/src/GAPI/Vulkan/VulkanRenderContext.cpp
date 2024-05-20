@@ -157,6 +157,8 @@ namespace NodeBrain
 
 		vkDestroyInstance(m_VkInstance, nullptr);
 		m_VkInstance = VK_NULL_HANDLE;
+
+		s_Instance = nullptr;
 	}
 
 	void VulkanRenderContext::AcquireNextImage()
@@ -263,17 +265,9 @@ namespace NodeBrain
 
 			std::vector<VkDescriptorPoolSize> poolSizes = 
 			{
-				{ VK_DESCRIPTOR_TYPE_SAMPLER, maxSets },
-				{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, maxSets },
-				{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, maxSets },
 				{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, maxSets },
-				{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, maxSets },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, maxSets },
 				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, maxSets },
 				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, maxSets },
-				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, maxSets },
-				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, maxSets },
-				{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, maxSets }
 			};
 
 			VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};

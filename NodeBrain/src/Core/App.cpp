@@ -41,6 +41,8 @@ namespace NodeBrain
 		m_Timer.EndTimer();
 
 		NB_INFO("Shutdown Application");
+
+		s_Instance = nullptr;
 	}
 
 	bool App::StartupSubSystems()
@@ -73,15 +75,18 @@ namespace NodeBrain
 
 			Renderer::BeginFrame();
 
-			// Update
-			for (Layer* layer : m_Layers)
-				layer->OnUpdate(deltaTime);
+			if (!m_Minimized)
+			{
+				// Update
+				for (Layer* layer : m_Layers)
+					layer->OnUpdate(deltaTime);
 
-			// Update GUI
-			m_ImGuiLayer->BeginFrame();
-			for (Layer* layer : m_Layers)
-				layer->OnUpdateGUI();
-			m_ImGuiLayer->EndFrame();
+				// Update GUI
+				m_ImGuiLayer->BeginFrame();
+				for (Layer* layer : m_Layers)
+					layer->OnUpdateGUI();
+				m_ImGuiLayer->EndFrame();
+			}
 
 			Renderer::EndFrame();
 
@@ -103,6 +108,7 @@ namespace NodeBrain
 
 		// Bind our functions to an event
 		event.AttachEventFunction<WindowClosedEvent>(std::bind(&App::OnWindowClose, this, std::placeholders::_1));
+		event.AttachEventFunction<WindowMinimizedEvent>(std::bind(&App::OnMinimized, this, std::placeholders::_1));
 	}
 
 	void App::PushLayer(Layer* layer)
@@ -121,6 +127,13 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		m_Running = false;
+	}
+
+	void App::OnMinimized(WindowMinimizedEvent& e)
+	{
+		NB_PROFILE_FN();
+
+		m_Minimized = e.IsMinimized();
 	}
 
 	App* App::Get() 

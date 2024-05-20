@@ -26,12 +26,14 @@ namespace NodeBrain
 		// Events
 		void OnEvent(Event& event);
 		void OnWindowClose(WindowClosedEvent& e);
+		void OnMinimized(WindowMinimizedEvent& e);
 
 		bool StartupSubSystems();
 
 	private:
 		std::string m_ApplicationName;
 		bool m_Running = true;
+		bool m_Minimized = false;
 		std::vector<Layer*> m_Layers;
 		std::unique_ptr<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;

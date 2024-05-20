@@ -111,13 +111,20 @@ namespace NodeBrain
 
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 			{
-				WindowResizeEvent event(width, height);
+				WindowResizedEvent event(width, height);
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				data.Width = width;
 				data.Height = height;
 				data.EventCallback(event);
 			});
-		
+
+		glfwSetWindowIconifyCallback(m_Window, [](GLFWwindow* window, int iconified)
+		{
+			WindowMinimizedEvent event(iconified);
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			data.EventCallback(event);
+		});
+
 		// Key events
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods) 
 			{
