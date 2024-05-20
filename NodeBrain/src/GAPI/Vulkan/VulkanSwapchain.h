@@ -37,7 +37,6 @@ namespace NodeBrain
 
 		uint32_t AcquireNextImage();
 		void PresentImage();
-		//void CopyImage(std::shared_ptr<VulkanImage> image);
 
 		VkSwapchainKHR GetVkSwapchain() const { return m_VkSwapchain; }
 		std::shared_ptr<VulkanImage> GetDrawImage() const { return m_DrawImage; }	

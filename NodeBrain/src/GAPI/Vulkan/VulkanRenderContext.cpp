@@ -261,7 +261,7 @@ namespace NodeBrain
 
 		for (int i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
-			uint32_t maxSets = 10;
+			uint32_t maxSets = 100;
 
 			std::vector<VkDescriptorPoolSize> poolSizes = 
 			{

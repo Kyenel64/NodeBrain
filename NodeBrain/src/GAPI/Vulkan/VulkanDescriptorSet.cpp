@@ -34,7 +34,7 @@ namespace NodeBrain
 
 
 		// --- Descriptor Set ---
-		std::vector<VkDescriptorSetLayout> layouts(2, m_VkDescriptorSetLayout);
+		std::vector<VkDescriptorSetLayout> layouts(FRAMES_IN_FLIGHT, m_VkDescriptorSetLayout);
 		VkDescriptorSetAllocateInfo descriptorAllocateInfo = {};
 		descriptorAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		descriptorAllocateInfo.descriptorPool = VulkanRenderContext::Get()->GetVkDescriptorPool();

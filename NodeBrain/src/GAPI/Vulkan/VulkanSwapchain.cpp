@@ -313,6 +313,7 @@ namespace NodeBrain
 		vkDeviceWaitIdle(m_Device.GetVkDevice());
 
 		// --- Destroy ---
+		m_DrawImage.reset();
 		DestroyImageDatas();
 		DestroyVkSwapchain();
 
@@ -320,6 +321,12 @@ namespace NodeBrain
 		// --- Recreate ---
 		VK_CHECK(CreateVkSwapchain());
 		VK_CHECK(CreateImageDatas());
+
+		ImageConfiguration config = {};
+		config.Width = m_VkExtent.width;
+		config.Height = m_VkExtent.height;
+		config.Format = ImageFormat::RGBA16;
+		m_DrawImage = std::make_shared<VulkanImage>(config);
 
 		NB_INFO("Recreated swapchain to size: {0}, {1}", m_VkExtent.width, m_VkExtent.height);
 	}
