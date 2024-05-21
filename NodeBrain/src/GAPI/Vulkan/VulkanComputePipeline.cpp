@@ -15,7 +15,7 @@ namespace NodeBrain
 		NB_ASSERT(m_Configuration.ComputeShader, "ComputeShader null. Compute pipeline must contain a valid compute shader.");
 		NB_ASSERT(m_Configuration.ComputeShader->GetShaderType() == ShaderType::Compute, "Shader type invalid. Compute pipeline must contain a compute shader.")
 
-		std::shared_ptr<VulkanShader> computeShader = std::static_pointer_cast<VulkanShader>(m_Configuration.ComputeShader);
+		std::shared_ptr<VulkanShader> computeShader = CastPtr<VulkanShader>(m_Configuration.ComputeShader);
 
 		// --- Pipeline Layout ---
 		VkPushConstantRange pushConstantRange = {};
@@ -26,7 +26,7 @@ namespace NodeBrain
 		std::vector<VkDescriptorSetLayout> layouts;
 		for (auto& set : m_Configuration.GetDescriptorSets())
 		{
-			std::shared_ptr<VulkanDescriptorSet> vulkanSet = std::static_pointer_cast<VulkanDescriptorSet>(set);
+			std::shared_ptr<VulkanDescriptorSet> vulkanSet = CastPtr<VulkanDescriptorSet>(set);
 			layouts.push_back(vulkanSet->GetVkDescriptorSetLayout());
 		}
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
@@ -80,7 +80,7 @@ namespace NodeBrain
 		NB_ASSERT(std::find(descriptorSets.begin(), descriptorSets.end(), descriptorSet) != descriptorSets.end(), "Descriptor set not found. Descriptor set being bound must exist during pipeline creation.")
 
 		uint32_t setIndex = std::find(descriptorSets.begin(), descriptorSets.end(), descriptorSet) - descriptorSets.begin();
-		std::shared_ptr<VulkanDescriptorSet> vulkanSet = std::static_pointer_cast<VulkanDescriptorSet>(descriptorSet);
+		std::shared_ptr<VulkanDescriptorSet> vulkanSet = CastPtr<VulkanDescriptorSet>(descriptorSet);
 		VkDescriptorSet vkDescriptorSet = vulkanSet->GetVkDescriptorSet();
 		vkCmdBindDescriptorSets(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_VkPipelineLayout, setIndex, 1, &vkDescriptorSet, 0, nullptr);
 	}

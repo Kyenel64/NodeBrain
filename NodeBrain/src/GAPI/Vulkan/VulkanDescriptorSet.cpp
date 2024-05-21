@@ -62,7 +62,7 @@ namespace NodeBrain
 				NB_ASSERT(layout.Type == BindingType::UniformBuffer, "Invalid binding type at index {0}. Binding must be of type UniformBuffer.", binding);
 		}
 
-		std::shared_ptr<VulkanUniformBuffer> vulkanUBO = std::static_pointer_cast<VulkanUniformBuffer>(buffer);
+		std::shared_ptr<VulkanUniformBuffer> vulkanUBO = CastPtr<VulkanUniformBuffer>(buffer);
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
@@ -93,7 +93,7 @@ namespace NodeBrain
 				NB_ASSERT(layout.Type == BindingType::StorageImage, "Invalid binding type at index {0}. Binding must be of type StorageImage.", binding);
 		}
 		
-		std::shared_ptr<VulkanImage> vulkanImage = std::static_pointer_cast<VulkanImage>(image);
+		std::shared_ptr<VulkanImage> vulkanImage = CastPtr<VulkanImage>(image);
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{

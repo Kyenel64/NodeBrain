@@ -18,8 +18,8 @@ namespace NodeBrain
 		NB_ASSERT(m_Configuration.FragmentShader, "FragmentShader null. Graphics pipeline must contain a valid fragment shader.");
 		NB_ASSERT(m_Configuration.FragmentShader->GetShaderType() == ShaderType::Fragment, "Shader type invalid. Graphics pipeline must contain a fragment shader.")
 
-		std::shared_ptr<VulkanShader> vertexShader = std::static_pointer_cast<VulkanShader>(m_Configuration.VertexShader);
-		std::shared_ptr<VulkanShader> fragShader = std::static_pointer_cast<VulkanShader>(m_Configuration.FragmentShader);
+		std::shared_ptr<VulkanShader> vertexShader = CastPtr<VulkanShader>(m_Configuration.VertexShader);
+		std::shared_ptr<VulkanShader> fragShader = CastPtr<VulkanShader>(m_Configuration.FragmentShader);
 		
 		// Vertex
 		VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo = {};
@@ -120,7 +120,7 @@ namespace NodeBrain
 		std::vector<VkDescriptorSetLayout> layouts;
 		for (auto& set : m_Configuration.GetDescriptorSets())
 		{
-			std::shared_ptr<VulkanDescriptorSet> vulkanSet = std::static_pointer_cast<VulkanDescriptorSet>(set);
+			std::shared_ptr<VulkanDescriptorSet> vulkanSet = CastPtr<VulkanDescriptorSet>(set);
 			layouts.push_back(vulkanSet->GetVkDescriptorSetLayout());
 		}
 
@@ -185,7 +185,7 @@ namespace NodeBrain
 		NB_ASSERT(std::find(descriptorSets.begin(), descriptorSets.end(), descriptorSet) != descriptorSets.end(), "Descriptor set not found. Descriptor set being bound must exist during pipeline creation.")
 
 		uint32_t setIndex = std::find(descriptorSets.begin(), descriptorSets.end(), descriptorSet) - descriptorSets.begin();
-		std::shared_ptr<VulkanDescriptorSet> vulkanSet = std::static_pointer_cast<VulkanDescriptorSet>(descriptorSet);
+		std::shared_ptr<VulkanDescriptorSet> vulkanSet = CastPtr<VulkanDescriptorSet>(descriptorSet);
 		VkDescriptorSet vkDescriptorSet = vulkanSet->GetVkDescriptorSet();
 		vkCmdBindDescriptorSets(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_VkPipelineLayout, setIndex, 1, &vkDescriptorSet, 0, nullptr);
 	}

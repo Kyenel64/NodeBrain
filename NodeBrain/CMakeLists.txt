@@ -17,7 +17,8 @@ set (CoreFiles
 "src/Core/KeyCode.h"
 "src/Core/Input.h" "src/Core/Input.cpp"
 "src/Core/Instrumentor.h" "src/Core/Instrumentor.cpp"
-"src/Core/ImGuiLayer.h" "src/Core/ImGuiLayer.cpp")
+"src/Core/ImGuiLayer.h" "src/Core/ImGuiLayer.cpp"
+"src/Core/Ref.h")
 
 set (VulkanFiles 
 "src/GAPI/Vulkan/VulkanRendererAPI.h" "src/GAPI/Vulkan/VulkanRendererAPI.cpp"

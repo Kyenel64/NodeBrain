@@ -77,7 +77,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		std::shared_ptr<VulkanImage> vulkanImage = image ? std::static_pointer_cast<VulkanImage>(image) : m_Swapchain.GetDrawImage();
+		std::shared_ptr<VulkanImage> vulkanImage = image ? CastPtr<VulkanImage>(image) : m_Swapchain.GetDrawImage();
 
 		VkClearColorValue clearValue = { { color.x, color.y, color.z, color.w }};
 		VkImageSubresourceRange clearRange = Utils::ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
@@ -88,8 +88,8 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? std::static_pointer_cast<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
-		std::shared_ptr<VulkanGraphicsPipeline> vulkanPipeline = std::static_pointer_cast<VulkanGraphicsPipeline>(pipeline);
+		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? CastPtr<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
+		std::shared_ptr<VulkanGraphicsPipeline> vulkanPipeline = CastPtr<VulkanGraphicsPipeline>(pipeline);
 
 		vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetVkPipeline());
 
@@ -134,7 +134,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? std::static_pointer_cast<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
+		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? CastPtr<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
 		
 		m_vkCmdEndRenderingKHR(m_ActiveCmdBuffer);
 
@@ -161,7 +161,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		std::shared_ptr<VulkanIndexBuffer> vulkanIndexBuffer = std::static_pointer_cast<VulkanIndexBuffer>(indexBuffer);
+		std::shared_ptr<VulkanIndexBuffer> vulkanIndexBuffer = CastPtr<VulkanIndexBuffer>(indexBuffer);
 
 		vkCmdBindIndexBuffer(m_ActiveCmdBuffer, vulkanIndexBuffer->GetVkBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(m_ActiveCmdBuffer, indexCount, instanceCount, firstIndex, 0, instanceIndex);
@@ -171,8 +171,8 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = std::static_pointer_cast<VulkanComputePipeline>(pipeline);
-		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? std::static_pointer_cast<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
+		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = CastPtr<VulkanComputePipeline>(pipeline);
+		std::shared_ptr<VulkanImage> vulkanImage = pipeline->GetTargetImage() ? CastPtr<VulkanImage>(pipeline->GetTargetImage()) : m_Swapchain.GetDrawImage();
 
 		vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vulkanPipeline->GetVkPipeline());
 
