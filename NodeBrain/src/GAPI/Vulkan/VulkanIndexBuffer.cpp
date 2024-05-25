@@ -1,12 +1,10 @@
 #include "NBpch.h"
 #include "VulkanIndexBuffer.h"
 
-#include "GAPI/Vulkan/VulkanRenderContext.h"
-
 namespace NodeBrain
 {
-	VulkanIndexBuffer::VulkanIndexBuffer(uint32_t* data, uint32_t size)
-		: m_Size(size)
+	VulkanIndexBuffer::VulkanIndexBuffer(VulkanRenderContext* context, uint32_t* data, uint32_t size)
+		: m_Context(context), m_Size(size)
 	{
 		NB_PROFILE_FN();
 
@@ -19,8 +17,8 @@ namespace NodeBrain
 		allocationCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT; // Check
 		allocationCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
-		VK_CHECK(vmaCreateBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), &bufferCreateInfo, &allocationCreateInfo, &m_VkBuffer, &m_VmaAllocation, nullptr));
-		VK_CHECK(vmaMapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_VmaAllocation, &m_MappedData));
+		VK_CHECK(vmaCreateBuffer(m_Context->GetVMAAllocator(), &bufferCreateInfo, &allocationCreateInfo, &m_VkBuffer, &m_VmaAllocation, nullptr));
+		VK_CHECK(vmaMapMemory(m_Context->GetVMAAllocator(), m_VmaAllocation, &m_MappedData));
 
 		// Set initial data if provided
 		if (data)
@@ -31,8 +29,10 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		vmaUnmapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_VmaAllocation);
-		vmaDestroyBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), m_VkBuffer, m_VmaAllocation);
+		m_Context->WaitForGPU();
+
+		vmaUnmapMemory(m_Context->GetVMAAllocator(), m_VmaAllocation);
+		vmaDestroyBuffer(m_Context->GetVMAAllocator(), m_VkBuffer, m_VmaAllocation);
 		m_VkBuffer = VK_NULL_HANDLE;
 		m_VmaAllocation = VK_NULL_HANDLE;
 	}

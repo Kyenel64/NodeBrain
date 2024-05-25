@@ -4,13 +4,14 @@
 #include <VMA/vk_mem_alloc.h>
 
 #include "Renderer/IndexBuffer.h"
+#include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
 {
 	class VulkanIndexBuffer : public IndexBuffer
 	{
 	public:
-		VulkanIndexBuffer(uint32_t* data, uint32_t size);
+		VulkanIndexBuffer(VulkanRenderContext* context, uint32_t* data, uint32_t size);
 		virtual ~VulkanIndexBuffer();
 
 		virtual void SetData(const void* data, uint32_t size) override;
@@ -18,6 +19,8 @@ namespace NodeBrain
 		VkBuffer GetVkBuffer() const { return m_VkBuffer; }
 
 	private:
+		VulkanRenderContext* m_Context;
+		
 		VkBuffer m_VkBuffer = VK_NULL_HANDLE;
 		VmaAllocation m_VmaAllocation = VK_NULL_HANDLE;
 

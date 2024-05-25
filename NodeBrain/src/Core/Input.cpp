@@ -3,7 +3,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "Core/App.h"
+#include "Renderer/Renderer.h"
 
 namespace NodeBrain
 {
@@ -66,7 +66,7 @@ namespace NodeBrain
 		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() ? s_MouseButtonState[mouseButton] : InputState::None;
 	}
 
-	void Input::ProcessStates()
+	void Input::ProcessPollStates()
 	{
 		NB_PROFILE_FN();
 
@@ -118,10 +118,12 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		GLFWwindow* window = App::Get()->GetWindow().GetGLFWWindow();
-		NB_ASSERT(window, "Could not retrieve application instance");
-		double xpos = 0, ypos = 0;
-		glfwGetCursorPos(window, &xpos, &ypos);
-		return { (float)xpos, (float)ypos };
+		// fix
+		//GLFWwindow* window = Renderer::GetContext()->GetWindow()->GetGLFWWindow();
+		//NB_ASSERT(window, "Could not retrieve application instance");
+		//double xpos = 0, ypos = 0;
+		//glfwGetCursorPos(window, &xpos, &ypos);
+		//return { (float)xpos, (float)ypos };
+		return { 0.0f, 0.0f };
 	}
 }

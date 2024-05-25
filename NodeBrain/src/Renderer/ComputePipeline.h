@@ -1,6 +1,9 @@
 #pragma once
 
+#include "Renderer/RenderContext.h"
 #include "Renderer/Shader.h"
+#include "Renderer/Image.h"
+#include "Renderer/DescriptorSet.h"
 
 namespace NodeBrain
 {
@@ -32,6 +35,6 @@ namespace NodeBrain
 
 		virtual std::shared_ptr<Image> GetTargetImage() const = 0;
 
-		static std::shared_ptr<ComputePipeline> Create(const ComputePipelineConfiguration& configuration);
+		static std::shared_ptr<ComputePipeline> Create(RenderContext* context, const ComputePipelineConfiguration& configuration);
 	};
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Renderer/RenderContext.h"
+
 namespace NodeBrain
 {
 	class VertexBuffer
@@ -11,6 +13,6 @@ namespace NodeBrain
 		
 		virtual uint64_t GetAddress() const = 0;
 
-		static std::shared_ptr<VertexBuffer> Create(const void* data, uint32_t size);
+		static std::shared_ptr<VertexBuffer> Create(RenderContext* context, const void* data, uint32_t size);
 	};
 }

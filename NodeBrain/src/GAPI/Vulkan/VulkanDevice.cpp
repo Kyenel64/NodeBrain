@@ -1,11 +1,12 @@
 #include "NBpch.h"
 #include "VulkanDevice.h"
 
+#include "Renderer/Renderer.h"
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
 {
-	VulkanDevice::VulkanDevice(VulkanPhysicalDevice& physicalDevice)
+	VulkanDevice::VulkanDevice(VulkanPhysicalDevice& physicalDevice, const std::vector<const char*>& enabledLayers)
 		: m_PhysicalDevice(physicalDevice)
 	{
 		NB_PROFILE_FN();
@@ -58,12 +59,10 @@ namespace NodeBrain
 		createInfo.ppEnabledExtensionNames = m_PhysicalDevice.GetEnabledDeviceExtensions().data();
 
 		// Validation layers
-		createInfo.enabledLayerCount = 0;
-		const std::vector<const char*>& validationLayers = VulkanRenderContext::Get()->GetEnabledLayers();
-		if (!validationLayers.empty())
+		if (!enabledLayers.empty())
 		{
-			createInfo.enabledLayerCount = validationLayers.size();
-			createInfo.ppEnabledLayerNames = &validationLayers[0];
+			createInfo.enabledLayerCount = enabledLayers.size();
+			createInfo.ppEnabledLayerNames = &enabledLayers[0];
 		}
 
 		VK_CHECK(vkCreateDevice(m_PhysicalDevice.GetVkPhysicalDevice(), &createInfo, nullptr, &m_VkDevice));

@@ -21,7 +21,6 @@
 
 #include "Core/Log.h"
 #include "Core/Instrumentor.h"
-#include "Core/Ref.h"
 
 #ifdef NB_WINDOWS
     #include <windows.h>

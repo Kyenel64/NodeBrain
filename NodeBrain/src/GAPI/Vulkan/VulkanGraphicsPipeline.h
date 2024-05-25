@@ -3,13 +3,14 @@
 #include <vulkan/vulkan.h>
 
 #include "Renderer/GraphicsPipeline.h"
+#include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
 {
 	class VulkanGraphicsPipeline : public GraphicsPipeline
 	{
 	public:
-		VulkanGraphicsPipeline(const GraphicsPipelineConfiguration& config);
+		VulkanGraphicsPipeline(VulkanRenderContext* context, const GraphicsPipelineConfiguration& config);
 		virtual ~VulkanGraphicsPipeline();
 
 		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) override;
@@ -21,6 +22,8 @@ namespace NodeBrain
 		VkPipeline GetVkPipeline() const { return m_VkPipeline; }
 
 	private:
+		VulkanRenderContext* m_Context;
+		
 		VkPipeline m_VkPipeline = VK_NULL_HANDLE;
 		VkPipelineLayout m_VkPipelineLayout = VK_NULL_HANDLE;
 

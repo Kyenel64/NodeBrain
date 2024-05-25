@@ -12,8 +12,6 @@
 
 // Renderer
 #include "Renderer/Renderer.h"
-#include "Renderer/RendererAPI.h"
-#include "Renderer/RenderContext.h"
 #include "Renderer/Image.h"
 #include "Renderer/Shader.h"
 #include "Renderer/GraphicsPipeline.h"
@@ -22,3 +20,8 @@
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/UniformBuffer.h"
 #include "Renderer/DescriptorSet.h"
+
+// Graphics API
+#include "GAPI/Vulkan/VulkanRenderContext.h"
+#include "GAPI/Vulkan/VulkanRendererAPI.h"
+#include "GAPI/Vulkan/VulkanImGuiLayer.h"

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Renderer/RenderContext.h"
+
 namespace NodeBrain
 {
 	class UniformBuffer
@@ -9,6 +11,6 @@ namespace NodeBrain
 
 		virtual void SetData(const void* data, uint32_t size) = 0;
 
-		static std::shared_ptr<UniformBuffer> Create(const void* data, uint32_t size);
+		static std::shared_ptr<UniformBuffer> Create(RenderContext* context, const void* data, uint32_t size);
 	};
 }

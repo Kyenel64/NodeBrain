@@ -3,13 +3,12 @@
 
 #include <ImGui/backends/imgui_impl_vulkan.h>
 
-#include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanUtils.h"
 
 namespace NodeBrain
 {	
-	VulkanImage::VulkanImage(const ImageConfiguration& configuration)
-		: m_Configuration(configuration)
+	VulkanImage::VulkanImage(VulkanRenderContext* context, const ImageConfiguration& configuration)
+		: m_Context(context), m_Configuration(configuration)
 	{
 		NB_PROFILE_FN();
 
@@ -38,7 +37,7 @@ namespace NodeBrain
 		allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 		allocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-		VK_CHECK(vmaCreateImage(VulkanRenderContext::Get()->GetVMAAllocator(), &imageCreateInfo, &allocationCreateInfo, &m_VkImage, &m_VmaAllocation, nullptr));
+		VK_CHECK(vmaCreateImage(m_Context->GetVMAAllocator(), &imageCreateInfo, &allocationCreateInfo, &m_VkImage, &m_VmaAllocation, nullptr));
 
 
 		// --- Create Image View ---
@@ -58,7 +57,7 @@ namespace NodeBrain
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 		imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-		VK_CHECK(vkCreateImageView(VulkanRenderContext::Get()->GetVkDevice(), &imageViewCreateInfo, nullptr, &m_VkImageView));
+		VK_CHECK(vkCreateImageView(m_Context->GetVkDevice(), &imageViewCreateInfo, nullptr, &m_VkImageView));
 
 
 		// --- Create sampler ---
@@ -80,10 +79,9 @@ namespace NodeBrain
 		samplerCreateInfo.minLod = 0.0f;
 		samplerCreateInfo.maxLod = 0.0f;
 
-		VK_CHECK(vkCreateSampler(VulkanRenderContext::Get()->GetVkDevice(), &samplerCreateInfo, nullptr, &m_VkSampler));
+		VK_CHECK(vkCreateSampler(m_Context->GetVkDevice(), &samplerCreateInfo, nullptr, &m_VkSampler));
 
-		// TODO: Immediate submit transition image to general layout
-		VulkanRenderContext::Get()->ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
+		m_Context->ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
 		{
 			Utils::TransitionImage(cmdBuffer, m_VkImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 		});
@@ -93,13 +91,15 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		vkDestroySampler(VulkanRenderContext::Get()->GetVkDevice(), m_VkSampler, nullptr);
+		m_Context->WaitForGPU();
+
+		vkDestroySampler(m_Context->GetVkDevice(), m_VkSampler, nullptr);
 		m_VkSampler = VK_NULL_HANDLE;
 
-		vkDestroyImageView(VulkanRenderContext::Get()->GetVkDevice(), m_VkImageView, nullptr);
+		vkDestroyImageView(m_Context->GetVkDevice(), m_VkImageView, nullptr);
 		m_VkImageView = VK_NULL_HANDLE;
 
-		vmaDestroyImage(VulkanRenderContext::Get()->GetVMAAllocator(), m_VkImage, m_VmaAllocation);
+		vmaDestroyImage(m_Context->GetVMAAllocator(), m_VkImage, m_VmaAllocation);
 		m_VkImage = VK_NULL_HANDLE;
 		m_VmaAllocation = VK_NULL_HANDLE;
 	}

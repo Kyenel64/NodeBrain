@@ -2,8 +2,7 @@
 
 #include <filesystem>
 
-#include "Renderer/Image.h"
-#include "Renderer/UniformBuffer.h"
+#include "Renderer/RenderContext.h"
 
 namespace NodeBrain
 {
@@ -17,6 +16,6 @@ namespace NodeBrain
 		virtual const std::filesystem::path& GetShaderPath() const = 0;
 		virtual ShaderType GetShaderType() const = 0;
 		
-		static std::shared_ptr<Shader> Create(const std::filesystem::path& path, ShaderType shaderType);
+		static std::shared_ptr<Shader> Create(RenderContext* context, const std::filesystem::path& path, ShaderType shaderType);
 	};
 }

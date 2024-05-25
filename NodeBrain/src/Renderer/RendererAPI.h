@@ -5,6 +5,7 @@
 #include "Renderer/GraphicsPipeline.h"
 #include "Renderer/ComputePipeline.h"
 #include "Renderer/IndexBuffer.h"
+#include "Renderer/Image.h"
 
 namespace NodeBrain
 {
@@ -16,7 +17,6 @@ namespace NodeBrain
 		virtual void BeginFrame() = 0;
 		virtual void EndFrame() = 0;
 
-		virtual void WaitForGPU() = 0;
 		virtual void ClearColor(const glm::vec4& color, std::shared_ptr<Image> image = nullptr) = 0;
 
 		virtual void BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline) = 0;
@@ -28,8 +28,6 @@ namespace NodeBrain
 		virtual void EndComputePass(std::shared_ptr<ComputePipeline> pipeline) = 0;
 		virtual void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) = 0;
 
-		virtual std::shared_ptr<Image> GetSwapchainDrawImage() const = 0;
-
-		static std::unique_ptr<RendererAPI> Create();
+		virtual RenderContext* GetContext() const = 0;
 	};
 }

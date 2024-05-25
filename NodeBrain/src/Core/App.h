@@ -5,19 +5,19 @@
 #include "Core/Window.h"
 #include "Core/Event.h"
 #include "Core/ImGuiLayer.h"
+#include "Renderer/Renderer.h"
 
 namespace NodeBrain
 {
 	class App
 	{
 	public:
-		App(const std::string& applicationName);
+		App(const std::string& applicationName, Window* window, Renderer* renderer, ImGuiLayer* imGuiLayer);
 		~App();
 
 		void Run();
 		void PushLayer(Layer* layer);
 
-		static App* Get();
 		size_t GetLayersSize() const { return m_Layers.size(); }
 		Window& GetWindow() const { return *m_Window; }
 		const std::string& GetApplicationName() const { return m_ApplicationName; }
@@ -28,15 +28,15 @@ namespace NodeBrain
 		void OnWindowClose(WindowClosedEvent& e);
 		void OnMinimized(WindowMinimizedEvent& e);
 
-		bool StartupSubSystems();
-
 	private:
 		std::string m_ApplicationName;
+		Window* m_Window;
+		Renderer* m_Renderer;
+		ImGuiLayer* m_ImGuiLayer;
+
 		bool m_Running = true;
 		bool m_Minimized = false;
 		std::vector<Layer*> m_Layers;
-		std::unique_ptr<Window> m_Window;
-		ImGuiLayer* m_ImGuiLayer;
 
 		float m_LastFrameTime = 0.0f;
 		Timer m_Timer;

@@ -20,7 +20,28 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		Init();
+		if (!glfwInit())
+			NB_ASSERT(false, "Failed to initialize GLFW.");
+
+		glfwSetErrorCallback(GLFWErrorCallback);
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_WindowName.c_str(), NULL, NULL);
+		NB_ASSERT(m_Window, "Failed to create GLFW window");
+		NB_INFO("Created Window {0}, size: {1}, {2}", m_WindowName, m_Data.Width, m_Data.Height);
+		// Set data that can be accessed when calling glfwGetWindowUserPointer
+		glfwSetWindowUserPointer(m_Window, &m_Data);
+
+		// TODO: Figure out proper DPI scaling. 
+		// 	Setting window size to framebuffer size solves proper DPI scaling for now but could be wrong.
+		glfwGetFramebufferSize(m_Window, &m_Data.Width, &m_Data.Height);
+
+		// Vulkan extensions
+		uint32_t extensionCount = 0;
+		const char** extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
+		for (size_t i = 0; i < extensionCount; i++)
+			m_VulkanExtensions.push_back(extensions[i]);
+		
+		RegisterCallbacks();
 	}
 
 	Window::~Window()
@@ -29,55 +50,6 @@ namespace NodeBrain
 
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
-	}
-
-	bool Window::Init()
-	{
-		NB_PROFILE_FN();
-
-		{
-			NB_PROFILE_SCOPE("Init GLFW");
-			if (!glfwInit())
-				return false;
-
-			glfwSetErrorCallback(GLFWErrorCallback);
-			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-			m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_WindowName.c_str(), NULL, NULL);
-			NB_ASSERT(m_Window, "Failed to create GLFW window");
-			NB_INFO("Created Window {0}, size: {1}, {2}", m_WindowName, m_Data.Width, m_Data.Height);
-			// Set data that can be accessed when calling glfwGetWindowUserPointer
-			glfwSetWindowUserPointer(m_Window, &m_Data);
-
-			// TODO: Figure out proper DPI scaling. 
-			// 	Setting window size to framebuffer size solves proper DPI scaling for now but could be wrong.
-			glfwGetFramebufferSize(m_Window, &m_Data.Width, &m_Data.Height);
-
-			// Vulkan extensions
-			uint32_t extensionCount = 0;
-			const char** extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
-			for (size_t i = 0; i < extensionCount; i++)
-				m_VulkanExtensions.push_back(extensions[i]);
-		}
-
-		m_RenderContext = RenderContext::Create(this);
-
-		RegisterCallbacks();
-
-		return true;
-	}
-
-	void Window::AcquireNextImage()
-	{
-		NB_PROFILE_FN();
-		
-		m_RenderContext->AcquireNextImage();
-	}
-
-	void Window::SwapBuffers()
-	{
-		NB_PROFILE_FN();
-
-		m_RenderContext->SwapBuffers();
 	}
 
 	void Window::PollEvents()

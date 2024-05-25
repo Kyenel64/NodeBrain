@@ -3,23 +3,24 @@
 #include <vulkan/vulkan.h>
 #include <VMA/vk_mem_alloc.h>
 
-#include "GAPI/Vulkan/VulkanRenderContext.h"
-#include "GAPI/Vulkan/VulkanSwapchain.h"
 #include "Renderer/UniformBuffer.h"
+#include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
 {
 	class VulkanUniformBuffer : public UniformBuffer
 	{
 	public:
-		VulkanUniformBuffer(const void* data, uint32_t size);
+		VulkanUniformBuffer(VulkanRenderContext* context, const void* data, uint32_t size);
 		virtual ~VulkanUniformBuffer();
 
 		virtual void SetData(const void* data, uint32_t size) override;
 
-		VkBuffer GetVkBuffer() const { return m_VkBuffers[VulkanRenderContext::Get()->GetSwapchain().GetFrameIndex()]; }
+		VkBuffer GetVkBuffer() const { return m_VkBuffers[m_Context->GetSwapchain().GetFrameIndex()]; }
 		uint32_t GetSize() const { return m_Size; }
 	private:
+		VulkanRenderContext* m_Context;
+
 		VkBuffer m_VkBuffers[FRAMES_IN_FLIGHT];
 		VmaAllocation m_VmaAllocations[FRAMES_IN_FLIGHT];
 		void* m_MappedData[FRAMES_IN_FLIGHT];

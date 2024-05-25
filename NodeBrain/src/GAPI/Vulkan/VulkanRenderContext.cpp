@@ -85,16 +85,10 @@ namespace NodeBrain
 	
 
 
-	// --- VulkanRenderContext ------------------------------------------------
-	static VulkanRenderContext* s_Instance;
-
 	VulkanRenderContext::VulkanRenderContext(Window* window)
 		: m_Window(window)
 	{
 		NB_PROFILE_FN();
-
-		NB_ASSERT(!s_Instance, "Instance already exists");
-		s_Instance = this;
 
 		#ifdef NB_DEBUG
 			m_EnabledLayers.push_back("VK_LAYER_KHRONOS_validation");
@@ -108,8 +102,6 @@ namespace NodeBrain
 			m_EnabledInstanceExtensions.push_back("VK_KHR_get_physical_device_properties2");
 		#endif
 
-
-
 		VK_CHECK(CreateInstance());
 
 		VK_CHECK(glfwCreateWindowSurface(m_VkInstance, m_Window->GetGLFWWindow(), nullptr, &m_VkSurface));
@@ -120,13 +112,13 @@ namespace NodeBrain
 
 		m_PhysicalDevice = FindFirstSuitablePhysicalDevice();
 
-		m_Device = std::make_unique<VulkanDevice>(*m_PhysicalDevice);
+		m_Device = std::make_unique<VulkanDevice>(*m_PhysicalDevice, m_EnabledLayers);
 
 		VK_CHECK(CreateImmediateObjects());
 
 		VK_CHECK(CreateAllocator());
 
-		m_Swapchain = std::make_unique<VulkanSwapchain>(m_VkSurface, *m_Device);
+		m_Swapchain = std::make_unique<VulkanSwapchain>(m_Window, m_VkSurface, *m_Device, m_VMAAllocator);
 		
 		VK_CHECK(CreateDescriptorPools());
 	}
@@ -134,6 +126,8 @@ namespace NodeBrain
 	VulkanRenderContext::~VulkanRenderContext()
 	{
 		NB_PROFILE_FN();
+
+		vkDeviceWaitIdle(m_Device->GetVkDevice());
 
 		for (int i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
@@ -157,8 +151,6 @@ namespace NodeBrain
 
 		vkDestroyInstance(m_VkInstance, nullptr);
 		m_VkInstance = VK_NULL_HANDLE;
-
-		s_Instance = nullptr;
 	}
 
 	void VulkanRenderContext::AcquireNextImage()
@@ -201,11 +193,11 @@ namespace NodeBrain
 		VK_CHECK(vkWaitForFences(m_Device->GetVkDevice(), 1, &m_ImmediateFence, true, UINT64_MAX));
 	}
 
-	VulkanRenderContext* VulkanRenderContext::Get() 
+	void VulkanRenderContext::WaitForGPU()
 	{
 		NB_PROFILE_FN();
 
-		return s_Instance; 
+		vkDeviceWaitIdle(m_Device->GetVkDevice());
 	}
 
 	VkResult VulkanRenderContext::CreateInstance()
@@ -214,9 +206,9 @@ namespace NodeBrain
 
 		VkApplicationInfo applicationInfo = {};
 		applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		applicationInfo.pApplicationName = App::Get()->GetApplicationName().c_str();
+		applicationInfo.pApplicationName = "NodeBrain";
 		applicationInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-		applicationInfo.pEngineName = App::Get()->GetApplicationName().c_str();
+		applicationInfo.pEngineName = "NodeBrain";
 		applicationInfo.engineVersion = VK_MAKE_VERSION(0, 0, 1);
 		applicationInfo.apiVersion = VK_API_VERSION_1_2;
 

@@ -2,14 +2,13 @@
 #include "VulkanDescriptorSet.h"
 
 #include "GAPI/Vulkan/VulkanUtils.h"
-
 #include "GAPI/Vulkan/VulkanUniformBuffer.h"
 #include "GAPI/Vulkan/VulkanImage.h"
 
 namespace NodeBrain
 {
-	VulkanDescriptorSet::VulkanDescriptorSet(const std::vector<LayoutBinding>& layout)
-		: m_Layout(layout)
+	VulkanDescriptorSet::VulkanDescriptorSet(VulkanRenderContext* context, const std::vector<LayoutBinding>& layout)
+		: m_Context(context), m_Layout(layout)
 	{
 		NB_PROFILE_FN();
 
@@ -30,24 +29,26 @@ namespace NodeBrain
 		descriptorLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		descriptorLayoutCreateInfo.bindingCount = (uint32_t)setLayoutbindings.size();
 		descriptorLayoutCreateInfo.pBindings = &setLayoutbindings[0];
-		VK_CHECK(vkCreateDescriptorSetLayout(VulkanRenderContext::Get()->GetVkDevice(), &descriptorLayoutCreateInfo, nullptr, &m_VkDescriptorSetLayout));
+		VK_CHECK(vkCreateDescriptorSetLayout(m_Context->GetVkDevice(), &descriptorLayoutCreateInfo, nullptr, &m_VkDescriptorSetLayout));
 
 
 		// --- Descriptor Set ---
 		std::vector<VkDescriptorSetLayout> layouts(FRAMES_IN_FLIGHT, m_VkDescriptorSetLayout);
 		VkDescriptorSetAllocateInfo descriptorAllocateInfo = {};
 		descriptorAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		descriptorAllocateInfo.descriptorPool = VulkanRenderContext::Get()->GetVkDescriptorPool();
+		descriptorAllocateInfo.descriptorPool = m_Context->GetVkDescriptorPool();
 		descriptorAllocateInfo.descriptorSetCount = FRAMES_IN_FLIGHT;
 		descriptorAllocateInfo.pSetLayouts = &layouts[0];
-		VK_CHECK(vkAllocateDescriptorSets(VulkanRenderContext::Get()->GetVkDevice(), &descriptorAllocateInfo, &m_VkDescriptorSet[0]));
+		VK_CHECK(vkAllocateDescriptorSets(m_Context->GetVkDevice(), &descriptorAllocateInfo, &m_VkDescriptorSet[0]));
 	}
 
 	VulkanDescriptorSet::~VulkanDescriptorSet()
 	{
 		NB_PROFILE_FN();
 
-		vkDestroyDescriptorSetLayout(VulkanRenderContext::Get()->GetVkDevice(), m_VkDescriptorSetLayout, nullptr);
+		m_Context->WaitForGPU();
+
+		vkDestroyDescriptorSetLayout(m_Context->GetVkDevice(), m_VkDescriptorSetLayout, nullptr);
 		m_VkDescriptorSetLayout = VK_NULL_HANDLE;
 	}
 
@@ -62,7 +63,7 @@ namespace NodeBrain
 				NB_ASSERT(layout.Type == BindingType::UniformBuffer, "Invalid binding type at index {0}. Binding must be of type UniformBuffer.", binding);
 		}
 
-		std::shared_ptr<VulkanUniformBuffer> vulkanUBO = CastPtr<VulkanUniformBuffer>(buffer);
+		std::shared_ptr<VulkanUniformBuffer> vulkanUBO = dynamic_pointer_cast<VulkanUniformBuffer>(buffer);
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
@@ -78,7 +79,7 @@ namespace NodeBrain
 			write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			write.dstSet = m_VkDescriptorSet[i];
 			write.pBufferInfo = &bufferInfo;
-			vkUpdateDescriptorSets(VulkanRenderContext::Get()->GetVkDevice(), 1, &write, 0, nullptr);
+			vkUpdateDescriptorSets(m_Context->GetVkDevice(), 1, &write, 0, nullptr);
 		}
 	}
 
@@ -93,7 +94,7 @@ namespace NodeBrain
 				NB_ASSERT(layout.Type == BindingType::StorageImage, "Invalid binding type at index {0}. Binding must be of type StorageImage.", binding);
 		}
 		
-		std::shared_ptr<VulkanImage> vulkanImage = CastPtr<VulkanImage>(image);
+		std::shared_ptr<VulkanImage> vulkanImage = dynamic_pointer_cast<VulkanImage>(image);
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
@@ -109,7 +110,7 @@ namespace NodeBrain
 			write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 			write.dstSet = m_VkDescriptorSet[i];
 			write.pImageInfo = &imageinfo;
-			vkUpdateDescriptorSets(VulkanRenderContext::Get()->GetVkDevice(), 1, &write, 0, nullptr);
+			vkUpdateDescriptorSets(m_Context->GetVkDevice(), 1, &write, 0, nullptr);
 		}
 	}
 }

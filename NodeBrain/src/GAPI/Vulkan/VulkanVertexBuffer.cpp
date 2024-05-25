@@ -1,12 +1,10 @@
 #include "NBpch.h"
 #include "VulkanVertexBuffer.h"
 
-#include "GAPI/Vulkan/VulkanRenderContext.h"
-
 namespace NodeBrain
 {
-	VulkanVertexBuffer::VulkanVertexBuffer(const void* data, uint32_t size)
-		: m_Size(size)
+	VulkanVertexBuffer::VulkanVertexBuffer(VulkanRenderContext* context, const void* data, uint32_t size)
+		: m_Context(context), m_Size(size)
 	{
 		NB_PROFILE_FN();
 
@@ -32,20 +30,20 @@ namespace NodeBrain
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
-			VK_CHECK(vmaCreateBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), &gpuBufferCreateInfo, &gpuAllocationCreateInfo, &m_GPUBuffer[i], &m_GPUAllocation[i], nullptr));
-			VK_CHECK(vmaCreateBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), &stagingBufferCreateInfo, &stagingAllocationCreateInfo, &m_StagingBuffer[i], &m_StagingAllocation[i], nullptr));
+			VK_CHECK(vmaCreateBuffer(m_Context->GetVMAAllocator(), &gpuBufferCreateInfo, &gpuAllocationCreateInfo, &m_GPUBuffer[i], &m_GPUAllocation[i], nullptr));
+			VK_CHECK(vmaCreateBuffer(m_Context->GetVMAAllocator(), &stagingBufferCreateInfo, &stagingAllocationCreateInfo, &m_StagingBuffer[i], &m_StagingAllocation[i], nullptr));
 
 			VkBufferDeviceAddressInfo deviceAddressInfo = {};
 			deviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
 			deviceAddressInfo.buffer = m_GPUBuffer[i];
-			m_VkDeviceAddress[i] = vkGetBufferDeviceAddress(VulkanRenderContext::Get()->GetVkDevice(), &deviceAddressInfo);
+			m_VkDeviceAddress[i] = vkGetBufferDeviceAddress(m_Context->GetVkDevice(), &deviceAddressInfo);
 
-			VK_CHECK(vmaMapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_StagingAllocation[i], &m_StagingMappedData[i]));
+			VK_CHECK(vmaMapMemory(m_Context->GetVMAAllocator(), m_StagingAllocation[i], &m_StagingMappedData[i]));
 
 			// Set initial data if provided
 			if (data)
 			{
-				VulkanRenderContext::Get()->ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
+				m_Context->ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
 				{
 					memcpy(m_StagingMappedData[i], data, size);
 
@@ -63,15 +61,17 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		m_Context->WaitForGPU();
+
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
-			vmaUnmapMemory(VulkanRenderContext::Get()->GetVMAAllocator(), m_StagingAllocation[i]);
+			vmaUnmapMemory(m_Context->GetVMAAllocator(), m_StagingAllocation[i]);
 			
-			vmaDestroyBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), m_GPUBuffer[i], m_GPUAllocation[i]);
+			vmaDestroyBuffer(m_Context->GetVMAAllocator(), m_GPUBuffer[i], m_GPUAllocation[i]);
 			m_GPUBuffer[i] = VK_NULL_HANDLE;
 			m_GPUAllocation[i] = VK_NULL_HANDLE;
 
-			vmaDestroyBuffer(VulkanRenderContext::Get()->GetVMAAllocator(), m_StagingBuffer[i], m_StagingAllocation[i]);
+			vmaDestroyBuffer(m_Context->GetVMAAllocator(), m_StagingBuffer[i], m_StagingAllocation[i]);
 			m_StagingBuffer[i] = VK_NULL_HANDLE;
 			m_StagingAllocation[i] = VK_NULL_HANDLE;
 		}
@@ -92,7 +92,7 @@ namespace NodeBrain
 			copy.dstOffset = 0;
 			copy.srcOffset = 0;
 			copy.size = size;
-			vkCmdCopyBuffer(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_StagingBuffer[i], m_GPUBuffer[i], 1, &copy);
+			vkCmdCopyBuffer(m_Context->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_StagingBuffer[i], m_GPUBuffer[i], 1, &copy);
 		}
 	}
 }

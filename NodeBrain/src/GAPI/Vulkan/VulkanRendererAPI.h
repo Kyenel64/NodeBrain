@@ -6,21 +6,21 @@
 #include "Renderer/RendererAPI.h"
 #include "Renderer/GraphicsPipeline.h"
 #include "Renderer/Shader.h"
+#include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
 {
 	class VulkanRendererAPI : public RendererAPI
 	{
 	public:
-		VulkanRendererAPI();
+		VulkanRendererAPI(VulkanRenderContext* renderContext);
 		virtual ~VulkanRendererAPI();
 
-		virtual std::shared_ptr<Image> GetSwapchainDrawImage() const override { return m_Swapchain.GetDrawImage(); };
+		virtual RenderContext* GetContext() const override { return m_Context; }
 
 		virtual void BeginFrame() override;
 		virtual void EndFrame() override;
 
-		virtual void WaitForGPU() override;
 		virtual void ClearColor(const glm::vec4& color, std::shared_ptr<Image> image = nullptr) override;
 
 		virtual void BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline) override;
@@ -33,6 +33,7 @@ namespace NodeBrain
 		virtual void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) override;
 
 	private:
+		VulkanRenderContext* m_Context;
 		VulkanSwapchain& m_Swapchain;
 		VkCommandBuffer m_ActiveCmdBuffer = VK_NULL_HANDLE;
 		VkImage m_ActiveSwapchainImage = VK_NULL_HANDLE;

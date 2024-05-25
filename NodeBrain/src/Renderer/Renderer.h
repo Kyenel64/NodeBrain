@@ -1,52 +1,103 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <ImGui/imgui.h>
 
+#include "Renderer/RendererAPI.h"
+#include "Renderer/RenderContext.h"
 #include "Renderer/GraphicsPipeline.h"
-#include "Renderer/IndexBuffer.h"
 #include "Renderer/ComputePipeline.h"
+#include "Renderer/VertexBuffer.h"
+#include "Renderer/IndexBuffer.h"
+#include "Renderer/UniformBuffer.h"
+#include "Renderer/DescriptorSet.h"
 #include "Renderer/Image.h"
 
 namespace NodeBrain
 {
-	enum class GAPI { None = 0, Vulkan };
+	struct QuadVertex
+	{
+		glm::vec3 Position;
+		float UVX;
+		glm::vec3 Normal;
+		float UVY;
+		glm::vec4 Color;
+	};
+
+	struct PushConstantData
+	{
+		glm::mat4 ViewProjectionMatrix;
+		uint64_t Address;
+	};
+
+	struct TestUniformData
+	{
+		glm::vec4 Color;
+		glm::vec4 Color2;
+	};
+
+	struct TestUniformData2
+	{
+		glm::vec4 Color3;
+	};
+
+	struct RendererData
+	{
+		const uint32_t MaxQuads = 20000;
+		const uint32_t MaxVertices = MaxQuads * 4;
+		const uint32_t MaxIndices = MaxQuads * 6;
+
+		PushConstantData PushConstantBuffer;
+
+		// --- Quad ---
+		std::shared_ptr<Shader> QuadVertexShader;
+		std::shared_ptr<Shader> QuadFragmentShader;
+		std::shared_ptr<GraphicsPipeline> QuadPipeline;
+
+		uint32_t QuadIndexCount = 0;
+		std::shared_ptr<VertexBuffer> QuadVertexBuffer;
+		std::shared_ptr<IndexBuffer> QuadIndexBuffer;
+		QuadVertex* QuadVertexBufferBase = nullptr;
+		QuadVertex* QuadVertexBufferPtr = nullptr;
+
+		glm::vec3 QuadVertexPositions[4];
+
+
+		TestUniformData TestUniformDataBuffer;
+		std::shared_ptr<UniformBuffer> TestUniformBuffer;
+
+		TestUniformData2 TestUniformDataBuffer2;
+		std::shared_ptr<UniformBuffer> TestUniformBuffer2;
+
+		TestUniformData2 TestUniformDataBuffer3;
+		std::shared_ptr<UniformBuffer> TestUniformBuffer3;
+
+		std::shared_ptr<DescriptorSet> GlobalDescriptorSet;
+		std::shared_ptr<DescriptorSet> LocalDescriptorSet;
+	};
 
 	class Renderer
 	{
 	public:
-		static void Init();
-		static void Shutdown();
+		Renderer(RendererAPI* rendererAPI);
+		~Renderer();
 
-		static void BeginFrame();
-		static void EndFrame();
+		void BeginFrame();
+		void EndFrame();
 
-		static void BeginScene(std::shared_ptr<Image> targetImage = nullptr);
-		static void EndScene();
+		void BeginScene(std::shared_ptr<Image> targetImage = nullptr);
+		void EndScene();
 
-		static void RenderSubmitted();
+		void RenderSubmitted();
 
-		static void SubmitQuad(const glm::mat4& transform, const glm::vec4& color);
+		void SubmitQuad(const glm::mat4& transform, const glm::vec4& color);
 
+		RenderContext* GetContext() const { return m_RendererAPI->GetContext(); };
+		RendererAPI* GetAPI() const { return m_RendererAPI; }
 
-		// --- Backend ---
-		static GAPI GetGAPI();
-		static void WaitForGPU();
+	private:
+		RendererAPI* m_RendererAPI;
+		RenderContext* m_Context;
 
-		static void ClearColor(const glm::vec4& color, std::shared_ptr<Image> image = nullptr);
-
-		static void BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline);
-		static void EndRenderPass(std::shared_ptr<GraphicsPipeline> pipeline);
-		static void Draw(uint32_t vertexCount, uint32_t vertexIndex, uint32_t instanceCount = 0, uint32_t instanceIndex = 0);
-		static void DrawIndexed(std::shared_ptr<IndexBuffer> indexBuffer, uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount = 1, uint32_t instanceIndex = 0);
-
-		static void BeginComputePass(std::shared_ptr<ComputePipeline> pipeline);
-		static void EndComputePass(std::shared_ptr<ComputePipeline> pipeline);
-		static void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ);
-
-		static std::shared_ptr<Image> GetSwapchainDrawImage();
-
-		// Temp
-		static void ProcessGradientCompute();
+		RendererData m_Data;
 	};
 }

@@ -1,9 +1,6 @@
 #include "NBpch.h"
 #include "VulkanSwapchain.h"
 
-#include "Core/App.h"
-#include "GAPI/Vulkan/VulkanRenderContext.h"
-
 namespace NodeBrain
 {
 	static VkSurfaceFormatKHR ChooseSwapchainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
@@ -32,7 +29,7 @@ namespace NodeBrain
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
-	static VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
+	static VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, Window* window)
 	{
 		NB_PROFILE_FN();
 
@@ -42,7 +39,7 @@ namespace NodeBrain
 		}
 		else
 		{
-			glm::vec2 framebufferSize = App::Get()->GetWindow().GetFramebufferSize();
+			glm::vec2 framebufferSize = window->GetFramebufferSize();
 			VkExtent2D actualExtent = { static_cast<uint32_t>(framebufferSize.x), static_cast<uint32_t>(framebufferSize.y) };
 			actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
 			actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
@@ -54,29 +51,20 @@ namespace NodeBrain
 
 
 
-	VulkanSwapchain::VulkanSwapchain(VkSurfaceKHR surface, VulkanDevice& device)
-		: m_VkSurface(surface), m_Device(device), m_ImageIndex(0)
+	VulkanSwapchain::VulkanSwapchain(Window* window, VkSurfaceKHR surface, VulkanDevice& device, VmaAllocator allocator)
+		: m_Window(window), m_VkSurface(surface), m_Device(device), m_ImageIndex(0), m_VmaAllocator(allocator)
 	{
 		NB_PROFILE_FN();
 
 		VK_CHECK(CreateVkSwapchain());
 		VK_CHECK(CreateImageDatas());
 		VK_CHECK(CreateFrameDatas());
-
-		ImageConfiguration config = {};
-		config.Width = m_VkExtent.width;
-		config.Height = m_VkExtent.height;
-		config.Format = ImageFormat::RGBA16;
-		m_DrawImage = std::make_shared<VulkanImage>(config);
 	}
 
 	VulkanSwapchain::~VulkanSwapchain()
 	{
 		NB_PROFILE_FN();
 
-		vkDeviceWaitIdle(m_Device.GetVkDevice());
-
-		m_DrawImage.reset();
 		DestroyFrameDatas();
 		DestroyImageDatas();
 		DestroyVkSwapchain();
@@ -93,7 +81,7 @@ namespace NodeBrain
 		m_VkColorFormat = surfaceFormat.format;
 		m_VkColorSpace = surfaceFormat.colorSpace;
 		m_VkPresentationMode = ChooseSwapchainPresentationMode(swapChainSupport.PresentationModes);
-		m_VkExtent = ChooseSwapExtent(capabilities);
+		m_VkExtent = ChooseSwapExtent(capabilities, m_Window);
 		uint32_t minImageCount = (capabilities.maxImageCount > 0 && m_ImageCount > capabilities.maxImageCount) ? capabilities.maxImageCount: capabilities.minImageCount + 1;
 
 		// --- Create swapchain ---
@@ -181,15 +169,6 @@ namespace NodeBrain
 				return result;
 		}
 
-		// Set image layouts
-		for (size_t i = 0; i < m_ImageCount; i++)
-		{
-			VulkanRenderContext::Get()->ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
-			{
-				Utils::TransitionImage(cmdBuffer, m_ImageDatas[i].Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
-			});
-		}
-
 		return VK_SUCCESS;
 	}
 
@@ -247,6 +226,57 @@ namespace NodeBrain
 			result = vkCreateFence(m_Device.GetVkDevice(), &fenceCreateInfo, nullptr, &m_FrameDatas[i].InFlightFence);
 			if (result != VK_SUCCESS)
 				return result;
+
+			// --- Create Draw Image ---
+			VkImageCreateInfo drawImageCreateInfo = {};
+			drawImageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+			drawImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+			drawImageCreateInfo.format = Utils::ImageFormatToVkFormat(ImageFormat::RGBA16);
+			drawImageCreateInfo.extent = { m_VkExtent.width, m_VkExtent.height, 1 };
+			drawImageCreateInfo.mipLevels = 1;
+			drawImageCreateInfo.arrayLayers = 1;
+			drawImageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+			drawImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+
+			// Usage flags
+			VkImageUsageFlags usage = {};
+			usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+			usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+			usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+			usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+			usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+			drawImageCreateInfo.usage = usage;
+
+			// Allocation
+			VmaAllocationCreateInfo allocationCreateInfo = {};
+			allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+			allocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+
+			result = vmaCreateImage(m_VmaAllocator, &drawImageCreateInfo, &allocationCreateInfo, &m_FrameDatas[i].DrawImage, &m_FrameDatas[i].DrawImageAllocation, nullptr);
+			if (result != VK_SUCCESS)
+				return result;
+
+
+			// --- Create Draw ImageView ---
+			VkImageViewCreateInfo drawImageViewCreateInfo = {};
+			drawImageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+			drawImageViewCreateInfo.image = m_FrameDatas[i].DrawImage;
+			drawImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D; // TODO: parameterize
+			drawImageViewCreateInfo.format = Utils::ImageFormatToVkFormat(ImageFormat::RGBA16);
+
+			drawImageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+			drawImageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+			drawImageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+			drawImageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+			drawImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			drawImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+			drawImageViewCreateInfo.subresourceRange.levelCount = 1;
+			drawImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+			drawImageViewCreateInfo.subresourceRange.layerCount = 1;
+
+			result = vkCreateImageView(m_Device.GetVkDevice(), &drawImageViewCreateInfo, nullptr, &m_FrameDatas[i].DrawImageView);
+			if (result != VK_SUCCESS)
+				return result;
 		}
 	
 		return VK_SUCCESS;
@@ -266,6 +296,13 @@ namespace NodeBrain
 			m_FrameDatas[i].ImageAvailableSemaphore = VK_NULL_HANDLE;
 			vkDestroyCommandPool(m_Device.GetVkDevice(), m_FrameDatas[i].CommandPool, nullptr);
 			m_FrameDatas[i].CommandPool = VK_NULL_HANDLE;
+
+			vkDestroyImageView(m_Device.GetVkDevice(), m_FrameDatas[i].DrawImageView, nullptr);
+			m_FrameDatas[i].DrawImageView = VK_NULL_HANDLE;
+
+			vmaDestroyImage(m_VmaAllocator, m_FrameDatas[i].DrawImage, m_FrameDatas[i].DrawImageAllocation);
+			m_FrameDatas[i].DrawImage = VK_NULL_HANDLE;
+			m_FrameDatas[i].DrawImageAllocation = VK_NULL_HANDLE;
 		}
 	}
 
@@ -313,7 +350,6 @@ namespace NodeBrain
 		vkDeviceWaitIdle(m_Device.GetVkDevice());
 
 		// --- Destroy ---
-		m_DrawImage.reset();
 		DestroyImageDatas();
 		DestroyVkSwapchain();
 
@@ -321,12 +357,6 @@ namespace NodeBrain
 		// --- Recreate ---
 		VK_CHECK(CreateVkSwapchain());
 		VK_CHECK(CreateImageDatas());
-
-		ImageConfiguration config = {};
-		config.Width = m_VkExtent.width;
-		config.Height = m_VkExtent.height;
-		config.Format = ImageFormat::RGBA16;
-		m_DrawImage = std::make_shared<VulkanImage>(config);
 
 		NB_INFO("Recreated swapchain to size: {0}, {1}", m_VkExtent.width, m_VkExtent.height);
 	}

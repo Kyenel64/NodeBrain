@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Renderer/RenderContext.h"
+
 namespace NodeBrain
 {
 	enum class ImageFormat { None = 0, RGBA8, RGBA16 };
@@ -19,6 +21,6 @@ namespace NodeBrain
 		virtual uint64_t GetAddress() = 0;
 		virtual const ImageConfiguration& GetConfiguration() const = 0; 
 
-		static std::shared_ptr<Image> Create(const ImageConfiguration& configuration); // TODO: implement
+		static std::shared_ptr<Image> Create(RenderContext* context, const ImageConfiguration& configuration);
 	};
 }

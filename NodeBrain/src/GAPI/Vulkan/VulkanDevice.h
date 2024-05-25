@@ -9,7 +9,7 @@ namespace NodeBrain
 	class VulkanDevice
 	{
 	public:
-		VulkanDevice(VulkanPhysicalDevice& physicalDevice);
+		VulkanDevice(VulkanPhysicalDevice& physicalDevice, const std::vector<const char*>& enabledLayers);
 		~VulkanDevice();
 
 		VkDevice GetVkDevice() const { return m_VkDevice; }

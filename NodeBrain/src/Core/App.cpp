@@ -7,57 +7,28 @@
 
 namespace NodeBrain
 {
-	App* s_Instance = nullptr;
-
-	App::App(const std::string& applicationName)
-		: m_ApplicationName(applicationName)
+	App::App(const std::string& applicationName, Window* window, Renderer* renderer, ImGuiLayer* imGuiLayer)
+		: m_ApplicationName(applicationName), m_Window(window), m_Renderer(renderer), m_ImGuiLayer(imGuiLayer)
 	{
 		NB_PROFILE_FN();
 
-		Log::Init(); // Init first so we can utilize logging during subsystem startup.
+		m_Window->SetEventCallback(std::bind(&App::OnEvent, this, std::placeholders::_1));
 
-		NB_ASSERT(!s_Instance, "Instance already exists");
-
-		s_Instance = this;
 		m_Timer.StartTimer();
-
-		StartupSubSystems();
 	}
 
 	App::~App()
 	{
 		NB_PROFILE_FN();
 
-		Renderer::WaitForGPU();
+		NB_TRACE("Test");
 
 		for (Layer* layer : m_Layers)
-		{
 			layer->OnDetach();
-			delete layer;
-		}
-
-		Renderer::Shutdown();
 
 		m_Timer.EndTimer();
 
 		NB_INFO("Shutdown Application");
-
-		s_Instance = nullptr;
-	}
-
-	bool App::StartupSubSystems()
-	{
-		NB_PROFILE_FN();
-
-		m_Window = std::make_unique<Window>("NodeBrain");
-		m_Window->SetEventCallback(std::bind(&App::OnEvent, this, std::placeholders::_1));
-
-		Renderer::Init();
-
-		m_ImGuiLayer = ImGuiLayer::Create();
-		PushLayer(m_ImGuiLayer);
-
-		return true;
 	}
 
 	void App::Run()
@@ -71,9 +42,9 @@ namespace NodeBrain
 			float deltaTime = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			m_Window->AcquireNextImage();
+			m_Renderer->GetContext()->AcquireNextImage();
 
-			Renderer::BeginFrame();
+			m_Renderer->BeginFrame();
 
 			if (!m_Minimized)
 			{
@@ -88,13 +59,11 @@ namespace NodeBrain
 				m_ImGuiLayer->EndFrame();
 			}
 
-			Renderer::EndFrame();
+			m_Renderer->EndFrame();
 
-			// Process input polling
-			Input::ProcessStates();
+			Input::ProcessPollStates();
 
-			// Window 
-			m_Window->SwapBuffers();
+			m_Renderer->GetContext()->SwapBuffers();
 			m_Window->PollEvents();
 		}
 	}
@@ -134,12 +103,5 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		m_Minimized = e.IsMinimized();
-	}
-
-	App* App::Get() 
-	{ 
-		NB_PROFILE_FN();
-
-		return s_Instance; 
 	}
 }

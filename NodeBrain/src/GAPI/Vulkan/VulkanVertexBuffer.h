@@ -3,23 +3,25 @@
 #include <vulkan/vulkan.h>
 #include <VMA/vk_mem_alloc.h>
 
-#include "GAPI/Vulkan/VulkanSwapchain.h"
 #include "Renderer/VertexBuffer.h"
+#include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
 {
 	class VulkanVertexBuffer : public VertexBuffer
 	{
 	public:
-		VulkanVertexBuffer(const void* data, uint32_t size);
+		VulkanVertexBuffer(VulkanRenderContext* context, const void* data, uint32_t size);
 		virtual ~VulkanVertexBuffer();
 
 		virtual void SetData(const void* data, uint32_t size) override;
 		
-		virtual uint64_t GetAddress() const override { return m_VkDeviceAddress[VulkanRenderContext::Get()->GetSwapchain().GetFrameIndex()]; }
-		VkBuffer GetVkBuffer() const { return m_StagingBuffer[VulkanRenderContext::Get()->GetSwapchain().GetFrameIndex()]; }
+		virtual uint64_t GetAddress() const override { return m_VkDeviceAddress[m_Context->GetSwapchain().GetFrameIndex()]; }
+		VkBuffer GetVkBuffer() const { return m_StagingBuffer[m_Context->GetSwapchain().GetFrameIndex()]; }
 
 	private:
+		VulkanRenderContext* m_Context;
+
 		VkBuffer m_StagingBuffer[FRAMES_IN_FLIGHT];
 		VkBuffer m_GPUBuffer[FRAMES_IN_FLIGHT];
 		VmaAllocation m_StagingAllocation[FRAMES_IN_FLIGHT];

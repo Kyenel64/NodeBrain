@@ -17,8 +17,7 @@ set (CoreFiles
 "src/Core/KeyCode.h"
 "src/Core/Input.h" "src/Core/Input.cpp"
 "src/Core/Instrumentor.h" "src/Core/Instrumentor.cpp"
-"src/Core/ImGuiLayer.h" "src/Core/ImGuiLayer.cpp"
-"src/Core/Ref.h")
+"src/Core/ImGuiLayer.h")
 
 set (VulkanFiles 
 "src/GAPI/Vulkan/VulkanRendererAPI.h" "src/GAPI/Vulkan/VulkanRendererAPI.cpp"
@@ -39,8 +38,8 @@ set (VulkanFiles
 
 set (RendererFiles 
 "src/Renderer/Renderer.h" "src/Renderer/Renderer.cpp"
-"src/Renderer/RendererAPI.h" "src/Renderer/RendererAPI.cpp"
-"src/Renderer/RenderContext.h" "src/Renderer/RenderContext.cpp"
+"src/Renderer/RendererAPI.h"
+"src/Renderer/RenderContext.h"
 "src/Renderer/Shader.h" "src/Renderer/Shader.cpp"
 "src/Renderer/GraphicsPipeline.h" "src/Renderer/GraphicsPipeline.cpp"
 "src/Renderer/Image.h" "src/Renderer/Image.cpp"

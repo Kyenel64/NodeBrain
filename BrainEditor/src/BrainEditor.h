@@ -12,7 +12,7 @@ namespace NodeBrain
 	class BrainEditor : public Layer
 	{
 	public:
-		BrainEditor() = default;
+		BrainEditor(Renderer* renderer) : m_Renderer(renderer), m_RendererAPI(renderer->GetAPI()), m_Context(renderer->GetContext()) {}
 		~BrainEditor() = default;
 
 		virtual void OnAttach() override;
@@ -26,6 +26,10 @@ namespace NodeBrain
 		void OnMousePressed(MousePressedEvent& event);
 
 	private:
+		Renderer* m_Renderer;
+		RendererAPI* m_RendererAPI;
+		RenderContext* m_Context;
+
 		int m_ShaderIndex = 0;
 
 		// Demo

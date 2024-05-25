@@ -2,20 +2,19 @@
 #include "VulkanComputePipeline.h"
 
 #include "GAPI/Vulkan/VulkanShader.h"
-#include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanDescriptorSet.h"
 
 namespace NodeBrain
 {
-	VulkanComputePipeline::VulkanComputePipeline(const ComputePipelineConfiguration& configuration)
-		: m_Configuration(configuration)
+	VulkanComputePipeline::VulkanComputePipeline(VulkanRenderContext* context, const ComputePipelineConfiguration& configuration)
+		: m_Context(context), m_Configuration(configuration)
 	{
 		NB_PROFILE_FN();
 
 		NB_ASSERT(m_Configuration.ComputeShader, "ComputeShader null. Compute pipeline must contain a valid compute shader.");
 		NB_ASSERT(m_Configuration.ComputeShader->GetShaderType() == ShaderType::Compute, "Shader type invalid. Compute pipeline must contain a compute shader.")
 
-		std::shared_ptr<VulkanShader> computeShader = CastPtr<VulkanShader>(m_Configuration.ComputeShader);
+		std::shared_ptr<VulkanShader> computeShader = dynamic_pointer_cast<VulkanShader>(m_Configuration.ComputeShader);
 
 		// --- Pipeline Layout ---
 		VkPushConstantRange pushConstantRange = {};
@@ -26,7 +25,7 @@ namespace NodeBrain
 		std::vector<VkDescriptorSetLayout> layouts;
 		for (auto& set : m_Configuration.GetDescriptorSets())
 		{
-			std::shared_ptr<VulkanDescriptorSet> vulkanSet = CastPtr<VulkanDescriptorSet>(set);
+			std::shared_ptr<VulkanDescriptorSet> vulkanSet = dynamic_pointer_cast<VulkanDescriptorSet>(set);
 			layouts.push_back(vulkanSet->GetVkDescriptorSetLayout());
 		}
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
@@ -35,7 +34,7 @@ namespace NodeBrain
 		pipelineLayoutCreateInfo.pSetLayouts = &layouts[0];
 		pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
 		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
-		VK_CHECK(vkCreatePipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
+		VK_CHECK(vkCreatePipelineLayout(m_Context->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
 
 
 		// --- Pipeline ---
@@ -49,17 +48,19 @@ namespace NodeBrain
 		computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 		computePipelineCreateInfo.stage = stageinfo;
 		computePipelineCreateInfo.layout = m_VkPipelineLayout;
-		VK_CHECK(vkCreateComputePipelines(VulkanRenderContext::Get()->GetVkDevice() , VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &m_VkPipeline));
+		VK_CHECK(vkCreateComputePipelines(m_Context->GetVkDevice() , VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &m_VkPipeline));
 	}
 
 	VulkanComputePipeline::~VulkanComputePipeline()
 	{
 		NB_PROFILE_FN();
 
-		vkDestroyPipelineLayout(VulkanRenderContext::Get()->GetVkDevice(), m_VkPipelineLayout, nullptr);
+		m_Context->WaitForGPU();
+
+		vkDestroyPipelineLayout(m_Context->GetVkDevice(), m_VkPipelineLayout, nullptr);
 		m_VkPipelineLayout = VK_NULL_HANDLE;
 		
-		vkDestroyPipeline(VulkanRenderContext::Get()->GetVkDevice(), m_VkPipeline, nullptr);
+		vkDestroyPipeline(m_Context->GetVkDevice(), m_VkPipeline, nullptr);
 		m_VkPipeline = VK_NULL_HANDLE;
 	}
 
@@ -69,7 +70,7 @@ namespace NodeBrain
 
 		NB_ASSERT(size + offset <= 128, "Push constant overflow. Push constant offset and size must fit within the max push constant size: {0}.", 128);
 
-		vkCmdPushConstants(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, offset, size, buffer);
+		vkCmdPushConstants(m_Context->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, offset, size, buffer);
 	}
 
 	void VulkanComputePipeline::BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet)
@@ -80,9 +81,9 @@ namespace NodeBrain
 		NB_ASSERT(std::find(descriptorSets.begin(), descriptorSets.end(), descriptorSet) != descriptorSets.end(), "Descriptor set not found. Descriptor set being bound must exist during pipeline creation.")
 
 		uint32_t setIndex = std::find(descriptorSets.begin(), descriptorSets.end(), descriptorSet) - descriptorSets.begin();
-		std::shared_ptr<VulkanDescriptorSet> vulkanSet = CastPtr<VulkanDescriptorSet>(descriptorSet);
+		std::shared_ptr<VulkanDescriptorSet> vulkanSet = dynamic_pointer_cast<VulkanDescriptorSet>(descriptorSet);
 		VkDescriptorSet vkDescriptorSet = vulkanSet->GetVkDescriptorSet();
-		vkCmdBindDescriptorSets(VulkanRenderContext::Get()->GetSwapchain().GetCurrentFrameData().CommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_VkPipelineLayout, setIndex, 1, &vkDescriptorSet, 0, nullptr);
+		vkCmdBindDescriptorSets(m_Context->GetSwapchain().GetCurrentFrameData().CommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_VkPipelineLayout, setIndex, 1, &vkDescriptorSet, 0, nullptr);
 	}
 	
 }

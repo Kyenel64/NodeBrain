@@ -1,10 +1,10 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <VMA/vk_mem_alloc.h>
 
-#include "GAPI/Vulkan/VulkanPhysicalDevice.h"
+#include "Core/Window.h"
 #include "GAPI/Vulkan/VulkanDevice.h"
-#include "GAPI/Vulkan/VulkanImage.h"
 
 namespace NodeBrain
 {
@@ -25,6 +25,10 @@ namespace NodeBrain
 		VkSemaphore ImageAvailableSemaphore = VK_NULL_HANDLE;
 		VkSemaphore RenderFinishedSemaphore = VK_NULL_HANDLE;
 		VkFence InFlightFence = VK_NULL_HANDLE;
+
+		VkImage DrawImage = VK_NULL_HANDLE;
+		VkImageView DrawImageView = VK_NULL_HANDLE;
+		VmaAllocation DrawImageAllocation = VK_NULL_HANDLE;
 	};
 
 
@@ -32,14 +36,13 @@ namespace NodeBrain
 	class VulkanSwapchain
 	{
 	public:
-		VulkanSwapchain(VkSurfaceKHR surface, VulkanDevice& device);
+		VulkanSwapchain(Window* window, VkSurfaceKHR surface, VulkanDevice& device, VmaAllocator allocator);
 		~VulkanSwapchain();
 
 		uint32_t AcquireNextImage();
 		void PresentImage();
 
 		VkSwapchainKHR GetVkSwapchain() const { return m_VkSwapchain; }
-		std::shared_ptr<VulkanImage> GetDrawImage() const { return m_DrawImage; }	
 		const FrameData& GetCurrentFrameData() const { return m_FrameDatas[m_FrameIndex]; }
 		const ImageData& GetCurrentImageData() const { return m_ImageDatas[m_ImageIndex]; }	
 		uint32_t GetImageIndex() const { return m_ImageIndex; }
@@ -60,12 +63,16 @@ namespace NodeBrain
 		void DestroyFrameDatas();
 
 	private:
+		Window* m_Window;
 		VkSwapchainKHR m_VkSwapchain = VK_NULL_HANDLE;
 		VkSurfaceKHR m_VkSurface = VK_NULL_HANDLE;
+		VmaAllocator m_VmaAllocator = VK_NULL_HANDLE;
 		VulkanDevice& m_Device;
 
 		// Draw Image
-		std::shared_ptr<VulkanImage> m_DrawImage;
+		VkImage m_VkDrawImage = VK_NULL_HANDLE;
+		VkImageView m_VkDrawImageView = VK_NULL_HANDLE;
+		VmaAllocation m_VmaDrawImageAllocation = VK_NULL_HANDLE;
 
 		// Configuration
 		VkExtent2D m_VkExtent;

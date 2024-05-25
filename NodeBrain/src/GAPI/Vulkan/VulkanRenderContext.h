@@ -20,6 +20,11 @@ namespace NodeBrain
 		virtual void AcquireNextImage() override;
 		virtual void SwapBuffers() override;
 
+		virtual void WaitForGPU() override;
+
+		virtual GAPI GetGraphicsAPI() const override { return GAPI::Vulkan; }
+		virtual Window* GetWindow() const override { return m_Window; }
+
 		void ImmediateSubmit(std::function<void(VkCommandBuffer cmdBuffer)> func);
 
 		// Getters
@@ -31,8 +36,6 @@ namespace NodeBrain
 		VmaAllocator GetVMAAllocator() const { return m_VMAAllocator; }
 		const std::vector<const char*>& GetEnabledLayers() const { return m_EnabledLayers; }
 		VkDescriptorPool GetVkDescriptorPool() const { return m_VkDescriptorPools[m_Swapchain->GetFrameIndex()]; }
-
-		static VulkanRenderContext* Get();
 
 	private:
 		VkResult CreateInstance();

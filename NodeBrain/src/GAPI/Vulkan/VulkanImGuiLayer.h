@@ -3,24 +3,23 @@
 #include <vulkan/vulkan.h>
 
 #include "Core/ImGuiLayer.h"
+#include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
 {
 	class VulkanImGuiLayer : public ImGuiLayer
 	{
 	public:
-		VulkanImGuiLayer();
+		VulkanImGuiLayer(VulkanRenderContext* context);
 		virtual ~VulkanImGuiLayer();
 		
-		virtual void OnAttach() override;
-		virtual void OnDetach() override;
-		virtual void OnEvent(Event& e) override;
-
 		virtual void BeginFrame() override;
 		
 		// Needs to be run within active command buffer and after copying draw image to swapchain. 
 		virtual void EndFrame() override;
 	private:
+		VulkanRenderContext* m_Context;
+
 		VkDescriptorPool m_ImGuiDescriptorPool = VK_NULL_HANDLE;
 
 		PFN_vkCmdBeginRenderingKHR m_vkCmdBeginRenderingKHR = VK_NULL_HANDLE;
