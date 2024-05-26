@@ -6,13 +6,10 @@
 
 namespace NodeBrain
 {
-	class Log
+	namespace Log
 	{
-	public:
-		static void Init();
-		
-		static std::shared_ptr<spdlog::logger>& GetLogger();
-	};
+		std::shared_ptr<spdlog::logger>& GetLogger();
+	}
 }
 
 #define NB_INFO(...)     SPDLOG_LOGGER_INFO(NodeBrain::Log::GetLogger(), __VA_ARGS__)
