@@ -6,7 +6,7 @@ int main()
 {
 	NB_PROFILE_BEGIN("Startup", "Startup.log");
 
-	NodeBrain::Window* window = new NodeBrain::Window("NodeBrain");
+	NodeBrain::Window* window = new NodeBrain::Window("NodeBrain", 1280, 720);
 	NodeBrain::VulkanRenderContext* renderContext = new NodeBrain::VulkanRenderContext(window);
 	NodeBrain::VulkanRendererAPI* rendererAPI = new NodeBrain::VulkanRendererAPI(renderContext);
 	NodeBrain::VulkanImGuiLayer* gui = new NodeBrain::VulkanImGuiLayer(renderContext);

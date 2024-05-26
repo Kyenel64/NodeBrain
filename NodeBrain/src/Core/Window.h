@@ -10,15 +10,15 @@ namespace NodeBrain
 {
 	struct WindowData
 	{
-		int Width = 1280;
-		int Height = 720;
+		int Width;
+		int Height;
 		std::function<void(Event&)> EventCallback = nullptr;
 	};
 
 	class Window
 	{
 	public:
-		Window(const std::string& windowName = "NodeBrain");
+		Window(const std::string& windowName, uint32_t width, uint32_t height);
 		~Window();
 
 		void SetEventCallback(std::function<void(Event&)> func) { m_Data.EventCallback = func; }

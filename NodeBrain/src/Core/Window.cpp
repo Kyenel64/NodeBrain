@@ -15,10 +15,16 @@ namespace NodeBrain
 		NB_ERROR("GLFW Error {0}: {1}", error, description);
 	}
 
-	Window::Window(const std::string& windowName)
+	Window::Window(const std::string& windowName, uint32_t width, uint32_t height)
 		: m_WindowName(windowName)
 	{
 		NB_PROFILE_FN();
+
+		NB_ASSERT(width, "width is 0. Width must be a non-zero value.");
+		NB_ASSERT(height, "height is 0. Height must be a non-zero value.");
+
+		m_Data.Width = width;
+		m_Data.Height = height;
 
 		if (!glfwInit())
 			NB_ASSERT(false, "Failed to initialize GLFW.");
