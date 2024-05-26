@@ -90,6 +90,8 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(window, "window null. A valid Window pointer is required to create VulkanRenderContext.");
+
 		#ifdef NB_DEBUG
 			m_EnabledLayers.push_back("VK_LAYER_KHRONOS_validation");
 		#endif

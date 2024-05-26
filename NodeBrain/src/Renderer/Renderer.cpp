@@ -7,8 +7,10 @@ namespace NodeBrain
 {
 	Renderer::Renderer(RendererAPI* rendererAPI)
 		: m_RendererAPI(rendererAPI), m_Context(rendererAPI->GetContext())
-	{
+	{		
 		NB_PROFILE_FN();
+
+		NB_ASSERT(rendererAPI, "rendererAPI null. RendererAPI is required to create Renderer.");
 
 		// --- Uniforms ---
 		m_Data.TestUniformBuffer = UniformBuffer::Create(m_Context, nullptr, sizeof(TestUniformData));
@@ -161,7 +163,7 @@ namespace NodeBrain
 	void Renderer::RenderSubmitted()
 	{
 		NB_PROFILE_FN();
-		
+
 		if (m_Data.QuadIndexCount)
 		{
 			uint32_t size = (uint32_t)((uint8_t*)m_Data.QuadVertexBufferPtr - (uint8_t*)m_Data.QuadVertexBufferBase);

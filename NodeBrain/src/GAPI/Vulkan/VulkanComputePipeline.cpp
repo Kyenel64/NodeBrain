@@ -10,7 +10,8 @@ namespace NodeBrain
 		: m_Context(context), m_Configuration(configuration)
 	{
 		NB_PROFILE_FN();
-
+		
+		NB_ASSERT(context, "context null. A valid VulkanRenderContext pointer is required to create VulkanComputePipeline.");
 		NB_ASSERT(m_Configuration.ComputeShader, "ComputeShader null. Compute pipeline must contain a valid compute shader.");
 		NB_ASSERT(m_Configuration.ComputeShader->GetShaderType() == ShaderType::Compute, "Shader type invalid. Compute pipeline must contain a compute shader.")
 

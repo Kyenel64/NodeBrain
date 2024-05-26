@@ -8,6 +8,9 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(context, "context null. A valid VulkanRenderContext pointer is required to create VulkanVertexBuffer.");
+		NB_ASSERT(size, "size is 0. Size must be a non-zero value in bytes.");
+
 		// --- GPU Buffer ---
 		VkBufferCreateInfo gpuBufferCreateInfo = {};
 		gpuBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -81,7 +84,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		NB_ASSERT(data, "Invalid data. Provided data must not be null.");
+		NB_ASSERT(data, "data null. Data must not be null.");
 		NB_ASSERT(size <= m_Size, "Buffer overflow. The size of data being set must be less than the allocated buffer size.");
 		
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)

@@ -12,6 +12,11 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(context, "context null. A valid VulkanRenderContext pointer is required to create VulkanImage.");
+		NB_ASSERT(configuration.Width, "Image width 0. Image width must be a non-zero value.");
+		NB_ASSERT(configuration.Height, "Image height 0. Image height must be a non-zero value.");
+		NB_ASSERT(configuration.Format != ImageFormat::None, "Invalid image format. Image format must be a valid formar.");
+
 		// --- Create Image ---
 		VkImageCreateInfo imageCreateInfo = {};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;

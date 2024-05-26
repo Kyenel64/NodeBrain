@@ -11,10 +11,10 @@ namespace NodeBrain
 	class VulkanIndexBuffer : public IndexBuffer
 	{
 	public:
-		VulkanIndexBuffer(VulkanRenderContext* context, uint32_t* data, uint32_t size);
+		VulkanIndexBuffer(VulkanRenderContext* context, const uint32_t* data, uint32_t size);
 		virtual ~VulkanIndexBuffer();
 
-		virtual void SetData(const void* data, uint32_t size) override;
+		virtual void SetData(const uint32_t* data, uint32_t size) override;
 
 		VkBuffer GetVkBuffer() const { return m_VkBuffer; }
 

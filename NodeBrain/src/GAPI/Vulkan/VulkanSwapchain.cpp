@@ -56,6 +56,8 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(window, "window null. A valid Window pointer is required to create VulkanSwapchain.");
+
 		VK_CHECK(CreateVkSwapchain());
 		VK_CHECK(CreateImageDatas());
 		VK_CHECK(CreateFrameDatas());

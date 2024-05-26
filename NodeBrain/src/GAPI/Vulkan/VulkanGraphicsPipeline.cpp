@@ -11,6 +11,8 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(context, "context null. A valid VulkanRenderContext pointer is required to create VulkanGraphicsPipeline.");
+
 		NB_ASSERT(m_Configuration.VertexShader, "VertexShader null. Graphics pipeline must contain a valid vertex shader.");
 		NB_ASSERT(m_Configuration.VertexShader->GetShaderType() == ShaderType::Vertex, "Shader type invalid. Graphics pipeline must contain a vertex shader.")
 
@@ -173,6 +175,8 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(buffer, "buffer null. Buffer must not be null.");
+		NB_ASSERT(size, "size is 0. Size must be a non-zero value in bytes.");
 		NB_ASSERT(size + offset <= 128, "Push constant overflow. Push constant offset and size must fit within the max push constant size: {0}.", 128);
 
 		vkCmdPushConstants(m_Context->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_ALL_GRAPHICS, 0, 128, buffer);

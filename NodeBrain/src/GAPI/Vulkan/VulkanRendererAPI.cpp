@@ -14,6 +14,8 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(renderContext, "renderContext null. A valid VulkanRenderContext pointer is required to create VulkanRendererAPI.");
+
 		m_vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)vkGetInstanceProcAddr(m_Context->GetVkInstance(), "vkCmdBeginRenderingKHR");
 		m_vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)vkGetInstanceProcAddr(m_Context->GetVkInstance(), "vkCmdEndRenderingKHR");
 	}

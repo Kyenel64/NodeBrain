@@ -10,6 +10,8 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(context, "context null. A valid VulkanRenderContext pointer is required to create VulkanShader.");
+
 		std::vector<char> buffer = Utils::ReadFile(m_ShaderPath);
 
 		VkShaderModuleCreateInfo createInfo = {};

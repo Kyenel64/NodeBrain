@@ -12,6 +12,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(context, "context null. A valid VulkanRenderContext pointer is required to create VulkanDescriptorSet.");
 		NB_ASSERT(m_Layout.size(), "layout contains 0 elements. Descriptor set must be created with a valid layout.");
 
 		// --- Descriptor Layout ---

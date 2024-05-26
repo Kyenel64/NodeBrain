@@ -3,10 +3,13 @@
 
 namespace NodeBrain
 {
-	VulkanIndexBuffer::VulkanIndexBuffer(VulkanRenderContext* context, uint32_t* data, uint32_t size)
+	VulkanIndexBuffer::VulkanIndexBuffer(VulkanRenderContext* context, const uint32_t* data, uint32_t size)
 		: m_Context(context), m_Size(size)
 	{
 		NB_PROFILE_FN();
+
+		NB_ASSERT(context, "context null. A valid VulkanRenderContext pointer is required to create VulkanIndexBuffer.");
+		NB_ASSERT(size, "size is 0. Size must be a non-zero value in bytes.");
 
 		VkBufferCreateInfo bufferCreateInfo = {};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -37,7 +40,7 @@ namespace NodeBrain
 		m_VmaAllocation = VK_NULL_HANDLE;
 	}
 
-	void VulkanIndexBuffer::SetData(const void* data, uint32_t size)
+	void VulkanIndexBuffer::SetData(const uint32_t* data, uint32_t size)
 	{
 		NB_PROFILE_FN();
 

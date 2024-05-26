@@ -6,7 +6,7 @@
 
 namespace NodeBrain
 {
-	std::shared_ptr<IndexBuffer> IndexBuffer::Create(RenderContext* context, uint32_t* data, uint32_t size)
+	std::shared_ptr<IndexBuffer> IndexBuffer::Create(RenderContext* context, const uint32_t* data, uint32_t size)
 	{
 		switch (context->GetGraphicsAPI())
 		{

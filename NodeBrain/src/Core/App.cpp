@@ -12,6 +12,9 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(window, "window null. Window is required to create App.");
+		NB_ASSERT(renderer, "renderer null. Renderer is required to create App.");
+
 		m_Window->SetEventCallback(std::bind(&App::OnEvent, this, std::placeholders::_1));
 
 		m_Timer.StartTimer();
@@ -20,8 +23,6 @@ namespace NodeBrain
 	App::~App()
 	{
 		NB_PROFILE_FN();
-
-		NB_TRACE("Test");
 
 		for (Layer* layer : m_Layers)
 			layer->OnDetach();
