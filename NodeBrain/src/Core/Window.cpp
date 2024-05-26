@@ -30,16 +30,17 @@ namespace NodeBrain
 			NB_ASSERT(false, "Failed to initialize GLFW.");
 
 		glfwSetErrorCallback(GLFWErrorCallback);
+		
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		#ifdef NB_APPLE
+			glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
+		#endif
+
 		m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_WindowName.c_str(), NULL, NULL);
 		NB_ASSERT(m_Window, "Failed to create GLFW window");
 		NB_INFO("Created Window {0}, size: {1}, {2}", m_WindowName, m_Data.Width, m_Data.Height);
 		// Set data that can be accessed when calling glfwGetWindowUserPointer
 		glfwSetWindowUserPointer(m_Window, &m_Data);
-
-		// TODO: Figure out proper DPI scaling. 
-		// 	Setting window size to framebuffer size solves proper DPI scaling for now but could be wrong.
-		glfwGetFramebufferSize(m_Window, &m_Data.Width, &m_Data.Height);
 
 		// Vulkan extensions
 		uint32_t extensionCount = 0;
@@ -63,16 +64,6 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		glfwPollEvents();
-	}
-
-	glm::vec2 Window::GetFramebufferSize() const
-	{
-		NB_PROFILE_FN();
-
-		int width, height;
-		glfwGetFramebufferSize(m_Window, &width, &height);
-
-		return { width, height };
 	}
 
 	void Window::RegisterCallbacks()

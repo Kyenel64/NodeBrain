@@ -26,7 +26,6 @@ namespace NodeBrain
 
 		GLFWwindow* GetGLFWWindow() const { return m_Window; }
 		std::vector<const char*> GetVulkanExtensions() const { return m_VulkanExtensions; }
-		glm::vec2 GetFramebufferSize() const;
 		uint32_t GetWidth() const { return m_Data.Width; }
 		uint32_t GetHeight() const { return m_Data.Height; }
 

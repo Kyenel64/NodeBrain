@@ -39,7 +39,7 @@ namespace NodeBrain
 		}
 		else
 		{
-			glm::vec2 framebufferSize = window->GetFramebufferSize();
+			glm::vec2 framebufferSize = { window->GetWidth(), window->GetHeight() };
 			VkExtent2D actualExtent = { static_cast<uint32_t>(framebufferSize.x), static_cast<uint32_t>(framebufferSize.y) };
 			actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
 			actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
