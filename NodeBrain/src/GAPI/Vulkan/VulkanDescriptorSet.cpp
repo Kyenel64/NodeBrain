@@ -69,7 +69,7 @@ namespace NodeBrain
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
 			VkDescriptorBufferInfo bufferInfo = {};
-			bufferInfo.buffer = vulkanUBO->GetVkBuffer();
+			bufferInfo.buffer = vulkanUBO->m_VkBuffers[i];
 			bufferInfo.offset = 0;
 			bufferInfo.range = vulkanUBO->GetSize();
 
@@ -100,8 +100,8 @@ namespace NodeBrain
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
 			VkDescriptorImageInfo imageinfo = {};
-			imageinfo.imageView = vulkanImage->GetVkImageView();
-			imageinfo.sampler = vulkanImage->GetVkSampler();
+			imageinfo.imageView = vulkanImage->m_VkImageView[i];
+			imageinfo.sampler = vulkanImage->m_VkSampler[i];
 			imageinfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
 			VkWriteDescriptorSet write = {};

@@ -26,5 +26,8 @@ namespace NodeBrain
 		void* m_MappedData[FRAMES_IN_FLIGHT];
 
 		uint32_t m_Size;
+
+	public:
+		friend class VulkanDescriptorSet;
 	};
 }

@@ -17,20 +17,23 @@ namespace NodeBrain
 		virtual uint64_t GetAddress() override;
 		virtual const ImageConfiguration& GetConfiguration() const override { return m_Configuration; }
 
-		VkImage GetVkImage() const { return m_VkImage; }
-		VkImageView GetVkImageView() const { return m_VkImageView; }
-		VkSampler GetVkSampler() const { return m_VkSampler; }
+		VkImage GetVkImage() const { return m_VkImage[m_Context->GetSwapchain().GetFrameIndex()]; }
+		VkImageView GetVkImageView() const { return m_VkImageView[m_Context->GetSwapchain().GetFrameIndex()]; }
+		VkSampler GetVkSampler() const { return m_VkSampler[m_Context->GetSwapchain().GetFrameIndex()]; }
 		
 	private:
 		VulkanRenderContext* m_Context;
 		
-		VkImage m_VkImage = VK_NULL_HANDLE;
-		VkImageView m_VkImageView = VK_NULL_HANDLE;
-		VmaAllocation m_VmaAllocation = VK_NULL_HANDLE;
-		VkSampler m_VkSampler = VK_NULL_HANDLE;
+		VkImage m_VkImage[FRAMES_IN_FLIGHT];
+		VkImageView m_VkImageView[FRAMES_IN_FLIGHT];
+		VkSampler m_VkSampler[FRAMES_IN_FLIGHT];
+		VmaAllocation m_VmaAllocation[FRAMES_IN_FLIGHT];
 
 		ImageConfiguration m_Configuration;
 
 		uint64_t m_Address = 0;
+
+	public:
+		friend class VulkanDescriptorSet;
 	};
 }
