@@ -21,7 +21,7 @@ namespace NodeBrain
 		static InputState GetKeyState(Key key);
 
 		// Called OnUpdate() to process keystates
-		static void ProcessStates();
+		static void ProcessPollStates();
 
 		// Poll-based. Checks first mouse button press.
 		static bool IsMouseButtonPressed(MouseButton mouseButton);

@@ -23,5 +23,8 @@
 #include "Core/Instrumentor.h"
 
 #ifdef NB_WINDOWS
-#include <windows.h>
+    #include <windows.h>
 #endif
+
+// Vulkan
+#include "GAPI/Vulkan/VulkanUtils.h"

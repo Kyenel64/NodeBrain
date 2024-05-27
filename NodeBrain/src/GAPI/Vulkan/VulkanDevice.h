@@ -9,17 +9,16 @@ namespace NodeBrain
 	class VulkanDevice
 	{
 	public:
-		VulkanDevice(std::shared_ptr<VulkanPhysicalDevice> physicalDevice);
+		VulkanDevice(VulkanPhysicalDevice& physicalDevice, const std::vector<const char*>& enabledLayers);
 		~VulkanDevice();
 
 		VkDevice GetVkDevice() const { return m_VkDevice; }
-		std::shared_ptr<VulkanPhysicalDevice> GetPhysicalDevice() const { return m_PhysicalDevice; }
+		VulkanPhysicalDevice& GetPhysicalDevice() const { return m_PhysicalDevice; }
+		VkQueue GetGraphicsQueue() const { return m_GraphicsQueue; }
+		VkQueue GetPresentationQueue() const { return m_PresentationQueue; }
 
 	private:
-		void Init();
-
-	private:
-		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
+		VulkanPhysicalDevice& m_PhysicalDevice;
 		VkDevice m_VkDevice = VK_NULL_HANDLE;
 
 		VkQueue m_GraphicsQueue = VK_NULL_HANDLE;

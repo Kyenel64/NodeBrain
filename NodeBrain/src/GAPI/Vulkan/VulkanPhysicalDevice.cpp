@@ -1,60 +1,46 @@
 #include "NBpch.h"
 #include "VulkanPhysicalDevice.h"
 
-#include <limits>
-
-#include <glm/glm.hpp>
-
-#include "Core/App.h"
-#include "GAPI/Vulkan/VulkanRenderContext.h"
-
 namespace NodeBrain
 {
 	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, uint32_t deviceIndex)
-		: m_VkInstance(instance), m_VkSurfaceKHR(surface), m_DeviceIndex(deviceIndex)
+		: m_VkInstance(instance), m_VkSurfaceKHR(surface), m_PhysicalDeviceIndex(deviceIndex)
 	{
 		NB_PROFILE_FN();
 
-		m_DeviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+		m_EnabledDeviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+		m_EnabledDeviceExtensions.push_back(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
+		m_EnabledDeviceExtensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 		#if NB_APPLE
-			m_DeviceExtensions.push_back("VK_KHR_portability_subset");
+			m_EnabledDeviceExtensions.push_back("VK_KHR_portability_subset");
 		#endif
 
-		Init();
-	}
-
-	void VulkanPhysicalDevice::Init()
-	{
-		// Set VkPhysicalDevice from device index
+		// Retrieve the VkPhysicalDevice at m_DeviceIndex
 		uint32_t deviceCount = 0;
 		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, nullptr);
 		NB_ASSERT(deviceCount, "Could not find any GPUs with Vulkan support");
-		NB_ASSERT(m_DeviceIndex < deviceCount, "Physical device index out of bounds");
+		NB_ASSERT(m_PhysicalDeviceIndex < deviceCount, "Physical device index out of bounds");
 		std::vector<VkPhysicalDevice> devices(deviceCount);
 		vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, &devices[0]);
-		m_VkPhysicalDevice = devices[m_DeviceIndex];
-
-		m_QueueFamilyIndices = FindQueueFamilies();
-		m_SwapChainSupportDetails = QuerySwapChainSupport();
+		m_VkPhysicalDevice = devices[m_PhysicalDeviceIndex];
 	}
 
 	bool VulkanPhysicalDevice::IsSuitable()
 	{
 		NB_PROFILE_FN();
 
-		if (!m_VkPhysicalDevice)
-			return false;
-
 		bool extensionSupported = CheckDeviceExtensionSupport();
+		SwapchainSupportDetails swapchainSupportDetails = QuerySwapchainSupport();
+		QueueFamilyIndices queueFamilyIndices = FindQueueFamilies();
 
-		bool swapChainAdequate = false;
+		bool swapchainAdequate = false;
 		if (extensionSupported)
-			swapChainAdequate = !m_SwapChainSupportDetails.Formats.empty() && !m_SwapChainSupportDetails.PresentationModes.empty();
+			swapchainAdequate = !swapchainSupportDetails.Formats.empty() && !swapchainSupportDetails.PresentationModes.empty();
 
-		return m_QueueFamilyIndices.IsComplete() && extensionSupported && swapChainAdequate;
+		return queueFamilyIndices.IsComplete() && extensionSupported && swapchainAdequate;
 	}
 
-	QueueFamilyIndices VulkanPhysicalDevice::FindQueueFamilies()
+	QueueFamilyIndices VulkanPhysicalDevice::FindQueueFamilies() const
 	{
 		NB_PROFILE_FN();
 
@@ -80,12 +66,12 @@ namespace NodeBrain
 		return indices;
 	}
 
-	SwapChainSupportDetails VulkanPhysicalDevice::QuerySwapChainSupport()
+	SwapchainSupportDetails VulkanPhysicalDevice::QuerySwapchainSupport() const
 	{
 		NB_PROFILE_FN();
 
 		// Capabilities
-		SwapChainSupportDetails supportDetails = {};
+		SwapchainSupportDetails supportDetails = {};
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_VkPhysicalDevice, m_VkSurfaceKHR, &supportDetails.Capabilities);
 
 		// Formats
@@ -110,7 +96,7 @@ namespace NodeBrain
 		return supportDetails;
 	}
 
-	bool VulkanPhysicalDevice::CheckDeviceExtensionSupport()
+	bool VulkanPhysicalDevice::CheckDeviceExtensionSupport() const
 	{
 		NB_PROFILE_FN();
 
@@ -119,13 +105,11 @@ namespace NodeBrain
 		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
 		vkEnumerateDeviceExtensionProperties(m_VkPhysicalDevice, nullptr, &extensionCount, &availableExtensions[0]);
 
-		std::set<std::string> requiredExtensions(m_DeviceExtensions.begin(), m_DeviceExtensions.end());
+		std::set<std::string> requiredExtensions(m_EnabledDeviceExtensions.begin(), m_EnabledDeviceExtensions.end());
 
 		for (const auto& extension : availableExtensions)
 			requiredExtensions.erase(extension.extensionName);
 
 		return requiredExtensions.empty();
 	}
-
-	
 }

@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 
 #include "Core/Event.h"
-#include "Renderer/RenderContext.h"
 
 struct GLFWwindow;
 
@@ -11,26 +10,24 @@ namespace NodeBrain
 {
 	struct WindowData
 	{
-		int Width = 1280;
-		int Height = 720;
+		int Width;
+		int Height;
 		std::function<void(Event&)> EventCallback = nullptr;
 	};
 
 	class Window
 	{
 	public:
-		Window(const std::string& windowName = "NodeBrain");
+		Window(const std::string& windowName, uint32_t width, uint32_t height);
 		~Window();
 
-		bool Init();
 		void SetEventCallback(std::function<void(Event&)> func) { m_Data.EventCallback = func; }
-		void SwapBuffers();
 		void PollEvents();
 
 		GLFWwindow* GetGLFWWindow() const { return m_Window; }
-		RenderContext& GetRenderContext() const { return *m_RenderContext; }
-		std::vector<const char*> GetExtensions() const { return m_Extensions; }
-		glm::vec2 GetFramebufferSize() const;
+		std::vector<const char*> GetVulkanExtensions() const { return m_VulkanExtensions; }
+		uint32_t GetWidth() const { return m_Data.Width; }
+		uint32_t GetHeight() const { return m_Data.Height; }
 
 	private:
 		void RegisterCallbacks();
@@ -38,10 +35,9 @@ namespace NodeBrain
 	private:
 		GLFWwindow* m_Window = nullptr;
 		std::string m_WindowName;
-		std::unique_ptr<RenderContext> m_RenderContext;
 
 		WindowData m_Data;
 
-		std::vector<const char*> m_Extensions;
+		std::vector<const char*> m_VulkanExtensions;
 	};
 }

@@ -1,16 +1,10 @@
 #include <gtest/gtest.h>
 #include <NodeBrain/NodeBrain.h>
 
-TEST(Timer, GetElapsedMilliseconds) 
-{
-    NodeBrain::Timer timer;
-	timer.EndTimer();
-    EXPECT_GE(timer.GetElapsedMilliseconds(), 0.0f);
-}
-
-TEST(Timer, GetStartTimeMilliseconds)
+TEST(Timer, GetElapsedMicroseconds) 
 {
     NodeBrain::Timer timer;
     timer.EndTimer();
-    EXPECT_GE(timer.GetStartTimeMilliseconds(), 0);
+    EXPECT_EQ(timer.GetElapsedMicroseconds(), timer.GetElapsedMilliseconds() / 1000.0f);
+    EXPECT_EQ(timer.GetElapsedMicroseconds(), timer.GetElapsedSeconds() / 1000000);
 }

@@ -7,7 +7,7 @@ namespace NodeBrain
 	enum class EventType
 	{ 
 		None = 0, 
-		WindowClosedEvent, WindowResizeEvent, 
+		WindowClosedEvent, WindowResizedEvent, WindowMinimizedEvent,
 		KeyPressedEvent, KeyReleasedEvent,
 		MousePressedEvent, MouseReleasedEvent, MouseMovedEvent, MouseScrolledEvent
 	};
@@ -47,18 +47,30 @@ namespace NodeBrain
 		static EventType GetStaticType() { return EventType::WindowClosedEvent; }
 	};
 
-	class WindowResizeEvent : public Event
+	class WindowResizedEvent : public Event
 	{
 	public:
-		WindowResizeEvent(uint32_t width, uint32_t height) : Event(EventType::WindowResizeEvent), m_Width(width), m_Height(height) {}
+		WindowResizedEvent(uint32_t width, uint32_t height) : Event(EventType::WindowResizedEvent), m_Width(width), m_Height(height) {}
 
 		uint32_t GetWidth() const { return m_Width; }
 		uint32_t GetHeight() const { return m_Height; }
-		static EventType GetStaticType() { return EventType::WindowResizeEvent; }
+		static EventType GetStaticType() { return EventType::WindowResizedEvent; }
 
 	private:
 		uint32_t m_Width;
 		uint32_t m_Height;
+	};
+
+	class WindowMinimizedEvent : public Event
+	{
+	public:
+		WindowMinimizedEvent(bool minimized) : Event(EventType::WindowMinimizedEvent), m_Minimized(minimized) {}
+
+		bool IsMinimized() const { return m_Minimized; }
+		static EventType GetStaticType() { return EventType::WindowMinimizedEvent; }
+
+	private:
+		bool m_Minimized;
 	};
 
 

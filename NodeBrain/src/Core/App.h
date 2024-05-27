@@ -4,13 +4,15 @@
 #include "Core/Layer.h"
 #include "Core/Window.h"
 #include "Core/Event.h"
+#include "Core/ImGuiLayer.h"
+#include "Renderer/Renderer.h"
 
 namespace NodeBrain
 {
 	class App
 	{
 	public:
-		App();
+		App(const std::string& applicationName, Window* window, Renderer* renderer, ImGuiLayer* imGuiLayer);
 		~App();
 
 		void Run();
@@ -18,19 +20,24 @@ namespace NodeBrain
 
 		size_t GetLayersSize() const { return m_Layers.size(); }
 		Window& GetWindow() const { return *m_Window; }
-		static App* GetInstance();
+		const std::string& GetApplicationName() const { return m_ApplicationName; }
 
 	private:
 		// Events
 		void OnEvent(Event& event);
 		void OnWindowClose(WindowClosedEvent& e);
-
-		bool StartupSubSystems();
+		void OnMinimized(WindowMinimizedEvent& e);
 
 	private:
+		std::string m_ApplicationName;
+		Window* m_Window;
+		Renderer* m_Renderer;
+		ImGuiLayer* m_ImGuiLayer;
+
 		bool m_Running = true;
+		bool m_Minimized = false;
 		std::vector<Layer*> m_Layers;
-		std::unique_ptr<Window> m_Window;
+
 		float m_LastFrameTime = 0.0f;
 		Timer m_Timer;
 	};

@@ -17,4 +17,4 @@ set(IMGUI_PATH ${CMAKE_CURRENT_SOURCE_DIR}/NodeBrain/thirdparty/ImGui)
 # Include sub-projects.
 add_subdirectory("NodeBrain")
 add_subdirectory("BrainEditor")
-add_subdirectory("test")
+add_subdirectory("Test")

@@ -1,17 +1,17 @@
 #include "NBpch.h"
 #include "RendererAPI.h"
 
-#include "Renderer/Renderer.h"
 #include "GAPI/Vulkan/VulkanRendererAPI.h"
+#include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
 {
-	std::unique_ptr<RendererAPI> RendererAPI::Create()
+	RendererAPI* RendererAPI::Create(RenderContext* renderContext)
 	{
-		switch (Renderer::GetGAPI())
+		switch (renderContext->GetGraphicsAPI())
 		{
 			case GAPI::None: NB_ASSERT(false, "Graphics API not detected!"); return nullptr;
-			case GAPI::Vulkan: return std::make_unique<VulkanRendererAPI>();
+			case GAPI::Vulkan: return new VulkanRendererAPI(dynamic_cast<VulkanRenderContext*>(renderContext));
 		}
 		NB_ASSERT(false, "Graphics API not detected!");
 		return nullptr;

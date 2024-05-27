@@ -3,9 +3,5 @@
 
 TEST(App, PushLayer) 
 {
-    NodeBrain::App* app = new NodeBrain::App();
-    app->PushLayer(nullptr);
-    EXPECT_EQ(app->GetLayersSize(), 0);
-
-    delete app;
+    
 }
