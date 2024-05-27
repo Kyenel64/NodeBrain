@@ -61,12 +61,14 @@ namespace NodeBrain
 		VK_CHECK(CreateVkSwapchain());
 		VK_CHECK(CreateImageDatas());
 		VK_CHECK(CreateFrameDatas());
+		VK_CHECK(CreateDrawImage());
 	}
 
 	VulkanSwapchain::~VulkanSwapchain()
 	{
 		NB_PROFILE_FN();
 
+		DestroyDrawImage();
 		DestroyFrameDatas();
 		DestroyImageDatas();
 		DestroyVkSwapchain();
@@ -228,7 +230,36 @@ namespace NodeBrain
 			result = vkCreateFence(m_Device.GetVkDevice(), &fenceCreateInfo, nullptr, &m_FrameDatas[i].InFlightFence);
 			if (result != VK_SUCCESS)
 				return result;
+		}
+	
+		return VK_SUCCESS;
+	}
 
+	void VulkanSwapchain::DestroyFrameDatas()
+	{
+		NB_PROFILE_FN();
+
+		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+		{
+			vkDestroyFence(m_Device.GetVkDevice(), m_FrameDatas[i].InFlightFence, nullptr);
+			m_FrameDatas[i].InFlightFence = VK_NULL_HANDLE;
+			vkDestroySemaphore(m_Device.GetVkDevice(), m_FrameDatas[i].RenderFinishedSemaphore, nullptr);
+			m_FrameDatas[i].RenderFinishedSemaphore = VK_NULL_HANDLE;
+			vkDestroySemaphore(m_Device.GetVkDevice(), m_FrameDatas[i].ImageAvailableSemaphore, nullptr);
+			m_FrameDatas[i].ImageAvailableSemaphore = VK_NULL_HANDLE;
+			vkDestroyCommandPool(m_Device.GetVkDevice(), m_FrameDatas[i].CommandPool, nullptr);
+			m_FrameDatas[i].CommandPool = VK_NULL_HANDLE;
+		}
+	}
+
+	VkResult VulkanSwapchain::CreateDrawImage()
+	{
+		NB_PROFILE_FN();
+
+		VkResult result;
+
+		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+		{
 			// --- Create Draw Image ---
 			VkImageCreateInfo drawImageCreateInfo = {};
 			drawImageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -254,7 +285,7 @@ namespace NodeBrain
 			allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 			allocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-			result = vmaCreateImage(m_VmaAllocator, &drawImageCreateInfo, &allocationCreateInfo, &m_FrameDatas[i].DrawImage, &m_FrameDatas[i].DrawImageAllocation, nullptr);
+			result = vmaCreateImage(m_VmaAllocator, &drawImageCreateInfo, &allocationCreateInfo, &m_DrawImageDatas[i].Image, &m_DrawImageDatas[i].Allocation, nullptr);
 			if (result != VK_SUCCESS)
 				return result;
 
@@ -262,7 +293,7 @@ namespace NodeBrain
 			// --- Create Draw ImageView ---
 			VkImageViewCreateInfo drawImageViewCreateInfo = {};
 			drawImageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			drawImageViewCreateInfo.image = m_FrameDatas[i].DrawImage;
+			drawImageViewCreateInfo.image = m_DrawImageDatas[i].Image;
 			drawImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D; // TODO: parameterize
 			drawImageViewCreateInfo.format = Utils::ImageFormatToVkFormat(ImageFormat::RGBA16);
 
@@ -276,35 +307,26 @@ namespace NodeBrain
 			drawImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 			drawImageViewCreateInfo.subresourceRange.layerCount = 1;
 
-			result = vkCreateImageView(m_Device.GetVkDevice(), &drawImageViewCreateInfo, nullptr, &m_FrameDatas[i].DrawImageView);
+			result = vkCreateImageView(m_Device.GetVkDevice(), &drawImageViewCreateInfo, nullptr, &m_DrawImageDatas[i].ImageView);
 			if (result != VK_SUCCESS)
 				return result;
 		}
-	
+
 		return VK_SUCCESS;
 	}
 
-	void VulkanSwapchain::DestroyFrameDatas()
+	void VulkanSwapchain::DestroyDrawImage()
 	{
 		NB_PROFILE_FN();
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
-			vkDestroyFence(m_Device.GetVkDevice(), m_FrameDatas[i].InFlightFence, nullptr);
-			m_FrameDatas[i].InFlightFence = VK_NULL_HANDLE;
-			vkDestroySemaphore(m_Device.GetVkDevice(), m_FrameDatas[i].RenderFinishedSemaphore, nullptr);
-			m_FrameDatas[i].RenderFinishedSemaphore = VK_NULL_HANDLE;
-			vkDestroySemaphore(m_Device.GetVkDevice(), m_FrameDatas[i].ImageAvailableSemaphore, nullptr);
-			m_FrameDatas[i].ImageAvailableSemaphore = VK_NULL_HANDLE;
-			vkDestroyCommandPool(m_Device.GetVkDevice(), m_FrameDatas[i].CommandPool, nullptr);
-			m_FrameDatas[i].CommandPool = VK_NULL_HANDLE;
+			vkDestroyImageView(m_Device.GetVkDevice(), m_DrawImageDatas[i].ImageView, nullptr);
+			m_DrawImageDatas[i].ImageView = VK_NULL_HANDLE;
 
-			vkDestroyImageView(m_Device.GetVkDevice(), m_FrameDatas[i].DrawImageView, nullptr);
-			m_FrameDatas[i].DrawImageView = VK_NULL_HANDLE;
-
-			vmaDestroyImage(m_VmaAllocator, m_FrameDatas[i].DrawImage, m_FrameDatas[i].DrawImageAllocation);
-			m_FrameDatas[i].DrawImage = VK_NULL_HANDLE;
-			m_FrameDatas[i].DrawImageAllocation = VK_NULL_HANDLE;
+			vmaDestroyImage(m_VmaAllocator, m_DrawImageDatas[i].Image, m_DrawImageDatas[i].Allocation);
+			m_DrawImageDatas[i].Image = VK_NULL_HANDLE;
+			m_DrawImageDatas[i].Allocation = VK_NULL_HANDLE;
 		}
 	}
 
@@ -352,6 +374,7 @@ namespace NodeBrain
 		vkDeviceWaitIdle(m_Device.GetVkDevice());
 
 		// --- Destroy ---
+		DestroyDrawImage();
 		DestroyImageDatas();
 		DestroyVkSwapchain();
 
@@ -359,6 +382,7 @@ namespace NodeBrain
 		// --- Recreate ---
 		VK_CHECK(CreateVkSwapchain());
 		VK_CHECK(CreateImageDatas());
+		VK_CHECK(CreateDrawImage());
 
 		NB_INFO("Recreated swapchain to size: {0}, {1}", m_VkExtent.width, m_VkExtent.height);
 	}

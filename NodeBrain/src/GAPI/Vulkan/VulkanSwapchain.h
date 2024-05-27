@@ -25,10 +25,13 @@ namespace NodeBrain
 		VkSemaphore ImageAvailableSemaphore = VK_NULL_HANDLE;
 		VkSemaphore RenderFinishedSemaphore = VK_NULL_HANDLE;
 		VkFence InFlightFence = VK_NULL_HANDLE;
+	};
 
-		VkImage DrawImage = VK_NULL_HANDLE;
-		VkImageView DrawImageView = VK_NULL_HANDLE;
-		VmaAllocation DrawImageAllocation = VK_NULL_HANDLE;
+	struct DrawImageData
+	{
+		VkImage Image = VK_NULL_HANDLE;
+		VkImageView ImageView = VK_NULL_HANDLE;
+		VmaAllocation Allocation = VK_NULL_HANDLE;
 	};
 
 
@@ -45,6 +48,7 @@ namespace NodeBrain
 		VkSwapchainKHR GetVkSwapchain() const { return m_VkSwapchain; }
 		const FrameData& GetCurrentFrameData() const { return m_FrameDatas[m_FrameIndex]; }
 		const ImageData& GetCurrentImageData() const { return m_ImageDatas[m_ImageIndex]; }	
+		const DrawImageData& GetCurrentDrawImage() const { return m_DrawImageDatas[m_FrameIndex]; }
 		uint32_t GetImageIndex() const { return m_ImageIndex; }
 		uint32_t GetFrameIndex() const { return m_FrameIndex; }
 		VkExtent2D GetVkExtent() const { return m_VkExtent; }
@@ -57,10 +61,12 @@ namespace NodeBrain
 		VkResult CreateVkSwapchain();
 		VkResult CreateImageDatas();
 		VkResult CreateFrameDatas();
+		VkResult CreateDrawImage();
 
 		void DestroyVkSwapchain();
 		void DestroyImageDatas();
 		void DestroyFrameDatas();
+		void DestroyDrawImage();
 
 	private:
 		Window* m_Window;
@@ -83,6 +89,7 @@ namespace NodeBrain
 
 		std::vector<ImageData> m_ImageDatas;
 		FrameData m_FrameDatas[FRAMES_IN_FLIGHT];
+		DrawImageData m_DrawImageDatas[FRAMES_IN_FLIGHT];
 
 		// Used for ImageData indexing. Index of current swapchain image retrieved by the GPU. 
 		// This can be any index from the swapchain that is ready to use.

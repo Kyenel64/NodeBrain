@@ -33,7 +33,7 @@ namespace NodeBrain
 
 		m_ActiveCmdBuffer = m_Swapchain.GetCurrentFrameData().CommandBuffer;
 		m_ActiveSwapchainImage = m_Swapchain.GetCurrentImageData().Image;
-		m_DrawImage = m_Swapchain.GetCurrentFrameData().DrawImage;
+		m_DrawImage = m_Swapchain.GetCurrentDrawImage().Image;
 
 		vkResetCommandBuffer(m_ActiveCmdBuffer, 0);
 
@@ -73,7 +73,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		VkImage vkImage = image ? dynamic_pointer_cast<VulkanImage>(image)->GetVkImage() : m_Swapchain.GetCurrentFrameData().DrawImage;
+		VkImage vkImage = image ? dynamic_pointer_cast<VulkanImage>(image)->GetVkImage() : m_Swapchain.GetCurrentDrawImage().Image;
 
 		VkClearColorValue clearValue = { { color.x, color.y, color.z, color.w }};
 		VkImageSubresourceRange clearRange = Utils::ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
@@ -98,8 +98,8 @@ namespace NodeBrain
 		}
 		else
 		{
-			vkImage = m_Swapchain.GetCurrentFrameData().DrawImage;
-			vkImageView = m_Swapchain.GetCurrentFrameData().DrawImageView;
+			vkImage = m_Swapchain.GetCurrentDrawImage().Image;
+			vkImageView = m_Swapchain.GetCurrentDrawImage().ImageView;
 			extent = m_Swapchain.GetVkExtent();
 		}
 
@@ -147,7 +147,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		VkImage vkImage = pipeline->GetTargetImage() ? dynamic_pointer_cast<VulkanImage>(pipeline->GetTargetImage())->GetVkImage() : m_Swapchain.GetCurrentFrameData().DrawImage;
+		VkImage vkImage = pipeline->GetTargetImage() ? dynamic_pointer_cast<VulkanImage>(pipeline->GetTargetImage())->GetVkImage() : m_Swapchain.GetCurrentDrawImage().Image;
 		
 		m_vkCmdEndRenderingKHR(m_ActiveCmdBuffer);
 
@@ -185,7 +185,7 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = dynamic_pointer_cast<VulkanComputePipeline>(pipeline);
-		VkImage vkImage = pipeline->GetTargetImage() ? dynamic_pointer_cast<VulkanImage>(pipeline->GetTargetImage())->GetVkImage() : m_Swapchain.GetCurrentFrameData().DrawImage;
+		VkImage vkImage = pipeline->GetTargetImage() ? dynamic_pointer_cast<VulkanImage>(pipeline->GetTargetImage())->GetVkImage() : m_Swapchain.GetCurrentDrawImage().Image;
 
 		vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vulkanPipeline->GetVkPipeline());
 
