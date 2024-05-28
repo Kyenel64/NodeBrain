@@ -14,27 +14,19 @@ namespace NodeBrain
 
 		// --- Uniforms ---
 		m_Data.TestUniformBuffer = UniformBuffer::Create(m_Context, nullptr, sizeof(TestUniformData));
-		m_Data.TestUniformBuffer2 = UniformBuffer::Create(m_Context, nullptr, sizeof(TestUniformData2));
-		m_Data.TestUniformBuffer3 = UniformBuffer::Create(m_Context, nullptr, sizeof(TestUniformData2));
 
 		m_Data.GlobalDescriptorSet = DescriptorSet::Create(m_Context, {
-			{ BindingType::UniformBuffer, 0 },
-			{ BindingType::UniformBuffer, 1 }});
+			{ BindingType::UniformBuffer, 0 }});
 		m_Data.GlobalDescriptorSet->WriteBuffer(m_Data.TestUniformBuffer, 0);
-		m_Data.GlobalDescriptorSet->WriteBuffer(m_Data.TestUniformBuffer2, 1);
-
-		m_Data.LocalDescriptorSet = DescriptorSet::Create(m_Context, { { BindingType::UniformBuffer, 0 }});
-		m_Data.LocalDescriptorSet->WriteBuffer(m_Data.TestUniformBuffer3, 0);
 
 		
 		// --- Quads ---
-		m_Data.QuadVertexShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/triangle.vert.spv", ShaderType::Vertex);
-		m_Data.QuadFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/triangle.frag.spv", ShaderType::Fragment);
+		m_Data.QuadVertexShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/quad.vert.spv", ShaderType::Vertex);
+		m_Data.QuadFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/quad.frag.spv", ShaderType::Fragment);
 		GraphicsPipelineConfiguration pipelineConfig = {};
 		pipelineConfig.VertexShader = m_Data.QuadVertexShader;
 		pipelineConfig.FragmentShader = m_Data.QuadFragmentShader;
 		pipelineConfig.AddDescriptorSet(m_Data.GlobalDescriptorSet, 0);
-		pipelineConfig.AddDescriptorSet(m_Data.LocalDescriptorSet, 1);
 		m_Data.QuadPipeline = GraphicsPipeline::Create(m_Context, pipelineConfig);
 
 
@@ -94,8 +86,7 @@ namespace NodeBrain
 		m_RendererAPI->EndFrame();
 	}
 
-	#include <GLFW/glfw3.h>
-	void Renderer::BeginScene(std::shared_ptr<Image> targetImage)
+	void Renderer::BeginScene(std::shared_ptr<EditorCamera> editorCamera, std::shared_ptr<Image> targetImage)
 	{
 		NB_PROFILE_FN();
 
@@ -103,20 +94,10 @@ namespace NodeBrain
 
 		m_RendererAPI->ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetImage);
 
-		m_Data.PushConstantBuffer.ViewProjectionMatrix = glm::mat4(1.0f);
+		m_Data.PushConstantBuffer.ViewProjectionMatrix = editorCamera->GetProjectionMatrix() * editorCamera->GetViewMatrix();
 
-		const float radius = 1.0f;
-		float camX = sin(glfwGetTime()) * radius;
-		float camZ = cos(glfwGetTime()) * radius;
 		m_Data.TestUniformDataBuffer.Color = { 0, 1, 0, 1.0f };
-		m_Data.TestUniformDataBuffer.Color2 = { 1, 0, 0, 1.0f };
 		m_Data.TestUniformBuffer->SetData(&m_Data.TestUniformDataBuffer, sizeof(TestUniformData));
-
-		m_Data.TestUniformDataBuffer2.Color3 = { 1, 0, 1, 1.0f };
-		m_Data.TestUniformBuffer2->SetData(&m_Data.TestUniformDataBuffer2, sizeof(TestUniformData2));
-
-		m_Data.TestUniformDataBuffer3.Color3 = { 0, 0, 1, 1.0f };
-		m_Data.TestUniformBuffer3->SetData(&m_Data.TestUniformDataBuffer3, sizeof(TestUniformData2));
 
 		m_Data.PushConstantBuffer.Address = m_Data.QuadVertexBuffer->GetAddress();
 		m_Data.QuadPipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
@@ -169,7 +150,7 @@ namespace NodeBrain
 			uint32_t size = (uint32_t)((uint8_t*)m_Data.QuadVertexBufferPtr - (uint8_t*)m_Data.QuadVertexBufferBase);
 			m_Data.QuadVertexBuffer->SetData(m_Data.QuadVertexBufferBase, size);
 
-			m_Data.QuadPipeline->BindDescriptorSet(m_Data.LocalDescriptorSet);
+			m_Data.QuadPipeline->BindDescriptorSet(m_Data.GlobalDescriptorSet);
 			m_RendererAPI->BeginRenderPass(m_Data.QuadPipeline);
 			m_RendererAPI->DrawIndexed(m_Data.QuadIndexBuffer, m_Data.QuadIndexCount, 0);
 			m_RendererAPI->EndRenderPass(m_Data.QuadPipeline);

@@ -12,7 +12,9 @@ namespace NodeBrain
 	class BrainEditor : public Layer
 	{
 	public:
-		BrainEditor(Renderer* renderer) : m_Renderer(renderer), m_RendererAPI(renderer->GetAPI()), m_Context(renderer->GetContext()) {}
+		BrainEditor(Renderer* renderer)
+			: m_Renderer(renderer), m_RendererAPI(renderer->GetAPI()),
+			m_Context(renderer->GetContext()), m_Window(renderer->GetContext()->GetWindow()) {}
 		~BrainEditor() = default;
 
 		virtual void OnAttach() override;
@@ -29,8 +31,11 @@ namespace NodeBrain
 		Renderer* m_Renderer;
 		RendererAPI* m_RendererAPI;
 		RenderContext* m_Context;
+		Window* m_Window;
 
 		int m_ShaderIndex = 0;
+
+		std::shared_ptr<EditorCamera> m_EditorCamera;
 
 		// Demo
 		std::shared_ptr<Shader> m_GradientShader;

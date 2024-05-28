@@ -20,6 +20,7 @@
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/UniformBuffer.h"
 #include "Renderer/DescriptorSet.h"
+#include "Renderer/EditorCamera.h"
 
 // Graphics API
 #include "GAPI/Vulkan/VulkanRenderContext.h"

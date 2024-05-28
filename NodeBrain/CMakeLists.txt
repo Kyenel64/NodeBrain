@@ -47,7 +47,8 @@ set (RendererFiles
 "src/Renderer/VertexBuffer.h" "src/Renderer/VertexBuffer.cpp"
 "src/Renderer/IndexBuffer.h" "src/Renderer/IndexBuffer.cpp"
 "src/Renderer/UniformBuffer.h" "src/Renderer/UniformBuffer.cpp"
-"src/Renderer/DescriptorSet.h" "src/Renderer/DescriptorSet.cpp")
+"src/Renderer/DescriptorSet.h" "src/Renderer/DescriptorSet.cpp"
+"src/Renderer/EditorCamera.h" "src/Renderer/EditorCamera.cpp")
 
 # Source files
 add_library ( ${PROJECT_NAME} 
@@ -77,14 +78,14 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/th
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw Vulkan::Vulkan spdlog glm)
 
 # Defines
-target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:NB_DEBUG>)
-target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:NB_RELEASE>)
+target_compile_definitions(${PROJECT_NAME} PUBLIC $<$<CONFIG:Debug>:NB_DEBUG>)
+target_compile_definitions(${PROJECT_NAME} PUBLIC $<$<CONFIG:Release>:NB_RELEASE>)
 IF (WIN32)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE NB_WINDOWS)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC NB_WINDOWS)
 ELSEIF (APPLE)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE NB_APPLE)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC NB_APPLE)
 ELSEIF (LINUX)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE NB_LINUX)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC NB_LINUX)
 ENDIF()
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_DEFINE_MATH_OPERATORS)

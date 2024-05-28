@@ -4,6 +4,9 @@
 # VS code
 .vscode
 
+# Clion
+.idea
+
 # Output
 out
 [Bb][Uu][Ii][Ll][Dd]

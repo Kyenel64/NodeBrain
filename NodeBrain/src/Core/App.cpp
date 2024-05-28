@@ -27,8 +27,6 @@ namespace NodeBrain
 		for (Layer* layer : m_Layers)
 			layer->OnDetach();
 
-		m_Timer.EndTimer();
-
 		NB_INFO("Shutdown Application");
 	}
 
@@ -39,7 +37,7 @@ namespace NodeBrain
 			NB_PROFILE_SCOPE("Frame");
 
 			// Calculate deltaTime
-			float time = m_Timer.GetElapsedSeconds(); // TODO: Change to GLFW time
+			float time = m_Window->GetTime();
 			float deltaTime = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 

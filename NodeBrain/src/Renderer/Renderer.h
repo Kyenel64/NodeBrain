@@ -11,6 +11,7 @@
 #include "Renderer/UniformBuffer.h"
 #include "Renderer/DescriptorSet.h"
 #include "Renderer/Image.h"
+#include "Renderer/EditorCamera.h"
 
 namespace NodeBrain
 {
@@ -32,12 +33,6 @@ namespace NodeBrain
 	struct TestUniformData
 	{
 		glm::vec4 Color;
-		glm::vec4 Color2;
-	};
-
-	struct TestUniformData2
-	{
-		glm::vec4 Color3;
 	};
 
 	struct RendererData
@@ -64,15 +59,7 @@ namespace NodeBrain
 
 		TestUniformData TestUniformDataBuffer;
 		std::shared_ptr<UniformBuffer> TestUniformBuffer;
-
-		TestUniformData2 TestUniformDataBuffer2;
-		std::shared_ptr<UniformBuffer> TestUniformBuffer2;
-
-		TestUniformData2 TestUniformDataBuffer3;
-		std::shared_ptr<UniformBuffer> TestUniformBuffer3;
-
 		std::shared_ptr<DescriptorSet> GlobalDescriptorSet;
-		std::shared_ptr<DescriptorSet> LocalDescriptorSet;
 	};
 
 	class Renderer
@@ -84,7 +71,7 @@ namespace NodeBrain
 		void BeginFrame();
 		void EndFrame();
 
-		void BeginScene(std::shared_ptr<Image> targetImage = nullptr);
+		void BeginScene(std::shared_ptr<EditorCamera> editorCamera, std::shared_ptr<Image> targetImage = nullptr);
 		void EndScene();
 
 		void RenderSubmitted();

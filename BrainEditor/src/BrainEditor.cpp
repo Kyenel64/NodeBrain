@@ -31,6 +31,8 @@ namespace NodeBrain
 		gradientConfig.TargetImage = m_TargetImage;
 		gradientConfig.AddDescriptorSet(m_GradientDescriptorSet, 0);
 		m_GradientPipeline = ComputePipeline::Create(m_Context, gradientConfig);
+
+		m_EditorCamera = std::make_shared<EditorCamera>(45.0f, m_Window->GetWidth() / m_Window->GetHeight(), 0.01f, 1000.0f);
 	}
 
 	void BrainEditor::OnDetach()
@@ -50,12 +52,14 @@ namespace NodeBrain
 		float camX = sin(glfwGetTime()) * radius;
 		float camZ = cos(glfwGetTime()) * radius;
 
+		m_EditorCamera->OnUpdate(deltaTime);
+
 		if (m_ShaderIndex == 0)
 		{
 			glm::mat4 transform  = glm::translate(glm::mat4(1.0f), { camX, -0.5f, 0.5f }) * glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 0.5f }) * glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), { 1.0f, 1.0f, 0.0f });
 			glm::mat4 transform1 = glm::translate(glm::mat4(1.0f), { -0.5f, 0.5f, 0.0f }) * glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 0.5f });
 
-			m_Renderer->BeginScene();
+			m_Renderer->BeginScene(m_EditorCamera);
 			m_Renderer->SubmitQuad(transform, { 1.0f, 0.0f, 0.0f, 1.0f });
 			m_Renderer->SubmitQuad(transform1, { 0.0f, 1.0f, 0.0f, 1.0f });
 			m_Renderer->EndScene();

@@ -36,5 +36,6 @@ namespace NodeBrain
 		// Poll-based. 
 		// Returns screen-space coordinates of the cursor relative to the top left corner of the application window.
 		static glm::vec2 GetMousePosition();
+		static void SetMousePosition(const glm::vec2& pos);
 	};
 }

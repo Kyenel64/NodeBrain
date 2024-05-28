@@ -137,6 +137,7 @@ namespace NodeBrain
 				MouseMovedEvent event((float)xpos, (float)ypos);
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				data.EventCallback(event);
+				Input::SetMousePosition({ xpos, ypos });
 			});
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset)
@@ -145,5 +146,10 @@ namespace NodeBrain
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				data.EventCallback(event);
 			});
+	}
+
+	float Window::GetTime() const
+	{
+		return glfwGetTime();
 	}
 }

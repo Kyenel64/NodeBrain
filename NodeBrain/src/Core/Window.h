@@ -28,6 +28,7 @@ namespace NodeBrain
 		std::vector<const char*> GetVulkanExtensions() const { return m_VulkanExtensions; }
 		uint32_t GetWidth() const { return m_Data.Width; }
 		uint32_t GetHeight() const { return m_Data.Height; }
+		float GetTime() const;
 
 	private:
 		void RegisterCallbacks();

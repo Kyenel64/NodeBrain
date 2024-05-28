@@ -13,6 +13,8 @@ namespace NodeBrain
 	static std::unordered_map<MouseButton, InputState> s_MouseButtonState;
 	static std::queue<MouseButton> s_UnhandledMouseButtons;
 
+	static glm::vec2 s_MousePosition;
+
 	bool Input::IsKeyPressed(Key key)
 	{
 		NB_PROFILE_FN();
@@ -118,12 +120,13 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		// fix
-		//GLFWwindow* window = Renderer::GetContext()->GetWindow()->GetGLFWWindow();
-		//NB_ASSERT(window, "Could not retrieve application instance");
-		//double xpos = 0, ypos = 0;
-		//glfwGetCursorPos(window, &xpos, &ypos);
-		//return { (float)xpos, (float)ypos };
-		return { 0.0f, 0.0f };
+		return s_MousePosition;
+	}
+
+	void Input::SetMousePosition(const glm::vec2& pos)
+	{
+		NB_PROFILE_FN();
+
+		s_MousePosition = pos;
 	}
 }
