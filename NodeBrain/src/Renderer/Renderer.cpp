@@ -86,7 +86,7 @@ namespace NodeBrain
 		m_RendererAPI->EndFrame();
 	}
 
-	void Renderer::BeginScene(std::shared_ptr<EditorCamera> editorCamera, std::shared_ptr<Image> targetImage)
+	void Renderer::BeginScene(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage)
 	{
 		NB_PROFILE_FN();
 

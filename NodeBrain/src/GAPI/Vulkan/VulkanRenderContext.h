@@ -14,18 +14,18 @@ namespace NodeBrain
 	class VulkanRenderContext : public RenderContext
 	{
 	public:
-		VulkanRenderContext(Window* window);
-		virtual ~VulkanRenderContext();
+		explicit VulkanRenderContext(Window* window);
+		~VulkanRenderContext() override;
 
-		virtual void AcquireNextImage() override;
-		virtual void SwapBuffers() override;
+		void AcquireNextImage() override;
+		void SwapBuffers() override;
 
-		virtual void WaitForGPU() override;
+		void WaitForGPU() override;
 
-		virtual GAPI GetGraphicsAPI() const override { return GAPI::Vulkan; }
-		virtual Window* GetWindow() const override { return m_Window; }
+		GAPI GetGraphicsAPI() const override { return GAPI::Vulkan; }
+		Window* GetWindow() const override { return m_Window; }
 
-		void ImmediateSubmit(std::function<void(VkCommandBuffer cmdBuffer)> func);
+		void ImmediateSubmit(const std::function<void(VkCommandBuffer cmdBuffer)>& func);
 
 		// Getters
 		VkInstance GetVkInstance() const { return m_VkInstance; }

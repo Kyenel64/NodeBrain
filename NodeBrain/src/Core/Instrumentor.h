@@ -30,7 +30,7 @@ namespace NodeBrain
 	class InstrumentorEvent
 	{
 	public:
-		InstrumentorEvent(const std::string& name);
+		explicit InstrumentorEvent(const std::string& name);
 		~InstrumentorEvent();
 
 		void Stop();
@@ -44,7 +44,7 @@ namespace NodeBrain
 #ifdef NB_ENABLE_PROFILING
 	#define NB_PROFILE_BEGIN(name, path) ::NodeBrain::Instrumentor::BeginTrace(name, path)
 	#define NB_PROFILE_END() ::NodeBrain::Instrumentor::EndTrace()
-#define NB_PROFILE_SCOPE(name) ::NodeBrain::InstrumentorEvent profileEvent##__LINE__(name)
+	#define NB_PROFILE_SCOPE(name) ::NodeBrain::InstrumentorEvent profileEvent##__LINE__(name)
 	#define NB_PROFILE_FN() NB_PROFILE_SCOPE(__FUNCTION__)
 #else
 	#define NB_PROFILE_BEGIN(name, path) 

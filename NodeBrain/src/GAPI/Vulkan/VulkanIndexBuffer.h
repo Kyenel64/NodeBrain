@@ -12,9 +12,9 @@ namespace NodeBrain
 	{
 	public:
 		VulkanIndexBuffer(VulkanRenderContext* context, const uint32_t* data, uint32_t size);
-		virtual ~VulkanIndexBuffer();
+		~VulkanIndexBuffer() override;
 
-		virtual void SetData(const uint32_t* data, uint32_t size) override;
+		void SetData(const uint32_t* data, uint32_t size) override;
 
 		VkBuffer GetVkBuffer() const { return m_VkBuffer; }
 

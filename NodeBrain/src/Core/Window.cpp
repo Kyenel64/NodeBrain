@@ -15,8 +15,8 @@ namespace NodeBrain
 		NB_ERROR("GLFW Error {0}: {1}", error, description);
 	}
 
-	Window::Window(const std::string& windowName, uint32_t width, uint32_t height)
-		: m_WindowName(windowName)
+	Window::Window(std::string windowName, uint32_t width, uint32_t height)
+		: m_WindowName(std::move(windowName))
 	{
 		NB_PROFILE_FN();
 
@@ -36,7 +36,7 @@ namespace NodeBrain
 			glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
 		#endif
 
-		m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_WindowName.c_str(), NULL, NULL);
+		m_Window = glfwCreateWindow((int)m_Data.Width, (int)m_Data.Height, m_WindowName.c_str(), nullptr, nullptr);
 		NB_ASSERT(m_Window, "Failed to create GLFW window");
 		NB_INFO("Created Window {0}, size: {1}, {2}", m_WindowName, m_Data.Width, m_Data.Height);
 		// Set data that can be accessed when calling glfwGetWindowUserPointer
@@ -148,7 +148,7 @@ namespace NodeBrain
 			});
 	}
 
-	float Window::GetTime() const
+	double Window::GetTime()
 	{
 		return glfwGetTime();
 	}

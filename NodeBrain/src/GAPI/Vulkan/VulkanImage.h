@@ -12,10 +12,10 @@ namespace NodeBrain
 	{
 	public:
 		VulkanImage(VulkanRenderContext* context, const ImageConfiguration& configuration);
-		virtual ~VulkanImage();
+		~VulkanImage() override;
 
-		virtual uint64_t GetAddress() override;
-		virtual const ImageConfiguration& GetConfiguration() const override { return m_Configuration; }
+		uint64_t GetAddress() override;
+		const ImageConfiguration& GetConfiguration() const override { return m_Configuration; }
 
 		VkImage GetVkImage() const { return m_VkImage[m_Context->GetSwapchain().GetFrameIndex()]; }
 		VkImageView GetVkImageView() const { return m_VkImageView[m_Context->GetSwapchain().GetFrameIndex()]; }

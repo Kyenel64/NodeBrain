@@ -16,7 +16,7 @@ namespace NodeBrain
 	{
 	public:
 		Event() = default;
-		Event(EventType type) : m_Type(type) {}
+		explicit Event(EventType type) : m_Type(type) {}
 
 		EventType GetType() const { return m_Type; }
 
@@ -64,7 +64,7 @@ namespace NodeBrain
 	class WindowMinimizedEvent : public Event
 	{
 	public:
-		WindowMinimizedEvent(bool minimized) : Event(EventType::WindowMinimizedEvent), m_Minimized(minimized) {}
+		explicit WindowMinimizedEvent(bool minimized) : Event(EventType::WindowMinimizedEvent), m_Minimized(minimized) {}
 
 		bool IsMinimized() const { return m_Minimized; }
 		static EventType GetStaticType() { return EventType::WindowMinimizedEvent; }
@@ -79,7 +79,7 @@ namespace NodeBrain
 	class KeyPressedEvent : public Event
 	{
 	public:
-		KeyPressedEvent(Key key) : Event(EventType::KeyPressedEvent), m_Key(key) {}
+		explicit KeyPressedEvent(Key key) : Event(EventType::KeyPressedEvent), m_Key(key) {}
 
 		Key GetKey() const { return m_Key; }
 
@@ -93,7 +93,7 @@ namespace NodeBrain
 	class KeyReleasedEvent : public Event
 	{
 	public:
-		KeyReleasedEvent(Key key) : Event(EventType::KeyReleasedEvent), m_Key(key) {}
+		explicit KeyReleasedEvent(Key key) : Event(EventType::KeyReleasedEvent), m_Key(key) {}
 
 		Key GetKey() const { return m_Key; }
 
@@ -108,7 +108,7 @@ namespace NodeBrain
 	class MousePressedEvent : public Event
 	{
 	public:
-		MousePressedEvent(MouseButton mouseButton) : Event(EventType::MousePressedEvent), m_MouseButton(mouseButton) {}
+		explicit MousePressedEvent(MouseButton mouseButton) : Event(EventType::MousePressedEvent), m_MouseButton(mouseButton) {}
 
 		MouseButton GetMouseButton() const { return m_MouseButton; }
 
@@ -120,7 +120,7 @@ namespace NodeBrain
 	class MouseReleasedEvent : public Event
 	{
 	public:
-		MouseReleasedEvent(MouseButton mouseButton) : Event(EventType::MouseReleasedEvent), m_MouseButton(mouseButton) {}
+		explicit MouseReleasedEvent(MouseButton mouseButton) : Event(EventType::MouseReleasedEvent), m_MouseButton(mouseButton) {}
 
 		MouseButton GetMouseButton() const { return m_MouseButton; }
 

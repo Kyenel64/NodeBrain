@@ -42,15 +42,15 @@ namespace NodeBrain
 
 	void BrainEditor::OnEvent(Event& event)
 	{
-		event.AttachEventFunction<KeyPressedEvent>(std::bind(&BrainEditor::OnKeyPressed, this, std::placeholders::_1));
-		event.AttachEventFunction<MousePressedEvent>(std::bind(&BrainEditor::OnMousePressed, this, std::placeholders::_1));
+		event.AttachEventFunction<KeyPressedEvent>([this](KeyPressedEvent& event) { OnKeyPressed(event); });
+		event.AttachEventFunction<MousePressedEvent>([this](MousePressedEvent& event) { OnMousePressed(event); });
 	}
 
 	void BrainEditor::OnUpdate(float deltaTime)
 	{
 		const float radius = 1.0f;
-		float camX = sin(glfwGetTime()) * radius;
-		float camZ = cos(glfwGetTime()) * radius;
+		float camX = (float)sin(glfwGetTime()) * radius;
+		float camZ = (float)cos(glfwGetTime()) * radius;
 
 		m_EditorCamera->OnUpdate(deltaTime);
 
@@ -85,7 +85,7 @@ namespace NodeBrain
 
 		ImGui::SliderInt("Switch Shader", &m_ShaderIndex, 0, 1);
 
-		ImGui::Image((ImTextureID)m_TargetImage->GetAddress(), { 1280 / 2, 720 / 2 });
+		ImGui::Image((ImTextureID)m_TargetImage->GetAddress(), { (float)m_TargetImage->GetConfiguration().Width, (float)m_TargetImage->GetConfiguration().Height});
 
 		ImGui::End();
 	}

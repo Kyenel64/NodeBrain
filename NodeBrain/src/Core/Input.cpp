@@ -1,10 +1,6 @@
 #include "NBpch.h"
 #include "Input.h"
 
-#include <GLFW/glfw3.h>
-
-#include "Renderer/Renderer.h"
-
 namespace NodeBrain
 {
 	static std::unordered_map<Key, InputState> s_KeyState;

@@ -11,7 +11,7 @@ namespace NodeBrain
 	{
 	public:
 		VulkanDescriptorSet(VulkanRenderContext* context, const std::vector<LayoutBinding>& layout);
-		virtual ~VulkanDescriptorSet();
+		~VulkanDescriptorSet() override;
 
 		virtual void WriteBuffer(std::shared_ptr<UniformBuffer> buffer, uint32_t binding) override;
 		virtual void WriteImage(std::shared_ptr<Image> image, uint32_t binding) override;

@@ -28,7 +28,7 @@ namespace NodeBrain
 			createInfo.pfnUserCallback = DebugCallback;
 		}
 
-		static bool CheckInstanceExtensionSupport(const std::vector<const char*> extensions)
+		static bool CheckInstanceExtensionSupport(const std::vector<const char*>& extensions)
 		{
 			NB_PROFILE_FN();
 
@@ -37,11 +37,11 @@ namespace NodeBrain
 			std::vector<VkExtensionProperties> availableExtensions(availableExtensionCount);
 			vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, &availableExtensions[0]);
 
-			for (int i = 0; i < extensions.size(); i++)
+			for (auto extension : extensions)
 			{
 				bool extensionIsAvailable = false;
 				for (int j = 0; j < availableExtensionCount; j++)
-					if (strcmp(extensions[i], availableExtensions[j].extensionName) == 0)
+					if (strcmp(extension, availableExtensions[j].extensionName) == 0)
 						extensionIsAvailable = true;
 
 				if (!extensionIsAvailable)
@@ -67,11 +67,11 @@ namespace NodeBrain
 			vkEnumerateInstanceLayerProperties(&layerCount, &availableLayers[0]);
 
 			// Check layers are available
-			for (int i = 0; i < validationLayers.size(); i++)
+			for (auto validationLayer : validationLayers)
 			{
 				bool layerIsAvailable = false;
 				for (int j = 0; j < layerCount; j++)
-					if (strcmp(validationLayers[i], availableLayers[j].layerName) == 0)
+					if (strcmp(validationLayer, availableLayers[j].layerName) == 0)
 						layerIsAvailable = true;
 
 				if (!layerIsAvailable)
@@ -169,7 +169,7 @@ namespace NodeBrain
 		m_Swapchain->PresentImage();
 	}
 
-	void VulkanRenderContext::ImmediateSubmit(std::function<void(VkCommandBuffer cmdBuffer)> func)
+	void VulkanRenderContext::ImmediateSubmit(const std::function<void(VkCommandBuffer cmdBuffer)>& func)
 	{
 		NB_PROFILE_FN();
 

@@ -15,13 +15,13 @@ namespace NodeBrain
 		BrainEditor(Renderer* renderer)
 			: m_Renderer(renderer), m_RendererAPI(renderer->GetAPI()),
 			m_Context(renderer->GetContext()), m_Window(renderer->GetContext()->GetWindow()) {}
-		~BrainEditor() = default;
+		~BrainEditor() override = default;
 
-		virtual void OnAttach() override;
-		virtual void OnDetach() override;
-		virtual void OnEvent(Event& event) override;
-		virtual void OnUpdate(float deltaTime) override;
-		virtual void OnUpdateGUI() override;
+		void OnAttach() override;
+		void OnDetach() override;
+		void OnEvent(Event& event) override;
+		void OnUpdate(float deltaTime) override;
+		void OnUpdateGUI() override;
 
 	private:
 		void OnKeyPressed(KeyPressedEvent& event);

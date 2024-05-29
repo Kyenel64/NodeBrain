@@ -10,25 +10,25 @@ namespace NodeBrain
 {
 	struct WindowData
 	{
-		int Width;
-		int Height;
+		uint32_t Width;
+		uint32_t Height;
 		std::function<void(Event&)> EventCallback = nullptr;
 	};
 
 	class Window
 	{
 	public:
-		Window(const std::string& windowName, uint32_t width, uint32_t height);
+		Window(std::string windowName, uint32_t width, uint32_t height);
 		~Window();
 
-		void SetEventCallback(std::function<void(Event&)> func) { m_Data.EventCallback = func; }
+		void SetEventCallback(std::function<void(Event&)> func) { m_Data.EventCallback = std::move(func); }
 		void PollEvents();
 
 		GLFWwindow* GetGLFWWindow() const { return m_Window; }
 		std::vector<const char*> GetVulkanExtensions() const { return m_VulkanExtensions; }
 		uint32_t GetWidth() const { return m_Data.Width; }
 		uint32_t GetHeight() const { return m_Data.Height; }
-		float GetTime() const;
+		static double GetTime();
 
 	private:
 		void RegisterCallbacks();

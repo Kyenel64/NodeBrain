@@ -11,14 +11,14 @@ namespace NodeBrain
 	{
 	public:
 		VulkanComputePipeline(VulkanRenderContext* context, const ComputePipelineConfiguration& configuration);
-		virtual ~VulkanComputePipeline();
+		~VulkanComputePipeline() override;
 
-		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) override; 
-		virtual void SetTargetImage(std::shared_ptr<Image> targetImage) override { m_Configuration.TargetImage = targetImage; }
+		void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) override;
+		void SetTargetImage(std::shared_ptr<Image> targetImage) override { m_Configuration.TargetImage = targetImage; }
 
-		virtual void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet) override;
+		void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet) override;
 
-		virtual std::shared_ptr<Image> GetTargetImage() const override { return m_Configuration.TargetImage; }
+		std::shared_ptr<Image> GetTargetImage() const override { return m_Configuration.TargetImage; }
 		VkPipeline GetVkPipeline() const { return m_VkPipeline; }
 
 	private:

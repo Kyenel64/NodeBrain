@@ -7,15 +7,15 @@
 
 namespace NodeBrain
 {
-	App::App(const std::string& applicationName, Window* window, Renderer* renderer, ImGuiLayer* imGuiLayer)
-		: m_ApplicationName(applicationName), m_Window(window), m_Renderer(renderer), m_ImGuiLayer(imGuiLayer)
+	App::App(std::string applicationName, Window* window, Renderer* renderer, ImGuiLayer* imGuiLayer)
+		: m_ApplicationName(std::move(applicationName)), m_Window(window), m_Renderer(renderer), m_ImGuiLayer(imGuiLayer)
 	{
 		NB_PROFILE_FN();
 
 		NB_ASSERT(window, "window null. Window is required to create App.");
 		NB_ASSERT(renderer, "renderer null. Renderer is required to create App.");
 
-		m_Window->SetEventCallback(std::bind(&App::OnEvent, this, std::placeholders::_1));
+		m_Window->SetEventCallback([this](Event& event) { OnEvent(event); });
 
 		m_Timer.StartTimer();
 	}
@@ -37,7 +37,7 @@ namespace NodeBrain
 			NB_PROFILE_SCOPE("Frame");
 
 			// Calculate deltaTime
-			float time = m_Window->GetTime();
+			auto time = (float)Window::GetTime();
 			float deltaTime = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
@@ -75,8 +75,8 @@ namespace NodeBrain
 			layer->OnEvent(event);
 
 		// Bind our functions to an event
-		event.AttachEventFunction<WindowClosedEvent>(std::bind(&App::OnWindowClose, this, std::placeholders::_1));
-		event.AttachEventFunction<WindowMinimizedEvent>(std::bind(&App::OnMinimized, this, std::placeholders::_1));
+		event.AttachEventFunction<WindowClosedEvent>([this](WindowClosedEvent& event) { OnWindowClose(event); });
+		event.AttachEventFunction<WindowMinimizedEvent>([this](WindowMinimizedEvent& event) { OnMinimized(event); });
 	}
 
 	void App::PushLayer(Layer* layer)

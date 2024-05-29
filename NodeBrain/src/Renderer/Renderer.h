@@ -65,13 +65,13 @@ namespace NodeBrain
 	class Renderer
 	{
 	public:
-		Renderer(RendererAPI* rendererAPI);
+		explicit Renderer(RendererAPI* rendererAPI);
 		~Renderer();
 
 		void BeginFrame();
 		void EndFrame();
 
-		void BeginScene(std::shared_ptr<EditorCamera> editorCamera, std::shared_ptr<Image> targetImage = nullptr);
+		void BeginScene(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage = nullptr);
 		void EndScene();
 
 		void RenderSubmitted();

@@ -12,15 +12,11 @@ namespace NodeBrain
 	class App
 	{
 	public:
-		App(const std::string& applicationName, Window* window, Renderer* renderer, ImGuiLayer* imGuiLayer);
+		App(std::string applicationName, Window* window, Renderer* renderer, ImGuiLayer* imGuiLayer);
 		~App();
 
 		void Run();
 		void PushLayer(Layer* layer);
-
-		size_t GetLayersSize() const { return m_Layers.size(); }
-		Window& GetWindow() const { return *m_Window; }
-		const std::string& GetApplicationName() const { return m_ApplicationName; }
 
 	private:
 		// Events

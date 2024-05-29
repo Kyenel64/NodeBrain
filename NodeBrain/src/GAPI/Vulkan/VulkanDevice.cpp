@@ -1,9 +1,6 @@
 #include "NBpch.h"
 #include "VulkanDevice.h"
 
-#include "Renderer/Renderer.h"
-#include "GAPI/Vulkan/VulkanRenderContext.h"
-
 namespace NodeBrain
 {
 	VulkanDevice::VulkanDevice(VulkanPhysicalDevice& physicalDevice, const std::vector<const char*>& enabledLayers)

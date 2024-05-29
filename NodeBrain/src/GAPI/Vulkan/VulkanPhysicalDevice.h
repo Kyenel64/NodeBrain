@@ -30,7 +30,7 @@ namespace NodeBrain
 		VulkanPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, uint32_t deviceIndex);
 		~VulkanPhysicalDevice() = default;
 
-		bool IsSuitable();
+		bool IsSuitable() const;
 
 		VkPhysicalDevice GetVkPhysicalDevice() const { return m_VkPhysicalDevice; }
 		const std::vector<const char*>& GetEnabledDeviceExtensions() const { return m_EnabledDeviceExtensions; }

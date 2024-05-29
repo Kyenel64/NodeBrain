@@ -25,7 +25,7 @@ namespace NodeBrain
 		m_VkPhysicalDevice = devices[m_PhysicalDeviceIndex];
 	}
 
-	bool VulkanPhysicalDevice::IsSuitable()
+	bool VulkanPhysicalDevice::IsSuitable() const
 	{
 		NB_PROFILE_FN();
 
