@@ -21,15 +21,15 @@ namespace NodeBrain
 		void BeginFrame() override;
 		void EndFrame() override;
 
-		void ClearColor(const glm::vec4& color, std::shared_ptr<Image> image) override;
+		void ClearColor(const glm::vec4& color, const std::shared_ptr<Image>& image) override;
 
-		void BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline) override;
-		void EndRenderPass(std::shared_ptr<GraphicsPipeline> pipeline) override;
+		void BeginRenderPass(const std::shared_ptr<GraphicsPipeline>& pipeline) override;
+		void EndRenderPass(const std::shared_ptr<GraphicsPipeline>& pipeline) override;
 		void Draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t instanceIndex) override;
-		void DrawIndexed(std::shared_ptr<IndexBuffer> indexBuffer, uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount, uint32_t instanceIndex) override;
+		void DrawIndexed(const std::shared_ptr<IndexBuffer>& indexBuffer, uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount, uint32_t instanceIndex) override;
 
-		void BeginComputePass(std::shared_ptr<ComputePipeline> pipeline) override;
-		void EndComputePass(std::shared_ptr<ComputePipeline> pipeline) override;
+		void BeginComputePass(const std::shared_ptr<ComputePipeline>& pipeline) override;
+		void EndComputePass(const std::shared_ptr<ComputePipeline>& pipeline) override;
 		void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) override;
 
 	private:

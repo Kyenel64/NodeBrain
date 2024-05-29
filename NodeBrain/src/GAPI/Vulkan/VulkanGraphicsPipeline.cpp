@@ -6,6 +6,31 @@
 
 namespace NodeBrain
 {
+	namespace Utils
+	{
+		static VkPolygonMode PolygonFillModeToVkPolygonMode(PolygonFillMode fillMode)
+		{
+			switch (fillMode)
+			{
+				case PolygonFillMode::Point: return VK_POLYGON_MODE_POINT;
+				case PolygonFillMode::Line: return VK_POLYGON_MODE_LINE;
+				case PolygonFillMode::Fill: return VK_POLYGON_MODE_FILL;
+			}
+		}
+
+		static VkPrimitiveTopology TopologyTypeToVkPrimitiveTopology(TopologyType type)
+		{
+			switch (type)
+			{
+				case TopologyType::PointList: return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+				case TopologyType::LineList: return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+				case TopologyType::LineStrip: return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+				case TopologyType::TriangleList: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+				case TopologyType::TriangleStrip: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+			}
+		}
+	}
+
 	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanRenderContext* context, const GraphicsPipelineConfiguration& configuration)
 		: m_Context(context), m_Configuration(configuration)
 	{
@@ -49,7 +74,7 @@ namespace NodeBrain
 		// Input Assembly
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = {};
 		inputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-		inputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		inputAssemblyStateCreateInfo.topology = Utils::TopologyTypeToVkPrimitiveTopology(m_Configuration.Topology);
 		inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
 
 		// Rasterizer
@@ -58,8 +83,8 @@ namespace NodeBrain
 		rasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 		rasterizationStateCreateInfo.depthClampEnable = VK_FALSE;
 		rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
-		rasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
-		rasterizationStateCreateInfo.lineWidth = 1.0f;
+		rasterizationStateCreateInfo.polygonMode = Utils::PolygonFillModeToVkPolygonMode(m_Configuration.FillMode);
+		rasterizationStateCreateInfo.lineWidth = m_Configuration.LineWidth;
 		rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
 		rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
 		rasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;

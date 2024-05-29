@@ -69,7 +69,7 @@ namespace NodeBrain
 		VK_CHECK(vkQueueSubmit(m_Context->GetDevice().GetGraphicsQueue(), 1, &submitInfo, frameData.InFlightFence));
 	}
 
-	void VulkanRendererAPI::ClearColor(const glm::vec4& color, std::shared_ptr<Image> image)
+	void VulkanRendererAPI::ClearColor(const glm::vec4& color, const std::shared_ptr<Image>& image)
 	{
 		NB_PROFILE_FN();
 
@@ -80,7 +80,7 @@ namespace NodeBrain
 		vkCmdClearColorImage(m_ActiveCmdBuffer, vkImage, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
 	}
 
-	void VulkanRendererAPI::BeginRenderPass(std::shared_ptr<GraphicsPipeline> pipeline)
+	void VulkanRendererAPI::BeginRenderPass(const std::shared_ptr<GraphicsPipeline>& pipeline)
 	{
 		NB_PROFILE_FN();
 
@@ -143,7 +143,7 @@ namespace NodeBrain
 		m_vkCmdBeginRenderingKHR(m_ActiveCmdBuffer, &renderingInfo);
 	}
 
-	void VulkanRendererAPI::EndRenderPass(std::shared_ptr<GraphicsPipeline> pipeline)
+	void VulkanRendererAPI::EndRenderPass(const std::shared_ptr<GraphicsPipeline>& pipeline)
 	{
 		NB_PROFILE_FN();
 
@@ -170,7 +170,7 @@ namespace NodeBrain
 		vkCmdDraw(m_ActiveCmdBuffer, vertexCount, instanceCount, firstVertex, instanceIndex);
 	}
 
-	void VulkanRendererAPI::DrawIndexed(std::shared_ptr<IndexBuffer> indexBuffer, uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount, uint32_t instanceIndex)
+	void VulkanRendererAPI::DrawIndexed(const std::shared_ptr<IndexBuffer>& indexBuffer, uint32_t indexCount, uint32_t firstIndex, uint32_t instanceCount, uint32_t instanceIndex)
 	{
 		NB_PROFILE_FN();
 
@@ -180,7 +180,7 @@ namespace NodeBrain
 		vkCmdDrawIndexed(m_ActiveCmdBuffer, indexCount, instanceCount, firstIndex, 0, instanceIndex);
 	}
 
-	void VulkanRendererAPI::BeginComputePass(std::shared_ptr<ComputePipeline> pipeline)
+	void VulkanRendererAPI::BeginComputePass(const std::shared_ptr<ComputePipeline>& pipeline)
 	{
 		NB_PROFILE_FN();
 
@@ -192,7 +192,7 @@ namespace NodeBrain
 		Utils::TransitionImage(m_ActiveCmdBuffer, vkImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 	}
 	
-	void VulkanRendererAPI::EndComputePass(std::shared_ptr<ComputePipeline> pipeline)
+	void VulkanRendererAPI::EndComputePass(const std::shared_ptr<ComputePipeline>& pipeline)
 	{
 		NB_PROFILE_FN();
 

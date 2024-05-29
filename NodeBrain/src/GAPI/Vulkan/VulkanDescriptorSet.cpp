@@ -53,7 +53,7 @@ namespace NodeBrain
 		m_VkDescriptorSetLayout = VK_NULL_HANDLE;
 	}
 
-	void VulkanDescriptorSet::WriteBuffer(std::shared_ptr<UniformBuffer> buffer, uint32_t binding)
+	void VulkanDescriptorSet::WriteBuffer(const std::shared_ptr<UniformBuffer>& buffer, uint32_t binding)
 	{
 		NB_PROFILE_FN();
 
@@ -84,7 +84,7 @@ namespace NodeBrain
 		}
 	}
 
-	void VulkanDescriptorSet::WriteImage(std::shared_ptr<Image> image, uint32_t binding)
+	void VulkanDescriptorSet::WriteImage(const std::shared_ptr<Image>& image, uint32_t binding)
 	{
 		NB_PROFILE_FN();
 

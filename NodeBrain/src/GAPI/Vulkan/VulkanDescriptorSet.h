@@ -13,8 +13,8 @@ namespace NodeBrain
 		VulkanDescriptorSet(VulkanRenderContext* context, const std::vector<LayoutBinding>& layout);
 		~VulkanDescriptorSet() override;
 
-		virtual void WriteBuffer(std::shared_ptr<UniformBuffer> buffer, uint32_t binding) override;
-		virtual void WriteImage(std::shared_ptr<Image> image, uint32_t binding) override;
+		virtual void WriteBuffer(const std::shared_ptr<UniformBuffer>& buffer, uint32_t binding) override;
+		virtual void WriteImage(const std::shared_ptr<Image>& image, uint32_t binding) override;
 
 		VkDescriptorSetLayout GetVkDescriptorSetLayout() const { return m_VkDescriptorSetLayout; }
 		VkDescriptorSet GetVkDescriptorSet() const { return m_VkDescriptorSet[m_Context->GetSwapchain().GetFrameIndex()]; }

@@ -7,8 +7,8 @@
 
 namespace NodeBrain
 {
-	enum class TopologyType { None = 0, PointList, LineList, LineStrip, TriangleList, TriangleStrip };
-	enum class PolygonFillMode { None = 0, Point, Line, Fill };
+	enum class TopologyType { PointList = 0, LineList, LineStrip, TriangleList, TriangleStrip };
+	enum class PolygonFillMode { Point = 0, Line, Fill };
 
 	struct GraphicsPipelineConfiguration
 	{

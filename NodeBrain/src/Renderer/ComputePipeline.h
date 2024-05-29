@@ -12,7 +12,7 @@ namespace NodeBrain
 		std::shared_ptr<Shader> ComputeShader;
 		std::shared_ptr<Image> TargetImage = nullptr;
 
-		void AddDescriptorSet(const std::shared_ptr<DescriptorSet>& descriptorSet, uint32_t setIndex)
+		void AddDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet, uint32_t setIndex)
 		{
 			DescriptorSets.insert(DescriptorSets.begin() + setIndex, descriptorSet);
 		}
