@@ -68,14 +68,16 @@ find_package(Vulkan REQUIRED)
 add_subdirectory("thirdparty/glm")
 add_subdirectory("thirdparty/glfw")
 add_subdirectory("thirdparty/spdlog")
+add_subdirectory("thirdparty/EnTT")
 
 # Include Paths
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ImGui/)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/EnTT/single_include)
 
 # Libraries
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw Vulkan::Vulkan spdlog glm)
+target_link_libraries(${PROJECT_NAME} PUBLIC glfw Vulkan::Vulkan EnTT spdlog glm)
 
 # Defines
 target_compile_definitions(${PROJECT_NAME} PUBLIC $<$<CONFIG:Debug>:NB_DEBUG>)
