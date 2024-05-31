@@ -37,6 +37,8 @@ namespace NodeBrain
 
 		std::shared_ptr<EditorCamera> m_EditorCamera;
 
+		std::shared_ptr<Scene> m_EditorScene;
+
 		// Demo
 		std::shared_ptr<Shader> m_GradientShader;
 		std::shared_ptr<ComputePipeline> m_GradientPipeline;

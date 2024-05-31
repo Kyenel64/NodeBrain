@@ -33,5 +33,5 @@ void main()
     Vertex v = PushConstants.vertexBuffer.vertices[gl_VertexIndex];
 
     gl_Position = PushConstants.ViewMatrix * vec4(v.Position, 1.0f);
-    outColor = globalUBO1.Color1;
+    outColor = v.Color;
 }

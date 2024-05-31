@@ -50,13 +50,19 @@ set (RendererFiles
 "src/Renderer/DescriptorSet.h" "src/Renderer/DescriptorSet.cpp"
 "src/Renderer/EditorCamera.h" "src/Renderer/EditorCamera.cpp")
 
+set (SceneFiles
+"src/Scene/Scene.h" "src/Scene/Scene.cpp"
+"src/Scene/Entity.h"
+"src/Scene/Component.h")
+
 # Source files
 add_library ( ${PROJECT_NAME} 
     ${CoreFiles}
     ${RendererFiles}
     ${VulkanFiles}
-    ${ImGuiSrcFiles} 
-    "thirdparty/VMA/vk_mem_alloc.h" "thirdparty/VMA/vk_mem_alloc.cpp" 
+    ${ImGuiSrcFiles}
+    ${SceneFiles}
+    "thirdparty/VMA/vk_mem_alloc.h" "thirdparty/VMA/vk_mem_alloc.cpp"
     "src/Utils/FileUtils.h" "src/Utils/FileUtils.cpp")
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)

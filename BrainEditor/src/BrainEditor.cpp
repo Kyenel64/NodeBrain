@@ -4,7 +4,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <ImGui/imgui.h>
-#include <GLFW/glfw3.h>
 
 namespace NodeBrain
 {
@@ -33,6 +32,10 @@ namespace NodeBrain
 		m_GradientPipeline = ComputePipeline::Create(m_Context, gradientConfig);
 
 		m_EditorCamera = std::make_shared<EditorCamera>(45.0f, m_Window->GetWidth() / m_Window->GetHeight(), 0.01f, 1000.0f);
+
+		m_EditorScene = std::make_shared<Scene>(m_Renderer);
+		Entity testEntity = m_EditorScene->CreateEntity();
+		m_EditorScene->AddComponent<TransformComponent>(testEntity);
 	}
 
 	void BrainEditor::OnDetach()
@@ -48,33 +51,8 @@ namespace NodeBrain
 
 	void BrainEditor::OnUpdate(float deltaTime)
 	{
-		const float radius = 1.0f;
-		float camX = (float)sin(glfwGetTime()) * radius;
-		float camZ = (float)cos(glfwGetTime()) * radius;
-
 		m_EditorCamera->OnUpdate(deltaTime);
-
-		if (m_ShaderIndex == 0)
-		{
-			glm::mat4 transform  = glm::translate(glm::mat4(1.0f), { camX, -0.5f, 0.5f }) * glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 0.5f }) * glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), { 1.0f, 1.0f, 0.0f });
-			glm::mat4 transform1 = glm::translate(glm::mat4(1.0f), { -0.5f, 0.5f, 0.0f }) * glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 0.5f });
-
-			m_Renderer->BeginScene(m_EditorCamera);
-			m_Renderer->SubmitQuad(transform, { 1.0f, 0.0f, 0.0f, 1.0f });
-			m_Renderer->SubmitQuad(transform1, { 0.0f, 1.0f, 0.0f, 1.0f });
-			m_Renderer->EndScene();
-		}
-		else if (m_ShaderIndex == 1)
-		{
-			m_GradientBuffer.Color1 = { camX, 0.0f, camZ, 1.0f };
-			m_GradientUB->SetData(&m_GradientBuffer, sizeof(GradientData));
-			m_GradientPipeline->BindDescriptorSet(m_GradientDescriptorSet);
-			m_RendererAPI->BeginComputePass(m_GradientPipeline);
-			uint32_t groupX = 1280 / 16;
-			uint32_t groupY = 720 / 16;
-			m_RendererAPI->DispatchCompute(groupX, groupY, 1);
-			m_RendererAPI->EndComputePass(m_GradientPipeline);
-		}
+		m_EditorScene->OnUpdate(m_EditorCamera);
 	}
 
 	void BrainEditor::OnUpdateGUI()
@@ -92,7 +70,7 @@ namespace NodeBrain
 
 	void BrainEditor::OnKeyPressed(KeyPressedEvent& event)
 	{
-		NB_INFO(event.GetKey());
+		NB_INFO((int)event.GetKey());
 	}
 
 	void BrainEditor::OnMousePressed(MousePressedEvent& event)
