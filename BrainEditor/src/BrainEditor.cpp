@@ -20,7 +20,9 @@ namespace NodeBrain
 
 		m_GradientUB = UniformBuffer::Create(m_Context, nullptr, sizeof(GradientData));
 
-		m_GradientDescriptorSet = DescriptorSet::Create(m_Context, { { BindingType::StorageImage, 0 }, { BindingType::UniformBuffer, 1} });
+		m_GradientDescriptorSet = DescriptorSet::Create(m_Context,
+			{ { BindingType::StorageImage, 0 },
+			  { BindingType::UniformBuffer, 1} });
 		m_GradientDescriptorSet->WriteImage(m_TargetImage, 0);
 		m_GradientDescriptorSet->WriteBuffer(m_GradientUB, 1);
 
@@ -31,11 +33,13 @@ namespace NodeBrain
 		gradientConfig.AddDescriptorSet(m_GradientDescriptorSet, 0);
 		m_GradientPipeline = ComputePipeline::Create(m_Context, gradientConfig);
 
-		m_EditorCamera = std::make_shared<EditorCamera>(45.0f, m_Window->GetWidth() / m_Window->GetHeight(), 0.01f, 1000.0f);
+		m_EditorCamera = std::make_shared<EditorCamera>(45.0f, m_Window->GetWidth() / m_Window->GetHeight(),
+														0.01f, 1000.0f);
 
 		m_EditorScene = std::make_shared<Scene>(m_Renderer);
+
+		// temp
 		Entity testEntity = m_EditorScene->CreateEntity();
-		m_EditorScene->AddComponent<TransformComponent>(testEntity);
 	}
 
 	void BrainEditor::OnDetach()
@@ -63,7 +67,8 @@ namespace NodeBrain
 
 		ImGui::SliderInt("Switch Shader", &m_ShaderIndex, 0, 1);
 
-		ImGui::Image((ImTextureID)m_TargetImage->GetAddress(), { (float)m_TargetImage->GetConfiguration().Width, (float)m_TargetImage->GetConfiguration().Height});
+		ImGui::Image((ImTextureID)m_TargetImage->GetAddress(), { (float)m_TargetImage->GetConfiguration().Width,
+																 (float)m_TargetImage->GetConfiguration().Height});
 
 		ImGui::End();
 	}

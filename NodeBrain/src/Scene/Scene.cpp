@@ -15,16 +15,28 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		return Entity((uint32_t)m_Registry.create());
+		Entity entity = Entity((uint32_t)m_Registry.create());
+		AddComponent<TransformComponent>(entity);
+
+		m_EntityGraphs[entity] = EntityGraph();
+
+		return entity;
 	}
 
 	void Scene::OnUpdate(const std::shared_ptr<EditorCamera>& editorCamera)
 	{
 		NB_PROFILE_FN();
 
+		// --- Entity Graph ---
+		auto v = m_Registry.view<TransformComponent>();
+		for (auto entity : v)
+			m_EntityGraphs[(Entity)(uint32_t)entity].Evaluate();
+
+
+		// --- Rendering ---
 		m_Renderer->BeginScene(editorCamera);
 
-		// Render Quads
+		// Quads
 		auto view = m_Registry.view<TransformComponent>();
 		for (auto entity : view)
 			m_Renderer->SubmitQuad(m_Registry.get<TransformComponent>(entity).GetTransform(), { 1.0f, 0.0f, 1.0f, 1.0f });

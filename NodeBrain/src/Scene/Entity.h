@@ -10,6 +10,7 @@ namespace NodeBrain
 		Entity() = default;
 		Entity(uint32_t handle) : m_Handle((entt::entity)handle) {}
 		~Entity() = default;
+		Entity(const Entity&) = default;
 
 		// Overrides
 		operator bool() const { return m_Handle != entt::null; }
@@ -20,5 +21,17 @@ namespace NodeBrain
 
 	private:
 		entt::entity m_Handle = entt::null;
+	};
+}
+
+namespace std
+{
+	template<>
+	struct hash<NodeBrain::Entity>
+	{
+		std::size_t operator()(const NodeBrain::Entity& handle) const
+		{
+			return hash<uint32_t>()(handle);
+		}
 	};
 }

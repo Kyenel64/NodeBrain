@@ -53,7 +53,9 @@ set (RendererFiles
 set (SceneFiles
 "src/Scene/Scene.h" "src/Scene/Scene.cpp"
 "src/Scene/Entity.h"
-"src/Scene/Component.h")
+"src/Scene/Component.h"
+"src/Scene/EntityGraph.h" "src/Scene/EntityGraph.cpp"
+"src/Scene/Node.h")
 
 # Source files
 add_library ( ${PROJECT_NAME} 

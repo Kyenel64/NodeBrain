@@ -7,7 +7,7 @@ namespace NodeBrain
 {
 	struct TransformComponent
 	{
-		glm::vec3 Position;
+		glm::vec3 Position = glm::vec3(1.0f);
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
