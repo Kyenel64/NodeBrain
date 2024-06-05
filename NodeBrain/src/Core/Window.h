@@ -18,7 +18,7 @@ namespace NodeBrain
 	class Window
 	{
 	public:
-		Window(std::string windowName, uint32_t width, uint32_t height);
+		Window(std::string windowName, uint32_t width, uint32_t height, bool maximize = true);
 		~Window();
 
 		void SetEventCallback(std::function<void(Event&)> func) { m_Data.EventCallback = std::move(func); }

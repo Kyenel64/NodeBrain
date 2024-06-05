@@ -22,6 +22,8 @@ namespace NodeBrain
 
 		// Add link to adjacency list
 		m_AdjList[outputNode->GetNodeID()].push_back(inputNode->GetNodeID());
+
+		TopologicalSort();
 	}
 
 	void EntityGraph::TopologicalSort()

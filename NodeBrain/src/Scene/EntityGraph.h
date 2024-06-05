@@ -12,7 +12,6 @@ namespace NodeBrain
 		{
 			std::shared_ptr<T> node = std::make_shared<T>(std::forward<Args>(args)...);
 			m_Nodes[node->GetNodeID()] = node;
-			TopologicalSort();
 			return node;
 		}
 

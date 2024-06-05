@@ -39,6 +39,9 @@ namespace NodeBrain
 
 		NodeID GetNodeID() const { return m_NodeID; }
 
+		const std::vector<InputPort>& GetInputPorts() { return m_InputPorts; }
+		const std::vector<OutputPort>& GetOutputPorts() { return m_OutputPorts; }
+
 	protected:
 		std::vector<InputPort> m_InputPorts;
 		std::vector<OutputPort> m_OutputPorts;
