@@ -7,6 +7,9 @@ namespace NodeBrain
 	class EntityGraph
 	{
 	public:
+		EntityGraph() = default;
+		~EntityGraph() = default;
+
 		template<typename T, typename... Args>
 		std::shared_ptr<T> AddNode(Args&&... args)
 		{
@@ -15,8 +18,7 @@ namespace NodeBrain
 			return node;
 		}
 
-		void AddLink(const std::shared_ptr<Node>& outputNode, uint32_t outputPortIndex,
-			const std::shared_ptr<Node>& inputNode, uint32_t inputPortIndex);
+		void AddLink(OutputPort& outputPort, InputPort& inputPort);
 
 		// Run whenever data is updated.
 		// Each node only references the input node's data to prevent iterating through the whole graph to get a value.
@@ -24,7 +26,6 @@ namespace NodeBrain
 		void Evaluate();
 
 	private:
-		// Run whenever there are changes in the graph
 		void TopologicalSort();
 
 	private:

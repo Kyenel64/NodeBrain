@@ -5,23 +5,10 @@
 
 namespace NodeBrain
 {
-	void EntityGraph::AddLink(const std::shared_ptr<Node>& outputNode, uint32_t outputPortIndex,
-		const std::shared_ptr<Node>& inputNode, uint32_t inputPortIndex)
+	void EntityGraph::AddLink(OutputPort& outputPort, InputPort& inputPort)
 	{
-		NB_ASSERT(outputNode->m_OutputPorts.size() > outputPortIndex,
-			"outputPortIndex out of bounds. outputPortIndex must be less than the total number of output ports in"
-			"outputNode");
-		NB_ASSERT(inputNode->m_InputPorts.size() > inputPortIndex,
-			"inputPortIndex out of bounds. inputPortIndex must be less than the total number of input ports in"
-			"inputNode");
-
-		OutputPort& outputPort = outputNode->m_OutputPorts[outputPortIndex];
-		InputPort& inputPort = inputNode->m_InputPorts[inputPortIndex];
-
 		inputPort.LinkedOutputPort = &outputPort;
-
-		// Add link to adjacency list
-		m_AdjList[outputNode->GetNodeID()].push_back(inputNode->GetNodeID());
+		m_AdjList[outputPort.ParentNodeID].push_back(inputPort.ParentNodeID);
 
 		TopologicalSort();
 	}

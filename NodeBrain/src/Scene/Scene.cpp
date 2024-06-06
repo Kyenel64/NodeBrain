@@ -23,7 +23,7 @@ namespace NodeBrain
 		return entity;
 	}
 
-	void Scene::OnUpdate(const std::shared_ptr<EditorCamera>& editorCamera)
+	void Scene::OnUpdate(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage)
 	{
 		NB_PROFILE_FN();
 
@@ -34,7 +34,7 @@ namespace NodeBrain
 
 
 		// --- Rendering ---
-		m_Renderer->BeginScene(editorCamera);
+		m_Renderer->BeginScene(editorCamera, targetImage);
 
 		// Quads
 		auto view = m_Registry.view<TransformComponent>();

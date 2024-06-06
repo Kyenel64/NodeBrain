@@ -35,7 +35,7 @@ namespace NodeBrain
 		template<typename T>
 		void RemoveComponent(Entity entity) { m_Registry.remove<T>(entity); }
 
-		void OnUpdate(const std::shared_ptr<EditorCamera>& editorCamera);
+		void OnUpdate(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage = nullptr);
 
 		EntityGraph& GetEntityGraph(Entity entity) { return m_EntityGraphs[entity]; }
 

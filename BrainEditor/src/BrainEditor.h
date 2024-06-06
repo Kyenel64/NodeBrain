@@ -1,20 +1,19 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <ImGui/imgui.h>
+
 #include <NodeBrain/NodeBrain.h>
+
+#include "Panels/EntityGraphPanel.h"
 
 namespace NodeBrain
 {
-	struct GradientData
-	{
-		glm::vec4 Color1;
-	};
-
 	class BrainEditor : public Layer
 	{
 	public:
 		BrainEditor(Renderer* renderer)
-			: m_Renderer(renderer), m_RendererAPI(renderer->GetAPI()),
-			m_Context(renderer->GetContext()), m_Window(renderer->GetContext()->GetWindow()) {}
+			: m_Renderer(renderer), m_RendererAPI(renderer->GetAPI()), m_Context(renderer->GetContext()), m_Window(renderer->GetContext()->GetWindow()) {}
 		~BrainEditor() override = default;
 
 		void OnAttach() override;
@@ -27,27 +26,21 @@ namespace NodeBrain
 		void OnKeyPressed(KeyPressedEvent& event);
 		void OnMousePressed(MousePressedEvent& event);
 
+		void DrawViewportWindow();
+
 	private:
 		Renderer* m_Renderer;
 		RendererAPI* m_RendererAPI;
 		RenderContext* m_Context;
 		Window* m_Window;
 
-		int m_ShaderIndex = 0;
+		EntityGraphPanel m_EntityGraphPanel;
 
 		std::shared_ptr<EditorCamera> m_EditorCamera;
-
 		std::shared_ptr<Scene> m_EditorScene;
 
-		// Demo
-		std::shared_ptr<Shader> m_GradientShader;
-		std::shared_ptr<ComputePipeline> m_GradientPipeline;
+		std::shared_ptr<Image> m_ViewportImage;
 
-		std::shared_ptr<Image> m_TargetImage;
-		
-		std::shared_ptr<UniformBuffer> m_GradientUB;
-		GradientData m_GradientBuffer;
-
-		std::shared_ptr<DescriptorSet> m_GradientDescriptorSet;
+		Entity m_SelectedEntity;
 	};
 }
