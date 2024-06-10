@@ -13,19 +13,20 @@ namespace NodeBrain
 	{
 		None = 0,
 		TransformComponent,
-		Vec3
+		Vec3,
+		Float
 	};
 
 	struct InputPortUI
 	{
 		InputPort& OwnedInputPort;
-		ImVec2 PortPos;
+		ImVec2 PortPos = { 0.0f, 0.0f };
 	};
 
 	struct OutputPortUI
 	{
 		OutputPort& OwnedOutputPort;
-		ImVec2 PortPos;
+		ImVec2 PortPos = { 0.0f, 0.0f };
 	};
 
 	struct NodeUI
@@ -62,7 +63,7 @@ namespace NodeBrain
 
 	private:
 		// Main styling for nodes. Optional uiFunction for nodes with unique styling elements.
-		void DrawNodeUI(NodeUI& node, const ImVec2& gridOrigin, std::function<void()> uiFunction = nullptr);
+		void DrawNodeUI(NodeUI& node, std::function<void()> uiFunction = nullptr);
 
 		void ProcessAddNodePopup();
 
@@ -80,6 +81,7 @@ namespace NodeBrain
 		NodeUI* m_SelectedNodeUI = nullptr;
 		OutputPortUI* m_SelectedOutputPortUI = nullptr;
 		bool m_AddingLink = false;
+		bool m_HoveringNode = false;
 
 	};
 }

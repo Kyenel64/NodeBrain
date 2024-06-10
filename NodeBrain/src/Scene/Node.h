@@ -10,6 +10,8 @@ namespace NodeBrain
 
 	using NodeID = uint32_t;
 
+	enum class PortDataType { None = 0, Int, Float, Vec3 };
+
 	union PortData
 	{
 		int IntValue;
@@ -21,12 +23,20 @@ namespace NodeBrain
 	{
 		PortData Value;
 		NodeID ParentNodeID;
+		PortDataType DataType;
 	};
 
 	struct InputPort
 	{
 		const OutputPort* LinkedOutputPort = nullptr;
+		PortData DefaultValue;
 		NodeID ParentNodeID;
+		PortDataType DataType;
+
+		const PortData& GetValue() const
+		{
+			return LinkedOutputPort ? LinkedOutputPort->Value : DefaultValue;
+		}
 	};
 
 	class Node
@@ -57,7 +67,7 @@ namespace NodeBrain
 	protected:
 		std::vector<InputPort> m_InputPorts;
 		std::vector<OutputPort> m_OutputPorts;
-		NodeID m_NodeID;
+		const NodeID m_NodeID;
 	};
 
 
@@ -70,15 +80,13 @@ namespace NodeBrain
 		{
 			m_InputPorts.resize(1);
 
-			// Input
-			InputPort inputPort;
-			inputPort.ParentNodeID = m_NodeID;
-			m_InputPorts[0] = std::move(inputPort);
+			// Input 1
+			m_InputPorts[0] = { nullptr, { .Vec3Value = glm::vec3(0.0f) }, m_NodeID, PortDataType::Vec3 };
 		}
 
 		void Evaluate() override
 		{
-			m_TransformComponent.Position = m_InputPorts[0].LinkedOutputPort->Value.Vec3Value;
+			m_TransformComponent.Position = m_InputPorts[0].GetValue().Vec3Value;
 		}
 
 	private:
@@ -95,10 +103,7 @@ namespace NodeBrain
 			m_OutputPorts.resize(1);
 
 			// Output
-			OutputPort outputPort;
-			outputPort.ParentNodeID = m_NodeID;
-			outputPort.Value.IntValue = initialValue;
-			m_OutputPorts[0] = std::move(outputPort);
+			m_OutputPorts[0] = { { .IntValue = initialValue }, m_NodeID, PortDataType::Int };
 		}
 		virtual ~IntNode() = default;
 
@@ -112,27 +117,55 @@ namespace NodeBrain
 
 
 
-	class Vec3Node : public Node
+	class FloatNode : public Node
 	{
 	public:
-		Vec3Node(const glm::vec3& initialValue = { 1.0f, 1.0f, 1.0f })
+		FloatNode(float initialValue = 1.0f)
 		{
 			m_OutputPorts.resize(1);
 
 			// Output
-			OutputPort outputPort;
-			outputPort.ParentNodeID = m_NodeID;
-			outputPort.Value.Vec3Value = initialValue;
-			m_OutputPorts[0] = std::move(outputPort);
+			m_OutputPorts[0] = { { .FloatValue = initialValue }, m_NodeID, PortDataType::Float };
 		}
-		virtual ~Vec3Node() = default;
+		virtual ~FloatNode() = default;
 
-		void SetValue(const glm::vec3& val)
+		void SetValue(float val)
 		{
-			m_OutputPorts[0].Value.Vec3Value = val;
+			m_OutputPorts[0].Value.FloatValue = val;
 		}
 
 		void Evaluate() override {}
+	};
+
+
+
+	class Vec3Node : public Node
+	{
+	public:
+		Vec3Node()
+		{
+			m_InputPorts.resize(3);
+			m_OutputPorts.resize(1);
+
+			// Input 1
+			m_InputPorts[0] = { nullptr, { .FloatValue = 0.0f }, m_NodeID, PortDataType::Float };
+			// Input 2
+			m_InputPorts[1] = { nullptr, { .FloatValue = 0.0f }, m_NodeID, PortDataType::Float };
+			// Input 3
+			m_InputPorts[2] = { nullptr, { .FloatValue = 0.0f }, m_NodeID, PortDataType::Float };
+
+			// Output
+			m_OutputPorts[0] = { { .Vec3Value = glm::vec3(0.0f) }, m_NodeID, PortDataType::Vec3 };
+		}
+
+		virtual ~Vec3Node() = default;
+
+		void Evaluate() override
+		{
+			m_OutputPorts[0].Value.Vec3Value.x = m_InputPorts[0].GetValue().FloatValue;
+			m_OutputPorts[0].Value.Vec3Value.y = m_InputPorts[1].GetValue().FloatValue;
+			m_OutputPorts[0].Value.Vec3Value.z = m_InputPorts[2].GetValue().FloatValue;
+		}
 	};
 
 
@@ -144,26 +177,18 @@ namespace NodeBrain
 			m_OutputPorts.resize(1);
 
 			// Input 1
-			InputPort inputPort1;
-			inputPort1.ParentNodeID = m_NodeID;
-			m_InputPorts[0] = std::move(inputPort1);
-
+			m_InputPorts[0] = { nullptr, { .IntValue = 1 }, m_NodeID, PortDataType::Int };
 			// Input 2
-			InputPort inputPort2;
-			inputPort2.ParentNodeID = m_NodeID;
-			m_InputPorts[1] = std::move(inputPort2);
+			m_InputPorts[1] = { nullptr, { .IntValue = 1 }, m_NodeID, PortDataType::Int };
 
 			// Output
-			OutputPort outputPort;
-			outputPort.ParentNodeID = m_NodeID;
-			outputPort.Value.IntValue = 0; // TODO: Calculate initial value
-			m_OutputPorts[0] = std::move(outputPort);
+			m_OutputPorts[0] = { { .IntValue = 1 }, m_NodeID, PortDataType::Int };
 		}
 
 		virtual ~MultiplyNode() = default;
 
 		void Evaluate() override {
-			m_OutputPorts[0].Value.IntValue = m_InputPorts[0].LinkedOutputPort->Value.IntValue * m_InputPorts[1].LinkedOutputPort->Value.IntValue;
+			m_OutputPorts[0].Value.IntValue = m_InputPorts[0].GetValue().IntValue * m_InputPorts[1].GetValue().IntValue;
 		}
 	};
 }
