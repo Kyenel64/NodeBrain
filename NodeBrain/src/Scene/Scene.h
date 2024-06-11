@@ -16,7 +16,7 @@ namespace NodeBrain
 		explicit Scene(Renderer* renderer);
 		~Scene() = default;
 
-		[[nodiscard]] Entity CreateEntity();
+		Entity CreateEntity();
 
 		template<typename T, typename... Args>
 		T& AddComponent(Entity entity, Args&&... args)
@@ -38,6 +38,12 @@ namespace NodeBrain
 		void OnUpdate(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage = nullptr);
 
 		EntityGraph& GetEntityGraph(Entity entity) { return m_EntityGraphs[entity]; }
+
+		template<typename... T>
+		auto View()
+		{
+			return m_Registry.view<T...>();
+		}
 
 	private:
 		Renderer* m_Renderer;

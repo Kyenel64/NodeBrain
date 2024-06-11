@@ -6,6 +6,7 @@
 #include <NodeBrain/NodeBrain.h>
 
 #include "Panels/EntityGraphPanel.h"
+#include "Panels/SceneGraphPanel.h"
 
 namespace NodeBrain
 {
@@ -34,6 +35,7 @@ namespace NodeBrain
 		RenderContext* m_Context;
 		Window* m_Window;
 
+		SceneGraphPanel m_SceneGraphPanel;
 		EntityGraphPanel m_EntityGraphPanel;
 
 		std::shared_ptr<EditorCamera> m_EditorCamera;

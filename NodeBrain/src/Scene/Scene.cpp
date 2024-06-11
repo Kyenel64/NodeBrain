@@ -15,7 +15,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		Entity entity = Entity((uint32_t)m_Registry.create());
+		Entity entity = Entity(m_Registry.create());
 		AddComponent<TransformComponent>(entity);
 
 		m_EntityGraphs[entity] = EntityGraph();
@@ -30,7 +30,7 @@ namespace NodeBrain
 		// --- Entity Graph ---
 		auto v = m_Registry.view<TransformComponent>();
 		for (auto entity : v)
-			m_EntityGraphs[(Entity)(uint32_t)entity].Evaluate();
+			m_EntityGraphs[(Entity)entity].Evaluate();
 
 
 		// --- Rendering ---

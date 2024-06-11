@@ -6,7 +6,6 @@ namespace NodeBrain
 	{
 		NB_INFO("Attached Brain Editor layer");
 
-		// Demonstrating renderer backend
 		ImageConfiguration config = {};
 		config.Width = 1280 / 2;
 		config.Height = 720 / 2;
@@ -17,7 +16,7 @@ namespace NodeBrain
 		m_EditorScene = std::make_shared<Scene>(m_Renderer);
 
 		// temp
-		m_SelectedEntity = m_EditorScene->CreateEntity();
+		//m_SelectedEntity = m_EditorScene->CreateEntity();
 	}
 
 	void BrainEditor::OnDetach()
@@ -60,9 +59,13 @@ namespace NodeBrain
 		ImGui::DockSpace(dockspace_id, { 0.0f, 0.0f }, docknodeFlags);
 
 
+		m_SelectedEntity = m_SceneGraphPanel.GetSelectedEntity();
+
+
 		// --- Panels ---
 		ImGui::ShowDemoWindow();
 		DrawViewportWindow();
+		m_SceneGraphPanel.Draw(m_EditorScene);
 		m_EntityGraphPanel.Draw(m_EditorScene, m_SelectedEntity);
 
 		ImGui::End();

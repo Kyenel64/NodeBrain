@@ -8,7 +8,7 @@ namespace NodeBrain
 	{
 	public:
 		Entity() = default;
-		Entity(uint32_t handle) : m_Handle((entt::entity)handle) {}
+		Entity(entt::entity handle) : m_Handle(handle) {}
 		~Entity() = default;
 		Entity(const Entity&) = default;
 

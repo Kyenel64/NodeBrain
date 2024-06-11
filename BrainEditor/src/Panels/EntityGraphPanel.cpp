@@ -1,4 +1,3 @@
-#include "NBpch.h"
 #include "EntityGraphPanel.h"
 
 namespace NodeBrain
@@ -55,58 +54,60 @@ namespace NodeBrain
 			m_EntityGraphPan.y += io.MouseDelta.y;
 		}
 		m_GridOrigin = { m_GridOrigin.x + m_EntityGraphPan.x, m_GridOrigin.y + m_EntityGraphPan.y };
-		drawList->AddCircle(m_GridOrigin, 5.0f, ImGui::GetColorU32({ 1.0f, 0.0f, 0.0f, 1.0f}));
 
-
-		// Draw a curve to mouse position if in the process of linking ports
-		if (m_AddingLink && ImGui::IsMouseDown(ImGuiMouseButton_Left))
+		if (m_SelectedEntity)
 		{
-			ImVec2 portScreenPos = { m_GridOrigin.x + m_SelectedOutputPortUI->PortPos.x, m_GridOrigin.y + m_SelectedOutputPortUI->PortPos.y };
-			drawList->AddBezierCubic( portScreenPos, { ImGui::GetMousePos().x, portScreenPos.y },
-					{ portScreenPos.x, ImGui::GetMousePos().y }, ImGui::GetMousePos(), ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 0.5f}), 1.0f);
-		}
+			drawList->AddCircle(m_GridOrigin, 5.0f, ImGui::GetColorU32({ 1.0f, 0.0f, 0.0f, 1.0f}));
 
-		// Draw all connected links
-		for (auto& linkUI : m_LinkUIs[m_SelectedEntity])
-		{
-			ImVec2 outputPos = { m_GridOrigin.x + linkUI.OutputPort.PortPos.x, m_GridOrigin.y + linkUI.OutputPort.PortPos.y };
-			ImVec2 inputPos = { m_GridOrigin.x + linkUI.InputPort.PortPos.x, m_GridOrigin.y + linkUI.InputPort.PortPos.y };
-			drawList->AddBezierCubic( outputPos, { inputPos.x, outputPos.y }, { outputPos.x, inputPos.y }, inputPos,
-					ImGui::GetColorU32(linkUI.LinkColor), linkUI.LineThickness);
-		}
-
-		// Draw all nodes in entity graph
-		m_HoveringNode = false;
-		for (auto& nodeUI : m_NodeUIs[m_SelectedEntity])
-		{
-			if (nodeUI.Type == NodeType::Float)
+			// Draw a curve to mouse position if in the process of linking ports
+			if (m_AddingLink && ImGui::IsMouseDown(ImGuiMouseButton_Left))
 			{
-				DrawNodeUI(nodeUI, [&]()
+				ImVec2 portScreenPos = { m_GridOrigin.x + m_SelectedOutputPortUI->PortPos.x, m_GridOrigin.y + m_SelectedOutputPortUI->PortPos.y };
+				drawList->AddBezierCubic( portScreenPos, { ImGui::GetMousePos().x, portScreenPos.y },
+						{ portScreenPos.x, ImGui::GetMousePos().y }, ImGui::GetMousePos(), ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 0.5f}), 1.0f);
+			}
+
+			// Draw all connected links
+			for (auto& linkUI : m_LinkUIs[m_SelectedEntity])
+			{
+				ImVec2 outputPos = { m_GridOrigin.x + linkUI.OutputPort.PortPos.x, m_GridOrigin.y + linkUI.OutputPort.PortPos.y };
+				ImVec2 inputPos = { m_GridOrigin.x + linkUI.InputPort.PortPos.x, m_GridOrigin.y + linkUI.InputPort.PortPos.y };
+				drawList->AddBezierCubic( outputPos, { inputPos.x, outputPos.y }, { outputPos.x, inputPos.y }, inputPos,
+						ImGui::GetColorU32(linkUI.LinkColor), linkUI.LineThickness);
+			}
+
+			// Draw all nodes in entity graph
+			m_HoveringNode = false;
+			for (auto& nodeUI : m_NodeUIs[m_SelectedEntity])
+			{
+				if (nodeUI.Type == NodeType::Float)
 				{
-					ImGui::SetNextItemWidth(nodeUI.Size.x / 2);
-					std::shared_ptr<FloatNode> floatNode = std::dynamic_pointer_cast<FloatNode>(nodeUI.OwnedNode);
-					ImGui::DragFloat("##Test", &floatNode->GetOutputPort(0).Value.FloatValue);
-				});
+					DrawNodeUI(nodeUI, [&]()
+					{
+						ImGui::SetNextItemWidth(nodeUI.Size.x / 2);
+						std::shared_ptr<FloatNode> floatNode = std::dynamic_pointer_cast<FloatNode>(nodeUI.OwnedNode);
+						ImGui::DragFloat("##Test", &floatNode->GetOutputPort(0).Value.FloatValue);
+					});
+				}
+				else
+				{
+					DrawNodeUI(nodeUI);
+				}
 			}
-			else
+
+			// Process this after drawing node
+			if (m_AddingLink && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 			{
-				DrawNodeUI(nodeUI);
+				m_AddingLink = false;
+				m_SelectedOutputPortUI = nullptr;
 			}
+
+
+			// "Add Node" Popup
+			if (ImGui::IsWindowFocused() && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+				ImGui::OpenPopup("Add Node");
+			ProcessAddNodePopup();
 		}
-
-		// Process this after drawing node
-		if (m_AddingLink && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-		{
-			m_AddingLink = false;
-			m_SelectedOutputPortUI = nullptr;
-		}
-
-
-		// "Add Node" Popup
-		if (ImGui::IsWindowFocused() && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-			ImGui::OpenPopup("Add Node");
-		ProcessAddNodePopup();
-
 
 		ImGui::End();
 	}
