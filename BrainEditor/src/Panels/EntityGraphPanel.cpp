@@ -86,7 +86,7 @@ namespace NodeBrain
 					{
 						ImGui::SetNextItemWidth(nodeUI.Size.x / 2);
 						std::shared_ptr<FloatNode> floatNode = std::dynamic_pointer_cast<FloatNode>(nodeUI.OwnedNode);
-						ImGui::DragFloat("##Test", &floatNode->GetOutputPort(0).Value.FloatValue);
+						ImGui::DragFloat("##Test", &std::get<float>(floatNode->GetOutputPort(0).Value));
 					});
 				}
 				else
@@ -150,7 +150,7 @@ namespace NodeBrain
 						break;
 					case PortDataType::Float: {
 						ImGui::SetNextItemWidth(node.Size.x / 2);
-						ImGui::DragFloat(label.c_str(), &inputPort.OwnedInputPort.DefaultValue.FloatValue);
+						ImGui::DragFloat(label.c_str(), &std::get<float>(inputPort.OwnedInputPort.DefaultValue));
 					}
 						break;
 				}

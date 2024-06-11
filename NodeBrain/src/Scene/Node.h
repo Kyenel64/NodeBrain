@@ -12,12 +12,7 @@ namespace NodeBrain
 
 	enum class PortDataType { None = 0, Int, Float, Vec3 };
 
-	union PortData
-	{
-		int IntValue;
-		float FloatValue;
-		glm::vec3 Vec3Value;
-	};
+	using PortData = std::variant<int, float, glm::vec3, std::string>;
 
 	struct OutputPort
 	{
@@ -35,7 +30,10 @@ namespace NodeBrain
 
 		const PortData& GetValue() const
 		{
-			return LinkedOutputPort ? LinkedOutputPort->Value : DefaultValue;
+			if (LinkedOutputPort)
+				return LinkedOutputPort->Value;
+			else
+				return DefaultValue;
 		}
 	};
 
@@ -81,12 +79,12 @@ namespace NodeBrain
 			m_InputPorts.resize(1);
 
 			// Input 1
-			m_InputPorts[0] = { nullptr, { .Vec3Value = glm::vec3(0.0f) }, m_NodeID, PortDataType::Vec3 };
+			m_InputPorts[0] = { nullptr, glm::vec3(0.0f), m_NodeID, PortDataType::Vec3 };
 		}
 
 		void Evaluate() override
 		{
-			m_TransformComponent.Position = m_InputPorts[0].GetValue().Vec3Value;
+			m_TransformComponent.Position = std::get<glm::vec3>(m_InputPorts[0].GetValue());
 		}
 
 	private:
@@ -103,13 +101,13 @@ namespace NodeBrain
 			m_OutputPorts.resize(1);
 
 			// Output
-			m_OutputPorts[0] = { { .IntValue = initialValue }, m_NodeID, PortDataType::Int };
+			m_OutputPorts[0] = { initialValue, m_NodeID, PortDataType::Int };
 		}
 		virtual ~IntNode() = default;
 
 		void SetValue(int val)
 		{
-			m_OutputPorts[0].Value.IntValue = val;
+			m_OutputPorts[0].Value = val;
 		}
 
 		void Evaluate() override {}
@@ -125,13 +123,13 @@ namespace NodeBrain
 			m_OutputPorts.resize(1);
 
 			// Output
-			m_OutputPorts[0] = { { .FloatValue = initialValue }, m_NodeID, PortDataType::Float };
+			m_OutputPorts[0] = { initialValue, m_NodeID, PortDataType::Float };
 		}
 		virtual ~FloatNode() = default;
 
 		void SetValue(float val)
 		{
-			m_OutputPorts[0].Value.FloatValue = val;
+			m_OutputPorts[0].Value = val;
 		}
 
 		void Evaluate() override {}
@@ -148,23 +146,23 @@ namespace NodeBrain
 			m_OutputPorts.resize(1);
 
 			// Input 1
-			m_InputPorts[0] = { nullptr, { .FloatValue = 0.0f }, m_NodeID, PortDataType::Float };
+			m_InputPorts[0] = { nullptr, 0.0f, m_NodeID, PortDataType::Float };
 			// Input 2
-			m_InputPorts[1] = { nullptr, { .FloatValue = 0.0f }, m_NodeID, PortDataType::Float };
+			m_InputPorts[1] = { nullptr, 0.0f, m_NodeID, PortDataType::Float };
 			// Input 3
-			m_InputPorts[2] = { nullptr, { .FloatValue = 0.0f }, m_NodeID, PortDataType::Float };
+			m_InputPorts[2] = { nullptr, 0.0f, m_NodeID, PortDataType::Float };
 
 			// Output
-			m_OutputPorts[0] = { { .Vec3Value = glm::vec3(0.0f) }, m_NodeID, PortDataType::Vec3 };
+			m_OutputPorts[0] = { glm::vec3(0.0f), m_NodeID, PortDataType::Vec3 };
 		}
 
 		virtual ~Vec3Node() = default;
 
 		void Evaluate() override
 		{
-			m_OutputPorts[0].Value.Vec3Value.x = m_InputPorts[0].GetValue().FloatValue;
-			m_OutputPorts[0].Value.Vec3Value.y = m_InputPorts[1].GetValue().FloatValue;
-			m_OutputPorts[0].Value.Vec3Value.z = m_InputPorts[2].GetValue().FloatValue;
+			m_OutputPorts[0].Value = glm::vec3(std::get<float>(m_InputPorts[0].GetValue()),
+			        						   std::get<float>(m_InputPorts[1].GetValue()),
+			                				   std::get<float>(m_InputPorts[2].GetValue()));
 		}
 	};
 
@@ -177,18 +175,18 @@ namespace NodeBrain
 			m_OutputPorts.resize(1);
 
 			// Input 1
-			m_InputPorts[0] = { nullptr, { .IntValue = 1 }, m_NodeID, PortDataType::Int };
+			m_InputPorts[0] = { nullptr, 1, m_NodeID, PortDataType::Int };
 			// Input 2
-			m_InputPorts[1] = { nullptr, { .IntValue = 1 }, m_NodeID, PortDataType::Int };
+			m_InputPorts[1] = { nullptr, 1, m_NodeID, PortDataType::Int };
 
 			// Output
-			m_OutputPorts[0] = { { .IntValue = 1 }, m_NodeID, PortDataType::Int };
+			m_OutputPorts[0] = { 1, m_NodeID, PortDataType::Int };
 		}
 
 		virtual ~MultiplyNode() = default;
 
 		void Evaluate() override {
-			m_OutputPorts[0].Value.IntValue = m_InputPorts[0].GetValue().IntValue * m_InputPorts[1].GetValue().IntValue;
+			m_OutputPorts[0].Value = std::get<int>(m_InputPorts[0].GetValue()) * std::get<int>(m_InputPorts[1].GetValue());
 		}
 	};
 }
