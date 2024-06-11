@@ -116,71 +116,55 @@ namespace NodeBrain
 		ImGui::PushID(node.OwnedNode->GetNodeID());
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
 
-		ImVec2 topLeft = { m_GridOrigin.x + node.Pos.x, m_GridOrigin.y + node.Pos.y };
-		ImVec2 botRight = { topLeft.x + node.Size.x, topLeft.y + node.Size.y };
-		float headerHeight = 20.0f;
-		float portFrameHeight = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2;
+		ImGui::SetCursorScreenPos({ m_GridOrigin.x + node.Pos.x, m_GridOrigin.y + node.Pos.y });
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, { 0.1f, 0.1f, 0.1f, 1.0f});
+		ImGui::PushStyleColor(ImGuiCol_Border, node.NodeColor);
+		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+		ImGui::BeginChild("NodeFrame", node.Size, ImGuiChildFlags_Border, ImGuiWindowFlags_None);
 
-		drawList->AddRectFilled(topLeft, botRight, ImGui::GetColorU32({ 0.1f, 0.1f, 0.1f, 1.0f}), 10.0f );
-		drawList->AddRect(topLeft, botRight, ImGui::GetColorU32(node.NodeColor), 10.0f, ImDrawFlags_None, 1.0f );
-		drawList->AddText(topLeft, ImGui::GetColorU32({ 0.0f, 0.0f, 0.0f, 1.0f }), node.NodeName.c_str());
-		drawList->AddLine({ topLeft.x, topLeft.y + headerHeight }, { botRight.x, topLeft.y + headerHeight }, ImGui::GetColorU32(node.NodeColor), 1.0f );
+		// --- Node Header ---
+		ImGui::Text("%s", node.NodeName.c_str());
 
-		// Draw Output Ports
+		ImVec2 p1 = ImGui::GetCursorScreenPos();
+		drawList->AddLine({ p1.x - ImGui::GetStyle().WindowPadding.x, p1.y }, { p1.x + node.Size.x- ImGui::GetStyle().WindowPadding.x, p1.y }, ImGui::GetColorU32(node.NodeColor));
+
+
+		// --- Ports ---
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0.0f});
+
+		// Input Ports
 		int index = 0;
-		for (auto& outputPort : node.OutputPorts)
-		{
-			ImVec2 nodeTopLeft = { m_GridOrigin.x + node.Pos.x + (node.Size.x / 2),
-								   m_GridOrigin.y + node.Pos.y + headerHeight + (index * (portFrameHeight + ImGui::GetStyle().ItemSpacing.y)) };
-			ImVec2 portScreenPos = { nodeTopLeft.x + (node.Size.x / 2), nodeTopLeft.y + (portFrameHeight / 2) };
-			outputPort.PortPos = { portScreenPos.x - m_GridOrigin.x, portScreenPos.y - m_GridOrigin.y };
-			drawList->AddCircleFilled(portScreenPos, 5, ImGui::GetColorU32(node.NodeColor));
-
-			ImGui::SetNextItemWidth(node.Size.x / 2);
-			ImGui::SetCursorScreenPos(nodeTopLeft);
-
-			ImGui::Button("Output");
-
-			// When port is clicked, begin adding a link curve.
-			if (!m_AddingLink && (Utils::Distance(portScreenPos, ImGui::GetMousePos()) <= 10.0f) && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-			{
-				m_SelectedOutputPortUI = &outputPort;
-				m_AddingLink = true;
-			}
-			index++;
-		}
-
-		// Draw Input Ports
-		index = 0;
 		for (auto& inputPort : node.InputPorts)
 		{
-			ImVec2 nodeTopLeft = { m_GridOrigin.x + node.Pos.x,
-								   m_GridOrigin.y + node.Pos.y + headerHeight + (index * (portFrameHeight + ImGui::GetStyle().ItemSpacing.y)) };
-			ImVec2 portScreenPos = { nodeTopLeft.x, nodeTopLeft.y + (portFrameHeight / 2) };
+			ImVec2 portScreenPos = { ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y + ((ImGui::GetFontSize() / 2) + ImGui::GetStyle().FramePadding.y)};
 			inputPort.PortPos = { portScreenPos.x - m_GridOrigin.x, portScreenPos.y - m_GridOrigin.y };
-			drawList->AddCircleFilled(portScreenPos, 5, ImGui::GetColorU32(node.NodeColor));
 
-			if (!inputPort.OwnedInputPort.LinkedOutputPort)
-			{
-				std::string label = "##input" + std::to_string(index);
+			std::string label = "##input" + std::to_string(index);
 
-				switch (inputPort.OwnedInputPort.DataType)
-				{
-					case PortDataType::None: break;
-					case PortDataType::Float:
-					{
+			if (!inputPort.OwnedInputPort.LinkedOutputPort) {
+
+				switch (inputPort.OwnedInputPort.DataType) {
+					case PortDataType::None:
+						break;
+					case PortDataType::Float: {
 						ImGui::SetNextItemWidth(node.Size.x / 2);
-						ImGui::SetCursorScreenPos(nodeTopLeft);
-						float val = inputPort.OwnedInputPort.DefaultValue.FloatValue;
-						ImGui::DragFloat(label.c_str(), &val);
-						inputPort.OwnedInputPort.DefaultValue.FloatValue = val;
-					} break;
+						ImGui::DragFloat(label.c_str(), &inputPort.OwnedInputPort.DefaultValue.FloatValue);
+					}
+						break;
 				}
 			}
+			else
+			{
+				ImGui::InvisibleButton(label.c_str(), { node.Size.x / 2, ImGui::GetFontSize() + ( ImGui::GetStyle().FramePadding.y * 2) });
+			}
 
+			drawList->AddCircleFilled(portScreenPos, 5.0f, ImGui::GetColorU32(node.NodeColor));
+
+			// TODO: Move this to beginning of frame or to event callbacks.
 			// When link connects to this port, create a link.
 			if (m_AddingLink && m_SelectedOutputPortUI &&
-				(Utils::Distance(portScreenPos, ImGui::GetMousePos()) <= 10.0f) && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+				(Utils::Distance(portScreenPos, ImGui::GetMousePos()) <= 15.0f) && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 			{
 				LinkUI link = { *m_SelectedOutputPortUI, inputPort };
 				m_EntityGraph->AddLink(m_SelectedOutputPortUI->OwnedOutputPort, inputPort.OwnedInputPort);
@@ -190,7 +174,7 @@ namespace NodeBrain
 			}
 
 			// When input port is clicked, remove link to the output port. TODO: Implement
-			if (!m_AddingLink && (Utils::Distance(portScreenPos, ImGui::GetMousePos()) <= 10.0f) &&
+			if (!m_AddingLink && (Utils::Distance(portScreenPos, ImGui::GetMousePos()) <= 15.0f) &&
 				ImGui::IsMouseClicked(ImGuiMouseButton_Left) && inputPort.OwnedInputPort.LinkedOutputPort)
 			{
 
@@ -199,11 +183,38 @@ namespace NodeBrain
 			index++;
 		}
 
-		ImVec2 nodeTopLeft = { m_GridOrigin.x + node.Pos.x,
-							   m_GridOrigin.y + node.Pos.y + headerHeight + (index * (portFrameHeight + ImGui::GetStyle().ItemSpacing.y)) };
-		ImGui::SetCursorScreenPos(nodeTopLeft);
+		// Output Ports
+		index = 0;
+		ImGui::SetCursorScreenPos({ m_GridOrigin.x + node.Pos.x + (node.Size.x / 2), p1.y });
+		for (auto& outputPort : node.OutputPorts)
+		{
+			ImVec2 portScreenPos = { ImGui::GetCursorScreenPos().x + (node.Size.x / 2), ImGui::GetCursorScreenPos().y + ((ImGui::GetFontSize() / 2) + ImGui::GetStyle().FramePadding.y)};
+			outputPort.PortPos = { portScreenPos.x - m_GridOrigin.x, portScreenPos.y - m_GridOrigin.y };
+
+			ImGui::Button("Output", { node.Size.x / 2, 0 });
+
+			drawList->AddCircleFilled(portScreenPos, 5.0f, ImGui::GetColorU32(node.NodeColor));
+
+			// When port is clicked, begin adding a link curve.
+			if (!m_AddingLink && (Utils::Distance(portScreenPos, ImGui::GetMousePos()) <= 15.0f) && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+			{
+				m_SelectedOutputPortUI = &outputPort;
+				m_AddingLink = true;
+			}
+
+			index++;
+		}
+
+		ImGui::PopStyleVar();
+
+
+		// --- Custom Styling ---
 		if (uiFunction)
 			uiFunction();
+
+		ImGui::EndChild();
+		ImGui::PopStyleColor(2);
+		ImGui::PopStyleVar(2);
 
 		ImGui::PopID();
 	}
