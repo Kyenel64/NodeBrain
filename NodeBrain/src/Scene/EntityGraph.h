@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scene/Node.h"
+#include "Scene/Nodes/Node.h"
 
 namespace NodeBrain
 {

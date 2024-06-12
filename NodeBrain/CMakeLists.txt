@@ -55,7 +55,10 @@ set (SceneFiles
 "src/Scene/Entity.h"
 "src/Scene/Component.h"
 "src/Scene/EntityGraph.h" "src/Scene/EntityGraph.cpp"
-"src/Scene/Node.h")
+"src/Scene/Nodes/Node.h"
+        src/Scene/Nodes/TypeNodes.h
+        src/Scene/Nodes/ComponentNodes.h
+        src/Scene/Nodes/MathNodes.h)
 
 # Source files
 add_library ( ${PROJECT_NAME} 
