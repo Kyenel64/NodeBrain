@@ -15,16 +15,19 @@ namespace NodeBrain
 		None = 0,
 		TagComponent,
 		TransformComponent,
+		SpriteComponent,
 		Vec3,
+		Vec4,
+		Color,
 		Float,
 		Int,
 		String,
 		Multiply
 	};
 
-	enum class PortDataType { None = 0, Int, Float, Vec3, String };
+	enum class PortDataType { None = 0, Int, Float, Vec3, Vec4, Color, String };
 
-	using PortData = std::variant<int, float, glm::vec3, std::string>;
+	using PortData = std::variant<int, float, glm::vec3, glm::vec4, std::string>;
 
 	struct OutputPort
 	{
@@ -88,34 +91,11 @@ namespace NodeBrain
 
 
 
-	class TransformComponentNode : public Node
-	{
-	public:
-		TransformComponentNode(TransformComponent& transform)
-			: m_TransformComponent(transform), Node(NodeType::TransformComponent)
-		{
-			m_InputPorts.resize(1);
-
-			// Input 1
-			m_InputPorts[0] = { nullptr, glm::vec3(0.0f), m_NodeID, PortDataType::Vec3, "Position" };
-		}
-
-		void Evaluate() override
-		{
-			m_TransformComponent.Position = std::get<glm::vec3>(m_InputPorts[0].GetValue());
-		}
-
-	private:
-		TransformComponent& m_TransformComponent;
-	};
-
-
-
 	class TagComponentNode : public Node
 	{
 	public:
-		TagComponentNode(TagComponent& tagComponent)
-			: m_TagComponent(tagComponent), Node(NodeType::TagComponent)
+		TagComponentNode(TagComponent& tagComp)
+				: m_TagComponent(tagComp), Node(NodeType::TagComponent)
 		{
 			m_InputPorts.resize(1);
 
@@ -134,6 +114,52 @@ namespace NodeBrain
 
 
 
+	class TransformComponentNode : public Node
+	{
+	public:
+		TransformComponentNode(TransformComponent& transformComp)
+			: m_TransformComponent(transformComp), Node(NodeType::TransformComponent)
+		{
+			m_InputPorts.resize(1);
+
+			// Input 1
+			m_InputPorts[0] = { nullptr, glm::vec3(0.0f), m_NodeID, PortDataType::Vec3, "Position" };
+		}
+
+		void Evaluate() override
+		{
+			m_TransformComponent.Position = std::get<glm::vec3>(m_InputPorts[0].GetValue());
+		}
+
+	private:
+		TransformComponent& m_TransformComponent;
+	};
+
+
+
+	class SpriteComponentNode : public Node
+	{
+	public:
+		SpriteComponentNode(SpriteComponent& spriteComp)
+		: m_SpriteComponent(spriteComp), Node(NodeType::SpriteComponent)
+		{
+			m_InputPorts.resize(1);
+
+			// Input 1
+			m_InputPorts[0] = { nullptr, glm::vec4(1.0f), m_NodeID, PortDataType::Color, "Color" };
+		}
+
+		void Evaluate() override
+		{
+			m_SpriteComponent.Color = std::get<glm::vec4>(m_InputPorts[0].GetValue());
+		}
+
+	private:
+		SpriteComponent& m_SpriteComponent;
+	};
+
+
+
 	class IntNode : public Node
 	{
 	public:
@@ -146,11 +172,6 @@ namespace NodeBrain
 			m_OutputPorts[0] = { initialValue, m_NodeID, PortDataType::Int, "Out" };
 		}
 		virtual ~IntNode() = default;
-
-		void SetValue(int val)
-		{
-			m_OutputPorts[0].Value = val;
-		}
 
 		void Evaluate() override {}
 	};
@@ -221,6 +242,25 @@ namespace NodeBrain
 			        						   std::get<float>(m_InputPorts[1].GetValue()),
 			                				   std::get<float>(m_InputPorts[2].GetValue()));
 		}
+	};
+
+
+
+	class ColorNode : public Node
+	{
+	public:
+		ColorNode()
+				: Node(NodeType::Color)
+		{
+			m_OutputPorts.resize(1);
+
+			// Output
+			m_OutputPorts[0] = { glm::vec4(1.0f), m_NodeID, PortDataType::Color, "Out" };
+		}
+
+		virtual ~ColorNode() = default;
+
+		void Evaluate() override {}
 	};
 
 

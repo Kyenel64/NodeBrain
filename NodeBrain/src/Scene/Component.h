@@ -28,4 +28,12 @@ namespace NodeBrain
 			return glm::translate(glm::mat4(1.0f), Position);
 		}
 	};
+
+	struct SpriteComponent
+	{
+		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+		SpriteComponent() = default;
+		SpriteComponent(const SpriteComponent&) = default;
+	};
 }

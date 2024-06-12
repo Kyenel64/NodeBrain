@@ -33,7 +33,7 @@ namespace NodeBrain
 	void BrainEditor::OnUpdate(float deltaTime)
 	{
 		m_EditorCamera->OnUpdate(deltaTime);
-		m_EditorScene->OnUpdate(m_EditorCamera, m_ViewportImage);
+		m_EditorScene->OnEditorUpdate(m_EditorCamera, m_ViewportImage);
 	}
 
 	void BrainEditor::OnUpdateGUI()

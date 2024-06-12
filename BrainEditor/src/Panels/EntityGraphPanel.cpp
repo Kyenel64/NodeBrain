@@ -1,5 +1,7 @@
 #include "EntityGraphPanel.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 namespace NodeBrain
 {
 	namespace Utils
@@ -12,7 +14,7 @@ namespace NodeBrain
 			return sqrt((dx * dx) + (dy * dy));
 		}
 
-		static NodeUI PopulateNodeUI(std::shared_ptr<Node> node, const std::string& name, NodeType type, const ImVec2& pos, const ImVec2& size, const ImVec4& color)
+		static NodeUI PopulateNodeUI(std::shared_ptr<Node> node, const std::string& name, const ImVec2& pos, const ImVec2& size, const ImVec4& color)
 		{
 			NodeUI nodeUI;
 			for (size_t i = 0; i < node->InputCount(); i++)
@@ -90,28 +92,31 @@ namespace NodeBrain
 				{
 					DrawNodeUI(nodeUI, [&]()
 					{
-						std::shared_ptr<FloatNode> floatNode = std::dynamic_pointer_cast<FloatNode>(nodeUI.OwnedNode);
-
 						ImGui::SetNextItemWidth(nodeUI.Size.x / 2);
-						ImGui::DragFloat("##FloatInput", &std::get<float>(floatNode->GetOutputPort(0).Value));
+						ImGui::DragFloat("##FloatInput", &std::get<float>(nodeUI.OwnedNode->GetOutputPort(0).Value));
 					});
 				}
 				else if (nodeUI.OwnedNode->GetType() == NodeType::String)
 				{
 					DrawNodeUI(nodeUI, [&]()
 					{
-						std::shared_ptr<StringNode> stringNode = std::dynamic_pointer_cast<StringNode>(nodeUI.OwnedNode);
-
 						ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
 						ImGui::SetNextItemWidth(nodeUI.Size.x / 2);
-						std::string tag = std::get<std::string>(stringNode->GetOutputPort(0).Value).c_str();
+						std::string tag = std::get<std::string>(nodeUI.OwnedNode->GetOutputPort(0).Value).c_str();
 						char buffer[256];
 						memset(buffer, 0, sizeof(buffer));
 						strcpy(buffer, tag.c_str());
 						if (ImGui::InputText("##TextInput", buffer, sizeof(buffer), flags))
-							stringNode->GetOutputPort(0).Value = buffer;
+							nodeUI.OwnedNode->GetOutputPort(0).Value = buffer;
 					});
-
+				}
+				else if (nodeUI.OwnedNode->GetType() == NodeType::Color)
+				{
+					DrawNodeUI(nodeUI, [&]()
+					{
+						ImGuiColorEditFlags flags = ImGuiColorEditFlags_NoInputs;
+						ImGui::ColorEdit4("##ColorInput", glm::value_ptr(std::get<glm::vec4>(nodeUI.OwnedNode->GetOutputPort(0).Value)), flags);
+					});
 				}
 				else
 				{
@@ -239,38 +244,55 @@ namespace NodeBrain
 		if (ImGui::BeginPopup("Add Node"))
 		{
 			const ImVec2 addNodePos = { ImGui::GetMousePosOnOpeningCurrentPopup().x - m_GridOrigin.x, ImGui::GetMousePosOnOpeningCurrentPopup().y - m_GridOrigin.y };
-			if (ImGui::MenuItem("Transform Component"))
-			{
-				std::shared_ptr<TransformComponentNode> node = m_EntityGraph->AddNode<TransformComponentNode>(m_ActiveScene->GetComponent<TransformComponent>(m_SelectedEntity));
-				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "TransformComponent", NodeType::TransformComponent,
-						addNodePos, { 200.0f, 60.0f}, { 0.6f, 0.3f, 0.3f, 1.0f}));
-			}
 
 			if (ImGui::MenuItem("Tag Component"))
 			{
 				std::shared_ptr<TagComponentNode> node = m_EntityGraph->AddNode<TagComponentNode>(m_ActiveScene->GetComponent<TagComponent>(m_SelectedEntity));
-				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "TagComponent", NodeType::TagComponent,
+				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Tag Component",
 						addNodePos, { 200.0f, 60.0f}, { 0.6f, 0.3f, 0.3f, 1.0f}));
 			}
 
-			if (ImGui::MenuItem("Vec3"))
+			if (ImGui::MenuItem("Transform Component"))
 			{
-				std::shared_ptr<Vec3Node> node = m_EntityGraph->AddNode<Vec3Node>();
-				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Vec3", NodeType::Vec3,
-						addNodePos, { 120.0f, 100.0f}, { 0.3f, 0.6f, 0.3f, 1.0f}));
+				std::shared_ptr<TransformComponentNode> node = m_EntityGraph->AddNode<TransformComponentNode>(m_ActiveScene->GetComponent<TransformComponent>(m_SelectedEntity));
+				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Transform Component",
+						addNodePos, { 200.0f, 60.0f}, { 0.6f, 0.3f, 0.3f, 1.0f}));
+			}
+
+			if (ImGui::MenuItem("Sprite Component"))
+			{
+				if (!m_ActiveScene->HasComponent<SpriteComponent>(m_SelectedEntity))
+					m_ActiveScene->AddComponent<SpriteComponent>(m_SelectedEntity);
+				std::shared_ptr<SpriteComponentNode> node = m_EntityGraph->AddNode<SpriteComponentNode>(m_ActiveScene->GetComponent<SpriteComponent>(m_SelectedEntity));
+				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Sprite Component",
+						addNodePos, { 200.0f, 60.0f}, { 0.6f, 0.6f, 0.3f, 1.0f}));
 			}
 
 			if (ImGui::MenuItem("Float"))
 			{
 				std::shared_ptr<FloatNode> node = m_EntityGraph->AddNode<FloatNode>();
-				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Float", NodeType::Float,
+				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Float",
 						addNodePos, { 100.0f, 60.0f}, { 0.3f, 0.6f, 0.6f, 1.0f}));
+			}
+
+			if (ImGui::MenuItem("Vec3"))
+			{
+				std::shared_ptr<Vec3Node> node = m_EntityGraph->AddNode<Vec3Node>();
+				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Vec3",
+						addNodePos, { 120.0f, 100.0f}, { 0.3f, 0.6f, 0.3f, 1.0f}));
+			}
+
+			if (ImGui::MenuItem("Color"))
+			{
+				std::shared_ptr<ColorNode> node = m_EntityGraph->AddNode<ColorNode>();
+				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Color",
+						addNodePos, { 120.0f, 100.0f}, { 0.6f, 0.6f, 0.3f, 1.0f}));
 			}
 
 			if (ImGui::MenuItem("String"))
 			{
 				std::shared_ptr<StringNode> node = m_EntityGraph->AddNode<StringNode>();
-				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "String", NodeType::String,
+				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "String",
 						addNodePos, { 100.0f, 60.0f}, { 0.3f, 0.6f, 0.6f, 1.0f}));
 			}
 

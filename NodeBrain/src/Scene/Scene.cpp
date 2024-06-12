@@ -25,7 +25,7 @@ namespace NodeBrain
 		return entity;
 	}
 
-	void Scene::OnUpdate(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage)
+	void Scene::OnEditorUpdate(const std::shared_ptr<EditorCamera> &editorCamera, const std::shared_ptr<Image> &targetImage)
 	{
 		NB_PROFILE_FN();
 
@@ -38,10 +38,10 @@ namespace NodeBrain
 		// --- Rendering ---
 		m_Renderer->BeginScene(editorCamera, targetImage);
 
-		// Quads
-		auto view = m_Registry.view<TransformComponent>();
+		// Draw Sprites
+		auto view = m_Registry.view<TransformComponent, SpriteComponent>();
 		for (auto entity : view)
-			m_Renderer->SubmitQuad(m_Registry.get<TransformComponent>(entity).GetTransform(), { 1.0f, 0.0f, 1.0f, 1.0f });
+			m_Renderer->SubmitQuad(m_Registry.get<TransformComponent>(entity).GetTransform(), m_Registry.get<SpriteComponent>(entity).Color);
 
 		m_Renderer->EndScene();
 	}
