@@ -67,12 +67,19 @@ namespace NodeBrain
 			}
 
 			// Draw all connected links
-			for (auto& linkUI : m_LinkUIs[m_SelectedEntity])
+			for (auto& nodeUI : m_NodeUIs[m_SelectedEntity])
 			{
-				ImVec2 outputPos = { m_GridOrigin.x + linkUI.OutputPort.PortPos.x, m_GridOrigin.y + linkUI.OutputPort.PortPos.y };
-				ImVec2 inputPos = { m_GridOrigin.x + linkUI.InputPort.PortPos.x, m_GridOrigin.y + linkUI.InputPort.PortPos.y };
-				drawList->AddBezierCubic( outputPos, { inputPos.x, outputPos.y }, { outputPos.x, inputPos.y }, inputPos,
-						ImGui::GetColorU32(linkUI.LinkColor), linkUI.LineThickness);
+				for (auto& inputPortUI : nodeUI.InputPorts)
+				{
+					if (inputPortUI.LinkedOutputPortUI)
+					{
+						OutputPortUI& outputPortUI = *inputPortUI.LinkedOutputPortUI;
+						ImVec2 outputPos = { m_GridOrigin.x + outputPortUI.PortPos.x, m_GridOrigin.y + outputPortUI.PortPos.y };
+						ImVec2 inputPos = { m_GridOrigin.x + inputPortUI.PortPos.x, m_GridOrigin.y + inputPortUI.PortPos.y };
+						drawList->AddBezierCubic( outputPos, { inputPos.x, outputPos.y }, { outputPos.x, inputPos.y }, inputPos,
+								ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f}), 1.0f);
+					}
+				}
 			}
 
 			// Draw all nodes in entity graph
@@ -164,23 +171,28 @@ namespace NodeBrain
 
 			drawList->AddCircleFilled(portScreenPos, 5.0f, ImGui::GetColorU32(node.NodeColor));
 
-			// TODO: Move this to beginning of frame or to event callbacks.
 			// When link connects to this port, create a link.
 			if (m_AddingLink && m_SelectedOutputPortUI &&
 				(Utils::Distance(portScreenPos, ImGui::GetMousePos()) <= 15.0f) && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 			{
-				LinkUI link = { *m_SelectedOutputPortUI, inputPort };
-				m_EntityGraph->AddLink(m_SelectedOutputPortUI->OwnedOutputPort, inputPort.OwnedInputPort);
-				m_LinkUIs[m_SelectedEntity].push_back(link);
+				if (m_SelectedOutputPortUI->OwnedOutputPort.DataType == inputPort.OwnedInputPort.DataType)
+				{
+					m_EntityGraph->AddLink(m_SelectedOutputPortUI->OwnedOutputPort, inputPort.OwnedInputPort);
+					inputPort.LinkedOutputPortUI = m_SelectedOutputPortUI;
+				}
+
 				m_AddingLink = false;
 				m_SelectedOutputPortUI = nullptr;
 			}
 
-			// When input port is clicked, remove link to the output port. TODO: Implement
+			// When input port is clicked, remove link to the output port.
 			if (!m_AddingLink && (Utils::Distance(portScreenPos, ImGui::GetMousePos()) <= 15.0f) &&
 				ImGui::IsMouseClicked(ImGuiMouseButton_Left) && inputPort.OwnedInputPort.LinkedOutputPort)
 			{
-
+				m_EntityGraph->RemoveLink(*inputPort.OwnedInputPort.LinkedOutputPort, inputPort.OwnedInputPort);
+				m_SelectedOutputPortUI = inputPort.LinkedOutputPortUI;
+				inputPort.LinkedOutputPortUI = nullptr;
+				m_AddingLink = true;
 			}
 
 			index++;

@@ -19,6 +19,7 @@ namespace NodeBrain
 		}
 
 		void AddLink(OutputPort& outputPort, InputPort& inputPort);
+		void RemoveLink(OutputPort& outputPort, InputPort& inputPort);
 
 		// Run whenever data is updated.
 		// Each node only references the input node's data to prevent iterating through the whole graph to get a value.

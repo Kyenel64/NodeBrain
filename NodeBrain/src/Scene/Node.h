@@ -36,7 +36,7 @@ namespace NodeBrain
 
 	struct InputPort
 	{
-		const OutputPort* LinkedOutputPort = nullptr;
+		OutputPort* LinkedOutputPort = nullptr;
 		PortData DefaultValue;
 		NodeID ParentNodeID;
 		PortDataType DataType;
@@ -166,7 +166,7 @@ namespace NodeBrain
 			m_OutputPorts.resize(1);
 
 			// Output
-			m_OutputPorts[0] = { std::string(), m_NodeID, PortDataType::Int, "Out" };
+			m_OutputPorts[0] = { std::string(), m_NodeID, PortDataType::String, "Out" };
 		}
 		virtual ~StringNode() = default;
 

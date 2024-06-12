@@ -13,6 +13,15 @@ namespace NodeBrain
 		TopologicalSort();
 	}
 
+	void EntityGraph::RemoveLink(OutputPort &outputPort, InputPort &inputPort)
+	{
+		inputPort.LinkedOutputPort = nullptr;
+		std::vector<NodeID>& adjNodes = m_AdjList[outputPort.ParentNodeID];
+		adjNodes.erase(std::find(adjNodes.begin(), adjNodes.end(), inputPort.ParentNodeID));
+
+		TopologicalSort();
+	}
+
 	void EntityGraph::TopologicalSort()
 	{
 		m_TopSortedNodes.clear();
