@@ -9,14 +9,6 @@
 
 namespace NodeBrain
 {
-	enum class NodeType
-	{
-		None = 0,
-		TransformComponent,
-		Vec3,
-		Float
-	};
-
 	struct InputPortUI
 	{
 		InputPort& OwnedInputPort;
@@ -39,7 +31,6 @@ namespace NodeBrain
 		ImVec4 NodeColor = { 0.3f, 0.3f, 0.3f, 1.0f };
 		ImVec2 Size = { 100.0f, 60.0f };
 		ImVec2 Pos = { 0.0f, 0.0f };
-		NodeType Type = NodeType::None;
 	};
 
 	struct LinkUI

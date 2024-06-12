@@ -5,6 +5,15 @@
 
 namespace NodeBrain
 {
+	struct TagComponent
+	{
+		std::string Tag;
+
+		TagComponent() = default;
+		TagComponent(const std::string& tag) : Tag(tag) {}
+		TagComponent(const TagComponent&) = default;
+	};
+
 	struct TransformComponent
 	{
 		glm::vec3 Position = glm::vec3(0.0f);

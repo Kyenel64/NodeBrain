@@ -16,7 +16,7 @@ namespace NodeBrain
 		explicit Scene(Renderer* renderer);
 		~Scene() = default;
 
-		Entity CreateEntity();
+		Entity CreateEntity(const std::string& name = "Empty Entity");
 
 		template<typename T, typename... Args>
 		T& AddComponent(Entity entity, Args&&... args)

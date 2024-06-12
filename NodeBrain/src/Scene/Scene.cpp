@@ -11,11 +11,13 @@ namespace NodeBrain
 
 	}
 
-	Entity Scene::CreateEntity()
+	Entity Scene::CreateEntity(const std::string& name)
 	{
 		NB_PROFILE_FN();
 
 		Entity entity = Entity(m_Registry.create());
+
+		AddComponent<TagComponent>(entity, name);
 		AddComponent<TransformComponent>(entity);
 
 		m_EntityGraphs[entity] = EntityGraph();

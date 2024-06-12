@@ -14,7 +14,7 @@ namespace NodeBrain
 
 
 		// --- Entity Tree ---
-		auto view = scene->View<TransformComponent>();
+		auto view = scene->View<TagComponent>();
 		for (auto e : view)
 		{
 			Entity entity = Entity(e);
@@ -22,7 +22,7 @@ namespace NodeBrain
 
 			ImGuiTreeNodeFlags flags = m_SelectedEntity == entity ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
 			flags |= ImGuiTreeNodeFlags_OpenOnArrow;
-			bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, "Entity");
+			bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, "%s", scene->GetComponent<TagComponent>(entity).Tag.c_str());
 
 			if (ImGui::IsItemClicked())
 				m_SelectedEntity = entity;

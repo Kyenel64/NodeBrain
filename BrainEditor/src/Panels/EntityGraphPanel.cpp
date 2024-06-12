@@ -21,7 +21,6 @@ namespace NodeBrain
 				nodeUI.OutputPorts.push_back({ node->GetOutputPort(i)});
 			nodeUI.OwnedNode = node;
 			nodeUI.NodeName = name;
-			nodeUI.Type = type;
 			nodeUI.Pos = pos;
 			nodeUI.Size = size;
 			nodeUI.NodeColor = color;
@@ -80,14 +79,32 @@ namespace NodeBrain
 			m_HoveringNode = false;
 			for (auto& nodeUI : m_NodeUIs[m_SelectedEntity])
 			{
-				if (nodeUI.Type == NodeType::Float)
+				if (nodeUI.OwnedNode->GetType() == NodeType::Float)
 				{
 					DrawNodeUI(nodeUI, [&]()
 					{
-						ImGui::SetNextItemWidth(nodeUI.Size.x / 2);
 						std::shared_ptr<FloatNode> floatNode = std::dynamic_pointer_cast<FloatNode>(nodeUI.OwnedNode);
-						ImGui::DragFloat("##Test", &std::get<float>(floatNode->GetOutputPort(0).Value));
+
+						ImGui::SetNextItemWidth(nodeUI.Size.x / 2);
+						ImGui::DragFloat("##FloatInput", &std::get<float>(floatNode->GetOutputPort(0).Value));
 					});
+				}
+				else if (nodeUI.OwnedNode->GetType() == NodeType::String)
+				{
+					DrawNodeUI(nodeUI, [&]()
+					{
+						std::shared_ptr<StringNode> stringNode = std::dynamic_pointer_cast<StringNode>(nodeUI.OwnedNode);
+
+						ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
+						ImGui::SetNextItemWidth(nodeUI.Size.x / 2);
+						std::string tag = std::get<std::string>(stringNode->GetOutputPort(0).Value).c_str();
+						char buffer[256];
+						memset(buffer, 0, sizeof(buffer));
+						strcpy(buffer, tag.c_str());
+						if (ImGui::InputText("##TextInput", buffer, sizeof(buffer), flags))
+							stringNode->GetOutputPort(0).Value = buffer;
+					});
+
 				}
 				else
 				{
@@ -143,22 +160,7 @@ namespace NodeBrain
 
 			std::string label = "##input" + std::to_string(index);
 
-			if (!inputPort.OwnedInputPort.LinkedOutputPort) {
-
-				switch (inputPort.OwnedInputPort.DataType) {
-					case PortDataType::None:
-						break;
-					case PortDataType::Float: {
-						ImGui::SetNextItemWidth(node.Size.x / 2);
-						ImGui::DragFloat(label.c_str(), &std::get<float>(inputPort.OwnedInputPort.DefaultValue));
-					}
-						break;
-				}
-			}
-			else
-			{
-				ImGui::InvisibleButton(label.c_str(), { node.Size.x / 2, ImGui::GetFontSize() + ( ImGui::GetStyle().FramePadding.y * 2) });
-			}
+			ImGui::Button(inputPort.OwnedInputPort.Name.c_str(), { node.Size.x / 2, 0 });
 
 			drawList->AddCircleFilled(portScreenPos, 5.0f, ImGui::GetColorU32(node.NodeColor));
 
@@ -192,7 +194,7 @@ namespace NodeBrain
 			ImVec2 portScreenPos = { ImGui::GetCursorScreenPos().x + (node.Size.x / 2), ImGui::GetCursorScreenPos().y + ((ImGui::GetFontSize() / 2) + ImGui::GetStyle().FramePadding.y)};
 			outputPort.PortPos = { portScreenPos.x - m_GridOrigin.x, portScreenPos.y - m_GridOrigin.y };
 
-			ImGui::Button("Output", { node.Size.x / 2, 0 });
+			ImGui::Button(outputPort.OwnedOutputPort.Name.c_str(), { node.Size.x / 2, 0 });
 
 			drawList->AddCircleFilled(portScreenPos, 5.0f, ImGui::GetColorU32(node.NodeColor));
 
@@ -232,6 +234,13 @@ namespace NodeBrain
 						addNodePos, { 200.0f, 60.0f}, { 0.6f, 0.3f, 0.3f, 1.0f}));
 			}
 
+			if (ImGui::MenuItem("Tag Component"))
+			{
+				std::shared_ptr<TagComponentNode> node = m_EntityGraph->AddNode<TagComponentNode>(m_ActiveScene->GetComponent<TagComponent>(m_SelectedEntity));
+				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "TagComponent", NodeType::TagComponent,
+						addNodePos, { 200.0f, 60.0f}, { 0.6f, 0.3f, 0.3f, 1.0f}));
+			}
+
 			if (ImGui::MenuItem("Vec3"))
 			{
 				std::shared_ptr<Vec3Node> node = m_EntityGraph->AddNode<Vec3Node>();
@@ -243,6 +252,13 @@ namespace NodeBrain
 			{
 				std::shared_ptr<FloatNode> node = m_EntityGraph->AddNode<FloatNode>();
 				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Float", NodeType::Float,
+						addNodePos, { 100.0f, 60.0f}, { 0.3f, 0.6f, 0.6f, 1.0f}));
+			}
+
+			if (ImGui::MenuItem("String"))
+			{
+				std::shared_ptr<StringNode> node = m_EntityGraph->AddNode<StringNode>();
+				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "String", NodeType::String,
 						addNodePos, { 100.0f, 60.0f}, { 0.3f, 0.6f, 0.6f, 1.0f}));
 			}
 
