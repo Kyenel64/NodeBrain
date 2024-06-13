@@ -50,6 +50,13 @@ namespace NodeBrain
 		CalculateViewMatrix();
 	}
 
+	void EditorCamera::Resize(uint32_t width, uint32_t height)
+	{
+		m_AspectRatio = (float)width / (float)height;
+
+		CalculateProjectionMatrix();
+	}
+
 	void EditorCamera::CalculateViewMatrix()
 	{
 		m_Direction.x = cos(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));

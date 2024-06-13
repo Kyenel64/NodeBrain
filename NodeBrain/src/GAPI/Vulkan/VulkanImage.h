@@ -14,12 +14,18 @@ namespace NodeBrain
 		VulkanImage(VulkanRenderContext* context, const ImageConfiguration& configuration);
 		~VulkanImage() override;
 
+		void Resize(uint32_t width, uint32_t height) override;
+
 		uint64_t GetAddress() override;
 		const ImageConfiguration& GetConfiguration() const override { return m_Configuration; }
 
 		VkImage GetVkImage() const { return m_VkImage[m_Context->GetSwapchain().GetFrameIndex()]; }
 		VkImageView GetVkImageView() const { return m_VkImageView[m_Context->GetSwapchain().GetFrameIndex()]; }
 		VkSampler GetVkSampler() const { return m_VkSampler[m_Context->GetSwapchain().GetFrameIndex()]; }
+
+	private:
+		VkResult CreateImage();
+		void DestroyImage();
 		
 	private:
 		VulkanRenderContext* m_Context;

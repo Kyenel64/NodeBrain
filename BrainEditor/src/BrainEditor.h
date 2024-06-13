@@ -42,6 +42,7 @@ namespace NodeBrain
 		std::shared_ptr<Scene> m_EditorScene;
 
 		std::shared_ptr<Image> m_ViewportImage;
+		ImVec2 m_ViewportSize = { 0.0f, 0.0f };
 
 		Entity m_SelectedEntity;
 	};

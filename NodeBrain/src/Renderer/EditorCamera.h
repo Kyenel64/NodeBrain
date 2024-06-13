@@ -12,8 +12,12 @@ namespace NodeBrain
 
 		void OnUpdate(float deltaTime);
 
+		void Resize(uint32_t width, uint32_t height);
+
 		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
 		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
+
+		float GetAspectRatio() const { return m_AspectRatio; }
 
 	private:
 		void CalculateViewMatrix();

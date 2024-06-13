@@ -17,6 +17,8 @@ namespace NodeBrain
 	public:
 		virtual ~Image() = default;
 
+		virtual void Resize(uint32_t width, uint32_t height) = 0;
+
 		// Pointer address is equal to VkDescriptorSet. Can only be accessed by ImGui.
 		virtual uint64_t GetAddress() = 0;
 		virtual const ImageConfiguration& GetConfiguration() const = 0; 

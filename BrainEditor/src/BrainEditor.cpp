@@ -12,11 +12,8 @@ namespace NodeBrain
 		config.Format = ImageFormat::RGBA16;
 		m_ViewportImage = Image::Create(m_Context, config);
 
-		m_EditorCamera = std::make_shared<EditorCamera>(45.0f, m_Window->GetWidth() / m_Window->GetHeight(), 0.01f, 1000.0f);
+		m_EditorCamera = std::make_shared<EditorCamera>(45.0f, m_ViewportImage->GetConfiguration().Width / m_ViewportImage->GetConfiguration().Height, 0.01f, 1000.0f);
 		m_EditorScene = std::make_shared<Scene>(m_Renderer);
-
-		// temp
-		//m_SelectedEntity = m_EditorScene->CreateEntity();
 	}
 
 	void BrainEditor::OnDetach()
@@ -32,6 +29,15 @@ namespace NodeBrain
 
 	void BrainEditor::OnUpdate(float deltaTime)
 	{
+		// On Viewport resize
+		if ((m_ViewportSize.x != 0.0f && m_ViewportSize.y != 0.0f) &&
+				(m_ViewportImage->GetConfiguration().Width != m_ViewportSize.x || m_ViewportImage->GetConfiguration().Height != m_ViewportSize.y))
+		{
+			NB_INFO("Resizing Viewport");
+			m_ViewportImage->Resize(m_ViewportSize.x, m_ViewportSize.y);
+			m_EditorCamera->Resize(m_ViewportSize.x, m_ViewportSize.y);
+		}
+
 		m_EditorCamera->OnUpdate(deltaTime);
 		m_EditorScene->OnEditorUpdate(m_EditorCamera, m_ViewportImage);
 	}
@@ -74,6 +80,8 @@ namespace NodeBrain
 	void BrainEditor::DrawViewportWindow()
 	{
 		ImGui::Begin("Viewport");
+
+		m_ViewportSize = ImGui::GetContentRegionAvail();
 
 		ImGui::Image((ImTextureID)m_ViewportImage->GetAddress(), { (float)m_ViewportImage->GetConfiguration().Width, (float)m_ViewportImage->GetConfiguration().Height});
 
