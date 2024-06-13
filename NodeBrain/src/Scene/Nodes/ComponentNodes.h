@@ -33,15 +33,23 @@ namespace NodeBrain
 		TransformComponentNode(TransformComponent& transformComp)
 				: m_TransformComponent(transformComp), Node(NodeType::TransformComponent)
 		{
-			m_InputPorts.resize(1);
+			m_InputPorts.resize(3);
 
 			// Input 1
 			m_InputPorts[0] = { nullptr, glm::vec3(0.0f), m_NodeID, PortDataType::Vec3, "Position" };
+
+			// Input 2
+			m_InputPorts[1] = { nullptr, glm::vec3(0.0f), m_NodeID, PortDataType::Vec3, "Rotation" };
+
+			// Input 3
+			m_InputPorts[2] = { nullptr, glm::vec3(1.0f), m_NodeID, PortDataType::Vec3, "Scale" };
 		}
 
 		void Evaluate() override
 		{
 			m_TransformComponent.Position = std::get<glm::vec3>(m_InputPorts[0].GetValue());
+			m_TransformComponent.SetEulerRotation(std::get<glm::vec3>(m_InputPorts[1].GetValue()));
+			m_TransformComponent.Scale = std::get<glm::vec3>(m_InputPorts[2].GetValue());
 		}
 
 	private:

@@ -256,7 +256,7 @@ namespace NodeBrain
 			{
 				std::shared_ptr<TransformComponentNode> node = m_EntityGraph->AddNode<TransformComponentNode>(m_ActiveScene->GetComponent<TransformComponent>(m_SelectedEntity));
 				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Transform Component",
-						addNodePos, { 200.0f, 60.0f}, { 0.6f, 0.3f, 0.3f, 1.0f}));
+						addNodePos, { 200.0f, 100.0f}, { 0.6f, 0.3f, 0.3f, 1.0f}));
 			}
 
 			if (ImGui::MenuItem("Sprite Component"))
