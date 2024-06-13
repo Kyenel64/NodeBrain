@@ -12,7 +12,6 @@ namespace NodeBrain
 		{
 			m_InputPorts.resize(1);
 
-			// Input 1
 			m_InputPorts[0] = { nullptr, std::string(), m_NodeID, PortDataType::String, "Tag" };
 		}
 
@@ -35,13 +34,8 @@ namespace NodeBrain
 		{
 			m_InputPorts.resize(3);
 
-			// Input 1
 			m_InputPorts[0] = { nullptr, glm::vec3(0.0f), m_NodeID, PortDataType::Vec3, "Position" };
-
-			// Input 2
 			m_InputPorts[1] = { nullptr, glm::vec3(0.0f), m_NodeID, PortDataType::Vec3, "Rotation" };
-
-			// Input 3
 			m_InputPorts[2] = { nullptr, glm::vec3(1.0f), m_NodeID, PortDataType::Vec3, "Scale" };
 		}
 
@@ -66,7 +60,6 @@ namespace NodeBrain
 		{
 			m_InputPorts.resize(1);
 
-			// Input 1
 			m_InputPorts[0] = { nullptr, glm::vec4(1.0f), m_NodeID, PortDataType::Color, "Color" };
 		}
 

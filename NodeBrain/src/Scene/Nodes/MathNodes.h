@@ -12,12 +12,9 @@ namespace NodeBrain
 			m_InputPorts.resize(2);
 			m_OutputPorts.resize(1);
 
-			// Input 1
 			m_InputPorts[0] = { nullptr, 1, m_NodeID, PortDataType::Int, "Value 1" };
-			// Input 2
 			m_InputPorts[1] = { nullptr, 1, m_NodeID, PortDataType::Int, "Value 2" };
 
-			// Output
 			m_OutputPorts[0] = { 1, m_NodeID, PortDataType::Int, "Out" };
 		}
 

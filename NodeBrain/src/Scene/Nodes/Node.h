@@ -20,18 +20,21 @@ namespace NodeBrain
 		TagComponent,
 		TransformComponent,
 		SpriteComponent,
+
+		Int,
+		Float,
+		Bool,
 		Vec3,
 		Vec4,
 		Color,
-		Float,
-		Int,
 		String,
+
 		Multiply
 	};
 
-	enum class PortDataType { None = 0, Int, Float, Vec3, Vec4, Color, String };
+	enum class PortDataType { None = 0, Int, Float, Bool, Vec3, Vec4, Color, String };
 
-	using PortData = std::variant<int, float, glm::vec3, glm::vec4, std::string>;
+	using PortData = std::variant<int, float, bool, glm::vec3, glm::vec4, std::string>;
 
 	struct OutputPort
 	{

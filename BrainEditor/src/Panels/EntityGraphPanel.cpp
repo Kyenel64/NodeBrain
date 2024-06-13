@@ -88,26 +88,25 @@ namespace NodeBrain
 			m_HoveringNode = false;
 			for (auto& nodeUI : m_NodeUIs[m_SelectedEntity])
 			{
-				if (nodeUI.OwnedNode->GetType() == NodeType::Float)
+				if (nodeUI.OwnedNode->GetType() == NodeType::Int)
 				{
 					DrawNodeUI(nodeUI, [&]()
 					{
-						ImGui::SetNextItemWidth(nodeUI.Size.x / 2);
-						ImGui::DragFloat("##FloatInput", &std::get<float>(nodeUI.OwnedNode->GetOutputPort(0).Value));
+						ImGui::DragInt("##DragInt", &std::get<int>(nodeUI.OwnedNode->GetOutputPort(0).Value));
 					});
 				}
-				else if (nodeUI.OwnedNode->GetType() == NodeType::String)
+				else if (nodeUI.OwnedNode->GetType() == NodeType::Float)
 				{
 					DrawNodeUI(nodeUI, [&]()
 					{
-						ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
-						ImGui::SetNextItemWidth(nodeUI.Size.x / 2);
-						std::string tag = std::get<std::string>(nodeUI.OwnedNode->GetOutputPort(0).Value).c_str();
-						char buffer[256];
-						memset(buffer, 0, sizeof(buffer));
-						strcpy(buffer, tag.c_str());
-						if (ImGui::InputText("##TextInput", buffer, sizeof(buffer), flags))
-							nodeUI.OwnedNode->GetOutputPort(0).Value = buffer;
+						ImGui::DragFloat("##DragFloat", &std::get<float>(nodeUI.OwnedNode->GetOutputPort(0).Value));
+					});
+				}
+				else if (nodeUI.OwnedNode->GetType() == NodeType::Bool)
+				{
+					DrawNodeUI(nodeUI, [&]()
+					{
+						ImGui::Checkbox("##Checkbox", &std::get<bool>(nodeUI.OwnedNode->GetOutputPort(0).Value));
 					});
 				}
 				else if (nodeUI.OwnedNode->GetType() == NodeType::Color)
@@ -115,7 +114,20 @@ namespace NodeBrain
 					DrawNodeUI(nodeUI, [&]()
 					{
 						ImGuiColorEditFlags flags = ImGuiColorEditFlags_NoInputs;
-						ImGui::ColorEdit4("##ColorInput", glm::value_ptr(std::get<glm::vec4>(nodeUI.OwnedNode->GetOutputPort(0).Value)), flags);
+						ImGui::ColorEdit4("##ColorEdit4", glm::value_ptr(std::get<glm::vec4>(nodeUI.OwnedNode->GetOutputPort(0).Value)), flags);
+					});
+				}
+				else if (nodeUI.OwnedNode->GetType() == NodeType::String)
+				{
+					DrawNodeUI(nodeUI, [&]()
+					{
+						ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
+						std::string tag = std::get<std::string>(nodeUI.OwnedNode->GetOutputPort(0).Value).c_str();
+						char buffer[256];
+						memset(buffer, 0, sizeof(buffer));
+						strcpy(buffer, tag.c_str());
+						if (ImGui::InputText("##InputText", buffer, sizeof(buffer), flags))
+							nodeUI.OwnedNode->GetOutputPort(0).Value = buffer;
 					});
 				}
 				else
@@ -268,6 +280,13 @@ namespace NodeBrain
 						addNodePos, { 200.0f, 60.0f}, { 0.6f, 0.6f, 0.3f, 1.0f}));
 			}
 
+			if (ImGui::MenuItem("Int"))
+			{
+				std::shared_ptr<IntNode> node = m_EntityGraph->AddNode<IntNode>();
+				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Int",
+						addNodePos, { 100.0f, 60.0f}, { 0.3f, 0.6f, 0.6f, 1.0f}));
+			}
+
 			if (ImGui::MenuItem("Float"))
 			{
 				std::shared_ptr<FloatNode> node = m_EntityGraph->AddNode<FloatNode>();
@@ -275,10 +294,24 @@ namespace NodeBrain
 						addNodePos, { 100.0f, 60.0f}, { 0.3f, 0.6f, 0.6f, 1.0f}));
 			}
 
+			if (ImGui::MenuItem("Bool"))
+			{
+				std::shared_ptr<BoolNode> node = m_EntityGraph->AddNode<BoolNode>();
+				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Bool",
+						addNodePos, { 100.0f, 60.0f}, { 0.3f, 0.6f, 0.6f, 1.0f}));
+			}
+
 			if (ImGui::MenuItem("Vec3"))
 			{
 				std::shared_ptr<Vec3Node> node = m_EntityGraph->AddNode<Vec3Node>();
 				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Vec3",
+						addNodePos, { 120.0f, 100.0f}, { 0.3f, 0.6f, 0.3f, 1.0f}));
+			}
+
+			if (ImGui::MenuItem("Vec4"))
+			{
+				std::shared_ptr<Vec4Node> node = m_EntityGraph->AddNode<Vec4Node>();
+				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Vec4",
 						addNodePos, { 120.0f, 100.0f}, { 0.3f, 0.6f, 0.3f, 1.0f}));
 			}
 
