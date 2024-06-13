@@ -5,12 +5,21 @@
 
 namespace NodeBrain
 {
-	void EntityGraph::AddLink(OutputPort& outputPort, InputPort& inputPort)
+	bool EntityGraph::AddLink(OutputPort& outputPort, InputPort& inputPort)
 	{
 		inputPort.LinkedOutputPort = &outputPort;
 		m_AdjList[outputPort.ParentNodeID].push_back(inputPort.ParentNodeID);
 
-		TopologicalSort();
+		// If added link creates a cycle, undo the link and sort.
+		if (!TopologicalSort())
+		{
+			RemoveLink(outputPort, inputPort);
+			TopologicalSort();
+			NB_ERROR("Failed to create link. Cycle detected.");
+			return false;
+		}
+
+		return true;
 	}
 
 	void EntityGraph::RemoveLink(OutputPort &outputPort, InputPort &inputPort)
@@ -22,7 +31,7 @@ namespace NodeBrain
 		TopologicalSort();
 	}
 
-	void EntityGraph::TopologicalSort()
+	bool EntityGraph::TopologicalSort()
 	{
 		m_TopSortedNodes.clear();
 
@@ -62,6 +71,11 @@ namespace NodeBrain
 			}
 			nodesWithNoInput.pop();
 		}
+
+		if (m_TopSortedNodes.size() != m_Nodes.size())
+			return false;
+
+		return true;
 	}
 
 	void EntityGraph::Evaluate()

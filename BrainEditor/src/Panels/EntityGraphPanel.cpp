@@ -194,8 +194,8 @@ namespace NodeBrain
 			{
 				if (m_SelectedOutputPortUI->OwnedOutputPort.DataType == inputPort.OwnedInputPort.DataType)
 				{
-					m_EntityGraph->AddLink(m_SelectedOutputPortUI->OwnedOutputPort, inputPort.OwnedInputPort);
-					inputPort.LinkedOutputPortUI = m_SelectedOutputPortUI;
+					if (m_EntityGraph->AddLink(m_SelectedOutputPortUI->OwnedOutputPort, inputPort.OwnedInputPort))
+						inputPort.LinkedOutputPortUI = m_SelectedOutputPortUI;
 				}
 
 				m_AddingLink = false;
@@ -257,6 +257,7 @@ namespace NodeBrain
 		{
 			const ImVec2 addNodePos = { ImGui::GetMousePosOnOpeningCurrentPopup().x - m_GridOrigin.x, ImGui::GetMousePosOnOpeningCurrentPopup().y - m_GridOrigin.y };
 
+			// --- Component Nodes ---
 			if (ImGui::MenuItem("Tag Component"))
 			{
 				std::shared_ptr<TagComponentNode> node = m_EntityGraph->AddNode<TagComponentNode>(m_ActiveScene->GetComponent<TagComponent>(m_SelectedEntity));
@@ -280,6 +281,7 @@ namespace NodeBrain
 						addNodePos, { 200.0f, 60.0f}, { 0.6f, 0.6f, 0.3f, 1.0f}));
 			}
 
+			// --- Type Nodes ---
 			if (ImGui::MenuItem("Int"))
 			{
 				std::shared_ptr<IntNode> node = m_EntityGraph->AddNode<IntNode>();
@@ -326,6 +328,14 @@ namespace NodeBrain
 			{
 				std::shared_ptr<StringNode> node = m_EntityGraph->AddNode<StringNode>();
 				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "String",
+						addNodePos, { 100.0f, 60.0f}, { 0.3f, 0.6f, 0.6f, 1.0f}));
+			}
+
+			// --- Math Nodes ---
+			if (ImGui::MenuItem("Multiply"))
+			{
+				std::shared_ptr<MultiplyNode> node = m_EntityGraph->AddNode<MultiplyNode>();
+				m_NodeUIs[m_SelectedEntity].push_back(Utils::PopulateNodeUI(node, "Multiply",
 						addNodePos, { 100.0f, 60.0f}, { 0.3f, 0.6f, 0.6f, 1.0f}));
 			}
 

@@ -18,7 +18,8 @@ namespace NodeBrain
 			return node;
 		}
 
-		void AddLink(OutputPort& outputPort, InputPort& inputPort);
+		// Returns false if cycle is detected.
+		bool AddLink(OutputPort& outputPort, InputPort& inputPort);
 		void RemoveLink(OutputPort& outputPort, InputPort& inputPort);
 
 		// Run whenever data is updated.
@@ -27,7 +28,8 @@ namespace NodeBrain
 		void Evaluate();
 
 	private:
-		void TopologicalSort();
+		// Returns false if cycle is detected.
+		bool TopologicalSort();
 
 	private:
 		std::unordered_map<NodeID, std::shared_ptr<Node>> m_Nodes;
