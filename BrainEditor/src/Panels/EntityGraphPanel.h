@@ -11,23 +11,16 @@ namespace NodeBrain
 {
 	struct OutputPortUI
 	{
-		OutputPort& OwnedOutputPort;
 		ImVec2 PortPos = { 0.0f, 0.0f };
 	};
 
 	struct InputPortUI
 	{
-		InputPort& OwnedInputPort;
-		OutputPortUI* LinkedOutputPortUI;
 		ImVec2 PortPos = { 0.0f, 0.0f };
 	};
 
 	struct NodeUI
 	{
-		std::shared_ptr<Node> OwnedNode;
-		std::vector<OutputPortUI> OutputPorts;
-		std::vector<InputPortUI> InputPorts;
-
 		std::string NodeName = "Node";
 		ImVec4 NodeColor = { 0.3f, 0.3f, 0.3f, 1.0f };
 		ImVec2 Size = { 100.0f, 60.0f };
@@ -46,12 +39,15 @@ namespace NodeBrain
 
 	private:
 		// Main styling for nodes. Optional uiFunction for nodes with unique styling elements.
-		void DrawNodeUI(NodeUI& node, std::function<void()> uiFunction = nullptr);
+		void DrawNodeUI(const std::shared_ptr<Node>& node, std::function<void()> uiFunction = nullptr);
 
 		void ProcessAddNodePopup();
+		void ProcessNodeMenuPopup();
 
 	private:
-		std::unordered_map<Entity, std::vector<NodeUI>> m_NodeUIs;
+		std::unordered_map<NodeID, NodeUI> m_NodeUIs;
+		std::unordered_map<const InputPort*, InputPortUI> m_InputPortUIs;
+		std::unordered_map<const OutputPort*, OutputPortUI> m_OutputPortUIs;
 
 		ImVec2 m_GridOrigin = { 0.0f, 0.0f };
 		ImVec2 m_EntityGraphPan = { 0.0f, 0.0f };
@@ -60,10 +56,9 @@ namespace NodeBrain
 		std::shared_ptr<Scene> m_ActiveScene;
 		EntityGraph* m_EntityGraph = nullptr;
 
-		NodeUI* m_SelectedNodeUI = nullptr;
-		OutputPortUI* m_SelectedOutputPortUI = nullptr;
+		Node* m_SelectedNode = nullptr;
+		OutputPort* m_SelectedOutputPort = nullptr;
 		bool m_AddingLink = false;
-		bool m_HoveringNode = false;
 
 	};
 }

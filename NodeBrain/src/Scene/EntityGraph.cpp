@@ -22,6 +22,40 @@ namespace NodeBrain
 		return true;
 	}
 
+	void EntityGraph::RemoveNode(NodeID node)
+	{
+		// Remove all input ports within entity graph that are connected to the output port of current node.
+		for (auto& adjNodes : m_AdjList[node])
+		{
+			std::shared_ptr<Node>& n = m_Nodes[adjNodes];
+			for (auto& inputPort : n->m_InputPorts)
+			{
+				if (inputPort.LinkedOutputPort->ParentNodeID == node)
+					inputPort.LinkedOutputPort = nullptr;
+			}
+		}
+
+		// Remove links from all input ports of current node.
+		for (auto& inputPort : m_Nodes[node]->m_InputPorts)
+			inputPort.LinkedOutputPort = nullptr;
+
+		// Remove node from adjacency list.
+		m_AdjList.erase(node);
+		for (auto& [ nodeID, adjNodes ] : m_AdjList)
+		{
+			for (auto& adjNode : adjNodes)
+			{
+				if (adjNode == node)
+					adjNodes.erase(std::find(adjNodes.begin(), adjNodes.end(), node));
+			}
+		}
+
+		// Destroy node instance
+		m_Nodes.erase(node);
+
+		TopologicalSort();
+	}
+
 	void EntityGraph::RemoveLink(OutputPort &outputPort, InputPort &inputPort)
 	{
 		inputPort.LinkedOutputPort = nullptr;
@@ -74,6 +108,12 @@ namespace NodeBrain
 
 		if (m_TopSortedNodes.size() != m_Nodes.size())
 			return false;
+
+		// Debug
+		std::string topSortStr = {};
+		for (auto& nodeID : m_TopSortedNodes)
+			topSortStr.append(std::to_string(nodeID) + ", ");
+		NB_INFO(topSortStr);
 
 		return true;
 	}

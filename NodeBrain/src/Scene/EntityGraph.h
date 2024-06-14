@@ -18,6 +18,8 @@ namespace NodeBrain
 			return node;
 		}
 
+		void RemoveNode(NodeID node);
+
 		// Returns false if cycle is detected.
 		bool AddLink(OutputPort& outputPort, InputPort& inputPort);
 		void RemoveLink(OutputPort& outputPort, InputPort& inputPort);
@@ -26,6 +28,10 @@ namespace NodeBrain
 		// Each node only references the input node's data to prevent iterating through the whole graph to get a value.
 		// If ran in a game loop, this should be called once at the beginning of each frame.
 		void Evaluate();
+
+		const std::unordered_map<NodeID, std::shared_ptr<Node>>& GetNodes() const { return m_Nodes; }
+
+		std::shared_ptr<Node> GetNode(NodeID id) { return m_Nodes[id]; }
 
 	private:
 		// Returns false if cycle is detected.

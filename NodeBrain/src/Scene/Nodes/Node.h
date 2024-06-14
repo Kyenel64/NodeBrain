@@ -94,5 +94,8 @@ namespace NodeBrain
 		std::vector<OutputPort> m_OutputPorts;
 		const NodeID m_NodeID;
 		NodeType m_Type;
+
+	public:
+		friend class EntityGraph;
 	};
 }
