@@ -55,15 +55,15 @@ namespace NodeBrain
 			}
 
 			// Draw all connected links
-			for (auto& [ nodeID, node ] : m_EntityGraph->GetNodes())
+			for (auto& [ node, nodeUI ] : m_NodeUIs)
 			{
 				for (size_t i = 0; i < node->InputCount(); i++)
 				{
 					InputPort& inputPort = node->GetInputPort(i);
-					if (inputPort.LinkedOutputPort)
+					if (inputPort.GetLinkedOutputPort())
 					{
 						InputPortUI& inputPortUI = m_InputPortUIs.at(&inputPort);
-						OutputPortUI& outputPortUI = m_OutputPortUIs.at(inputPort.LinkedOutputPort);
+						OutputPortUI& outputPortUI = m_OutputPortUIs.at(inputPort.GetLinkedOutputPort());
 						ImVec2 outputPos = { m_GridOrigin.x + outputPortUI.PortPos.x, m_GridOrigin.y + outputPortUI.PortPos.y };
 						ImVec2 inputPos = { m_GridOrigin.x + inputPortUI.PortPos.x, m_GridOrigin.y + inputPortUI.PortPos.y };
 						drawList->AddBezierCubic( outputPos, { inputPos.x, outputPos.y }, { outputPos.x, inputPos.y }, inputPos,
@@ -73,34 +73,32 @@ namespace NodeBrain
 			}
 
 			// Draw all nodes in entity graph
-			for (auto& [ nodeID, node] : m_EntityGraph->GetNodes())
+			for (auto& [ node, nodeUI ] : m_NodeUIs)
 			{
-				NodeUI& nodeUI = m_NodeUIs[node->GetNodeID()];
-
 				if (node->GetType() == NodeType::Int)
 				{
-					DrawNodeUI(node, [&]()
+					DrawNodeUI(*node, [&]()
 					{
 						ImGui::DragInt("##DragInt", &std::get<int>(node->GetOutputPort(0).Value));
 					});
 				}
 				else if (node->GetType() == NodeType::Float)
 				{
-					DrawNodeUI(node, [&]()
+					DrawNodeUI(*node, [&]()
 					{
 						ImGui::DragFloat("##DragFloat", &std::get<float>(node->GetOutputPort(0).Value));
 					});
 				}
 				else if (node->GetType() == NodeType::Bool)
 				{
-					DrawNodeUI(node, [&]()
+					DrawNodeUI(*node, [&]()
 					{
 						ImGui::Checkbox("##Checkbox", &std::get<bool>(node->GetOutputPort(0).Value));
 					});
 				}
 				else if (node->GetType() == NodeType::Color)
 				{
-					DrawNodeUI(node, [&]()
+					DrawNodeUI(*node, [&]()
 					{
 						ImGuiColorEditFlags flags = ImGuiColorEditFlags_NoInputs;
 						ImGui::ColorEdit4("##ColorEdit4", glm::value_ptr(std::get<glm::vec4>(node->GetOutputPort(0).Value)), flags);
@@ -108,7 +106,7 @@ namespace NodeBrain
 				}
 				else if (node->GetType() == NodeType::String)
 				{
-					DrawNodeUI(node, [&]()
+					DrawNodeUI(*node, [&]()
 					{
 						ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
 						std::string tag = std::get<std::string>(node->GetOutputPort(0).Value).c_str();
@@ -121,7 +119,7 @@ namespace NodeBrain
 				}
 				else
 				{
-					DrawNodeUI(node);
+					DrawNodeUI(*node);
 				}
 			}
 
@@ -143,17 +141,18 @@ namespace NodeBrain
 			{
 				if (m_SelectedNode->GetType() == NodeType::SpriteComponent)
 					m_ActiveScene->RemoveComponent<SpriteComponent>(m_SelectedEntity);
-				m_EntityGraph->RemoveNode(m_SelectedNode->GetNodeID());
+				m_NodeUIs.erase(m_SelectedNode);
+				m_EntityGraph->RemoveNode(*m_SelectedNode);
 			}
 		}
 
 		ImGui::End();
 	}
 
-	void EntityGraphPanel::DrawNodeUI(const std::shared_ptr<Node>& node, std::function<void()> uiFunction)
+	void EntityGraphPanel::DrawNodeUI(Node& node, std::function<void()> uiFunction)
 	{
-		NodeUI& nodeUI = m_NodeUIs[node->GetNodeID()];
-		ImGui::PushID(node->GetNodeID());
+		NodeUI& nodeUI = m_NodeUIs[&node];
+		ImGui::PushID(&node);
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
 		ImGuiIO& io = ImGui::GetIO();
 
@@ -165,7 +164,7 @@ namespace NodeBrain
 		ImGui::BeginChild("NodeFrame", nodeUI.Size, ImGuiChildFlags_Border, ImGuiWindowFlags_None);
 
 		// --- Node Header ---
-		ImGui::Text("%s, %i", nodeUI.NodeName.c_str(), node->GetNodeID()); // NodeID is Debug
+		ImGui::Text("%s", nodeUI.NodeName.c_str());
 
 		ImVec2 p1 = ImGui::GetCursorScreenPos();
 		drawList->AddLine({ p1.x - ImGui::GetStyle().WindowPadding.x, p1.y }, { p1.x + nodeUI.Size.x- ImGui::GetStyle().WindowPadding.x, p1.y }, ImGui::GetColorU32(nodeUI.NodeColor));
@@ -176,16 +175,16 @@ namespace NodeBrain
 
 		// Input Ports
 		int index = 0;
-		for (size_t i = 0; i < node->InputCount(); i++)
+		for (size_t i = 0; i < node.InputCount(); i++)
 		{
-			InputPort& inputPort = node->GetInputPort(i);
+			InputPort& inputPort = node.GetInputPort(i);
 			InputPortUI& inputPortUI = m_InputPortUIs[&inputPort];
 			ImVec2 portScreenPos = { ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y + ((ImGui::GetFontSize() / 2) + ImGui::GetStyle().FramePadding.y)};
 			inputPortUI.PortPos = { portScreenPos.x - m_GridOrigin.x, portScreenPos.y - m_GridOrigin.y };
 
 			std::string label = "##input" + std::to_string(index);
 
-			ImGui::Button(inputPort.Name.c_str(), { nodeUI.Size.x / 2, 0 });
+			ImGui::Button("Placeholder", { nodeUI.Size.x / 2, 0 });
 
 			drawList->AddCircleFilled(portScreenPos, 5.0f, ImGui::GetColorU32(nodeUI.NodeColor));
 
@@ -193,7 +192,7 @@ namespace NodeBrain
 			if (m_AddingLink && m_SelectedOutputPort &&
 				(Utils::Distance(portScreenPos, ImGui::GetMousePos()) <= 15.0f) && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 			{
-				if (m_SelectedOutputPort->DataType == inputPort.DataType)
+				if (m_SelectedOutputPort->GetType() == inputPort.GetType())
 					m_EntityGraph->AddLink(*m_SelectedOutputPort, inputPort);
 
 				m_AddingLink = false;
@@ -202,11 +201,10 @@ namespace NodeBrain
 
 			// When input port is clicked, remove link to the output port.
 			if (!m_AddingLink && (Utils::Distance(portScreenPos, ImGui::GetMousePos()) <= 15.0f) &&
-				ImGui::IsMouseClicked(ImGuiMouseButton_Left) && inputPort.LinkedOutputPort)
+				ImGui::IsMouseClicked(ImGuiMouseButton_Left) && inputPort.GetLinkedOutputPort())
 			{
-				m_EntityGraph->RemoveLink(*inputPort.LinkedOutputPort, inputPort);
-				m_SelectedOutputPort = inputPort.LinkedOutputPort;
-				inputPort.LinkedOutputPort = nullptr;
+				m_EntityGraph->RemoveLink(*inputPort.GetLinkedOutputPort(), inputPort);
+				m_SelectedOutputPort = inputPort.GetLinkedOutputPort();
 				m_AddingLink = true;
 			}
 
@@ -216,14 +214,14 @@ namespace NodeBrain
 		// Output Ports
 		index = 0;
 		ImGui::SetCursorScreenPos({ m_GridOrigin.x + nodeUI.Pos.x + (nodeUI.Size.x / 2), p1.y });
-		for (size_t i = 0; i < node->OutputCount(); i++)
+		for (size_t i = 0; i < node.OutputCount(); i++)
 		{
-			OutputPort& outputPort = node->GetOutputPort(i);
+			OutputPort& outputPort = node.GetOutputPort(i);
 			OutputPortUI& outputPortUI = m_OutputPortUIs[&outputPort];
 			ImVec2 portScreenPos = { ImGui::GetCursorScreenPos().x + (nodeUI.Size.x / 2), ImGui::GetCursorScreenPos().y + ((ImGui::GetFontSize() / 2) + ImGui::GetStyle().FramePadding.y)};
 			outputPortUI.PortPos = { portScreenPos.x - m_GridOrigin.x, portScreenPos.y - m_GridOrigin.y };
 
-			ImGui::Button(outputPort.Name.c_str(), { nodeUI.Size.x / 2, 0 });
+			ImGui::Button("Placeholder", { nodeUI.Size.x / 2, 0 });
 
 			drawList->AddCircleFilled(portScreenPos, 5.0f, ImGui::GetColorU32(nodeUI.NodeColor));
 
@@ -248,7 +246,7 @@ namespace NodeBrain
 		// Input
 		if (ImGui::IsWindowFocused())
 		{
-			m_SelectedNode = node.get();
+			m_SelectedNode = &node;
 
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
 			{
@@ -270,8 +268,7 @@ namespace NodeBrain
 		{
 			if (ImGui::MenuItem("Delete"))
 			{
-				NB_INFO("Deleting Node ID: {0}", m_SelectedNode->GetNodeID());
-				m_EntityGraph->RemoveNode(m_SelectedNode->GetNodeID());
+				m_EntityGraph->RemoveNode(*m_SelectedNode);
 			}
 			ImGui::EndPopup();
 		}
@@ -286,72 +283,72 @@ namespace NodeBrain
 			// --- Component Nodes ---
 			if (ImGui::MenuItem("Tag Component"))
 			{
-				std::shared_ptr<TagComponentNode> node = m_EntityGraph->AddNode<TagComponentNode>(m_ActiveScene->GetComponent<TagComponent>(m_SelectedEntity));
-				m_NodeUIs[node->GetNodeID()] = { "Tag Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 60.0f }, addNodePos };
+				TagComponentNode& node = m_EntityGraph->AddNode<TagComponentNode>(m_ActiveScene->GetComponent<TagComponent>(m_SelectedEntity));
+				m_NodeUIs[&node] = { "Tag Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 60.0f }, addNodePos };
 			}
 
 			if (ImGui::MenuItem("Transform Component"))
 			{
-				std::shared_ptr<TransformComponentNode> node = m_EntityGraph->AddNode<TransformComponentNode>(m_ActiveScene->GetComponent<TransformComponent>(m_SelectedEntity));
-				m_NodeUIs[node->GetNodeID()] = { "Transform Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 120.0f }, addNodePos };
+				TransformComponentNode& node = m_EntityGraph->AddNode<TransformComponentNode>(m_ActiveScene->GetComponent<TransformComponent>(m_SelectedEntity));
+				m_NodeUIs[&node] = { "Transform Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 120.0f }, addNodePos };
 			}
 
 			if (ImGui::MenuItem("Sprite Component"))
 			{
 				if (!m_ActiveScene->HasComponent<SpriteComponent>(m_SelectedEntity))
 					m_ActiveScene->AddComponent<SpriteComponent>(m_SelectedEntity);
-				std::shared_ptr<SpriteComponentNode> node = m_EntityGraph->AddNode<SpriteComponentNode>(m_ActiveScene->GetComponent<SpriteComponent>(m_SelectedEntity));
-				m_NodeUIs[node->GetNodeID()] = { "Sprite Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 60.0f }, addNodePos };
+				SpriteComponentNode& node = m_EntityGraph->AddNode<SpriteComponentNode>(m_ActiveScene->GetComponent<SpriteComponent>(m_SelectedEntity));
+				m_NodeUIs[&node] = { "Sprite Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 60.0f }, addNodePos };
 			}
 
 			// --- Type Nodes ---
 			if (ImGui::MenuItem("Int"))
 			{
-				std::shared_ptr<IntNode> node = m_EntityGraph->AddNode<IntNode>();
-				m_NodeUIs[node->GetNodeID()] = { "Int", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				IntNode& node = m_EntityGraph->AddNode<IntNode>();
+				m_NodeUIs[&node] = { "Int", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
 			}
 
 			if (ImGui::MenuItem("Float"))
 			{
-				std::shared_ptr<FloatNode> node = m_EntityGraph->AddNode<FloatNode>();
-				m_NodeUIs[node->GetNodeID()] = { "Float", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				FloatNode& node = m_EntityGraph->AddNode<FloatNode>();
+				m_NodeUIs[&node] = { "Float", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
 			}
 
 			if (ImGui::MenuItem("Bool"))
 			{
-				std::shared_ptr<BoolNode> node = m_EntityGraph->AddNode<BoolNode>();
-				m_NodeUIs[node->GetNodeID()] = { "Bool", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				BoolNode& node = m_EntityGraph->AddNode<BoolNode>();
+				m_NodeUIs[&node] = { "Bool", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
 			}
 
 			if (ImGui::MenuItem("Vec3"))
 			{
-				std::shared_ptr<Vec3Node> node = m_EntityGraph->AddNode<Vec3Node>();
-				m_NodeUIs[node->GetNodeID()] = { "Vector 3", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				Vec3Node& node = m_EntityGraph->AddNode<Vec3Node>();
+				m_NodeUIs[&node] = { "Vector 3", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
 			}
 
 			if (ImGui::MenuItem("Vec4"))
 			{
-				std::shared_ptr<Vec4Node> node = m_EntityGraph->AddNode<Vec4Node>();
-				m_NodeUIs[node->GetNodeID()] = { "Vector 4", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				Vec4Node& node = m_EntityGraph->AddNode<Vec4Node>();
+				m_NodeUIs[&node] = { "Vector 4", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
 			}
 
 			if (ImGui::MenuItem("Color"))
 			{
-				std::shared_ptr<ColorNode> node = m_EntityGraph->AddNode<ColorNode>();
-				m_NodeUIs[node->GetNodeID()] = { "Color", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				ColorNode& node = m_EntityGraph->AddNode<ColorNode>();
+				m_NodeUIs[&node] = { "Color", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
 			}
 
 			if (ImGui::MenuItem("String"))
 			{
-				std::shared_ptr<StringNode> node = m_EntityGraph->AddNode<StringNode>();
-				m_NodeUIs[node->GetNodeID()] = { "String", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				StringNode& node = m_EntityGraph->AddNode<StringNode>();
+				m_NodeUIs[&node] = { "String", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
 			}
 
 			// --- Math Nodes ---
 			if (ImGui::MenuItem("Multiply"))
 			{
-				std::shared_ptr<MultiplyNode> node = m_EntityGraph->AddNode<MultiplyNode>();
-				m_NodeUIs[node->GetNodeID()] = { "Multiply", { 0.3f, 0.3f, 0.6f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				MultiplyNode& node = m_EntityGraph->AddNode<MultiplyNode>();
+				m_NodeUIs[&node] = { "Multiply", { 0.3f, 0.3f, 0.6f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
 			}
 
 			ImGui::EndPopup();

@@ -10,9 +10,7 @@ namespace NodeBrain
 		TagComponentNode(TagComponent& tagComp)
 				: m_TagComponent(tagComp), Node(NodeType::TagComponent)
 		{
-			m_InputPorts.resize(1);
-
-			m_InputPorts[0] = { nullptr, std::string(), m_NodeID, PortDataType::String, "Tag" };
+			m_InputPorts.push_back(InputPort(*this, PortDataType::String, std::string()));
 		}
 
 		void Evaluate() override
@@ -32,11 +30,9 @@ namespace NodeBrain
 		TransformComponentNode(TransformComponent& transformComp)
 				: m_TransformComponent(transformComp), Node(NodeType::TransformComponent)
 		{
-			m_InputPorts.resize(3);
-
-			m_InputPorts[0] = { nullptr, glm::vec3(0.0f), m_NodeID, PortDataType::Vec3, "Position" };
-			m_InputPorts[1] = { nullptr, glm::vec3(0.0f), m_NodeID, PortDataType::Vec3, "Rotation" };
-			m_InputPorts[2] = { nullptr, glm::vec3(1.0f), m_NodeID, PortDataType::Vec3, "Scale" };
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Vec3, glm::vec3(0.0f)));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Vec3, glm::vec3(0.0f)));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Vec3, glm::vec3(1.0f)));
 		}
 
 		void Evaluate() override
@@ -58,9 +54,7 @@ namespace NodeBrain
 		SpriteComponentNode(SpriteComponent& spriteComp)
 				: m_SpriteComponent(spriteComp), Node(NodeType::SpriteComponent)
 		{
-			m_InputPorts.resize(1);
-
-			m_InputPorts[0] = { nullptr, glm::vec4(1.0f), m_NodeID, PortDataType::Color, "Color" };
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Color, glm::vec4(1.0f)));
 		}
 
 		void Evaluate() override

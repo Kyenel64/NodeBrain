@@ -6,16 +6,12 @@ namespace NodeBrain
 {
 	class MultiplyNode : public Node {
 	public:
-		MultiplyNode()
-				: Node(NodeType::Multiply)
+		MultiplyNode() : Node(NodeType::Multiply)
 		{
-			m_InputPorts.resize(2);
-			m_OutputPorts.resize(1);
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Int, 1));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Int, 1));
 
-			m_InputPorts[0] = { nullptr, 1, m_NodeID, PortDataType::Int, "Value 1" };
-			m_InputPorts[1] = { nullptr, 1, m_NodeID, PortDataType::Int, "Value 2" };
-
-			m_OutputPorts[0] = { 1, m_NodeID, PortDataType::Int, "Out" };
+			m_OutputPorts.push_back(OutputPort(*this, PortDataType::Int, 1));
 		}
 
 		virtual ~MultiplyNode() = default;

@@ -12,11 +12,13 @@ namespace NodeBrain
 	struct OutputPortUI
 	{
 		ImVec2 PortPos = { 0.0f, 0.0f };
+		std::string Name;
 	};
 
 	struct InputPortUI
 	{
 		ImVec2 PortPos = { 0.0f, 0.0f };
+		std::string Name;
 	};
 
 	struct NodeUI
@@ -39,15 +41,15 @@ namespace NodeBrain
 
 	private:
 		// Main styling for nodes. Optional uiFunction for nodes with unique styling elements.
-		void DrawNodeUI(const std::shared_ptr<Node>& node, std::function<void()> uiFunction = nullptr);
+		void DrawNodeUI(Node& node, std::function<void()> uiFunction = nullptr);
 
 		void ProcessAddNodePopup();
 		void ProcessNodeMenuPopup();
 
 	private:
-		std::unordered_map<NodeID, NodeUI> m_NodeUIs;
-		std::unordered_map<const InputPort*, InputPortUI> m_InputPortUIs;
-		std::unordered_map<const OutputPort*, OutputPortUI> m_OutputPortUIs;
+		std::unordered_map<Node*, NodeUI> m_NodeUIs;
+		std::unordered_map<InputPort*, InputPortUI> m_InputPortUIs;
+		std::unordered_map<OutputPort*, OutputPortUI> m_OutputPortUIs;
 
 		ImVec2 m_GridOrigin = { 0.0f, 0.0f };
 		ImVec2 m_EntityGraphPan = { 0.0f, 0.0f };

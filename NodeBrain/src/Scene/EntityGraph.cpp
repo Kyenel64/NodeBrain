@@ -7,8 +7,8 @@ namespace NodeBrain
 {
 	bool EntityGraph::AddLink(OutputPort& outputPort, InputPort& inputPort)
 	{
-		inputPort.LinkedOutputPort = &outputPort;
-		m_AdjList[outputPort.ParentNodeID].push_back(inputPort.ParentNodeID);
+		inputPort.m_LinkedOutputPort = &outputPort;
+		m_AdjList[outputPort.m_ParentNode.m_NodeID].push_back(inputPort.m_ParentNode.m_NodeID);
 
 		// If added link creates a cycle, undo the link and sort.
 		if (!TopologicalSort())
@@ -22,45 +22,45 @@ namespace NodeBrain
 		return true;
 	}
 
-	void EntityGraph::RemoveNode(NodeID node)
+	void EntityGraph::RemoveNode(const Node& node)
 	{
 		// Remove all input ports within entity graph that are connected to the output port of current node.
-		for (auto& adjNodes : m_AdjList[node])
+		for (auto& adjNodes : m_AdjList[node.m_NodeID])
 		{
 			std::shared_ptr<Node>& n = m_Nodes[adjNodes];
 			for (auto& inputPort : n->m_InputPorts)
 			{
-				if (inputPort.LinkedOutputPort->ParentNodeID == node)
-					inputPort.LinkedOutputPort = nullptr;
+				if (inputPort.m_LinkedOutputPort->m_ParentNode.m_NodeID == node.m_NodeID)
+					inputPort.m_LinkedOutputPort = nullptr;
 			}
 		}
 
 		// Remove links from all input ports of current node.
-		for (auto& inputPort : m_Nodes[node]->m_InputPorts)
-			inputPort.LinkedOutputPort = nullptr;
+		for (auto& inputPort : m_Nodes[node.m_NodeID]->m_InputPorts)
+			inputPort.m_LinkedOutputPort = nullptr;
 
 		// Remove node from adjacency list.
-		m_AdjList.erase(node);
+		m_AdjList.erase(node.m_NodeID);
 		for (auto& [ nodeID, adjNodes ] : m_AdjList)
 		{
 			for (auto& adjNode : adjNodes)
 			{
-				if (adjNode == node)
-					adjNodes.erase(std::find(adjNodes.begin(), adjNodes.end(), node));
+				if (adjNode == node.m_NodeID)
+					adjNodes.erase(std::find(adjNodes.begin(), adjNodes.end(), node.m_NodeID));
 			}
 		}
 
 		// Destroy node instance
-		m_Nodes.erase(node);
+		m_Nodes.erase(node.m_NodeID);
 
 		TopologicalSort();
 	}
 
 	void EntityGraph::RemoveLink(OutputPort &outputPort, InputPort &inputPort)
 	{
-		inputPort.LinkedOutputPort = nullptr;
-		std::vector<NodeID>& adjNodes = m_AdjList[outputPort.ParentNodeID];
-		adjNodes.erase(std::find(adjNodes.begin(), adjNodes.end(), inputPort.ParentNodeID));
+		inputPort.m_LinkedOutputPort = nullptr;
+		std::vector<NodeID>& adjNodes = m_AdjList[outputPort.m_ParentNode.m_NodeID];
+		adjNodes.erase(std::find(adjNodes.begin(), adjNodes.end(), inputPort.m_ParentNode.m_NodeID));
 
 		TopologicalSort();
 	}
@@ -94,10 +94,10 @@ namespace NodeBrain
 		// Repeat until all nodes have been processed.
 		while (!nodesWithNoInput.empty())
 		{
-			NodeID curNode = nodesWithNoInput.front();
-			m_TopSortedNodes.push_back(curNode);
+			NodeID curNodeID = nodesWithNoInput.front();
+			m_TopSortedNodes.push_back(m_Nodes[curNodeID].get());
 
-			for (auto& adjNode : m_AdjList[curNode])
+			for (auto& adjNode : m_AdjList[curNodeID])
 			{
 				inDegrees[adjNode]--;
 				if (inDegrees[adjNode] == 0)
@@ -111,8 +111,8 @@ namespace NodeBrain
 
 		// Debug
 		std::string topSortStr = {};
-		for (auto& nodeID : m_TopSortedNodes)
-			topSortStr.append(std::to_string(nodeID) + ", ");
+		for (auto& node : m_TopSortedNodes)
+			topSortStr.append(std::to_string(node->m_NodeID) + ", ");
 		NB_INFO(topSortStr);
 
 		return true;
@@ -120,7 +120,7 @@ namespace NodeBrain
 
 	void EntityGraph::Evaluate()
 	{
-		for (auto& nodeID : m_TopSortedNodes)
-			m_Nodes[nodeID]->Evaluate();
+		for (auto& node : m_TopSortedNodes)
+			node->Evaluate();
 	}
 }

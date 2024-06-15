@@ -11,14 +11,14 @@ namespace NodeBrain
 		~EntityGraph() = default;
 
 		template<typename T, typename... Args>
-		std::shared_ptr<T> AddNode(Args&&... args)
+		T& AddNode(Args&&... args)
 		{
 			std::shared_ptr<T> node = std::make_shared<T>(std::forward<Args>(args)...);
-			m_Nodes[node->GetNodeID()] = node;
-			return node;
+			m_Nodes[node->m_NodeID] = node;
+			return *node;
 		}
 
-		void RemoveNode(NodeID node);
+		void RemoveNode(const Node& node);
 
 		// Returns false if cycle is detected.
 		bool AddLink(OutputPort& outputPort, InputPort& inputPort);
@@ -29,17 +29,14 @@ namespace NodeBrain
 		// If ran in a game loop, this should be called once at the beginning of each frame.
 		void Evaluate();
 
-		const std::unordered_map<NodeID, std::shared_ptr<Node>>& GetNodes() const { return m_Nodes; }
-
-		std::shared_ptr<Node> GetNode(NodeID id) { return m_Nodes[id]; }
-
 	private:
 		// Returns false if cycle is detected.
 		bool TopologicalSort();
 
 	private:
+		// TODO: Profile. Vector probably faster.
 		std::unordered_map<NodeID, std::shared_ptr<Node>> m_Nodes;
 		std::unordered_map<NodeID, std::vector<NodeID>> m_AdjList;
-		std::vector<NodeID> m_TopSortedNodes;
+		std::vector<Node*> m_TopSortedNodes;
 	};
 }

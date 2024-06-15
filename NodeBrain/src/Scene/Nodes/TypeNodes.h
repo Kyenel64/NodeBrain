@@ -9,9 +9,7 @@ namespace NodeBrain
 	public:
 		IntNode() : Node(NodeType::Int)
 		{
-			m_OutputPorts.resize(1);
-
-			m_OutputPorts[0] = { 1, m_NodeID, PortDataType::Int, "Out" };
+			m_OutputPorts.push_back(OutputPort(*this, PortDataType::Int, 0));
 		}
 		virtual ~IntNode() = default;
 
@@ -25,9 +23,7 @@ namespace NodeBrain
 	public:
 		FloatNode() : Node(NodeType::Float)
 		{
-			m_OutputPorts.resize(1);
-
-			m_OutputPorts[0] = { 1.0f, m_NodeID, PortDataType::Float, "Out" };
+			m_OutputPorts.push_back(OutputPort(*this, PortDataType::Float, 0.0f));
 		}
 		virtual ~FloatNode() = default;
 
@@ -41,9 +37,7 @@ namespace NodeBrain
 	public:
 		BoolNode() : Node(NodeType::Bool)
 		{
-			m_OutputPorts.resize(1);
-
-			m_OutputPorts[0] = { true, m_NodeID, PortDataType::Bool, "Out"};
+			m_OutputPorts.push_back(OutputPort(*this, PortDataType::Bool, true));
 		}
 		virtual ~BoolNode() = default;
 
@@ -55,12 +49,9 @@ namespace NodeBrain
 	class StringNode : public Node
 	{
 	public:
-		StringNode()
-				: Node(NodeType::String)
+		StringNode() : Node(NodeType::String)
 		{
-			m_OutputPorts.resize(1);
-
-			m_OutputPorts[0] = { std::string(), m_NodeID, PortDataType::String, "Out" };
+			m_OutputPorts.push_back(OutputPort(*this, PortDataType::String, std::string()));
 		}
 		virtual ~StringNode() = default;
 
@@ -72,17 +63,13 @@ namespace NodeBrain
 	class Vec3Node : public Node
 	{
 	public:
-		Vec3Node()
-				: Node(NodeType::Vec3)
+		Vec3Node() : Node(NodeType::Vec3)
 		{
-			m_InputPorts.resize(3);
-			m_OutputPorts.resize(1);
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
 
-			m_InputPorts[0] = { nullptr, 0.0f, m_NodeID, PortDataType::Float, "X" };
-			m_InputPorts[1] = { nullptr, 0.0f, m_NodeID, PortDataType::Float, "Y" };
-			m_InputPorts[2] = { nullptr, 0.0f, m_NodeID, PortDataType::Float, "Z" };
-
-			m_OutputPorts[0] = { glm::vec3(0.0f), m_NodeID, PortDataType::Vec3, "Out" };
+			m_OutputPorts.push_back(OutputPort(*this, PortDataType::Vec3, glm::vec3(0.0f)));
 		}
 
 		virtual ~Vec3Node() = default;
@@ -100,18 +87,14 @@ namespace NodeBrain
 	class Vec4Node : public Node
 	{
 	public:
-		Vec4Node()
-				: Node(NodeType::Vec4)
+		Vec4Node() : Node(NodeType::Vec4)
 		{
-			m_InputPorts.resize(4);
-			m_OutputPorts.resize(1);
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
 
-			m_InputPorts[0] = { nullptr, 0.0f, m_NodeID, PortDataType::Float, "X" };
-			m_InputPorts[1] = { nullptr, 0.0f, m_NodeID, PortDataType::Float, "Y" };
-			m_InputPorts[2] = { nullptr, 0.0f, m_NodeID, PortDataType::Float, "Z" };
-			m_InputPorts[3] = { nullptr, 0.0f, m_NodeID, PortDataType::Float, "W" };
-
-			m_OutputPorts[0] = { glm::vec4(0.0f), m_NodeID, PortDataType::Vec4, "Out" };
+			m_OutputPorts.push_back(OutputPort(*this, PortDataType::Vec4, glm::vec4(0.0f)));
 		}
 
 		virtual ~Vec4Node() = default;
@@ -130,12 +113,9 @@ namespace NodeBrain
 	class ColorNode : public Node
 	{
 	public:
-		ColorNode()
-				: Node(NodeType::Color)
+		ColorNode() : Node(NodeType::Color)
 		{
-			m_OutputPorts.resize(1);
-
-			m_OutputPorts[0] = { glm::vec4(1.0f), m_NodeID, PortDataType::Color, "Out" };
+			m_OutputPorts.push_back(OutputPort(*this, PortDataType::Color, glm::vec4(1.0f)));
 		}
 
 		virtual ~ColorNode() = default;

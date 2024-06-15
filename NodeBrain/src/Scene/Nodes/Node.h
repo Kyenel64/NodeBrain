@@ -10,7 +10,7 @@
 
 namespace NodeBrain
 {
-	static uint32_t hashIndex = 0; // TODO
+	static uint32_t hashIndex = 1; // TODO
 
 	using NodeID = uint32_t;
 
@@ -36,30 +36,59 @@ namespace NodeBrain
 
 	using PortData = std::variant<int, float, bool, glm::vec3, glm::vec4, std::string>;
 
+	class Node;
+
 	struct OutputPort
 	{
+	public:
+		OutputPort(Node& parentNode, PortDataType type, PortData initialValue)
+			: m_ParentNode(parentNode), m_Type(type), Value(initialValue) {}
+
+		PortDataType GetType() const { return m_Type; }
+		Node& GetParentNode() const { return m_ParentNode; }
+
+	public:
 		PortData Value;
-		NodeID ParentNodeID;
-		PortDataType DataType;
-		std::string Name;
+
+	private:
+		Node& m_ParentNode;
+		PortDataType m_Type;
+
+	public:
+		friend class EntityGraph;
 	};
 
-	struct InputPort
+
+
+	class InputPort
 	{
-		OutputPort* LinkedOutputPort = nullptr;
-		PortData DefaultValue;
-		NodeID ParentNodeID;
-		PortDataType DataType;
-		std::string Name;
+	public:
+		InputPort(Node& parentNode, PortDataType type, PortData defaultValue)
+			: m_ParentNode(parentNode), m_Type(type), m_DefaultValue(defaultValue) {}
 
 		const PortData& GetValue() const
 		{
-			if (LinkedOutputPort)
-				return LinkedOutputPort->Value;
+			if (m_LinkedOutputPort)
+				return m_LinkedOutputPort->Value;
 			else
-				return DefaultValue;
+				return m_DefaultValue;
 		}
+
+		OutputPort* GetLinkedOutputPort() const { return m_LinkedOutputPort; }
+		PortDataType GetType() const { return m_Type; }
+		Node& GetParentNode() const { return m_ParentNode; }
+
+	private:
+		OutputPort* m_LinkedOutputPort = nullptr;
+		Node& m_ParentNode;
+		PortData m_DefaultValue;
+		PortDataType m_Type;
+
+	public:
+		friend class EntityGraph;
 	};
+
+
 
 	class Node
 	{
@@ -71,7 +100,6 @@ namespace NodeBrain
 		// Runs the logic of the node and sets output values
 		virtual void Evaluate() = 0;
 
-		NodeID GetNodeID() const { return m_NodeID; }
 		NodeType GetType() const { return m_Type; }
 
 		InputPort& GetInputPort(uint32_t index)
