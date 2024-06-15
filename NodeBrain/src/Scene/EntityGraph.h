@@ -18,7 +18,7 @@ namespace NodeBrain
 			return *node;
 		}
 
-		void RemoveNode(const Node& node);
+		void RemoveNode(Node& removingNode);
 
 		// Returns false if cycle is detected.
 		bool AddLink(OutputPort& outputPort, InputPort& inputPort);
@@ -34,9 +34,9 @@ namespace NodeBrain
 		bool TopologicalSort();
 
 	private:
-		// TODO: Profile. Vector probably faster.
+		// TODO: Profile topological sort.
 		std::unordered_map<NodeID, std::shared_ptr<Node>> m_Nodes;
-		std::unordered_map<NodeID, std::vector<NodeID>> m_AdjList;
+		std::vector<std::pair<NodeID, NodeID>> m_AdjList;
 		std::vector<Node*> m_TopSortedNodes;
 	};
 }
