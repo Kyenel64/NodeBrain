@@ -24,9 +24,6 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		for (Layer* layer : m_Layers)
-			layer->OnDetach();
-
 		NB_INFO("Shutdown Application");
 	}
 
@@ -88,7 +85,6 @@ namespace NodeBrain
 			return;
 
 		m_Layers.push_back(layer);
-		layer->OnAttach();
 	}
 
 	void App::OnWindowClose(WindowClosedEvent& e)

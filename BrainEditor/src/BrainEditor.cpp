@@ -2,7 +2,8 @@
 
 namespace NodeBrain
 {
-	void BrainEditor::OnAttach()
+	BrainEditor::BrainEditor(Renderer* renderer)
+		: m_Renderer(renderer), m_RendererAPI(renderer->GetAPI()), m_Context(renderer->GetContext()), m_Window(renderer->GetContext()->GetWindow())
 	{
 		NB_INFO("Attached Brain Editor layer");
 
@@ -14,11 +15,6 @@ namespace NodeBrain
 
 		m_EditorCamera = std::make_shared<EditorCamera>(45.0f, m_ViewportImage->GetConfiguration().Width / m_ViewportImage->GetConfiguration().Height, 0.01f, 1000.0f);
 		m_EditorScene = std::make_shared<Scene>(m_Renderer);
-	}
-
-	void BrainEditor::OnDetach()
-	{
-
 	}
 
 	void BrainEditor::OnEvent(Event& event)
