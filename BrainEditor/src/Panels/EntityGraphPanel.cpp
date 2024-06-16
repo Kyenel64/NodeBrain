@@ -41,6 +41,7 @@ namespace NodeBrain
 		}
 		m_GridOrigin = { m_GridOrigin.x + m_EntityGraphPan.x, m_GridOrigin.y + m_EntityGraphPan.y };
 
+
 		if (m_SelectedEntity)
 		{
 			drawList->AddCircle(m_GridOrigin, 5.0f, ImGui::GetColorU32({ 1.0f, 0.0f, 0.0f, 1.0f}));
@@ -137,13 +138,9 @@ namespace NodeBrain
 			ProcessAddNodePopup();
 
 			// Deleting nodes must be handled at the end.
-			if (m_SelectedNode && ImGui::IsKeyPressed(ImGuiKey_Backspace))
-			{
-				if (m_SelectedNode->GetType() == NodeType::SpriteComponent)
-					m_ActiveScene->RemoveComponent<SpriteComponent>(m_SelectedEntity);
-				m_NodeUIs.erase(m_SelectedNode);
-				m_EntityGraph->RemoveNode(*m_SelectedNode);
-			}
+			if (m_SelectedNode && ImGui::IsWindowFocused() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+				ImGui::OpenPopup("Node Menu");
+			ProcessNodeMenuPopup();
 		}
 
 		ImGui::End();
@@ -156,25 +153,27 @@ namespace NodeBrain
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
 		ImGuiIO& io = ImGui::GetIO();
 
-		ImGui::SetCursorScreenPos({ m_GridOrigin.x + nodeUI.Pos.x, m_GridOrigin.y + nodeUI.Pos.y });
+		ImGui::SetNextWindowPos({ m_GridOrigin.x + nodeUI.Pos.x, m_GridOrigin.y + nodeUI.Pos.y });
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, { 0.1f, 0.1f, 0.1f, 1.0f});
 		ImGui::PushStyleColor(ImGuiCol_Border, nodeUI.NodeColor);
 		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGui::BeginChild("NodeFrame", nodeUI.Size, ImGuiChildFlags_Border, ImGuiWindowFlags_None);
 
+		if (ImGui::IsWindowFocused())
+			m_SelectedNode = &node;
+
 		// --- Node Header ---
 		ImGui::Text("%s", nodeUI.NodeName.c_str());
-
 		ImVec2 p1 = ImGui::GetCursorScreenPos();
-		drawList->AddLine({ p1.x - ImGui::GetStyle().WindowPadding.x, p1.y }, { p1.x + nodeUI.Size.x- ImGui::GetStyle().WindowPadding.x, p1.y }, ImGui::GetColorU32(nodeUI.NodeColor));
+		drawList->AddLine({ p1.x - ImGui::GetStyle().WindowPadding.x, p1.y }, { p1.x + nodeUI.Size.x - ImGui::GetStyle().WindowPadding.x, p1.y },
+				ImGui::GetColorU32(nodeUI.NodeColor));
 
 
 		// --- Ports ---
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { ImGui::GetStyle().ItemSpacing.x, 0.0f});
 
 		// Input Ports
-		int index = 0;
 		for (size_t i = 0; i < node.InputCount(); i++)
 		{
 			InputPort& inputPort = node.GetInputPort(i);
@@ -182,9 +181,9 @@ namespace NodeBrain
 			ImVec2 portScreenPos = { ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y + ((ImGui::GetFontSize() / 2) + ImGui::GetStyle().FramePadding.y)};
 			inputPortUI.PortPos = { portScreenPos.x - m_GridOrigin.x, portScreenPos.y - m_GridOrigin.y };
 
-			std::string label = "##input" + std::to_string(index);
+			std::string label = "##input" + std::to_string(i);
 
-			ImGui::Button("Placeholder", { nodeUI.Size.x / 2, 0 });
+			ImGui::Button(inputPort.GetDebugName().c_str(), { nodeUI.Size.x / 2, 0 });
 
 			drawList->AddCircleFilled(portScreenPos, 5.0f, ImGui::GetColorU32(nodeUI.NodeColor));
 
@@ -207,12 +206,9 @@ namespace NodeBrain
 				m_SelectedOutputPort = inputPort.GetLinkedOutputPort();
 				m_AddingLink = true;
 			}
-
-			index++;
 		}
 
 		// Output Ports
-		index = 0;
 		ImGui::SetCursorScreenPos({ m_GridOrigin.x + nodeUI.Pos.x + (nodeUI.Size.x / 2), p1.y });
 		for (size_t i = 0; i < node.OutputCount(); i++)
 		{
@@ -221,7 +217,7 @@ namespace NodeBrain
 			ImVec2 portScreenPos = { ImGui::GetCursorScreenPos().x + (nodeUI.Size.x / 2), ImGui::GetCursorScreenPos().y + ((ImGui::GetFontSize() / 2) + ImGui::GetStyle().FramePadding.y)};
 			outputPortUI.PortPos = { portScreenPos.x - m_GridOrigin.x, portScreenPos.y - m_GridOrigin.y };
 
-			ImGui::Button("Placeholder", { nodeUI.Size.x / 2, 0 });
+			ImGui::Button(outputPort.GetDebugName().c_str(), { nodeUI.Size.x / 2, 0 });
 
 			drawList->AddCircleFilled(portScreenPos, 5.0f, ImGui::GetColorU32(nodeUI.NodeColor));
 
@@ -231,8 +227,6 @@ namespace NodeBrain
 				m_SelectedOutputPort = &outputPort;
 				m_AddingLink = true;
 			}
-
-			index++;
 		}
 
 		ImGui::PopStyleVar();
@@ -244,16 +238,12 @@ namespace NodeBrain
 
 
 		// Input
-		if (ImGui::IsWindowFocused())
+		if (ImGui::IsWindowFocused() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
 		{
-			m_SelectedNode = &node;
-
-			if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
-			{
-				nodeUI.Pos.x += io.MouseDelta.x;
-				nodeUI.Pos.y += io.MouseDelta.y;
-			}
+			nodeUI.Pos.x += io.MouseDelta.x;
+			nodeUI.Pos.y += io.MouseDelta.y;
 		}
+
 
 		ImGui::EndChild();
 		ImGui::PopStyleColor(2);
@@ -268,7 +258,11 @@ namespace NodeBrain
 		{
 			if (ImGui::MenuItem("Delete"))
 			{
+				if (m_SelectedNode->GetType() == NodeType::SpriteComponent)
+					m_ActiveScene->RemoveComponent<SpriteComponent>(m_SelectedEntity);
+				m_NodeUIs.erase(m_SelectedNode);
 				m_EntityGraph->RemoveNode(*m_SelectedNode);
+				m_SelectedNode = nullptr;
 			}
 			ImGui::EndPopup();
 		}

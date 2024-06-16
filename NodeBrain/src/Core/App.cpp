@@ -36,6 +36,8 @@ namespace NodeBrain
 		{
 			NB_PROFILE_SCOPE("Frame");
 
+			m_Window->PollEvents();
+
 			// Calculate deltaTime
 			auto time = (float)Window::GetTime();
 			float deltaTime = time - m_LastFrameTime;
@@ -63,7 +65,6 @@ namespace NodeBrain
 			Input::ProcessPollStates();
 
 			m_Renderer->GetContext()->SwapBuffers();
-			m_Window->PollEvents();
 		}
 	}
 

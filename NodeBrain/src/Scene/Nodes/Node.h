@@ -41,11 +41,12 @@ namespace NodeBrain
 	struct OutputPort
 	{
 	public:
-		OutputPort(Node& parentNode, PortDataType type, PortData initialValue)
-			: m_ParentNode(parentNode), m_Type(type), Value(initialValue) {}
+		OutputPort(Node& parentNode, PortDataType type, PortData initialValue, const std::string& debugName = "Out")
+			: m_ParentNode(parentNode), m_Type(type), Value(initialValue), m_DebugName(debugName) {}
 
 		PortDataType GetType() const { return m_Type; }
 		Node& GetParentNode() const { return m_ParentNode; }
+		const std::string& GetDebugName() const { return m_DebugName; }
 
 	public:
 		PortData Value;
@@ -53,6 +54,7 @@ namespace NodeBrain
 	private:
 		Node& m_ParentNode;
 		PortDataType m_Type;
+		std::string m_DebugName;
 
 	public:
 		friend class EntityGraph;
@@ -63,8 +65,8 @@ namespace NodeBrain
 	class InputPort
 	{
 	public:
-		InputPort(Node& parentNode, PortDataType type, PortData defaultValue)
-			: m_ParentNode(parentNode), m_Type(type), m_DefaultValue(defaultValue) {}
+		InputPort(Node& parentNode, PortDataType type, PortData defaultValue, const std::string& debugName)
+			: m_ParentNode(parentNode), m_Type(type), m_DefaultValue(defaultValue), m_DebugName(debugName) {}
 
 		const PortData& GetValue() const
 		{
@@ -77,12 +79,14 @@ namespace NodeBrain
 		OutputPort* GetLinkedOutputPort() const { return m_LinkedOutputPort; }
 		PortDataType GetType() const { return m_Type; }
 		Node& GetParentNode() const { return m_ParentNode; }
+		const std::string& GetDebugName() const { return m_DebugName; }
 
 	private:
 		OutputPort* m_LinkedOutputPort = nullptr;
 		Node& m_ParentNode;
 		PortData m_DefaultValue;
 		PortDataType m_Type;
+		std::string m_DebugName;
 
 	public:
 		friend class EntityGraph;

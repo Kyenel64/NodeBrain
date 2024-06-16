@@ -65,9 +65,9 @@ namespace NodeBrain
 	public:
 		Vec3Node() : Node(NodeType::Vec3)
 		{
-			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
-			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
-			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f, "X"));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f, "Y"));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f, "Z"));
 
 			m_OutputPorts.push_back(OutputPort(*this, PortDataType::Vec3, glm::vec3(0.0f)));
 		}
@@ -89,10 +89,10 @@ namespace NodeBrain
 	public:
 		Vec4Node() : Node(NodeType::Vec4)
 		{
-			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
-			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
-			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
-			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f, "X"));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f, "Y"));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f, "Z"));
+			m_InputPorts.push_back(InputPort(*this, PortDataType::Float, 0.0f, "W"));
 
 			m_OutputPorts.push_back(OutputPort(*this, PortDataType::Vec4, glm::vec4(0.0f)));
 		}
