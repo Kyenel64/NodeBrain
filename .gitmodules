@@ -14,3 +14,6 @@
 	path = NodeBrain/thirdparty/ImGui
 	url = https://github.com/ocornut/ImGui
 	branch = docking
+[submodule "NodeBrain/thirdparty/EnTT"]
+	path = NodeBrain/thirdparty/EnTT
+	url = https://github.com/skypjack/entt

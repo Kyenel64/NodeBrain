@@ -150,7 +150,6 @@ namespace NodeBrain
 			uint32_t size = (uint32_t)((uint8_t*)m_Data.QuadVertexBufferPtr - (uint8_t*)m_Data.QuadVertexBufferBase);
 			m_Data.QuadVertexBuffer->SetData(m_Data.QuadVertexBufferBase, size);
 
-			m_Data.QuadPipeline->BindDescriptorSet(m_Data.GlobalDescriptorSet);
 			m_RendererAPI->BeginRenderPass(m_Data.QuadPipeline);
 			m_RendererAPI->DrawIndexed(m_Data.QuadIndexBuffer, m_Data.QuadIndexCount, 0);
 			m_RendererAPI->EndRenderPass(m_Data.QuadPipeline);

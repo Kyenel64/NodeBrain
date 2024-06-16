@@ -15,7 +15,7 @@ namespace NodeBrain
 		NB_ERROR("GLFW Error {0}: {1}", error, description);
 	}
 
-	Window::Window(std::string windowName, uint32_t width, uint32_t height)
+	Window::Window(std::string windowName, uint32_t width, uint32_t height, bool maximize)
 		: m_WindowName(std::move(windowName))
 	{
 		NB_PROFILE_FN();
@@ -41,6 +41,9 @@ namespace NodeBrain
 		NB_INFO("Created Window {0}, size: {1}, {2}", m_WindowName, m_Data.Width, m_Data.Height);
 		// Set data that can be accessed when calling glfwGetWindowUserPointer
 		glfwSetWindowUserPointer(m_Window, &m_Data);
+
+		if (maximize)
+			glfwMaximizeWindow(m_Window);
 
 		// Vulkan extensions
 		uint32_t extensionCount = 0;

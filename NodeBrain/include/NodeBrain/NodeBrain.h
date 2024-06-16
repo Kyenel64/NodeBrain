@@ -26,3 +26,13 @@
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanRendererAPI.h"
 #include "GAPI/Vulkan/VulkanImGuiLayer.h"
+
+// Scene
+#include "Scene/Scene.h"
+#include "Scene/Entity.h"
+#include "Scene/Component.h"
+#include "Scene/EntityGraph.h"
+#include "Scene/Nodes/Node.h"
+#include "Scene/Nodes/TypeNodes.h"
+#include "Scene/Nodes/ComponentNodes.h"
+#include "Scene/Nodes/MathNodes.h"

@@ -50,13 +50,24 @@ set (RendererFiles
 "src/Renderer/DescriptorSet.h" "src/Renderer/DescriptorSet.cpp"
 "src/Renderer/EditorCamera.h" "src/Renderer/EditorCamera.cpp")
 
+set (SceneFiles
+"src/Scene/Scene.h" "src/Scene/Scene.cpp"
+"src/Scene/Entity.h"
+"src/Scene/Component.h"
+"src/Scene/EntityGraph.h" "src/Scene/EntityGraph.cpp"
+"src/Scene/Nodes/Node.h"
+        src/Scene/Nodes/TypeNodes.h
+        src/Scene/Nodes/ComponentNodes.h
+        src/Scene/Nodes/MathNodes.h)
+
 # Source files
 add_library ( ${PROJECT_NAME} 
     ${CoreFiles}
     ${RendererFiles}
     ${VulkanFiles}
-    ${ImGuiSrcFiles} 
-    "thirdparty/VMA/vk_mem_alloc.h" "thirdparty/VMA/vk_mem_alloc.cpp" 
+    ${ImGuiSrcFiles}
+    ${SceneFiles}
+    "thirdparty/VMA/vk_mem_alloc.h" "thirdparty/VMA/vk_mem_alloc.cpp"
     "src/Utils/FileUtils.h" "src/Utils/FileUtils.cpp")
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
@@ -68,14 +79,16 @@ find_package(Vulkan REQUIRED)
 add_subdirectory("thirdparty/glm")
 add_subdirectory("thirdparty/glfw")
 add_subdirectory("thirdparty/spdlog")
+add_subdirectory("thirdparty/EnTT")
 
 # Include Paths
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ImGui/)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/EnTT/single_include)
 
 # Libraries
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw Vulkan::Vulkan spdlog glm)
+target_link_libraries(${PROJECT_NAME} PUBLIC glfw Vulkan::Vulkan EnTT spdlog glm)
 
 # Defines
 target_compile_definitions(${PROJECT_NAME} PUBLIC $<$<CONFIG:Debug>:NB_DEBUG>)
