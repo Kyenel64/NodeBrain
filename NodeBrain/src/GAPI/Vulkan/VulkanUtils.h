@@ -1,13 +1,13 @@
 #pragma once
 
-#include <vulkan/vk_enum_string_helper.h>
+#include <vulkan/vulkan_to_string.hpp>
 
 #include "Renderer/DescriptorSet.h"
 #include "Renderer/Image.h"
 #include "GAPI/Vulkan/VulkanShader.h"
 
 
-#define VK_CHECK(result) if (result) NB_ERROR(string_VkResult(result));
+#define VK_CHECK(result) if (result) NB_ERROR(vulkan_to_string(result));
 
 namespace NodeBrain::Utils
 {
