@@ -13,8 +13,10 @@ namespace NodeBrain
 		template<typename T, typename... Args>
 		T& AddNode(Args&&... args)
 		{
+			NB_PROFILE_FN();
+
 			std::shared_ptr<T> node = std::make_shared<T>(std::forward<Args>(args)...);
-			m_Nodes[node->m_NodeID] = node;
+			m_Nodes.emplace(node->m_NodeID, node);
 			return *node;
 		}
 

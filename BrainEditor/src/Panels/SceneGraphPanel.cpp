@@ -18,7 +18,7 @@ namespace NodeBrain
 		for (auto e : view)
 		{
 			Entity entity = Entity(e);
-			ImGui::PushID(entity);
+			ImGui::PushID((uint32_t)entity);
 
 			ImGuiTreeNodeFlags flags = m_SelectedEntity == entity ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
 			flags |= ImGuiTreeNodeFlags_OpenOnArrow;

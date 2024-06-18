@@ -23,7 +23,6 @@ namespace NodeBrain
 
 	void EntityGraphPanel::Draw(std::shared_ptr<Scene> activeScene, Entity selectedEntity)
 	{
-		m_EntityGraph = &activeScene->GetEntityGraph(selectedEntity);
 		m_SelectedEntity = selectedEntity;
 		m_ActiveScene = activeScene;
 
@@ -44,6 +43,8 @@ namespace NodeBrain
 
 		if (m_SelectedEntity)
 		{
+			m_EntityGraph = &activeScene->GetEntityGraph(selectedEntity);
+
 			drawList->AddCircle(m_GridOrigin, 5.0f, ImGui::GetColorU32({ 1.0f, 0.0f, 0.0f, 1.0f}));
 
 			// Draw a curve to mouse position if in the process of linking ports
@@ -110,7 +111,7 @@ namespace NodeBrain
 					DrawNodeUI(*node, [&]()
 					{
 						ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
-						std::string tag = std::get<std::string>(node->GetOutputPort(0).Value).c_str();
+						std::string tag = std::get<std::string>(node->GetOutputPort(0).Value);
 						char buffer[256];
 						memset(buffer, 0, sizeof(buffer));
 						strcpy(buffer, tag.c_str());
@@ -137,16 +138,13 @@ namespace NodeBrain
 				ImGui::OpenPopup("Add Node");
 			ProcessAddNodePopup();
 
-			// Deleting nodes must be handled at the end.
-			if (m_SelectedNode && ImGui::IsWindowFocused() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-				ImGui::OpenPopup("Node Menu");
 			ProcessNodeMenuPopup();
 		}
 
 		ImGui::End();
 	}
 
-	void EntityGraphPanel::DrawNodeUI(Node& node, std::function<void()> uiFunction)
+	void EntityGraphPanel::DrawNodeUI(Node& node, const std::function<void()>& uiFunction)
 	{
 		NodeUI& nodeUI = m_NodeUIs[&node];
 		ImGui::PushID(&node);
@@ -162,6 +160,9 @@ namespace NodeBrain
 
 		if (ImGui::IsWindowFocused())
 			m_SelectedNode = &node;
+
+		if (ImGui::IsWindowFocused() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+			ImGui::OpenPopup("Node Menu");
 
 		// --- Node Header ---
 		ImGui::Text("%s", nodeUI.NodeName.c_str());

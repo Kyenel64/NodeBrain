@@ -1,29 +1,12 @@
 #include "NBpch.h"
 #include "EntityGraph.h"
 
-#include <queue>
-
 namespace NodeBrain
 {
-	bool EntityGraph::AddLink(OutputPort& outputPort, InputPort& inputPort)
-	{
-		inputPort.m_LinkedOutputPort = &outputPort;
-		m_AdjList.push_back(std::make_pair(outputPort.m_ParentNode.m_NodeID, inputPort.m_ParentNode.m_NodeID));
-
-		// If added link creates a cycle, undo the link and sort.
-		if (!TopologicalSort())
-		{
-			RemoveLink(outputPort, inputPort);
-			TopologicalSort();
-			NB_ERROR("Failed to create link. Cycle detected.");
-			return false;
-		}
-
-		return true;
-	}
-
 	void EntityGraph::RemoveNode(Node& removingNode)
 	{
+		NB_PROFILE_FN();
+
 		NodeID removingNodeID = removingNode.m_NodeID;
 
 		// Remove links between this node's output ports and the linked input ports
@@ -43,11 +26,11 @@ namespace NodeBrain
 		for (auto& inputPort : m_Nodes[removingNode.m_NodeID]->m_InputPorts)
 			inputPort.m_LinkedOutputPort = nullptr;
 
-		// Remove node from adjacency list.
-		for (size_t i = 0; i < m_AdjList.size(); i++)
+		// Remove all node references from adjacency list.
+		for (auto it = m_AdjList.begin(); it != m_AdjList.end(); it++)
 		{
-			if (m_AdjList[i].first == removingNodeID || m_AdjList[i].second == removingNodeID)
-				m_AdjList.erase(m_AdjList.begin() + i);
+			if (it->first == removingNodeID || it->second == removingNodeID)
+				m_AdjList.erase(it);
 		}
 
 		// Destroy node instance
@@ -56,14 +39,38 @@ namespace NodeBrain
 		TopologicalSort();
 	}
 
+	bool EntityGraph::AddLink(OutputPort& outputPort, InputPort& inputPort)
+	{
+		NB_PROFILE_FN();
+
+		inputPort.m_LinkedOutputPort = &outputPort;
+		m_AdjList.emplace_back(outputPort.m_ParentNode.m_NodeID, inputPort.m_ParentNode.m_NodeID);
+
+		// If added link creates a cycle, undo the link and sort.
+		if (!TopologicalSort())
+		{
+			RemoveLink(outputPort, inputPort);
+			TopologicalSort();
+			NB_ERROR("Failed to create link. Cycle detected.");
+			return false;
+		}
+
+		return true;
+	}
+
 	void EntityGraph::RemoveLink(OutputPort &outputPort, InputPort &inputPort)
 	{
+		NB_PROFILE_FN();
+
 		inputPort.m_LinkedOutputPort = nullptr;
 
-		for (size_t i = 0; i < m_AdjList.size(); i++)
+		for (auto it = m_AdjList.begin(); it != m_AdjList.end(); it++)
 		{
-			if (m_AdjList[i].first == outputPort.m_ParentNode.m_NodeID && m_AdjList[i].second == inputPort.m_ParentNode.m_NodeID)
-				m_AdjList.erase(m_AdjList.begin() + i);
+			if (it->first == outputPort.m_ParentNode.m_NodeID && it->second == inputPort.m_ParentNode.m_NodeID)
+			{
+				m_AdjList.erase(it);
+				break;
+			}
 		}
 
 		TopologicalSort();
@@ -71,6 +78,8 @@ namespace NodeBrain
 
 	bool EntityGraph::TopologicalSort()
 	{
+		NB_PROFILE_FN();
+
 		m_TopSortedNodes.clear();
 
 		// inDegree == number of connected inputs
@@ -82,8 +91,8 @@ namespace NodeBrain
 			inDegrees[id] = 0;
 
 		// Calculate number of indegrees for each node.
-		for (auto& [ nodeID, adjNodeID] : m_AdjList)
-			inDegrees[adjNodeID]++;
+		for (auto& link : m_AdjList)
+			inDegrees[link.second]++;
 
 		// Push nodes with an indegree of 0 to queue
 		for (auto& [ nodeID, inDegree] : inDegrees)
@@ -98,13 +107,13 @@ namespace NodeBrain
 			NodeID curNodeID = nodesWithNoInput.front();
 			m_TopSortedNodes.push_back(m_Nodes[curNodeID].get());
 
-			for (auto& [ nodeID, adjNodeID] : m_AdjList)
+			for (auto& link : m_AdjList)
 			{
-				if (nodeID == curNodeID)
+				if (link.first == curNodeID)
 				{
-					inDegrees[adjNodeID]--;
-					if (inDegrees[adjNodeID] == 0)
-						nodesWithNoInput.push(adjNodeID);
+					inDegrees[link.second]--;
+					if (inDegrees[link.second] == 0)
+						nodesWithNoInput.push(link.second);
 				}
 			}
 			nodesWithNoInput.pop();
@@ -125,6 +134,8 @@ namespace NodeBrain
 
 	void EntityGraph::Evaluate()
 	{
+		NB_PROFILE_FN();
+
 		for (auto& node : m_TopSortedNodes)
 			node->Evaluate();
 	}

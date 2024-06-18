@@ -7,10 +7,10 @@ namespace NodeBrain
 	class TagComponentNode : public Node
 	{
 	public:
-		TagComponentNode(TagComponent& tagComp)
+		explicit TagComponentNode(TagComponent& tagComp)
 				: m_TagComponent(tagComp), Node(NodeType::TagComponent)
 		{
-			m_InputPorts.push_back(InputPort(*this, PortDataType::String, std::string(), "Tag"));
+			m_InputPorts.emplace_back(*this, PortDataType::String, std::string(), "Tag");
 		}
 
 		void Evaluate() override
@@ -27,12 +27,12 @@ namespace NodeBrain
 	class TransformComponentNode : public Node
 	{
 	public:
-		TransformComponentNode(TransformComponent& transformComp)
+		explicit TransformComponentNode(TransformComponent& transformComp)
 				: m_TransformComponent(transformComp), Node(NodeType::TransformComponent)
 		{
-			m_InputPorts.push_back(InputPort(*this, PortDataType::Vec3, glm::vec3(0.0f), "Position"));
-			m_InputPorts.push_back(InputPort(*this, PortDataType::Vec3, glm::vec3(0.0f), "Rotation"));
-			m_InputPorts.push_back(InputPort(*this, PortDataType::Vec3, glm::vec3(1.0f), "Scale"));
+			m_InputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(0.0f), "Position");
+			m_InputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(0.0f), "Rotation");
+			m_InputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(1.0f), "Scale");
 		}
 
 		void Evaluate() override
@@ -51,10 +51,10 @@ namespace NodeBrain
 	class SpriteComponentNode : public Node
 	{
 	public:
-		SpriteComponentNode(SpriteComponent& spriteComp)
+		explicit SpriteComponentNode(SpriteComponent& spriteComp)
 				: m_SpriteComponent(spriteComp), Node(NodeType::SpriteComponent)
 		{
-			m_InputPorts.push_back(InputPort(*this, PortDataType::Color, glm::vec4(1.0f), "Color"));
+			m_InputPorts.emplace_back(*this, PortDataType::Color, glm::vec4(1.0f), "Color");
 		}
 
 		void Evaluate() override

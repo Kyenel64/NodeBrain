@@ -21,30 +21,60 @@ namespace NodeBrain
 		template<typename T, typename... Args>
 		T& AddComponent(Entity entity, Args&&... args)
 		{
-			NB_ASSERT(!HasComponent<T>(entity), "Entity already has component!");
+			NB_PROFILE_FN();
+
+			NB_ASSERT(!HasComponent<T>(entity), "Entity already has component.");
 			T& component = m_Registry.emplace<T>((entt::entity)entity, std::forward<Args>(args)...);
 			return component;
 		}
 
 		template<typename T>
-		T& GetComponent(Entity entity) { return m_Registry.get<T>((entt::entity)entity); }
+		T& GetComponent(Entity entity)
+		{
+			NB_PROFILE_FN();
+
+			NB_ASSERT(HasComponent<T>(entity), "Entity does not have component.");
+			return m_Registry.get<T>((entt::entity)entity);
+		}
 
 		template<typename T>
-		bool HasComponent(Entity entity) { return m_Registry.any_of<T>(entity); }
+		bool HasComponent(Entity entity)
+		{
+			NB_PROFILE_FN();
+
+			return m_Registry.any_of<T>((entt::entity)entity);
+		}
 
 		template<typename T>
-		void RemoveComponent(Entity entity) { m_Registry.remove<T>(entity); }
+		void RemoveComponent(Entity entity)
+		{
+			NB_PROFILE_FN();
 
-		void OnEditorUpdate(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage = nullptr);
-		//void OnRuntimeUpdate(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage = nullptr);
-
-		EntityGraph& GetEntityGraph(Entity entity) { return m_EntityGraphs[entity]; }
+			NB_ASSERT(HasComponent<T>(entity), "Entity does not have component.");
+			m_Registry.remove<T>((entt::entity)entity);
+		}
 
 		template<typename... T>
 		auto View()
 		{
+			NB_PROFILE_FN();
+
 			return m_Registry.view<T...>();
 		}
+
+		void OnEditorUpdate(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage = nullptr);
+		//void OnRuntimeUpdate(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage = nullptr);
+
+		EntityGraph& GetEntityGraph(Entity entity)
+		{
+			NB_PROFILE_FN();
+
+			NB_ASSERT(entity, "Entity null.");
+			NB_ASSERT(m_EntityGraphs.find(entity) != m_EntityGraphs.end(), "Could not find entity graph for given entity.");
+			return m_EntityGraphs.at(entity);
+		}
+
+
 
 	private:
 		Renderer* m_Renderer;

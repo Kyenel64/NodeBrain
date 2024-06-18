@@ -41,7 +41,7 @@ namespace NodeBrain
 
 	private:
 		// Main styling for nodes. Optional uiFunction for nodes with unique styling elements.
-		void DrawNodeUI(Node& node, std::function<void()> uiFunction = nullptr);
+		void DrawNodeUI(Node& node, const std::function<void()>& uiFunction = nullptr);
 
 		void ProcessAddNodePopup();
 		void ProcessNodeMenuPopup();

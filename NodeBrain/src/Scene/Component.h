@@ -11,7 +11,7 @@ namespace NodeBrain
 		std::string Tag;
 
 		TagComponent() = default;
-		TagComponent(const std::string& tag) : Tag(tag) {}
+		explicit TagComponent(std::string tag) : Tag(std::move(tag)) {}
 		TagComponent(const TagComponent&) = default;
 	};
 
@@ -21,7 +21,7 @@ namespace NodeBrain
 		glm::vec3 Scale = glm::vec3(1.0f);
 
 	private:
-		// In Degrees
+		// Rotation in degrees
 		glm::vec3 EulerRotation = glm::vec3(0.0f);
 		glm::quat QuatRotation = glm::quat();
 
@@ -30,7 +30,7 @@ namespace NodeBrain
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
 
-		glm::mat4 GetTransform()
+		[[nodiscard]] glm::mat4 GetTransform()
 		{
 			NB_PROFILE_FN();
 
@@ -39,7 +39,7 @@ namespace NodeBrain
 					glm::scale(glm::mat4(1.0f), Scale);
 		}
 
-		// In Degrees
+		// Rotation in degrees
 		void SetEulerRotation(const glm::vec3& rotation)
 		{
 			EulerRotation = rotation;
@@ -52,8 +52,8 @@ namespace NodeBrain
 			EulerRotation = glm::degrees(glm::eulerAngles(quat));
 		}
 
-		const glm::vec3& GetEulerRotation() const { return EulerRotation; }
-		const glm::quat& GetQuatRotation() const { return QuatRotation; }
+		[[nodiscard]] const glm::vec3& GetEulerRotation() const { return EulerRotation; }
+		[[nodiscard]] const glm::quat& GetQuatRotation() const { return QuatRotation; }
 	};
 
 	struct SpriteComponent
