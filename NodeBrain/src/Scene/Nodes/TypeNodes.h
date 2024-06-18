@@ -51,7 +51,7 @@ namespace NodeBrain
 	public:
 		StringNode() : Node(NodeType::String)
 		{
-			m_OutputPorts.emplace_back(OutputPort(*this, PortDataType::String, std::string());
+			m_OutputPorts.emplace_back(*this, PortDataType::String, std::string());
 		}
 		~StringNode() override = default;
 
@@ -69,7 +69,7 @@ namespace NodeBrain
 			m_InputPorts.emplace_back(*this, PortDataType::Float, 0.0f, "Y");
 			m_InputPorts.emplace_back(*this, PortDataType::Float, 0.0f, "Z");
 
-			m_OutputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(0.0f);
+			m_OutputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(0.0f));
 		}
 
 		~Vec3Node() override = default;
