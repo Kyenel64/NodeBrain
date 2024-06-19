@@ -12,12 +12,17 @@ namespace NodeBrain
 	EditorCamera::EditorCamera(float fov, float aspectRatio, float nearClip, float farClip)
 		: m_FOV(fov), m_AspectRatio(aspectRatio), m_NearClip(nearClip), m_FarClip(farClip)
 	{
+		NB_ASSERT(fov > 0, "Invalid FOV. FOV must not be less than 0.");
+		NB_ASSERT(aspectRatio > 0, "Invalid aspect ratio. Aspect ratio must not be less than 0.");
+
 		CalculateViewMatrix();
 		CalculateProjectionMatrix();
 	}
 
 	void EditorCamera::OnUpdate(float deltaTime)
 	{
+		NB_PROFILE_FN();
+
 		glm::vec2 curMousePos = Input::GetMousePosition();
 		glm::vec2 delta = curMousePos - m_MousePosition;
 		m_MousePosition = curMousePos;
@@ -52,6 +57,9 @@ namespace NodeBrain
 
 	void EditorCamera::Resize(uint32_t width, uint32_t height)
 	{
+		NB_ASSERT(width, "Invalid width. Width must be a non-zero value.");
+		NB_ASSERT(height, "Invalid height. Height must be a non-zero value.");
+
 		m_AspectRatio = (float)width / (float)height;
 
 		CalculateProjectionMatrix();
@@ -59,6 +67,8 @@ namespace NodeBrain
 
 	void EditorCamera::CalculateViewMatrix()
 	{
+		NB_PROFILE_FN();
+
 		m_Direction.x = cos(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));
 		m_Direction.y = sin(glm::radians(m_Pitch));
 		m_Direction.z = sin(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));
@@ -70,6 +80,8 @@ namespace NodeBrain
 
 	void EditorCamera::CalculateProjectionMatrix()
 	{
+		NB_PROFILE_FN();
+
 		m_ProjectionMatrix = glm::perspective(glm::radians(m_FOV), m_AspectRatio, m_NearClip, m_FarClip);
 	}
 }
