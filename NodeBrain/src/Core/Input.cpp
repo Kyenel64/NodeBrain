@@ -15,21 +15,21 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 		
-		return s_KeyState.find(key) != s_KeyState.end() && s_KeyState[key] == InputState::Pressed;
+		return s_KeyState.find(key) != s_KeyState.end() && s_KeyState.at(key) == InputState::Pressed;
 	}
 
 	bool Input::IsKeyHeld(Key key)
 	{
 		NB_PROFILE_FN();
 
-		return s_KeyState.find(key) != s_KeyState.end() && s_KeyState[key] == InputState::Held;
+		return s_KeyState.find(key) != s_KeyState.end() && s_KeyState.at(key) == InputState::Held;
 	}
 
 	bool Input::IsKeyReleased(Key key)
 	{
 		NB_PROFILE_FN();
 
-		return s_KeyState.find(key) != s_KeyState.end() && s_KeyState[key] == InputState::Released;
+		return s_KeyState.find(key) != s_KeyState.end() && s_KeyState.at(key) == InputState::Released;
 	}
 
 	void Input::SetKeyState(Key key, InputState keyState)
@@ -45,7 +45,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		return s_KeyState.find(key) != s_KeyState.end() ? s_KeyState[key] : InputState::None;
+		return s_KeyState.find(key) != s_KeyState.end() ? s_KeyState.at(key) : InputState::None;
 	}
 
 	void Input::SetMouseButtonState(MouseButton mouseButton, InputState mouseState)
@@ -61,7 +61,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() ? s_MouseButtonState[mouseButton] : InputState::None;
+		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() ? s_MouseButtonState.at(mouseButton) : InputState::None;
 	}
 
 	void Input::ProcessPollStates()
@@ -95,21 +95,21 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() && s_MouseButtonState[mouseButton] == InputState::Pressed;
+		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() && s_MouseButtonState.at(mouseButton) == InputState::Pressed;
 	}
 
 	bool Input::IsMouseButtonHeld(MouseButton mouseButton)
 	{
 		NB_PROFILE_FN();
 
-		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() && s_MouseButtonState[mouseButton] == InputState::Held;
+		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() && s_MouseButtonState.at(mouseButton) == InputState::Held;
 	}
 
 	bool Input::IsMouseButtonReleased(MouseButton mouseButton)
 	{
 		NB_PROFILE_FN();
 
-		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() && s_MouseButtonState[mouseButton] == InputState::Released;
+		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() && s_MouseButtonState.at(mouseButton) == InputState::Released;
 	}
 
 	glm::vec2 Input::GetMousePosition()
