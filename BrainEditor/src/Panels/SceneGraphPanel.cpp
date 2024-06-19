@@ -2,27 +2,29 @@
 
 namespace NodeBrain
 {
-	void SceneGraphPanel::Draw(std::shared_ptr<Scene> scene)
+	void SceneGraphPanel::Draw(const std::shared_ptr<Scene>& scene)
 	{
+		m_ActiveScene = scene;
+
 		ImGui::Begin("Scene Graph");
 
 		// --- Add Entity Button ---
 		if (ImGui::Button("+"))
 		{
-			scene->CreateEntity();
+			m_ActiveScene->CreateEntity();
 		}
 
 
 		// --- Entity Tree ---
-		auto view = scene->View<TagComponent>();
+		auto view = m_ActiveScene->View<TagComponent>();
 		for (auto e : view)
 		{
-			Entity entity = Entity(e);
-			ImGui::PushID((uint32_t)entity);
+			auto entity = Entity(e);
+			ImGui::PushID((int)(uint32_t)entity);
 
 			ImGuiTreeNodeFlags flags = m_SelectedEntity == entity ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
 			flags |= ImGuiTreeNodeFlags_OpenOnArrow;
-			bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, "%s", scene->GetComponent<TagComponent>(entity).Tag.c_str());
+			bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, "%s", m_ActiveScene->GetComponent<TagComponent>(entity).Tag.c_str());
 
 			if (ImGui::IsItemClicked())
 				m_SelectedEntity = entity;

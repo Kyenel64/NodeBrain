@@ -27,11 +27,11 @@ namespace NodeBrain
 	{
 		// On Viewport resize
 		if ((m_ViewportSize.x != 0.0f && m_ViewportSize.y != 0.0f) &&
-				(m_ViewportImage->GetConfiguration().Width != m_ViewportSize.x || m_ViewportImage->GetConfiguration().Height != m_ViewportSize.y))
+				((float)m_ViewportImage->GetConfiguration().Width != m_ViewportSize.x || (float)m_ViewportImage->GetConfiguration().Height != m_ViewportSize.y))
 		{
 			NB_INFO("Resizing Viewport");
-			m_ViewportImage->Resize(m_ViewportSize.x, m_ViewportSize.y);
-			m_EditorCamera->Resize(m_ViewportSize.x, m_ViewportSize.y);
+			m_ViewportImage->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_EditorCamera->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
 		m_EditorCamera->OnUpdate(deltaTime);

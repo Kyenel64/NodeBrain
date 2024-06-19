@@ -13,7 +13,7 @@ namespace NodeBrain
 	class BrainEditor : public Layer
 	{
 	public:
-		BrainEditor(Renderer* renderer);
+		explicit BrainEditor(Renderer* renderer);
 		~BrainEditor() override = default;
 
 		void OnEvent(Event& event) override;

@@ -11,7 +11,7 @@
 
 namespace NodeBrain
 {
-	static uint32_t hashIndex = 1; // TODO
+	static uint32_t hashIndex = 0; // TODO
 
 	using NodeID = uint32_t;
 

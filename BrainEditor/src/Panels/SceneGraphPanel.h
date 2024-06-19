@@ -12,11 +12,12 @@ namespace NodeBrain
 		SceneGraphPanel() = default;
 		~SceneGraphPanel() = default;
 
-		void Draw(std::shared_ptr<Scene> scene);
+		void Draw(const std::shared_ptr<Scene>& scene);
 
-		Entity GetSelectedEntity() const { return m_SelectedEntity; }
+		[[nodiscard]] Entity GetSelectedEntity() const { return m_SelectedEntity; }
 		
 	private:
 		Entity m_SelectedEntity;
+		std::shared_ptr<Scene> m_ActiveScene;
 	};
 }

@@ -221,9 +221,9 @@ namespace NodeBrain
 			if (!m_AddingLink && (Utils::Distance(portScreenPos, ImGui::GetMousePos()) <= 15.0f) &&
 				ImGui::IsMouseClicked(ImGuiMouseButton_Left) && inputPort.GetLinkedOutputPort())
 			{
-				m_EntityGraph->RemoveLink(*inputPort.GetLinkedOutputPort(), inputPort);
-				m_SelectedOutputPort = inputPort.GetLinkedOutputPort();
 				m_AddingLink = true;
+				m_SelectedOutputPort = inputPort.GetLinkedOutputPort();
+				m_EntityGraph->RemoveLink(*inputPort.GetLinkedOutputPort(), inputPort);
 			}
 		}
 
