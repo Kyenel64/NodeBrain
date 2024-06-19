@@ -27,10 +27,10 @@ namespace NodeBrain
 			inputPort.m_LinkedOutputPort = nullptr;
 
 		// Remove all node references from adjacency list.
-		for (auto it = m_AdjList.begin(); it != m_AdjList.end(); it++)
+		for (auto i = 0; i < m_AdjList.size(); i++)
 		{
-			if (it->first == removingNodeID || it->second == removingNodeID)
-				m_AdjList.erase(it);
+			if (m_AdjList[i].first == removingNodeID || m_AdjList[i].second == removingNodeID)
+				m_AdjList.erase(m_AdjList.begin() + i);
 		}
 
 		// Destroy node instance
@@ -64,11 +64,11 @@ namespace NodeBrain
 
 		inputPort.m_LinkedOutputPort = nullptr;
 
-		for (auto it = m_AdjList.begin(); it != m_AdjList.end(); it++)
+		for (auto i = 0; i < m_AdjList.size(); i++)
 		{
-			if (it->first == outputPort.m_ParentNode.m_NodeID && it->second == inputPort.m_ParentNode.m_NodeID)
+			if (m_AdjList[i].first == outputPort.m_ParentNode.m_NodeID && m_AdjList[i].second == inputPort.m_ParentNode.m_NodeID)
 			{
-				m_AdjList.erase(it);
+				m_AdjList.erase(m_AdjList.begin() + i);
 				break;
 			}
 		}

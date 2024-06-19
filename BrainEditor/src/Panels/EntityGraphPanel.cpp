@@ -10,18 +10,11 @@ namespace NodeBrain
 		{
 			float dx = p2.x - p1.x;
 			float dy = p2.y - p1.y;
-
 			return sqrt((dx * dx) + (dy * dy));
 		}
 	}
 
-
-	EntityGraphPanel::EntityGraphPanel()
-	{
-
-	}
-
-	void EntityGraphPanel::Draw(std::shared_ptr<Scene> activeScene, Entity selectedEntity)
+	void EntityGraphPanel::Draw(const std::shared_ptr<Scene>& activeScene, Entity selectedEntity)
 	{
 		m_SelectedEntity = selectedEntity;
 		m_ActiveScene = activeScene;
@@ -50,22 +43,22 @@ namespace NodeBrain
 			// Draw a curve to mouse position if in the process of linking ports
 			if (m_AddingLink && ImGui::IsMouseDown(ImGuiMouseButton_Left))
 			{
-				OutputPortUI& selectedOutputPortUI = m_OutputPortUIs[m_SelectedOutputPort];
+				const OutputPortUI& selectedOutputPortUI = m_OutputPortUIs[m_SelectedEntity].at(m_SelectedOutputPort);
 				ImVec2 portScreenPos = { m_GridOrigin.x + selectedOutputPortUI.PortPos.x, m_GridOrigin.y + selectedOutputPortUI.PortPos.y };
 				drawList->AddBezierCubic( portScreenPos, { ImGui::GetMousePos().x, portScreenPos.y },
 						{ portScreenPos.x, ImGui::GetMousePos().y }, ImGui::GetMousePos(), ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 0.5f}), 1.0f);
 			}
 
 			// Draw all connected links
-			for (auto& [ node, nodeUI ] : m_NodeUIs)
+			for (auto& [ node, nodeUI ] : m_NodeUIs[m_SelectedEntity])
 			{
 				for (size_t i = 0; i < node->InputCount(); i++)
 				{
 					InputPort& inputPort = node->GetInputPort(i);
 					if (inputPort.GetLinkedOutputPort())
 					{
-						InputPortUI& inputPortUI = m_InputPortUIs.at(&inputPort);
-						OutputPortUI& outputPortUI = m_OutputPortUIs.at(inputPort.GetLinkedOutputPort());
+						const InputPortUI& inputPortUI = m_InputPortUIs[m_SelectedEntity].at(&inputPort);
+						const OutputPortUI& outputPortUI = m_OutputPortUIs[m_SelectedEntity].at(inputPort.GetLinkedOutputPort());
 						ImVec2 outputPos = { m_GridOrigin.x + outputPortUI.PortPos.x, m_GridOrigin.y + outputPortUI.PortPos.y };
 						ImVec2 inputPos = { m_GridOrigin.x + inputPortUI.PortPos.x, m_GridOrigin.y + inputPortUI.PortPos.y };
 						drawList->AddBezierCubic( outputPos, { inputPos.x, outputPos.y }, { outputPos.x, inputPos.y }, inputPos,
@@ -75,7 +68,7 @@ namespace NodeBrain
 			}
 
 			// Draw all nodes in entity graph
-			for (auto& [ node, nodeUI ] : m_NodeUIs)
+			for (auto& [ node, nodeUI ] : m_NodeUIs[m_SelectedEntity])
 			{
 				if (node->GetType() == NodeType::Int)
 				{
@@ -133,21 +126,37 @@ namespace NodeBrain
 			}
 
 
-			// "Add Node" Popup
+			// Add node popup
 			if (ImGui::IsWindowFocused() && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
 				ImGui::OpenPopup("Add Node");
 			ProcessAddNodePopup();
 
-			ProcessNodeMenuPopup();
 		}
 
 		ImGui::End();
+
+		// Nodes are deleted at the end to prevent conflicts.
+		while (!m_DeletionQueue.empty())
+		{
+			Node* node = m_DeletionQueue.front();
+			if (node->GetType() == NodeType::SpriteComponent)
+				m_ActiveScene->RemoveComponent<SpriteComponent>(m_SelectedEntity);
+			m_NodeUIs[m_SelectedEntity].erase(node);
+			m_EntityGraph->RemoveNode(*node);
+
+			if (node == m_SelectedNode)
+				m_SelectedNode = nullptr;
+
+			m_DeletionQueue.pop();
+		}
 	}
 
 	void EntityGraphPanel::DrawNodeUI(Node& node, const std::function<void()>& uiFunction)
 	{
-		NodeUI& nodeUI = m_NodeUIs[&node];
+		NodeUI& nodeUI = m_NodeUIs[m_SelectedEntity].at(&node);
+
 		ImGui::PushID(&node);
+
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
 		ImGuiIO& io = ImGui::GetIO();
 
@@ -158,14 +167,23 @@ namespace NodeBrain
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGui::BeginChild("NodeFrame", nodeUI.Size, ImGuiChildFlags_Border, ImGuiWindowFlags_None);
 
+		// Input
 		if (ImGui::IsWindowFocused())
 			m_SelectedNode = &node;
 
-		if (ImGui::IsWindowFocused() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-			ImGui::OpenPopup("Node Menu");
+		if (ImGui::IsWindowFocused() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+		{
+			nodeUI.Pos.x += io.MouseDelta.x;
+			nodeUI.Pos.y += io.MouseDelta.y;
+		}
+
+		if (ImGui::IsWindowFocused() && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+			ImGui::OpenPopup("Node Menu", ImGuiPopupFlags_AnyPopup);
+		ProcessNodeMenuPopup();
+
 
 		// --- Node Header ---
-		ImGui::Text("%s", nodeUI.NodeName.c_str());
+		ImGui::Text("%s, %i", nodeUI.NodeName.c_str(), node.m_NodeID);
 		ImVec2 p1 = ImGui::GetCursorScreenPos();
 		drawList->AddLine({ p1.x - ImGui::GetStyle().WindowPadding.x, p1.y }, { p1.x + nodeUI.Size.x - ImGui::GetStyle().WindowPadding.x, p1.y },
 				ImGui::GetColorU32(nodeUI.NodeColor));
@@ -178,13 +196,13 @@ namespace NodeBrain
 		for (size_t i = 0; i < node.InputCount(); i++)
 		{
 			InputPort& inputPort = node.GetInputPort(i);
-			InputPortUI& inputPortUI = m_InputPortUIs[&inputPort];
+			InputPortUI& inputPortUI = m_InputPortUIs[m_SelectedEntity].at(&inputPort);
 			ImVec2 portScreenPos = { ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y + ((ImGui::GetFontSize() / 2) + ImGui::GetStyle().FramePadding.y)};
 			inputPortUI.PortPos = { portScreenPos.x - m_GridOrigin.x, portScreenPos.y - m_GridOrigin.y };
 
 			std::string label = "##input" + std::to_string(i);
 
-			ImGui::Button(inputPort.GetDebugName().c_str(), { nodeUI.Size.x / 2, 0 });
+			ImGui::Button(inputPortUI.Name.c_str(), { nodeUI.Size.x / 2, 0 });
 
 			drawList->AddCircleFilled(portScreenPos, 5.0f, ImGui::GetColorU32(nodeUI.NodeColor));
 
@@ -214,11 +232,11 @@ namespace NodeBrain
 		for (size_t i = 0; i < node.OutputCount(); i++)
 		{
 			OutputPort& outputPort = node.GetOutputPort(i);
-			OutputPortUI& outputPortUI = m_OutputPortUIs[&outputPort];
+			OutputPortUI& outputPortUI = m_OutputPortUIs[m_SelectedEntity].at(&outputPort);
 			ImVec2 portScreenPos = { ImGui::GetCursorScreenPos().x + (nodeUI.Size.x / 2), ImGui::GetCursorScreenPos().y + ((ImGui::GetFontSize() / 2) + ImGui::GetStyle().FramePadding.y)};
 			outputPortUI.PortPos = { portScreenPos.x - m_GridOrigin.x, portScreenPos.y - m_GridOrigin.y };
 
-			ImGui::Button(outputPort.GetDebugName().c_str(), { nodeUI.Size.x / 2, 0 });
+			ImGui::Button(outputPortUI.Name.c_str(), { nodeUI.Size.x / 2, 0 });
 
 			drawList->AddCircleFilled(portScreenPos, 5.0f, ImGui::GetColorU32(nodeUI.NodeColor));
 
@@ -238,14 +256,6 @@ namespace NodeBrain
 			uiFunction();
 
 
-		// Input
-		if (ImGui::IsWindowFocused() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
-		{
-			nodeUI.Pos.x += io.MouseDelta.x;
-			nodeUI.Pos.y += io.MouseDelta.y;
-		}
-
-
 		ImGui::EndChild();
 		ImGui::PopStyleColor(2);
 		ImGui::PopStyleVar(2);
@@ -258,13 +268,7 @@ namespace NodeBrain
 		if (ImGui::BeginPopup("Node Menu"))
 		{
 			if (ImGui::MenuItem("Delete"))
-			{
-				if (m_SelectedNode->GetType() == NodeType::SpriteComponent)
-					m_ActiveScene->RemoveComponent<SpriteComponent>(m_SelectedEntity);
-				m_NodeUIs.erase(m_SelectedNode);
-				m_EntityGraph->RemoveNode(*m_SelectedNode);
-				m_SelectedNode = nullptr;
-			}
+				m_DeletionQueue.push(m_SelectedNode);
 			ImGui::EndPopup();
 		}
 	}
@@ -278,72 +282,95 @@ namespace NodeBrain
 			// --- Component Nodes ---
 			if (ImGui::MenuItem("Tag Component"))
 			{
-				TagComponentNode& node = m_EntityGraph->AddNode<TagComponentNode>(m_ActiveScene->GetComponent<TagComponent>(m_SelectedEntity));
-				m_NodeUIs[&node] = { "Tag Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 60.0f }, addNodePos };
+				auto& node = m_EntityGraph->AddNode<TagComponentNode>(m_ActiveScene->GetComponent<TagComponent>(m_SelectedEntity));
+				m_NodeUIs[m_SelectedEntity].emplace(&node, NodeUI("Tag Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 60.0f }, addNodePos));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(0), InputPortUI("Tag"));
 			}
 
 			if (ImGui::MenuItem("Transform Component"))
 			{
-				TransformComponentNode& node = m_EntityGraph->AddNode<TransformComponentNode>(m_ActiveScene->GetComponent<TransformComponent>(m_SelectedEntity));
-				m_NodeUIs[&node] = { "Transform Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 120.0f }, addNodePos };
+				auto& node = m_EntityGraph->AddNode<TransformComponentNode>(m_ActiveScene->GetComponent<TransformComponent>(m_SelectedEntity));
+				m_NodeUIs[m_SelectedEntity].emplace(&node, NodeUI("Transform Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 120.0f }, addNodePos));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(0), InputPortUI("Position"));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(1), InputPortUI("Rotation"));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(2), InputPortUI("Scale"));
 			}
 
 			if (ImGui::MenuItem("Sprite Component"))
 			{
 				if (!m_ActiveScene->HasComponent<SpriteComponent>(m_SelectedEntity))
 					m_ActiveScene->AddComponent<SpriteComponent>(m_SelectedEntity);
-				SpriteComponentNode& node = m_EntityGraph->AddNode<SpriteComponentNode>(m_ActiveScene->GetComponent<SpriteComponent>(m_SelectedEntity));
-				m_NodeUIs[&node] = { "Sprite Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 60.0f }, addNodePos };
+
+				auto& node = m_EntityGraph->AddNode<SpriteComponentNode>(m_ActiveScene->GetComponent<SpriteComponent>(m_SelectedEntity));
+				m_NodeUIs[m_SelectedEntity].emplace(&node, NodeUI("Sprite Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 60.0f }, addNodePos));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(0), InputPortUI("Color"));
 			}
 
 			// --- Type Nodes ---
 			if (ImGui::MenuItem("Int"))
 			{
-				IntNode& node = m_EntityGraph->AddNode<IntNode>();
-				m_NodeUIs[&node] = { "Int", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				auto& node = m_EntityGraph->AddNode<IntNode>();
+				m_NodeUIs[m_SelectedEntity].emplace(&node, NodeUI("Int", { 0.6f, 0.3f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos));
+				m_OutputPortUIs[m_SelectedEntity].emplace(&node.GetOutputPort(0), OutputPortUI("Out"));
 			}
 
 			if (ImGui::MenuItem("Float"))
 			{
-				FloatNode& node = m_EntityGraph->AddNode<FloatNode>();
-				m_NodeUIs[&node] = { "Float", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				auto& node = m_EntityGraph->AddNode<FloatNode>();
+				m_NodeUIs[m_SelectedEntity].emplace(&node, NodeUI("Float", { 0.6f, 0.3f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos));
+				m_OutputPortUIs[m_SelectedEntity].emplace(&node.GetOutputPort(0), OutputPortUI("Out"));
 			}
 
 			if (ImGui::MenuItem("Bool"))
 			{
-				BoolNode& node = m_EntityGraph->AddNode<BoolNode>();
-				m_NodeUIs[&node] = { "Bool", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				auto& node = m_EntityGraph->AddNode<BoolNode>();
+				m_NodeUIs[m_SelectedEntity].emplace(&node, NodeUI("Bool", { 0.6f, 0.3f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos));
+				m_OutputPortUIs[m_SelectedEntity].emplace(&node.GetOutputPort(0), OutputPortUI("Out"));
 			}
 
 			if (ImGui::MenuItem("Vec3"))
 			{
-				Vec3Node& node = m_EntityGraph->AddNode<Vec3Node>();
-				m_NodeUIs[&node] = { "Vector 3", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				auto& node = m_EntityGraph->AddNode<Vec3Node>();
+				m_NodeUIs[m_SelectedEntity].emplace(&node, NodeUI("Vector 3", { 0.6f, 0.3f, 0.3f, 1.0f }, { 100.0f, 80.0f }, addNodePos));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(0), InputPortUI("X"));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(1), InputPortUI("Y"));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(2), InputPortUI("Z"));
+				m_OutputPortUIs[m_SelectedEntity].emplace(&node.GetOutputPort(0), OutputPortUI("Out"));
 			}
 
 			if (ImGui::MenuItem("Vec4"))
 			{
-				Vec4Node& node = m_EntityGraph->AddNode<Vec4Node>();
-				m_NodeUIs[&node] = { "Vector 4", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				auto& node = m_EntityGraph->AddNode<Vec4Node>();
+				m_NodeUIs[m_SelectedEntity].emplace(&node, NodeUI("Vector 4", { 0.6f, 0.3f, 0.3f, 1.0f }, { 100.0f, 100.0f }, addNodePos));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(0), InputPortUI("X"));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(1), InputPortUI("Y"));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(2), InputPortUI("Z"));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(3), InputPortUI("W"));
+				m_OutputPortUIs[m_SelectedEntity].emplace(&node.GetOutputPort(0), OutputPortUI("Out"));
 			}
 
 			if (ImGui::MenuItem("Color"))
 			{
-				ColorNode& node = m_EntityGraph->AddNode<ColorNode>();
-				m_NodeUIs[&node] = { "Color", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				auto& node = m_EntityGraph->AddNode<ColorNode>();
+				m_NodeUIs[m_SelectedEntity].emplace(&node, NodeUI("Color", { 0.6f, 0.3f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos));
+				m_OutputPortUIs[m_SelectedEntity].emplace(&node.GetOutputPort(0), OutputPortUI("Out"));
 			}
 
 			if (ImGui::MenuItem("String"))
 			{
-				StringNode& node = m_EntityGraph->AddNode<StringNode>();
-				m_NodeUIs[&node] = { "String", { 0.3f, 0.6f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				auto& node = m_EntityGraph->AddNode<StringNode>();
+				m_NodeUIs[m_SelectedEntity].emplace(&node, NodeUI("String", { 0.6f, 0.3f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos));
+				m_OutputPortUIs[m_SelectedEntity].emplace(&node.GetOutputPort(0), OutputPortUI("Out"));
 			}
 
 			// --- Math Nodes ---
 			if (ImGui::MenuItem("Multiply"))
 			{
-				MultiplyNode& node = m_EntityGraph->AddNode<MultiplyNode>();
-				m_NodeUIs[&node] = { "Multiply", { 0.3f, 0.3f, 0.6f, 1.0f }, { 100.0f, 60.0f }, addNodePos };
+				auto& node = m_EntityGraph->AddNode<MultiplyNode>();
+				m_NodeUIs[m_SelectedEntity].emplace(&node, NodeUI("Multiply", { 0.6f, 0.3f, 0.3f, 1.0f }, { 100.0f, 60.0f }, addNodePos));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(0), InputPortUI("In 1"));
+				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(1), InputPortUI("In 2"));
+				m_OutputPortUIs[m_SelectedEntity].emplace(&node.GetOutputPort(0), OutputPortUI("Sum"));
 			}
 
 			ImGui::EndPopup();

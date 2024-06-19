@@ -10,7 +10,7 @@ namespace NodeBrain
 		explicit TagComponentNode(TagComponent& tagComp)
 				: m_TagComponent(tagComp), Node(NodeType::TagComponent)
 		{
-			m_InputPorts.emplace_back(*this, PortDataType::String, std::string(), "Tag");
+			m_InputPorts.emplace_back(*this, PortDataType::String, std::string());
 		}
 
 		void Evaluate() override
@@ -30,9 +30,9 @@ namespace NodeBrain
 		explicit TransformComponentNode(TransformComponent& transformComp)
 				: m_TransformComponent(transformComp), Node(NodeType::TransformComponent)
 		{
-			m_InputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(0.0f), "Position");
-			m_InputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(0.0f), "Rotation");
-			m_InputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(1.0f), "Scale");
+			m_InputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(0.0f));
+			m_InputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(0.0f));
+			m_InputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(1.0f));
 		}
 
 		void Evaluate() override
@@ -54,7 +54,7 @@ namespace NodeBrain
 		explicit SpriteComponentNode(SpriteComponent& spriteComp)
 				: m_SpriteComponent(spriteComp), Node(NodeType::SpriteComponent)
 		{
-			m_InputPorts.emplace_back(*this, PortDataType::Color, glm::vec4(1.0f), "Color");
+			m_InputPorts.emplace_back(*this, PortDataType::Color, glm::vec4(1.0f));
 		}
 
 		void Evaluate() override

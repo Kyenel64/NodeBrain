@@ -8,8 +8,8 @@ namespace NodeBrain
 	public:
 		MultiplyNode() : Node(NodeType::Multiply)
 		{
-			m_InputPorts.emplace_back(*this, PortDataType::Int, 1, "In 1");
-			m_InputPorts.emplace_back(*this, PortDataType::Int, 1, "In 2");
+			m_InputPorts.emplace_back(*this, PortDataType::Int, 1);
+			m_InputPorts.emplace_back(*this, PortDataType::Int, 1);
 
 			m_OutputPorts.emplace_back(*this, PortDataType::Int, 1);
 		}
