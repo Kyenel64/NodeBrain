@@ -14,7 +14,7 @@ namespace NodeBrain
 	{
 		std::string Name;
 		long long Start;
-		long long Duration;
+		double Duration;
 		uint32_t ThreadID;
 	};
 

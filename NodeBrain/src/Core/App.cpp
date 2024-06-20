@@ -13,8 +13,6 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		m_Window.SetEventCallback([this](Event& event) { OnEvent(event); });
-
-		m_Timer.StartTimer();
 	}
 
 	App::~App()
@@ -33,8 +31,8 @@ namespace NodeBrain
 			m_Window.PollEvents();
 
 			// Calculate deltaTime
-			auto time = (float)Window::GetTime();
-			float deltaTime = time - m_LastFrameTime;
+			double time = m_Timer.GetElapsedTime(TimerUnit::Seconds);
+			auto deltaTime = static_cast<float>(time - m_LastFrameTime);
 			m_LastFrameTime = time;
 
 			m_Renderer.GetContext().AcquireNextImage();

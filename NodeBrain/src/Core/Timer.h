@@ -4,32 +4,61 @@
 
 namespace NodeBrain
 {
+	enum class TimerUnit { Seconds, Milliseconds, Microseconds };
+
 	class Timer
 	{
 	public:
-		Timer() { StartTimer(); };
+		Timer() { Reset(); };
 		~Timer() = default;
 
-		void StartTimer() { m_StartTime = std::chrono::high_resolution_clock::now(); m_Running = true; }
-		void EndTimer() { m_EndTime = std::chrono::high_resolution_clock::now(); m_Running = false; }
+		void Reset() { m_StartTime = std::chrono::high_resolution_clock::now(); }
 
-		[[nodiscard]] long long GetStartTimeMicroseconds() const { return std::chrono::time_point_cast<std::chrono::microseconds>(m_StartTime).time_since_epoch().count(); }
-		[[nodiscard]] long long GetStartTimeMilliseconds() const { return GetStartTimeMicroseconds() / 1000.0f; }
-		[[nodiscard]] long long GetStartTimeSeconds() const { return GetStartTimeMicroseconds() / 1000.0f / 1000.0f; }
-
-		long long GetElapsedMicroseconds()
+		[[nodiscard]] double GetElapsedTime(TimerUnit unit)
 		{
-			if (m_Running)
-				EndTimer();
-
-			return std::chrono::duration_cast<std::chrono::microseconds>(m_EndTime - m_StartTime).count();
+			switch (unit)
+			{
+				case TimerUnit::Seconds:
+				{
+					auto elapsedTime = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - m_StartTime);
+					return static_cast<double>(elapsedTime.count());
+				}
+				case TimerUnit::Milliseconds:
+				{
+					auto elapsedTime = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - m_StartTime);
+					return static_cast<double>(elapsedTime.count());
+				}
+				case TimerUnit::Microseconds:
+				{
+					auto elapsedTime = std::chrono::duration<double, std::micro>(std::chrono::high_resolution_clock::now() - m_StartTime);
+					return static_cast<double>(elapsedTime.count());
+				}
+			}
 		}
-		long long GetElapsedMilliseconds() { return GetElapsedMicroseconds() / 1000.0f; }
-		long long GetElapsedSeconds() { return GetElapsedMilliseconds() / 1000.0f / 1000.0f; }
+
+		[[nodiscard]] long long GetStartTime(TimerUnit unit)
+		{
+			switch (unit)
+			{
+				case TimerUnit::Seconds:
+				{
+					auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(m_StartTime.time_since_epoch());
+					return static_cast<long long>(elapsedTime.count());
+				}
+				case TimerUnit::Milliseconds:
+				{
+					auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(m_StartTime.time_since_epoch());
+					return static_cast<long long>(elapsedTime.count());
+				}
+				case TimerUnit::Microseconds:
+				{
+					auto elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(m_StartTime.time_since_epoch());
+					return static_cast<long long>(elapsedTime.count());
+				}
+			}
+		}
 
 	private:
-		bool m_Running = false;
 		std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTime;
-		std::chrono::time_point<std::chrono::high_resolution_clock> m_EndTime;
 	};
 }

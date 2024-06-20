@@ -64,10 +64,10 @@ namespace NodeBrain
 	}
 
 	InstrumentorEvent::InstrumentorEvent(const std::string& name)
-		: m_Data(TraceEventData()), m_Timer(Timer())
+		: m_Data(TraceEventData())
 	{
 		m_Data.Name = name;
-		m_Data.Start = m_Timer.GetStartTimeMicroseconds();
+		m_Data.Start = m_Timer.GetStartTime(TimerUnit::Microseconds);
 	}
 
 	InstrumentorEvent::~InstrumentorEvent()
@@ -79,9 +79,8 @@ namespace NodeBrain
 	void InstrumentorEvent::Stop()
 	{
 		m_Stopped = true;
-		m_Timer.EndTimer();
 
-		m_Data.Duration = m_Timer.GetElapsedMicroseconds();
+		m_Data.Duration = m_Timer.GetElapsedTime(TimerUnit::Microseconds);
 		m_Data.ThreadID = static_cast<uint32_t>(std::hash<std::thread::id>{}(std::this_thread::get_id()));
 		Instrumentor::WriteEvent(m_Data);
 	}

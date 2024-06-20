@@ -34,7 +34,7 @@ namespace NodeBrain
 		bool m_Minimized = false;
 		std::vector<Layer*> m_Layers;
 
-		float m_LastFrameTime = 0.0f;
+		double m_LastFrameTime = 0.0f;
 		Timer m_Timer;
 	};
 }
