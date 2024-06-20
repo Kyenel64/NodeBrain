@@ -11,8 +11,8 @@ namespace NodeBrain
 
 		virtual void SetData(const void* data, uint32_t size) = 0;
 		
-		virtual uint64_t GetAddress() const = 0;
+		[[nodiscard]] virtual uint64_t GetAddress() const = 0;
 
-		static std::shared_ptr<VertexBuffer> Create(RenderContext* context, const void* data, uint32_t size);
+		static std::shared_ptr<VertexBuffer> Create(RenderContext& context, const void* data, uint32_t size);
 	};
 }

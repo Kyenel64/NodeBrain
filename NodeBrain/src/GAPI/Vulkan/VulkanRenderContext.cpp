@@ -85,18 +85,16 @@ namespace NodeBrain
 	
 
 
-	VulkanRenderContext::VulkanRenderContext(Window* window)
+	VulkanRenderContext::VulkanRenderContext(Window& window)
 		: m_Window(window)
 	{
 		NB_PROFILE_FN();
-
-		NB_ASSERT(window, "window null. A valid Window pointer is required to create VulkanRenderContext.");
 
 		#ifdef NB_DEBUG
 			m_EnabledLayers.push_back("VK_LAYER_KHRONOS_validation");
 		#endif
 
-		for (const char* ext : m_Window->GetVulkanExtensions())
+		for (const char* ext : m_Window.GetVulkanExtensions())
 			m_EnabledInstanceExtensions.push_back(ext);
 
 		#if NB_APPLE
@@ -106,7 +104,7 @@ namespace NodeBrain
 
 		VK_CHECK(CreateInstance());
 
-		VK_CHECK(glfwCreateWindowSurface(m_VkInstance, m_Window->GetGLFWWindow(), nullptr, &m_VkSurface));
+		VK_CHECK(glfwCreateWindowSurface(m_VkInstance, m_Window.GetGLFWWindow(), nullptr, &m_VkSurface));
 
 		#ifdef NB_DEBUG
 			VK_CHECK(CreateDebugUtilsMessenger());

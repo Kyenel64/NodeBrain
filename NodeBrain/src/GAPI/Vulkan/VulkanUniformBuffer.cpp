@@ -3,12 +3,11 @@
 
 namespace NodeBrain
 {
-	VulkanUniformBuffer::VulkanUniformBuffer(VulkanRenderContext* context, const void* data, uint32_t size)
+	VulkanUniformBuffer::VulkanUniformBuffer(VulkanRenderContext& context, const void* data, uint32_t size)
 		: m_Context(context), m_Size(size)
 	{
 		NB_PROFILE_FN();
 
-		NB_ASSERT(context, "context null. A valid VulkanRenderContext pointer is required to create VulkanUniformBuffer.");
 		NB_ASSERT(size, "size is 0. Size must be a non-zero value in bytes.");
 
 		VkBufferCreateInfo bufferCreateInfo = {};
@@ -22,15 +21,15 @@ namespace NodeBrain
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
-			VK_CHECK(vmaCreateBuffer(m_Context->GetVMAAllocator(), &bufferCreateInfo, &allocationCreateInfo, &m_VkBuffers[i], &m_VmaAllocations[i], nullptr));
-			VK_CHECK(vmaMapMemory(m_Context->GetVMAAllocator(), m_VmaAllocations[i], &m_MappedData[i]));
+			VK_CHECK(vmaCreateBuffer(m_Context.GetVMAAllocator(), &bufferCreateInfo, &allocationCreateInfo, &m_VkBuffers[i], &m_VmaAllocations[i], nullptr));
+			VK_CHECK(vmaMapMemory(m_Context.GetVMAAllocator(), m_VmaAllocations[i], &m_MappedData[i]));
 		}
 
 		// Set initial data if provided
 		if (data)
 		{
 			for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
-				memcpy(m_MappedData[m_Context->GetSwapchain().GetFrameIndex()], data, size);
+				memcpy(m_MappedData[m_Context.GetSwapchain().GetFrameIndex()], data, size);
 		}
 	}
 
@@ -38,12 +37,12 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		m_Context->WaitForGPU();
+		m_Context.WaitForGPU();
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
-			vmaUnmapMemory(m_Context->GetVMAAllocator(), m_VmaAllocations[i]);
-			vmaDestroyBuffer(m_Context->GetVMAAllocator(), m_VkBuffers[i], m_VmaAllocations[i]);
+			vmaUnmapMemory(m_Context.GetVMAAllocator(), m_VmaAllocations[i]);
+			vmaDestroyBuffer(m_Context.GetVMAAllocator(), m_VkBuffers[i], m_VmaAllocations[i]);
 			m_VkBuffers[i] = VK_NULL_HANDLE;
 			m_VmaAllocations[i] = VK_NULL_HANDLE;
 		}
@@ -56,6 +55,6 @@ namespace NodeBrain
 		NB_ASSERT(data, "data null. Data must not be null.");
 		NB_ASSERT(size <= m_Size, "Buffer overflow. The size of data being set must be less than the allocated buffer size.");
 
-		memcpy(m_MappedData[m_Context->GetSwapchain().GetFrameIndex()], data, size);
+		memcpy(m_MappedData[m_Context.GetSwapchain().GetFrameIndex()], data, size);
 	}
 }

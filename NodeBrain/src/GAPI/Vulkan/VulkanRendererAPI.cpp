@@ -9,22 +9,20 @@
 
 namespace NodeBrain
 {
-	VulkanRendererAPI::VulkanRendererAPI(VulkanRenderContext* renderContext)
-		: m_Context(renderContext), m_Swapchain(renderContext->GetSwapchain()) 
+	VulkanRendererAPI::VulkanRendererAPI(VulkanRenderContext& renderContext)
+		: m_Context(renderContext), m_Swapchain(renderContext.GetSwapchain())
 	{
 		NB_PROFILE_FN();
 
-		NB_ASSERT(renderContext, "renderContext null. A valid VulkanRenderContext pointer is required to create VulkanRendererAPI.");
-
-		m_vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)vkGetInstanceProcAddr(m_Context->GetVkInstance(), "vkCmdBeginRenderingKHR");
-		m_vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)vkGetInstanceProcAddr(m_Context->GetVkInstance(), "vkCmdEndRenderingKHR");
+		m_vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)vkGetInstanceProcAddr(m_Context.GetVkInstance(), "vkCmdBeginRenderingKHR");
+		m_vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)vkGetInstanceProcAddr(m_Context.GetVkInstance(), "vkCmdEndRenderingKHR");
 	}
 
 	VulkanRendererAPI::~VulkanRendererAPI()
 	{
 		NB_PROFILE_FN();
 
-		m_Context->WaitForGPU();
+		m_Context.WaitForGPU();
 	}
 
 	void VulkanRendererAPI::BeginFrame()
@@ -66,7 +64,7 @@ namespace NodeBrain
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &m_ActiveCmdBuffer;
-		VK_CHECK(vkQueueSubmit(m_Context->GetDevice().GetGraphicsQueue(), 1, &submitInfo, frameData.InFlightFence));
+		VK_CHECK(vkQueueSubmit(m_Context.GetDevice().GetGraphicsQueue(), 1, &submitInfo, frameData.InFlightFence));
 	}
 
 	void VulkanRendererAPI::ClearColor(const glm::vec4& color, const std::shared_ptr<Image>& image)

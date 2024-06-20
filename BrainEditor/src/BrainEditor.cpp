@@ -2,8 +2,8 @@
 
 namespace NodeBrain
 {
-	BrainEditor::BrainEditor(Renderer* renderer)
-		: m_Renderer(renderer), m_RendererAPI(renderer->GetAPI()), m_Context(renderer->GetContext()), m_Window(renderer->GetContext()->GetWindow())
+	BrainEditor::BrainEditor(Renderer& renderer)
+		: m_Renderer(renderer), m_RendererAPI(renderer.GetAPI()), m_Context(renderer.GetContext()), m_Window(renderer.GetContext().GetWindow())
 	{
 		NB_INFO("Attached Brain Editor layer");
 

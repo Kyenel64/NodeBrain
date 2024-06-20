@@ -7,15 +7,12 @@
 
 namespace NodeBrain
 {
-	App::App(std::string applicationName, Window* window, Renderer* renderer, ImGuiLayer* imGuiLayer)
+	App::App(std::string applicationName, Window& window, Renderer& renderer, ImGuiLayer* imGuiLayer)
 		: m_ApplicationName(std::move(applicationName)), m_Window(window), m_Renderer(renderer), m_ImGuiLayer(imGuiLayer)
 	{
 		NB_PROFILE_FN();
 
-		NB_ASSERT(window, "window null. Window is required to create App.");
-		NB_ASSERT(renderer, "renderer null. Renderer is required to create App.");
-
-		m_Window->SetEventCallback([this](Event& event) { OnEvent(event); });
+		m_Window.SetEventCallback([this](Event& event) { OnEvent(event); });
 
 		m_Timer.StartTimer();
 	}
@@ -33,16 +30,16 @@ namespace NodeBrain
 		{
 			NB_PROFILE_SCOPE("Frame");
 
-			m_Window->PollEvents();
+			m_Window.PollEvents();
 
 			// Calculate deltaTime
 			auto time = (float)Window::GetTime();
 			float deltaTime = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			m_Renderer->GetContext()->AcquireNextImage();
+			m_Renderer.GetContext().AcquireNextImage();
 
-			m_Renderer->BeginFrame();
+			m_Renderer.BeginFrame();
 
 			if (!m_Minimized)
 			{
@@ -57,11 +54,11 @@ namespace NodeBrain
 				m_ImGuiLayer->EndFrame();
 			}
 
-			m_Renderer->EndFrame();
+			m_Renderer.EndFrame();
 
 			Input::ProcessPollStates();
 
-			m_Renderer->GetContext()->SwapBuffers();
+			m_Renderer.GetContext().SwapBuffers();
 		}
 	}
 
@@ -75,16 +72,6 @@ namespace NodeBrain
 		// Bind our functions to an event
 		event.AttachEventFunction<WindowClosedEvent>([this](WindowClosedEvent& event) { OnWindowClose(event); });
 		event.AttachEventFunction<WindowMinimizedEvent>([this](WindowMinimizedEvent& event) { OnMinimized(event); });
-	}
-
-	void App::PushLayer(Layer* layer)
-	{
-		NB_PROFILE_FN();
-
-		if (!layer)
-			return;
-
-		m_Layers.push_back(layer);
 	}
 
 	void App::OnWindowClose(WindowClosedEvent& e)

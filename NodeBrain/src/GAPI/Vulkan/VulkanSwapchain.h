@@ -39,21 +39,21 @@ namespace NodeBrain
 	class VulkanSwapchain
 	{
 	public:
-		VulkanSwapchain(Window* window, VkSurfaceKHR surface, VulkanDevice& device, VmaAllocator allocator);
+		VulkanSwapchain(Window& window, VkSurfaceKHR surface, VulkanDevice& device, VmaAllocator allocator);
 		~VulkanSwapchain();
 
 		uint32_t AcquireNextImage();
 		void PresentImage();
 
-		VkSwapchainKHR GetVkSwapchain() const { return m_VkSwapchain; }
-		const FrameData& GetCurrentFrameData() const { return m_FrameDatas[m_FrameIndex]; }
-		const ImageData& GetCurrentImageData() const { return m_ImageDatas[m_ImageIndex]; }	
-		const DrawImageData& GetCurrentDrawImage() const { return m_DrawImageDatas[m_FrameIndex]; }
-		uint32_t GetImageIndex() const { return m_ImageIndex; }
-		uint32_t GetFrameIndex() const { return m_FrameIndex; }
-		VkExtent2D GetVkExtent() const { return m_VkExtent; }
-		VkFormat GetVkFormat() const { return m_VkColorFormat; }
-		uint32_t GetImageCount() const { return m_ImageCount; }
+		[[nodiscard]] VkSwapchainKHR GetVkSwapchain() const { return m_VkSwapchain; }
+		[[nodiscard]] const FrameData& GetCurrentFrameData() const { return m_FrameDatas[m_FrameIndex]; }
+		[[nodiscard]] const ImageData& GetCurrentImageData() const { return m_ImageDatas[m_ImageIndex]; }
+		[[nodiscard]] const DrawImageData& GetCurrentDrawImage() const { return m_DrawImageDatas[m_FrameIndex]; }
+		[[nodiscard]] uint32_t GetImageIndex() const { return m_ImageIndex; }
+		[[nodiscard]] uint32_t GetFrameIndex() const { return m_FrameIndex; }
+		[[nodiscard]] VkExtent2D GetVkExtent() const { return m_VkExtent; }
+		[[nodiscard]] VkFormat GetVkFormat() const { return m_VkColorFormat; }
+		[[nodiscard]] uint32_t GetImageCount() const { return m_ImageCount; }
 
 	private:
 		void RecreateSwapchain();
@@ -69,7 +69,7 @@ namespace NodeBrain
 		void DestroyDrawImage();
 
 	private:
-		Window* m_Window;
+		Window& m_Window;
 		VkSwapchainKHR m_VkSwapchain = VK_NULL_HANDLE;
 		VkSurfaceKHR m_VkSurface = VK_NULL_HANDLE;
 		VmaAllocator m_VmaAllocator = VK_NULL_HANDLE;

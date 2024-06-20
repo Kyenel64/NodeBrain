@@ -12,12 +12,12 @@ namespace NodeBrain
 		std::shared_ptr<Shader> ComputeShader;
 		std::shared_ptr<Image> TargetImage = nullptr;
 
-		void AddDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet, uint32_t setIndex)
+		void AddDescriptorSet(const std::shared_ptr<DescriptorSet>& descriptorSet, uint32_t setIndex)
 		{
 			DescriptorSets.insert(DescriptorSets.begin() + setIndex, descriptorSet);
 		}
 
-		const std::vector<std::shared_ptr<DescriptorSet>>& GetDescriptorSets() const { return DescriptorSets; }
+		[[nodiscard]] const std::vector<std::shared_ptr<DescriptorSet>>& GetDescriptorSets() const { return DescriptorSets; }
 
 	private:
 		std::vector<std::shared_ptr<DescriptorSet>> DescriptorSets;
@@ -33,8 +33,8 @@ namespace NodeBrain
 
 		virtual void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet) = 0;
 
-		virtual std::shared_ptr<Image> GetTargetImage() const = 0;
+		[[nodiscard]] virtual std::shared_ptr<Image> GetTargetImage() const = 0;
 
-		static std::shared_ptr<ComputePipeline> Create(RenderContext* context, const ComputePipelineConfiguration& configuration);
+		static std::shared_ptr<ComputePipeline> Create(RenderContext& context, const ComputePipelineConfiguration& configuration);
 	};
 }

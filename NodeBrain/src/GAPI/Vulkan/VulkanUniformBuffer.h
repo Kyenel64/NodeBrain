@@ -11,15 +11,16 @@ namespace NodeBrain
 	class VulkanUniformBuffer : public UniformBuffer
 	{
 	public:
-		VulkanUniformBuffer(VulkanRenderContext* context, const void* data, uint32_t size);
+		VulkanUniformBuffer(VulkanRenderContext& context, const void* data, uint32_t size);
 		~VulkanUniformBuffer() override;
 
 		void SetData(const void* data, uint32_t size) override;
 
-		VkBuffer GetVkBuffer() const { return m_VkBuffers[m_Context->GetSwapchain().GetFrameIndex()]; }
-		uint32_t GetSize() const { return m_Size; }
+		[[nodiscard]] VkBuffer GetVkBuffer() const { return m_VkBuffers[m_Context.GetSwapchain().GetFrameIndex()]; }
+		[[nodiscard]] uint32_t GetSize() const { return m_Size; }
+
 	private:
-		VulkanRenderContext* m_Context;
+		VulkanRenderContext& m_Context;
 
 		VkBuffer m_VkBuffers[FRAMES_IN_FLIGHT];
 		VmaAllocation m_VmaAllocations[FRAMES_IN_FLIGHT];

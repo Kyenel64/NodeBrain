@@ -28,6 +28,6 @@ namespace NodeBrain
 		virtual void EndComputePass(const std::shared_ptr<ComputePipeline>& pipeline) = 0;
 		virtual void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) = 0;
 
-		virtual RenderContext* GetContext() const = 0;
+		virtual RenderContext& GetContext() const = 0;
 	};
 }

@@ -21,8 +21,8 @@ namespace NodeBrain
 
 		// Pointer address is equal to VkDescriptorSet. Can only be accessed by ImGui.
 		virtual uint64_t GetAddress() = 0;
-		virtual const ImageConfiguration& GetConfiguration() const = 0; 
+		[[nodiscard]] virtual const ImageConfiguration& GetConfiguration() const = 0;
 
-		static std::shared_ptr<Image> Create(RenderContext* context, const ImageConfiguration& configuration);
+		static std::shared_ptr<Image> Create(RenderContext& context, const ImageConfiguration& configuration);
 	};
 }

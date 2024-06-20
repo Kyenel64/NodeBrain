@@ -13,7 +13,7 @@ namespace NodeBrain
 	class Scene
 	{
 	public:
-		explicit Scene(Renderer* renderer);
+		explicit Scene(Renderer& renderer);
 		~Scene() = default;
 
 		Entity CreateEntity(const std::string& name = "Empty Entity");
@@ -77,7 +77,7 @@ namespace NodeBrain
 
 
 	private:
-		Renderer* m_Renderer;
+		Renderer& m_Renderer;
 
 		entt::registry m_Registry;
 		std::unordered_map<Entity, EntityGraph> m_EntityGraphs;

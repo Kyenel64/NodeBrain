@@ -9,13 +9,11 @@ class GLFWwindow;
 
 namespace NodeBrain
 {
-	VulkanImGuiLayer::VulkanImGuiLayer(VulkanRenderContext* context)
+	VulkanImGuiLayer::VulkanImGuiLayer(VulkanRenderContext& context)
 		: m_Context(context)
 	{
 		NB_PROFILE_FN();
 
-		NB_ASSERT(context, "context null. A valid VulkanRenderContext pointer is required to create VulkanImGuiLayer.");
-		
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
@@ -23,7 +21,7 @@ namespace NodeBrain
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-		GLFWwindow* glfwWindow = m_Context->GetWindow()->GetGLFWWindow();
+		GLFWwindow* glfwWindow = m_Context.GetWindow().GetGLFWWindow();
 		ImGui_ImplGlfw_InitForVulkan(glfwWindow, true);
 
 
@@ -50,15 +48,15 @@ namespace NodeBrain
 		descriptorPoolCreateInfo.poolSizeCount = (uint32_t)std::size(poolSizes);
 		descriptorPoolCreateInfo.pPoolSizes = poolSizes;
 
-		VK_CHECK(vkCreateDescriptorPool(m_Context->GetVkDevice(), &descriptorPoolCreateInfo, nullptr, &m_ImGuiDescriptorPool));
+		VK_CHECK(vkCreateDescriptorPool(m_Context.GetVkDevice(), &descriptorPoolCreateInfo, nullptr, &m_ImGuiDescriptorPool));
 
 
 		ImGui_ImplVulkan_InitInfo initInfo = {};
-		initInfo.Instance = m_Context->GetVkInstance();
-		initInfo.PhysicalDevice = m_Context->GetPhysicalDevice().GetVkPhysicalDevice();
-		initInfo.Device = m_Context->GetVkDevice();
-		initInfo.QueueFamily = m_Context->GetPhysicalDevice().FindQueueFamilies().Graphics.value();
-		initInfo.Queue = m_Context->GetDevice().GetGraphicsQueue();
+		initInfo.Instance = m_Context.GetVkInstance();
+		initInfo.PhysicalDevice = m_Context.GetPhysicalDevice().GetVkPhysicalDevice();
+		initInfo.Device = m_Context.GetVkDevice();
+		initInfo.QueueFamily = m_Context.GetPhysicalDevice().FindQueueFamilies().Graphics.value();
+		initInfo.Queue = m_Context.GetDevice().GetGraphicsQueue();
 		initInfo.DescriptorPool = m_ImGuiDescriptorPool;
 		initInfo.MinImageCount = 3;
 		initInfo.ImageCount = 3;
@@ -67,7 +65,7 @@ namespace NodeBrain
 		initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		ImGui_ImplVulkan_Init(&initInfo, VK_NULL_HANDLE);
 
-		VkInstance vkInstance = m_Context->GetVkInstance();
+		VkInstance vkInstance = m_Context.GetVkInstance();
 		m_vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)vkGetInstanceProcAddr(vkInstance, "vkCmdBeginRenderingKHR");
 		m_vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)vkGetInstanceProcAddr(vkInstance, "vkCmdEndRenderingKHR");
 	}
@@ -76,11 +74,11 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		m_Context->WaitForGPU();
+		m_Context.WaitForGPU();
 
 		ImGui_ImplVulkan_Shutdown();
 		
-		vkDestroyDescriptorPool(m_Context->GetVkDevice(), m_ImGuiDescriptorPool, nullptr);
+		vkDestroyDescriptorPool(m_Context.GetVkDevice(), m_ImGuiDescriptorPool, nullptr);
 		m_ImGuiDescriptorPool = VK_NULL_HANDLE;
 	}
 
@@ -99,7 +97,7 @@ namespace NodeBrain
 		
 		ImGui::Render();
 
-		VulkanSwapchain& swapchain = m_Context->GetSwapchain();
+		VulkanSwapchain& swapchain = m_Context.GetSwapchain();
 		VkCommandBuffer cmdBuffer = swapchain.GetCurrentFrameData().CommandBuffer;
 		VkImage image = swapchain.GetCurrentImageData().Image;
 		VkImageView imageView = swapchain.GetCurrentImageData().ImageView;

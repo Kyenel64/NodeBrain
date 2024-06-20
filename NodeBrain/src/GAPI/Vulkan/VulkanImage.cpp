@@ -7,19 +7,17 @@
 
 namespace NodeBrain
 {	
-	VulkanImage::VulkanImage(VulkanRenderContext* context, const ImageConfiguration& configuration)
+	VulkanImage::VulkanImage(VulkanRenderContext& context, const ImageConfiguration& configuration)
 		: m_Context(context), m_Configuration(configuration)
 	{
 		NB_PROFILE_FN();
-
-		NB_ASSERT(context, "context null. A valid VulkanRenderContext pointer is required to create VulkanImage.");
 
 		VK_CHECK(CreateImage());
 	}
 
 	VulkanImage::~VulkanImage()
 	{
-		m_Context->WaitForGPU();
+		m_Context.WaitForGPU();
 
 		DestroyImage();
 
@@ -63,7 +61,7 @@ namespace NodeBrain
 			allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 			allocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-			result = vmaCreateImage(m_Context->GetVMAAllocator(), &imageCreateInfo, &allocationCreateInfo, &m_VkImage[i], &m_VmaAllocation[i], nullptr);
+			result = vmaCreateImage(m_Context.GetVMAAllocator(), &imageCreateInfo, &allocationCreateInfo, &m_VkImage[i], &m_VmaAllocation[i], nullptr);
 			if (result != VK_SUCCESS)
 				return result;
 
@@ -85,7 +83,7 @@ namespace NodeBrain
 			imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 			imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-			result = vkCreateImageView(m_Context->GetVkDevice(), &imageViewCreateInfo, nullptr, &m_VkImageView[i]);
+			result = vkCreateImageView(m_Context.GetVkDevice(), &imageViewCreateInfo, nullptr, &m_VkImageView[i]);
 			if (result != VK_SUCCESS)
 				return result;
 
@@ -109,11 +107,11 @@ namespace NodeBrain
 			samplerCreateInfo.minLod = 0.0f;
 			samplerCreateInfo.maxLod = 0.0f;
 
-			result = vkCreateSampler(m_Context->GetVkDevice(), &samplerCreateInfo, nullptr, &m_VkSampler[i]);
+			result = vkCreateSampler(m_Context.GetVkDevice(), &samplerCreateInfo, nullptr, &m_VkSampler[i]);
 			if (result != VK_SUCCESS)
 				return result;
 
-			m_Context->ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
+			m_Context.ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
 			{
 				Utils::TransitionImage(cmdBuffer, m_VkImage[i], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 			});
@@ -128,13 +126,13 @@ namespace NodeBrain
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
-			vkDestroySampler(m_Context->GetVkDevice(), m_VkSampler[i], nullptr);
+			vkDestroySampler(m_Context.GetVkDevice(), m_VkSampler[i], nullptr);
 			m_VkSampler[i] = VK_NULL_HANDLE;
 
-			vkDestroyImageView(m_Context->GetVkDevice(), m_VkImageView[i], nullptr);
+			vkDestroyImageView(m_Context.GetVkDevice(), m_VkImageView[i], nullptr);
 			m_VkImageView[i] = VK_NULL_HANDLE;
 
-			vmaDestroyImage(m_Context->GetVMAAllocator(), m_VkImage[i], m_VmaAllocation[i]);
+			vmaDestroyImage(m_Context.GetVMAAllocator(), m_VkImage[i], m_VmaAllocation[i]);
 			m_VkImage[i] = VK_NULL_HANDLE;
 			m_VmaAllocation[i] = VK_NULL_HANDLE;
 		}
@@ -142,7 +140,7 @@ namespace NodeBrain
 
 	void VulkanImage::Resize(uint32_t width, uint32_t height)
 	{
-		m_Context->WaitForGPU();
+		m_Context.WaitForGPU();
 
 		m_Configuration.Width = width;
 		m_Configuration.Height = height;
@@ -158,7 +156,7 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 		
 		if (!m_Address)
-			m_Address = (uint64_t)ImGui_ImplVulkan_AddTexture(m_VkSampler[m_Context->GetSwapchain().GetFrameIndex()], m_VkImageView[m_Context->GetSwapchain().GetFrameIndex()], VK_IMAGE_LAYOUT_GENERAL);
+			m_Address = (uint64_t)ImGui_ImplVulkan_AddTexture(m_VkSampler[m_Context.GetSwapchain().GetFrameIndex()], m_VkImageView[m_Context.GetSwapchain().GetFrameIndex()], VK_IMAGE_LAYOUT_GENERAL);
 
 		return m_Address;
 	}

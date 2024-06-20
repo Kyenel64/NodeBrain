@@ -16,7 +16,7 @@ namespace NodeBrain
 
 		virtual void WaitForGPU() = 0;
 
-		virtual GAPI GetGraphicsAPI() const = 0;
-		virtual Window* GetWindow() const = 0;
+		[[nodiscard]] virtual GAPI GetGraphicsAPI() const = 0;
+		[[nodiscard]] virtual Window& GetWindow() const = 0;
 	};
 }

@@ -9,7 +9,7 @@ namespace NodeBrain
 		std::optional<uint32_t> Graphics;
 		std::optional<uint32_t> Presentation;
 
-		bool IsComplete() const
+		[[nodiscard]] bool IsComplete() const
 		{
 			return Graphics.has_value() && Presentation.has_value();
 		}
@@ -30,14 +30,14 @@ namespace NodeBrain
 		VulkanPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, uint32_t deviceIndex);
 		~VulkanPhysicalDevice() = default;
 
-		bool IsSuitable() const;
+		[[nodiscard]] bool IsSuitable() const;
 
-		VkPhysicalDevice GetVkPhysicalDevice() const { return m_VkPhysicalDevice; }
-		const std::vector<const char*>& GetEnabledDeviceExtensions() const { return m_EnabledDeviceExtensions; }
+		[[nodiscard]] VkPhysicalDevice GetVkPhysicalDevice() const { return m_VkPhysicalDevice; }
+		[[nodiscard]] const std::vector<const char*>& GetEnabledDeviceExtensions() const { return m_EnabledDeviceExtensions; }
 		
-		QueueFamilyIndices FindQueueFamilies() const;
-		SwapchainSupportDetails QuerySwapchainSupport() const;
-		bool CheckDeviceExtensionSupport() const;
+		[[nodiscard]] QueueFamilyIndices FindQueueFamilies() const;
+		[[nodiscard]] SwapchainSupportDetails QuerySwapchainSupport() const;
+		[[nodiscard]] bool CheckDeviceExtensionSupport() const;
 
 	private:
 		VkPhysicalDevice m_VkPhysicalDevice = VK_NULL_HANDLE;

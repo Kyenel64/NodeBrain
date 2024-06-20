@@ -31,12 +31,10 @@ namespace NodeBrain
 		}
 	}
 
-	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanRenderContext* context, const GraphicsPipelineConfiguration& configuration)
-		: m_Context(context), m_Configuration(configuration)
+	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanRenderContext& context, GraphicsPipelineConfiguration  configuration)
+		: m_Context(context), m_Configuration(std::move(configuration))
 	{
 		NB_PROFILE_FN();
-
-		NB_ASSERT(context, "context null. A valid VulkanRenderContext pointer is required to create VulkanGraphicsPipeline.");
 
 		NB_ASSERT(m_Configuration.VertexShader, "VertexShader null. Graphics pipeline must contain a valid vertex shader.");
 		NB_ASSERT(m_Configuration.VertexShader->GetShaderType() == ShaderType::Vertex, "Shader type invalid. Graphics pipeline must contain a vertex shader.")
@@ -156,7 +154,7 @@ namespace NodeBrain
 		pipelineLayoutCreateInfo.pSetLayouts = &layouts[0];
 		pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
 		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
-		VK_CHECK(vkCreatePipelineLayout(m_Context->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
+		VK_CHECK(vkCreatePipelineLayout(m_Context.GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
 
 
 		// --- Pipeline ---
@@ -180,19 +178,19 @@ namespace NodeBrain
 		pipelineCreateInfo.subpass = 0;
 		pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 		pipelineCreateInfo.basePipelineIndex = -1; // Optional
-		VK_CHECK(vkCreateGraphicsPipelines(m_Context->GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_VkPipeline));
+		VK_CHECK(vkCreateGraphicsPipelines(m_Context.GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &m_VkPipeline));
 	}
 
 	VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
 	{
 		NB_PROFILE_FN();
 
-		m_Context->WaitForGPU();
+		m_Context.WaitForGPU();
 
-		vkDestroyPipelineLayout(m_Context->GetVkDevice(), m_VkPipelineLayout, nullptr);
+		vkDestroyPipelineLayout(m_Context.GetVkDevice(), m_VkPipelineLayout, nullptr);
 		m_VkPipelineLayout = VK_NULL_HANDLE;
 		
-		vkDestroyPipeline(m_Context->GetVkDevice(), m_VkPipeline, nullptr);
+		vkDestroyPipeline(m_Context.GetVkDevice(), m_VkPipeline, nullptr);
 		m_VkPipeline = VK_NULL_HANDLE;
 	}
 
@@ -204,7 +202,7 @@ namespace NodeBrain
 		NB_ASSERT(size, "size is 0. Size must be a non-zero value in bytes.");
 		NB_ASSERT(size + offset <= 128, "Push constant overflow. Push constant offset and size must fit within the max push constant size: {0}.", 128);
 
-		vkCmdPushConstants(m_Context->GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_ALL_GRAPHICS, 0, 128, buffer);
+		vkCmdPushConstants(m_Context.GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_ALL_GRAPHICS, 0, 128, buffer);
 	}
 
 	void VulkanGraphicsPipeline::BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet)
@@ -217,6 +215,6 @@ namespace NodeBrain
 		uint32_t setIndex = std::find(descriptorSets.begin(), descriptorSets.end(), descriptorSet) - descriptorSets.begin();
 		std::shared_ptr<VulkanDescriptorSet> vulkanSet = dynamic_pointer_cast<VulkanDescriptorSet>(descriptorSet);
 		VkDescriptorSet vkDescriptorSet = vulkanSet->GetVkDescriptorSet();
-		vkCmdBindDescriptorSets(m_Context->GetSwapchain().GetCurrentFrameData().CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_VkPipelineLayout, setIndex, 1, &vkDescriptorSet, 0, nullptr);
+		vkCmdBindDescriptorSets(m_Context.GetSwapchain().GetCurrentFrameData().CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_VkPipelineLayout, setIndex, 1, &vkDescriptorSet, 0, nullptr);
 	}
 }

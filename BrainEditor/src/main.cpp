@@ -6,15 +6,15 @@ int main()
 {
 	NB_PROFILE_BEGIN("Startup", "Startup.log");
 
-	NodeBrain::Window* window = new NodeBrain::Window("NodeBrain", 1280, 720);
-	NodeBrain::VulkanRenderContext* renderContext = new NodeBrain::VulkanRenderContext(window);
-	NodeBrain::VulkanRendererAPI* rendererAPI = new NodeBrain::VulkanRendererAPI(renderContext);
-	NodeBrain::VulkanImGuiLayer* gui = new NodeBrain::VulkanImGuiLayer(renderContext);
-	NodeBrain::Renderer* renderer = new NodeBrain::Renderer(rendererAPI);
+	auto* window = new NodeBrain::Window("NodeBrain", 1280, 720);
+	auto* renderContext = new NodeBrain::VulkanRenderContext(*window);
+	auto* rendererAPI = new NodeBrain::VulkanRendererAPI(*renderContext);
+	auto* gui = new NodeBrain::VulkanImGuiLayer(*renderContext);
+	auto* renderer = new NodeBrain::Renderer(*rendererAPI);
 
-	NodeBrain::Layer* brainEditor = new NodeBrain::BrainEditor(renderer);
-	NodeBrain::App* app = new NodeBrain::App("NodeBrain", window, renderer, gui);
-	app->PushLayer(brainEditor);
+	NodeBrain::Layer* brainEditor = new NodeBrain::BrainEditor(*renderer);
+	auto* app = new NodeBrain::App("NodeBrain", *window, *renderer, gui);
+	app->PushLayer(*brainEditor);
 
 	NB_PROFILE_END();
 

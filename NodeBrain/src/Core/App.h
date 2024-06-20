@@ -12,11 +12,11 @@ namespace NodeBrain
 	class App
 	{
 	public:
-		App(std::string applicationName, Window* window, Renderer* renderer, ImGuiLayer* imGuiLayer);
+		App(std::string applicationName, Window& window, Renderer& renderer, ImGuiLayer* imGuiLayer);
 		~App();
 
 		void Run();
-		void PushLayer(Layer* layer);
+		void PushLayer(Layer& layer) { m_Layers.push_back(&layer); }
 
 	private:
 		// Events
@@ -26,9 +26,9 @@ namespace NodeBrain
 
 	private:
 		std::string m_ApplicationName;
-		Window* m_Window;
-		Renderer* m_Renderer;
-		ImGuiLayer* m_ImGuiLayer;
+		Window& m_Window;
+		Renderer& m_Renderer;
+		ImGuiLayer* m_ImGuiLayer = nullptr;
 
 		bool m_Running = true;
 		bool m_Minimized = false;

@@ -3,7 +3,7 @@
 
 namespace NodeBrain
 {
-	Scene::Scene(Renderer* renderer)
+	Scene::Scene(Renderer& renderer)
 		: m_Renderer(renderer)
 	{
 
@@ -36,15 +36,15 @@ namespace NodeBrain
 
 
 		// --- Rendering ---
-		m_Renderer->BeginScene(editorCamera, targetImage);
+		m_Renderer.BeginScene(editorCamera, targetImage);
 
 		// Draw Sprites
 		{
 			auto view = m_Registry.view<TransformComponent, SpriteComponent>();
 			for (const auto& entity : view)
-				m_Renderer->SubmitQuad(m_Registry.get<TransformComponent>(entity).GetTransform(), m_Registry.get<SpriteComponent>(entity).Color);
+				m_Renderer.SubmitQuad(m_Registry.get<TransformComponent>(entity).GetTransform(), m_Registry.get<SpriteComponent>(entity).Color);
 		}
 
-		m_Renderer->EndScene();
+		m_Renderer.EndScene();
 	}
 }

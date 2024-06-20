@@ -29,7 +29,7 @@ namespace NodeBrain
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
-	static VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, Window* window)
+	static VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, Window& window)
 	{
 		NB_PROFILE_FN();
 
@@ -39,7 +39,7 @@ namespace NodeBrain
 		}
 		else
 		{
-			glm::vec2 framebufferSize = { window->GetWidth(), window->GetHeight() };
+			glm::vec2 framebufferSize = { window.GetWidth(), window.GetHeight() };
 			VkExtent2D actualExtent = { static_cast<uint32_t>(framebufferSize.x), static_cast<uint32_t>(framebufferSize.y) };
 			actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
 			actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
@@ -51,12 +51,10 @@ namespace NodeBrain
 
 
 
-	VulkanSwapchain::VulkanSwapchain(Window* window, VkSurfaceKHR surface, VulkanDevice& device, VmaAllocator allocator)
+	VulkanSwapchain::VulkanSwapchain(Window& window, VkSurfaceKHR surface, VulkanDevice& device, VmaAllocator allocator)
 		: m_Window(window), m_VkSurface(surface), m_Device(device), m_ImageIndex(0), m_VmaAllocator(allocator)
 	{
 		NB_PROFILE_FN();
-
-		NB_ASSERT(window, "window null. A valid Window pointer is required to create VulkanSwapchain.");
 
 		VK_CHECK(CreateVkSwapchain());
 		VK_CHECK(CreateImageDatas());

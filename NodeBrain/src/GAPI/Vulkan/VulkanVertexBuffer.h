@@ -11,16 +11,16 @@ namespace NodeBrain
 	class VulkanVertexBuffer : public VertexBuffer
 	{
 	public:
-		VulkanVertexBuffer(VulkanRenderContext* context, const void* data, uint32_t size);
+		VulkanVertexBuffer(VulkanRenderContext& context, const void* data, uint32_t size);
 		~VulkanVertexBuffer() override;
 
 		void SetData(const void* data, uint32_t size) override;
 		
-		uint64_t GetAddress() const override { return m_VkDeviceAddress[m_Context->GetSwapchain().GetFrameIndex()]; }
-		VkBuffer GetVkBuffer() const { return m_StagingBuffer[m_Context->GetSwapchain().GetFrameIndex()]; }
+		[[nodiscard]] uint64_t GetAddress() const override { return m_VkDeviceAddress[m_Context.GetSwapchain().GetFrameIndex()]; }
+		[[nodiscard]] VkBuffer GetVkBuffer() const { return m_StagingBuffer[m_Context.GetSwapchain().GetFrameIndex()]; }
 
 	private:
-		VulkanRenderContext* m_Context;
+		VulkanRenderContext& m_Context;
 
 		VkBuffer m_StagingBuffer[FRAMES_IN_FLIGHT];
 		VkBuffer m_GPUBuffer[FRAMES_IN_FLIGHT];

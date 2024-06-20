@@ -7,12 +7,11 @@
 
 namespace NodeBrain
 {
-	VulkanDescriptorSet::VulkanDescriptorSet(VulkanRenderContext* context, const std::vector<LayoutBinding>& layout)
+	VulkanDescriptorSet::VulkanDescriptorSet(VulkanRenderContext& context, const std::vector<LayoutBinding>& layout)
 		: m_Context(context), m_Layout(layout)
 	{
 		NB_PROFILE_FN();
 
-		NB_ASSERT(context, "context null. A valid VulkanRenderContext pointer is required to create VulkanDescriptorSet.");
 		NB_ASSERT(!m_Layout.empty(), "layout contains 0 elements. Descriptor set must be created with a valid layout.");
 
 		// --- Descriptor Layout ---
@@ -30,26 +29,26 @@ namespace NodeBrain
 		descriptorLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		descriptorLayoutCreateInfo.bindingCount = (uint32_t)setLayoutbindings.size();
 		descriptorLayoutCreateInfo.pBindings = &setLayoutbindings[0];
-		VK_CHECK(vkCreateDescriptorSetLayout(m_Context->GetVkDevice(), &descriptorLayoutCreateInfo, nullptr, &m_VkDescriptorSetLayout));
+		VK_CHECK(vkCreateDescriptorSetLayout(m_Context.GetVkDevice(), &descriptorLayoutCreateInfo, nullptr, &m_VkDescriptorSetLayout));
 
 
 		// --- Descriptor Set ---
 		std::vector<VkDescriptorSetLayout> layouts(FRAMES_IN_FLIGHT, m_VkDescriptorSetLayout);
 		VkDescriptorSetAllocateInfo descriptorAllocateInfo = {};
 		descriptorAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		descriptorAllocateInfo.descriptorPool = m_Context->GetVkDescriptorPool();
+		descriptorAllocateInfo.descriptorPool = m_Context.GetVkDescriptorPool();
 		descriptorAllocateInfo.descriptorSetCount = FRAMES_IN_FLIGHT;
 		descriptorAllocateInfo.pSetLayouts = &layouts[0];
-		VK_CHECK(vkAllocateDescriptorSets(m_Context->GetVkDevice(), &descriptorAllocateInfo, &m_VkDescriptorSet[0]));
+		VK_CHECK(vkAllocateDescriptorSets(m_Context.GetVkDevice(), &descriptorAllocateInfo, &m_VkDescriptorSet[0]));
 	}
 
 	VulkanDescriptorSet::~VulkanDescriptorSet()
 	{
 		NB_PROFILE_FN();
 
-		m_Context->WaitForGPU();
+		m_Context.WaitForGPU();
 
-		vkDestroyDescriptorSetLayout(m_Context->GetVkDevice(), m_VkDescriptorSetLayout, nullptr);
+		vkDestroyDescriptorSetLayout(m_Context.GetVkDevice(), m_VkDescriptorSetLayout, nullptr);
 		m_VkDescriptorSetLayout = VK_NULL_HANDLE;
 	}
 
@@ -80,7 +79,7 @@ namespace NodeBrain
 			write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			write.dstSet = m_VkDescriptorSet[i];
 			write.pBufferInfo = &bufferInfo;
-			vkUpdateDescriptorSets(m_Context->GetVkDevice(), 1, &write, 0, nullptr);
+			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
 		}
 	}
 
@@ -111,7 +110,7 @@ namespace NodeBrain
 			write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 			write.dstSet = m_VkDescriptorSet[i];
 			write.pImageInfo = &imageinfo;
-			vkUpdateDescriptorSets(m_Context->GetVkDevice(), 1, &write, 0, nullptr);
+			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
 		}
 	}
 }

@@ -5,12 +5,10 @@
 
 namespace NodeBrain
 {
-	VulkanShader::VulkanShader(VulkanRenderContext* context, const std::filesystem::path& path, ShaderType shaderType)
+	VulkanShader::VulkanShader(VulkanRenderContext& context, const std::filesystem::path& path, ShaderType shaderType)
 		: m_Context(context), m_ShaderPath(path), m_ShaderType(shaderType)
 	{
 		NB_PROFILE_FN();
-
-		NB_ASSERT(context, "context null. A valid VulkanRenderContext pointer is required to create VulkanShader.");
 
 		std::vector<char> buffer = Utils::ReadFile(m_ShaderPath);
 
@@ -18,7 +16,7 @@ namespace NodeBrain
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		createInfo.codeSize = buffer.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(buffer.data());
-		VK_CHECK(vkCreateShaderModule(m_Context->GetVkDevice(), &createInfo, nullptr, &m_VkShaderModule));
+		VK_CHECK(vkCreateShaderModule(m_Context.GetVkDevice(), &createInfo, nullptr, &m_VkShaderModule));
 		NB_INFO("Created shader module of size: {0}", buffer.size());
 	}
 
@@ -26,9 +24,9 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		m_Context->WaitForGPU();
+		m_Context.WaitForGPU();
 
-		vkDestroyShaderModule(m_Context->GetVkDevice(), m_VkShaderModule, nullptr);
+		vkDestroyShaderModule(m_Context.GetVkDevice(), m_VkShaderModule, nullptr);
 		m_VkShaderModule = VK_NULL_HANDLE;
 	}
 }

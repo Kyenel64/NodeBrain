@@ -5,12 +5,10 @@
 
 namespace NodeBrain
 {
-	Renderer::Renderer(RendererAPI* rendererAPI)
-		: m_RendererAPI(rendererAPI), m_Context(rendererAPI->GetContext())
+	Renderer::Renderer(RendererAPI& rendererAPI)
+		: m_RendererAPI(rendererAPI), m_Context(rendererAPI.GetContext())
 	{		
 		NB_PROFILE_FN();
-
-		NB_ASSERT(rendererAPI, "rendererAPI null. RendererAPI is required to create Renderer.");
 
 		// --- Uniforms ---
 		m_Data.TestUniformBuffer = UniformBuffer::Create(m_Context, nullptr, sizeof(TestUniformData));
@@ -32,7 +30,7 @@ namespace NodeBrain
 
 		m_Data.QuadVertexBuffer = VertexBuffer::Create(m_Context, nullptr, sizeof(QuadVertex) * m_Data.MaxVertices);
 
-		uint32_t* quadIndices = new uint32_t[m_Data.MaxIndices];
+		auto* quadIndices = new uint32_t[m_Data.MaxIndices];
 		uint32_t offset = 0;
 		for (size_t i = 0; i < m_Data.MaxIndices; i += 6)
 		{
@@ -63,7 +61,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		m_Context->WaitForGPU();
+		m_Context.WaitForGPU();
 
 		delete m_Data.QuadVertexBufferBase;
 		m_Data.QuadVertexBufferBase = nullptr;
@@ -75,7 +73,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		m_RendererAPI->BeginFrame();
+		m_RendererAPI.BeginFrame();
 
 		// Bind per frame descriptors
 		m_Data.QuadPipeline->BindDescriptorSet(m_Data.GlobalDescriptorSet);
@@ -83,7 +81,7 @@ namespace NodeBrain
 
 	void Renderer::EndFrame()
 	{
-		m_RendererAPI->EndFrame();
+		m_RendererAPI.EndFrame();
 	}
 
 	void Renderer::BeginScene(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage)
@@ -92,7 +90,7 @@ namespace NodeBrain
 
 		m_Data.QuadPipeline->SetTargetImage(targetImage);
 
-		m_RendererAPI->ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetImage);
+		m_RendererAPI.ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetImage);
 
 		m_Data.PushConstantBuffer.ViewProjectionMatrix = editorCamera->GetProjectionMatrix() * editorCamera->GetViewMatrix();
 
@@ -150,9 +148,9 @@ namespace NodeBrain
 			uint32_t size = (uint32_t)((uint8_t*)m_Data.QuadVertexBufferPtr - (uint8_t*)m_Data.QuadVertexBufferBase);
 			m_Data.QuadVertexBuffer->SetData(m_Data.QuadVertexBufferBase, size);
 
-			m_RendererAPI->BeginRenderPass(m_Data.QuadPipeline);
-			m_RendererAPI->DrawIndexed(m_Data.QuadIndexBuffer, m_Data.QuadIndexCount, 0);
-			m_RendererAPI->EndRenderPass(m_Data.QuadPipeline);
+			m_RendererAPI.BeginRenderPass(m_Data.QuadPipeline);
+			m_RendererAPI.DrawIndexed(m_Data.QuadIndexBuffer, m_Data.QuadIndexCount, 0);
+			m_RendererAPI.EndRenderPass(m_Data.QuadPipeline);
 		}
 	}
 }

@@ -12,10 +12,10 @@ namespace NodeBrain
 		VulkanDevice(VulkanPhysicalDevice& physicalDevice, const std::vector<const char*>& enabledLayers);
 		~VulkanDevice();
 
-		VkDevice GetVkDevice() const { return m_VkDevice; }
-		VulkanPhysicalDevice& GetPhysicalDevice() const { return m_PhysicalDevice; }
-		VkQueue GetGraphicsQueue() const { return m_GraphicsQueue; }
-		VkQueue GetPresentationQueue() const { return m_PresentationQueue; }
+		[[nodiscard]] VkDevice GetVkDevice() const { return m_VkDevice; }
+		[[nodiscard]] VulkanPhysicalDevice& GetPhysicalDevice() const { return m_PhysicalDevice; }
+		[[nodiscard]] VkQueue GetGraphicsQueue() const { return m_GraphicsQueue; }
+		[[nodiscard]] VkQueue GetPresentationQueue() const { return m_PresentationQueue; }
 
 	private:
 		VulkanPhysicalDevice& m_PhysicalDevice;

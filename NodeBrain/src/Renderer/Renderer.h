@@ -65,7 +65,7 @@ namespace NodeBrain
 	class Renderer
 	{
 	public:
-		explicit Renderer(RendererAPI* rendererAPI);
+		explicit Renderer(RendererAPI& rendererAPI);
 		~Renderer();
 
 		void BeginFrame();
@@ -78,12 +78,12 @@ namespace NodeBrain
 
 		void SubmitQuad(const glm::mat4& transform, const glm::vec4& color);
 
-		RenderContext* GetContext() const { return m_RendererAPI->GetContext(); };
-		RendererAPI* GetAPI() const { return m_RendererAPI; }
+		[[nodiscard]] RenderContext& GetContext() const { return m_RendererAPI.GetContext(); };
+		[[nodiscard]] RendererAPI& GetAPI() const { return m_RendererAPI; }
 
 	private:
-		RendererAPI* m_RendererAPI;
-		RenderContext* m_Context;
+		RendererAPI& m_RendererAPI;
+		RenderContext& m_Context;
 
 		RendererData m_Data;
 	};

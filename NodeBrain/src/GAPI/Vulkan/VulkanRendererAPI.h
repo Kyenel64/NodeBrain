@@ -13,10 +13,10 @@ namespace NodeBrain
 	class VulkanRendererAPI : public RendererAPI
 	{
 	public:
-		explicit VulkanRendererAPI(VulkanRenderContext* renderContext);
+		explicit VulkanRendererAPI(VulkanRenderContext& renderContext);
 		~VulkanRendererAPI() override;
 
-		RenderContext* GetContext() const override { return m_Context; }
+		RenderContext& GetContext() const override { return m_Context; }
 
 		void BeginFrame() override;
 		void EndFrame() override;
@@ -33,7 +33,7 @@ namespace NodeBrain
 		void DispatchCompute(uint32_t groupX, uint32_t groupY, uint32_t groupZ) override;
 
 	private:
-		VulkanRenderContext* m_Context;
+		VulkanRenderContext& m_Context;
 		VulkanSwapchain& m_Swapchain;
 		VkCommandBuffer m_ActiveCmdBuffer = VK_NULL_HANDLE;
 		VkImage m_ActiveSwapchainImage = VK_NULL_HANDLE;

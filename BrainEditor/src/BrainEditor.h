@@ -13,7 +13,7 @@ namespace NodeBrain
 	class BrainEditor : public Layer
 	{
 	public:
-		explicit BrainEditor(Renderer* renderer);
+		explicit BrainEditor(Renderer& renderer);
 		~BrainEditor() override = default;
 
 		void OnEvent(Event& event) override;
@@ -27,10 +27,10 @@ namespace NodeBrain
 		void DrawViewportWindow();
 
 	private:
-		Renderer* m_Renderer;
-		RendererAPI* m_RendererAPI;
-		RenderContext* m_Context;
-		Window* m_Window;
+		Renderer& m_Renderer;
+		RendererAPI& m_RendererAPI;
+		RenderContext& m_Context;
+		Window& m_Window;
 
 		SceneGraphPanel m_SceneGraphPanel;
 		EntityGraphPanel m_EntityGraphPanel;

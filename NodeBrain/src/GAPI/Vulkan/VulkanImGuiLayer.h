@@ -10,7 +10,7 @@ namespace NodeBrain
 	class VulkanImGuiLayer : public ImGuiLayer
 	{
 	public:
-		explicit VulkanImGuiLayer(VulkanRenderContext* context);
+		explicit VulkanImGuiLayer(VulkanRenderContext& context);
 		~VulkanImGuiLayer() override;
 		
 		void BeginFrame() override;
@@ -18,7 +18,7 @@ namespace NodeBrain
 		// Needs to be run within active command buffer and after copying draw image to swapchain. 
 		void EndFrame() override;
 	private:
-		VulkanRenderContext* m_Context;
+		VulkanRenderContext& m_Context;
 
 		VkDescriptorPool m_ImGuiDescriptorPool = VK_NULL_HANDLE;
 
