@@ -1,6 +1,7 @@
 #pragma once
 
 #include <csignal>
+#include <format>
 
 #include <spdlog/spdlog.h>
 
