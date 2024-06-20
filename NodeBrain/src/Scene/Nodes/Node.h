@@ -7,13 +7,12 @@
 #include <glm/glm.hpp>
 
 #include "Core/Log.h"
+#include "Core/UUID.h"
 #include "Scene/Component.h"
 
 namespace NodeBrain
 {
-	static uint32_t hashIndex = 0; // TODO
-
-	using NodeID = uint32_t;
+	typedef UUID NodeID;
 
 	enum class NodeType
 	{
@@ -94,7 +93,7 @@ namespace NodeBrain
 	class Node
 	{
 	public:
-		explicit Node(NodeType type) : m_NodeID(hashIndex), m_Type(type) { hashIndex++; };
+		explicit Node(NodeType type) : m_NodeID(NodeID()), m_Type(type) {}
 
 		virtual ~Node() = default;
 
@@ -121,7 +120,7 @@ namespace NodeBrain
 	protected:
 		std::vector<InputPort> m_InputPorts;
 		std::vector<OutputPort> m_OutputPorts;
-		const NodeID m_NodeID;
+		NodeID m_NodeID;
 		NodeType m_Type;
 
 	public:

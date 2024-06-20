@@ -17,7 +17,8 @@ set (CoreFiles
 "src/Core/KeyCode.h"
 "src/Core/Input.h" "src/Core/Input.cpp"
 "src/Core/Instrumentor.h" "src/Core/Instrumentor.cpp"
-"src/Core/ImGuiLayer.h")
+"src/Core/ImGuiLayer.h"
+"src/Core/UUID.h" "src/Core/UUID.cpp")
 
 set (VulkanFiles 
 "src/GAPI/Vulkan/VulkanRendererAPI.h" "src/GAPI/Vulkan/VulkanRendererAPI.cpp"
@@ -56,9 +57,9 @@ set (SceneFiles
 "src/Scene/Component.h"
 "src/Scene/EntityGraph.h" "src/Scene/EntityGraph.cpp"
 "src/Scene/Nodes/Node.h"
-        src/Scene/Nodes/TypeNodes.h
-        src/Scene/Nodes/ComponentNodes.h
-        src/Scene/Nodes/MathNodes.h)
+"src/Scene/Nodes/TypeNodes.h"
+"src/Scene/Nodes/ComponentNodes.h"
+"src/Scene/Nodes/MathNodes.h")
 
 # Source files
 add_library ( ${PROJECT_NAME} 

@@ -183,7 +183,7 @@ namespace NodeBrain
 
 
 		// --- Node Header ---
-		ImGui::Text("%s, %i", nodeUI.NodeName.c_str(), node.m_NodeID);
+		ImGui::Text("%s, %llu", nodeUI.NodeName.c_str(), (uint64_t)node.m_NodeID); // Node id is debug
 		ImVec2 p1 = ImGui::GetCursorScreenPos();
 		drawList->AddLine({ p1.x - ImGui::GetStyle().WindowPadding.x, p1.y }, { p1.x + nodeUI.Size.x - ImGui::GetStyle().WindowPadding.x, p1.y },
 				ImGui::GetColorU32(nodeUI.NodeColor));

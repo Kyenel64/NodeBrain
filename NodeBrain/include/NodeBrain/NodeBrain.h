@@ -9,6 +9,7 @@
 #include "Core/Timer.h"
 #include "Core/Log.h"
 #include "Core/Instrumentor.h"
+#include "Core/UUID.h"
 
 // Renderer
 #include "Renderer/Renderer.h"

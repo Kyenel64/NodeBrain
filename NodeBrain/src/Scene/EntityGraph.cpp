@@ -14,7 +14,7 @@ namespace NodeBrain
 		{
 			if (nodeID == removingNodeID)
 			{
-				for (auto& inputPort : m_Nodes[adjNodeID]->m_InputPorts)
+				for (auto& inputPort : m_Nodes.at(adjNodeID)->m_InputPorts)
 				{
 					if (inputPort.m_LinkedOutputPort->m_ParentNode.m_NodeID == removingNodeID)
 						inputPort.m_LinkedOutputPort = nullptr;
@@ -126,7 +126,7 @@ namespace NodeBrain
 		// Debug
 		std::string topSortStr = {};
 		for (auto& node : m_TopSortedNodes)
-			topSortStr.append(std::to_string(node->m_NodeID) + ", ");
+			topSortStr.append(std::to_string((uint64_t)node->m_NodeID) + ", ");
 		NB_INFO(topSortStr);
 
 		return true;
