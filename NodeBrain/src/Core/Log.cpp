@@ -3,17 +3,19 @@
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-namespace NodeBrain
+namespace NodeBrain::Log
 {
 	static std::shared_ptr<spdlog::logger> s_Logger;
 
-	void Log::Init()
+	std::shared_ptr<spdlog::logger>& GetLogger()
 	{
-		NB_PROFILE_FN();
+		// Initialize if not yet initialized
+		if (!s_Logger)
+		{
+			s_Logger = spdlog::stdout_color_mt("NodeBrain");
+			s_Logger->set_pattern("[%T] [%n] [%s:%#]: %v %$");
+		}
 
-		spdlog::set_pattern("[%T] [%n]: %v %$");
-		s_Logger = spdlog::stdout_color_mt("NodeBrain");
+		return s_Logger;
 	}
-
-	std::shared_ptr<spdlog::logger>& Log::GetLogger() { return s_Logger; }
 }

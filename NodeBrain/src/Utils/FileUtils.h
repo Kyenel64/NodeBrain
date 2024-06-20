@@ -1,9 +1,6 @@
 #pragma once
 
-namespace NodeBrain
+namespace NodeBrain::Utils
 {
-	namespace Utils
-	{
-		std::vector<char> ReadFile(const std::filesystem::path& path);
-	}
+	std::vector<char> ReadFile(const std::filesystem::path& path);
 }

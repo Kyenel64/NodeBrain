@@ -32,10 +32,15 @@ jobs:
           vulkan-components: Vulkan-Headers, Vulkan-Loader
           vulkan-use-cache: true
 
-      - name: Build
+      - name: Build Debug
         run: |
-          cmake .
-          make
+          cmake . -DCMAKE_BUILD_TYPE=Debug
+          cmake --build .
+
+      - name: Build Release
+        run: |
+          cmake . -DCMAKE_BUILD_TYPE=Release
+          cmake --build .
 
   build_windows:
     name: Build Windows
@@ -52,12 +57,17 @@ jobs:
           vulkan-query-version: latest
           vulkan-components: Vulkan-Headers, Vulkan-Loader
           vulkan-use-cache: true
-             
+
       - uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Build
+      - name: Build Debug
         run: |
-          cmake .
+          cmake . -DCMAKE_BUILD_TYPE=Debug
+          cmake --build .
+
+      - name: Build Release
+        run: |
+          cmake . -DCMAKE_BUILD_TYPE=Release
           cmake --build .
 
   build_macos:
@@ -76,7 +86,12 @@ jobs:
           vulkan-components: Vulkan-Headers, Vulkan-Loader
           vulkan-use-cache: true
 
-      - name: Build
+      - name: Build Debug
         run: |
-          cmake .
+          cmake . -DCMAKE_BUILD_TYPE=Debug
+          cmake --build .
+
+      - name: Build Release
+        run: |
+          cmake . -DCMAKE_BUILD_TYPE=Release
           cmake --build .

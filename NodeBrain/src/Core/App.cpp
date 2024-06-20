@@ -7,47 +7,19 @@
 
 namespace NodeBrain
 {
-	App* s_Instance = nullptr;
-
-	App::App()
+	App::App(std::string applicationName, Window& window, Renderer& renderer, ImGuiLayer* imGuiLayer)
+		: m_ApplicationName(std::move(applicationName)), m_Window(window), m_Renderer(renderer), m_ImGuiLayer(imGuiLayer)
 	{
 		NB_PROFILE_FN();
 
-		s_Instance = this;
-		m_Timer.StartTimer();
-
-		StartupSubSystems();
+		m_Window.SetEventCallback([this](Event& event) { OnEvent(event); });
 	}
 
 	App::~App()
 	{
 		NB_PROFILE_FN();
 
-		Renderer::Shutdown();
-		
-		for (Layer* layer : m_Layers)
-		{
-			layer->OnDetach();
-			delete layer;
-		}
-
-		m_Timer.EndTimer();
-
 		NB_INFO("Shutdown Application");
-	}
-
-	bool App::StartupSubSystems()
-	{
-		NB_PROFILE_FN();
-
-		Log::Init();
-
-		m_Window = std::make_unique<Window>("NodeBrain");
-		m_Window->SetEventCallback(std::bind(&App::OnEvent, this, std::placeholders::_1));
-
-		Renderer::Init();
-
-		return true;
 	}
 
 	void App::Run()
@@ -56,25 +28,35 @@ namespace NodeBrain
 		{
 			NB_PROFILE_SCOPE("Frame");
 
+			m_Window.PollEvents();
+
 			// Calculate deltaTime
-			float time = m_Timer.GetElapsedSeconds(); // TODO: Change to GLFW time
-			float deltaTime = time - m_LastFrameTime;
+			double time = m_Timer.GetElapsedTime(TimerUnit::Seconds);
+			auto deltaTime = static_cast<float>(time - m_LastFrameTime);
 			m_LastFrameTime = time;
 
-			// Update
-			for (Layer* layer : m_Layers)
-				layer->OnUpdate(deltaTime);
+			m_Renderer.GetContext().AcquireNextImage();
 
-			// Update GUI
-			for (Layer* layer : m_Layers)
-				layer->OnUpdateGUI();
+			m_Renderer.BeginFrame();
 
-			// Process input polling
-			Input::ProcessStates();
+			if (!m_Minimized)
+			{
+				// Update
+				for (Layer* layer : m_Layers)
+					layer->OnUpdate(deltaTime);
 
-			// Window 
-			m_Window->SwapBuffers();
-			m_Window->PollEvents();
+				// Update GUI
+				m_ImGuiLayer->BeginFrame();
+				for (Layer* layer : m_Layers)
+					layer->OnUpdateGUI();
+				m_ImGuiLayer->EndFrame();
+			}
+
+			m_Renderer.EndFrame();
+
+			Input::ProcessPollStates();
+
+			m_Renderer.GetContext().SwapBuffers();
 		}
 	}
 
@@ -86,18 +68,8 @@ namespace NodeBrain
 			layer->OnEvent(event);
 
 		// Bind our functions to an event
-		event.AttachEventFunction<WindowClosedEvent>(std::bind(&App::OnWindowClose, this, std::placeholders::_1));
-	}
-
-	void App::PushLayer(Layer* layer)
-	{
-		NB_PROFILE_FN();
-
-		if (!layer)
-			return;
-
-		m_Layers.push_back(layer);
-		layer->OnAttach();
+		event.AttachEventFunction<WindowClosedEvent>([this](WindowClosedEvent& event) { OnWindowClose(event); });
+		event.AttachEventFunction<WindowMinimizedEvent>([this](WindowMinimizedEvent& event) { OnMinimized(event); });
 	}
 
 	void App::OnWindowClose(WindowClosedEvent& e)
@@ -107,10 +79,10 @@ namespace NodeBrain
 		m_Running = false;
 	}
 
-	App* App::GetInstance() 
-	{ 
+	void App::OnMinimized(WindowMinimizedEvent& e)
+	{
 		NB_PROFILE_FN();
 
-		return s_Instance; 
+		m_Minimized = e.IsMinimized();
 	}
 }

@@ -1,49 +1,71 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <VMA/vk_mem_alloc.h>
 
 #include "Core/Window.h"
 #include "Renderer/RenderContext.h"
 #include "GAPI/Vulkan/VulkanPhysicalDevice.h"
 #include "GAPI/Vulkan/VulkanDevice.h"
-#include "GAPI/Vulkan/VulkanSurface.h"
-#include "GAPI/Vulkan/VulkanSwapChain.h"
+#include "GAPI/Vulkan/VulkanSwapchain.h"
 
 namespace NodeBrain
 {
-    class VulkanRenderContext : public RenderContext
-    {
-    public:
-		VulkanRenderContext(Window* window);
-		~VulkanRenderContext();
+	class VulkanRenderContext : public RenderContext
+	{
+	public:
+		explicit VulkanRenderContext(Window& window);
+		~VulkanRenderContext() override;
 
-		virtual void Init() override;
-		virtual void SwapBuffers() override;
+		void AcquireNextImage() override;
+		void SwapBuffers() override;
 
-		static VulkanRenderContext* GetInstance();
+		void WaitForGPU() override;
+
+		GAPI GetGraphicsAPI() const override { return GAPI::Vulkan; }
+		Window& GetWindow() const override { return m_Window; }
+
+		void ImmediateSubmit(const std::function<void(VkCommandBuffer cmdBuffer)>& func);
+
+		// Getters
 		VkInstance GetVkInstance() const { return m_VkInstance; }
-		const std::vector<const char*>& GetValidationLayers() const { return m_ValidationLayers; }
-		std::shared_ptr<VulkanSurface> GetSurface() const { return m_Surface; }
-		std::shared_ptr<VulkanDevice> GetDevice() const { return m_Device; }
-		bool IsValidationLayersEnabled() const { return m_EnableValidationLayers; }
+		VkDevice GetVkDevice() const { return m_Device->GetVkDevice(); }
+		VulkanDevice& GetDevice() const { return *m_Device; }
+		VulkanPhysicalDevice& GetPhysicalDevice() const { return *m_PhysicalDevice; }
+		VulkanSwapchain& GetSwapchain() const { return *m_Swapchain; }
+		VmaAllocator GetVMAAllocator() const { return m_VMAAllocator; }
+		const std::vector<const char*>& GetEnabledLayers() const { return m_EnabledLayers; }
+		VkDescriptorPool GetVkDescriptorPool() const { return m_VkDescriptorPools[m_Swapchain->GetFrameIndex()]; }
 
 	private:
 		VkResult CreateInstance();
+		VkResult CreateDescriptorPools();
 		VkResult CreateDebugUtilsMessenger();
+		VkResult CreateAllocator();
+		VkResult CreateImmediateObjects();
+		
+		void DestroyDebugUtilsMessenger();
+		void DestroyImmediateObjects();
 
-		bool CheckExtensionSupport(std::vector<const char*> extensions);
-		bool CheckValidationLayerSupport();
+		std::unique_ptr<VulkanPhysicalDevice> FindFirstSuitablePhysicalDevice();
 
-    private:
-		Window* m_Window = nullptr;
+	private:
+		Window& m_Window;
 		VkInstance m_VkInstance = VK_NULL_HANDLE;
-		VkDebugUtilsMessengerEXT m_DebugMessenger = nullptr;
-		bool m_EnableValidationLayers = false;
-		std::vector<const char*> m_ValidationLayers;
+		VkSurfaceKHR m_VkSurface = VK_NULL_HANDLE;
+		VmaAllocator m_VMAAllocator = VK_NULL_HANDLE;
+		VkDescriptorPool m_VkDescriptorPools[FRAMES_IN_FLIGHT];
+		VkDebugUtilsMessengerEXT m_DebugMessenger = VK_NULL_HANDLE;
 
-		std::shared_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
-		std::shared_ptr<VulkanDevice> m_Device;
-		std::shared_ptr<VulkanSurface> m_Surface;
-		std::shared_ptr<VulkanSwapChain> m_SwapChain;
-    };
+		std::unique_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
+		std::unique_ptr<VulkanDevice> m_Device;
+		std::unique_ptr<VulkanSwapchain> m_Swapchain;
+
+		std::vector<const char*> m_EnabledLayers;
+		std::vector<const char*> m_EnabledInstanceExtensions;
+
+		VkFence m_ImmediateFence = VK_NULL_HANDLE;
+		VkCommandPool m_ImmediateCmdPool = VK_NULL_HANDLE;
+		VkCommandBuffer m_ImmediateCmdBuffer = VK_NULL_HANDLE;
+	};
 }

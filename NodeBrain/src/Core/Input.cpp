@@ -1,10 +1,6 @@
 #include "NBpch.h"
 #include "Input.h"
 
-#include <GLFW/glfw3.h>
-
-#include "Core/App.h"
-
 namespace NodeBrain
 {
 	static std::unordered_map<Key, InputState> s_KeyState;
@@ -13,24 +9,27 @@ namespace NodeBrain
 	static std::unordered_map<MouseButton, InputState> s_MouseButtonState;
 	static std::queue<MouseButton> s_UnhandledMouseButtons;
 
+	static glm::vec2 s_MousePosition;
+
 	bool Input::IsKeyPressed(Key key)
 	{
 		NB_PROFILE_FN();
-		return s_KeyState.find(key) != s_KeyState.end() && s_KeyState[key] == InputState::Pressed;
+		
+		return s_KeyState.find(key) != s_KeyState.end() && s_KeyState.at(key) == InputState::Pressed;
 	}
 
 	bool Input::IsKeyHeld(Key key)
 	{
 		NB_PROFILE_FN();
 
-		return s_KeyState.find(key) != s_KeyState.end() && s_KeyState[key] == InputState::Held;
+		return s_KeyState.find(key) != s_KeyState.end() && s_KeyState.at(key) == InputState::Held;
 	}
 
 	bool Input::IsKeyReleased(Key key)
 	{
 		NB_PROFILE_FN();
 
-		return s_KeyState.find(key) != s_KeyState.end() && s_KeyState[key] == InputState::Released;
+		return s_KeyState.find(key) != s_KeyState.end() && s_KeyState.at(key) == InputState::Released;
 	}
 
 	void Input::SetKeyState(Key key, InputState keyState)
@@ -46,7 +45,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		return s_KeyState.find(key) != s_KeyState.end() ? s_KeyState[key] : InputState::None;
+		return s_KeyState.find(key) != s_KeyState.end() ? s_KeyState.at(key) : InputState::None;
 	}
 
 	void Input::SetMouseButtonState(MouseButton mouseButton, InputState mouseState)
@@ -62,10 +61,10 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() ? s_MouseButtonState[mouseButton] : InputState::None;
+		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() ? s_MouseButtonState.at(mouseButton) : InputState::None;
 	}
 
-	void Input::ProcessStates()
+	void Input::ProcessPollStates()
 	{
 		NB_PROFILE_FN();
 
@@ -96,31 +95,34 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() && s_MouseButtonState[mouseButton] == InputState::Pressed;
+		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() && s_MouseButtonState.at(mouseButton) == InputState::Pressed;
 	}
 
 	bool Input::IsMouseButtonHeld(MouseButton mouseButton)
 	{
 		NB_PROFILE_FN();
 
-		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() && s_MouseButtonState[mouseButton] == InputState::Held;
+		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() && s_MouseButtonState.at(mouseButton) == InputState::Held;
 	}
 
 	bool Input::IsMouseButtonReleased(MouseButton mouseButton)
 	{
 		NB_PROFILE_FN();
 
-		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() && s_MouseButtonState[mouseButton] == InputState::Released;
+		return s_MouseButtonState.find(mouseButton) != s_MouseButtonState.end() && s_MouseButtonState.at(mouseButton) == InputState::Released;
 	}
 
 	glm::vec2 Input::GetMousePosition()
 	{
 		NB_PROFILE_FN();
 
-		GLFWwindow* window = App::GetInstance()->GetWindow().GetGLFWWindow();
-		NB_ASSERT(window, "Could not retrieve application instance");
-		double xpos = 0, ypos = 0;
-		glfwGetCursorPos(window, &xpos, &ypos);
-		return { (float)xpos, (float)ypos };
+		return s_MousePosition;
+	}
+
+	void Input::SetMousePosition(const glm::vec2& pos)
+	{
+		NB_PROFILE_FN();
+
+		s_MousePosition = pos;
 	}
 }

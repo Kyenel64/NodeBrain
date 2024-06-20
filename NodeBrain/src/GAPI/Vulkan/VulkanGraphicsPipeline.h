@@ -2,21 +2,31 @@
 
 #include <vulkan/vulkan.h>
 
-#include "GAPI/Vulkan/VulkanShader.h"
 #include "Renderer/GraphicsPipeline.h"
+#include "GAPI/Vulkan/VulkanRenderContext.h"
 
 namespace NodeBrain
 {
 	class VulkanGraphicsPipeline : public GraphicsPipeline
 	{
 	public:
-		VulkanGraphicsPipeline(std::shared_ptr<Shader> vertShader, std::shared_ptr<Shader> fragShader);
-		virtual ~VulkanGraphicsPipeline() = default;
-	private:
-		void Init();
+		VulkanGraphicsPipeline(VulkanRenderContext& context, GraphicsPipelineConfiguration  config);
+		~VulkanGraphicsPipeline() override;
+
+		void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) override;
+		void SetTargetImage(std::shared_ptr<Image> targetImage) override { m_Configuration.TargetImage = targetImage; }
+
+		void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet) override;
+
+		[[nodiscard]] std::shared_ptr<Image> GetTargetImage() const override { return m_Configuration.TargetImage; }
+		[[nodiscard]] VkPipeline GetVkPipeline() const { return m_VkPipeline; }
 
 	private:
-		std::shared_ptr<VulkanShader> m_VertexShader;
-		std::shared_ptr<VulkanShader> m_FragmentShader;
+		VulkanRenderContext& m_Context;
+		
+		VkPipeline m_VkPipeline = VK_NULL_HANDLE;
+		VkPipelineLayout m_VkPipelineLayout = VK_NULL_HANDLE;
+
+		GraphicsPipelineConfiguration m_Configuration;
 	};
 }

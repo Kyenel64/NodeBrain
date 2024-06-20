@@ -2,8 +2,6 @@
 
 #include <vulkan/vulkan.h>
 
-#include "GAPI/Vulkan/VulkanSurface.h"
-
 namespace NodeBrain
 {
 	struct QueueFamilyIndices
@@ -11,46 +9,42 @@ namespace NodeBrain
 		std::optional<uint32_t> Graphics;
 		std::optional<uint32_t> Presentation;
 
-		bool IsComplete() const
+		[[nodiscard]] bool IsComplete() const
 		{
 			return Graphics.has_value() && Presentation.has_value();
 		}
 	};
 
-	struct SwapChainSupportDetails
+	struct SwapchainSupportDetails
 	{
 		VkSurfaceCapabilitiesKHR Capabilities;
 		std::vector<VkSurfaceFormatKHR> Formats;
 		std::vector<VkPresentModeKHR> PresentationModes;
 	};
 
+
+
 	class VulkanPhysicalDevice
 	{
 	public:
-		VulkanPhysicalDevice(uint32_t deviceNumber);
+		VulkanPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, uint32_t deviceIndex);
 		~VulkanPhysicalDevice() = default;
 
-		QueueFamilyIndices GetQueueFamilyIndices() { return FindQueueFamilies(m_PhysicalDevice); }
-		SwapChainSupportDetails GetSwapChainSupportDetails() { return QuerySwapChainSupport(m_PhysicalDevice); }
-		VkPhysicalDevice GetVkPhysicalDevice() const { return m_PhysicalDevice; }
-		const std::vector<const char*>& GetDeviceExtensions() const { return m_DeviceExtensions; }
+		[[nodiscard]] bool IsSuitable() const;
 
-		static VkSurfaceFormatKHR ChooseSwapChainFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-		static VkPresentModeKHR ChooseSwapChainPresentationMode(const std::vector<VkPresentModeKHR>& availablePresentationModes);
-		static VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-
-	private:
-		void PickPhysicalDevice(uint32_t deviceHandle);
-		bool IsDeviceSuitable(VkPhysicalDevice device);
-		bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
-		QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
-
-		SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
+		[[nodiscard]] VkPhysicalDevice GetVkPhysicalDevice() const { return m_VkPhysicalDevice; }
+		[[nodiscard]] const std::vector<const char*>& GetEnabledDeviceExtensions() const { return m_EnabledDeviceExtensions; }
 		
+		[[nodiscard]] QueueFamilyIndices FindQueueFamilies() const;
+		[[nodiscard]] SwapchainSupportDetails QuerySwapchainSupport() const;
+		[[nodiscard]] bool CheckDeviceExtensionSupport() const;
+
 	private:
+		VkPhysicalDevice m_VkPhysicalDevice = VK_NULL_HANDLE;
 		VkInstance m_VkInstance = VK_NULL_HANDLE;
-		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
-		std::shared_ptr<VulkanSurface> m_Surface;
-		std::vector<const char*> m_DeviceExtensions;
+		VkSurfaceKHR m_VkSurfaceKHR = VK_NULL_HANDLE;
+
+		uint32_t m_PhysicalDeviceIndex;
+		std::vector<const char*> m_EnabledDeviceExtensions;
 	};
 }

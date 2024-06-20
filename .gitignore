@@ -1,6 +1,12 @@
 # Visual Studio cache
 .vs
 
+# VS code
+.vscode
+
+# Clion
+.idea
+
 # Output
 out
 [Bb][Uu][Ii][Ll][Dd]
@@ -30,3 +36,6 @@ _deps
 *.exe
 *.out
 *.app
+
+# Profile
+*.log

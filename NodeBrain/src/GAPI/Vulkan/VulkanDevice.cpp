@@ -1,32 +1,15 @@
 #include "NBpch.h"
 #include "VulkanDevice.h"
 
-#include "GAPI/Vulkan/VulkanRenderContext.h"
-
 namespace NodeBrain
 {
-	VulkanDevice::VulkanDevice(std::shared_ptr<VulkanPhysicalDevice> physicalDevice)
+	VulkanDevice::VulkanDevice(VulkanPhysicalDevice& physicalDevice, const std::vector<const char*>& enabledLayers)
 		: m_PhysicalDevice(physicalDevice)
 	{
 		NB_PROFILE_FN();
 
-		m_ValidationLayers = VulkanRenderContext::GetInstance()->GetValidationLayers();
-		Init();
-	}
-
-	VulkanDevice::~VulkanDevice()
-	{
-		NB_PROFILE_FN();
-
-		vkDestroyDevice(m_Device, nullptr);
-	}
-
-	void VulkanDevice::Init()
-	{
-		NB_PROFILE_FN();
-
 		// --- Queue info ---
-		QueueFamilyIndices indices = m_PhysicalDevice->GetQueueFamilyIndices();
+		QueueFamilyIndices indices = m_PhysicalDevice.FindQueueFamilies();
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 		std::set<uint32_t> uniqueQueueFamilies = { indices.Graphics.value(), indices.Presentation.value() };
 		float queuePriority = 1.0f;
@@ -39,35 +22,58 @@ namespace NodeBrain
 			queueCreateInfo.pQueuePriorities = &queuePriority;
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
+
 		
 		// --- Features ---
-		VkPhysicalDeviceFeatures deviceFeatures = {}; // TODO:
+		VkPhysicalDeviceFeatures2 deviceFeatures = {};
+		deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
+
+		VkPhysicalDeviceVulkan12Features vulkan12Features = {};
+		vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+		vulkan12Features.bufferDeviceAddress = VK_TRUE;
+		vulkan12Features.descriptorIndexing = VK_TRUE;
+
+		VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures = {};
+		dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
+		dynamicRenderingFeatures.dynamicRendering = VK_TRUE;
+
+		VkPhysicalDeviceSynchronization2FeaturesKHR synchronization2Features = {};
+		synchronization2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
+		synchronization2Features.synchronization2 = VK_TRUE;
+
+		deviceFeatures.pNext = &vulkan12Features;
+		vulkan12Features.pNext = &dynamicRenderingFeatures;
+		dynamicRenderingFeatures.pNext = &synchronization2Features;
+
 
 		// --- Device ---
 		VkDeviceCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		createInfo.pNext = &deviceFeatures;
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		createInfo.pQueueCreateInfos = &queueCreateInfos[0];
-		createInfo.pEnabledFeatures = &deviceFeatures;
+		createInfo.enabledExtensionCount = m_PhysicalDevice.GetEnabledDeviceExtensions().size();
+		createInfo.ppEnabledExtensionNames = m_PhysicalDevice.GetEnabledDeviceExtensions().data();
 
-		// Extensions
-		createInfo.enabledExtensionCount = m_PhysicalDevice->GetDeviceExtensions().size();
-		createInfo.ppEnabledExtensionNames = m_PhysicalDevice->GetDeviceExtensions().data();
-
-		// Layers
-		createInfo.enabledLayerCount = 0;
-		if (!m_ValidationLayers.empty())
+		// Validation layers
+		if (!enabledLayers.empty())
 		{
-			createInfo.enabledLayerCount = m_ValidationLayers.size();
-			createInfo.ppEnabledLayerNames = &m_ValidationLayers[0];
+			createInfo.enabledLayerCount = enabledLayers.size();
+			createInfo.ppEnabledLayerNames = &enabledLayers[0];
 		}
 
-		// Create device
-		VkResult result = vkCreateDevice(m_PhysicalDevice->GetVkPhysicalDevice(), &createInfo, nullptr, &m_Device);
-		NB_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan device");
+		VK_CHECK(vkCreateDevice(m_PhysicalDevice.GetVkPhysicalDevice(), &createInfo, nullptr, &m_VkDevice));
 
-		// Create graphics queue
-		vkGetDeviceQueue(m_Device, indices.Graphics.value(), 0, &m_GraphicsQueue);
-		vkGetDeviceQueue(m_Device, indices.Presentation.value(), 0, &m_PresentationQueue);
+		// Retrieve queues
+		vkGetDeviceQueue(m_VkDevice, indices.Graphics.value(), 0, &m_GraphicsQueue);
+		vkGetDeviceQueue(m_VkDevice, indices.Presentation.value(), 0, &m_PresentationQueue);
+	}
+
+	VulkanDevice::~VulkanDevice()
+	{
+		NB_PROFILE_FN();
+		
+		vkDestroyDevice(m_VkDevice, nullptr);
+		m_VkDevice = VK_NULL_HANDLE;
 	}
 }

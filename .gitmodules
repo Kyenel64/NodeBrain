@@ -8,9 +8,12 @@
 	path = NodeBrain/thirdparty/spdlog
 	url = https://github.com/gabime/spdlog
 [submodule "test/thirdparty/googletest"]
-	path = test/thirdparty/googletest
+	path = Test/thirdparty/googletest
 	url = https://github.com/google/googletest
 [submodule "NodeBrain/thirdparty/ImGui"]
 	path = NodeBrain/thirdparty/ImGui
 	url = https://github.com/ocornut/ImGui
 	branch = docking
+[submodule "NodeBrain/thirdparty/EnTT"]
+	path = NodeBrain/thirdparty/EnTT
+	url = https://github.com/skypjack/entt

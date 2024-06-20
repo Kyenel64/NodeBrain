@@ -1,6 +1,8 @@
 #include "NBpch.h"
 #include "Window.h"
 
+#define GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include "Core/Input.h"
@@ -13,12 +15,43 @@ namespace NodeBrain
 		NB_ERROR("GLFW Error {0}: {1}", error, description);
 	}
 
-	Window::Window(const std::string& windowName)
-		: m_WindowName(windowName)
+	Window::Window(std::string windowName, uint32_t width, uint32_t height, bool maximize)
+		: m_WindowName(std::move(windowName))
 	{
 		NB_PROFILE_FN();
 
-		Init();
+		NB_ASSERT(width, "width is 0. Width must be a non-zero value.");
+		NB_ASSERT(height, "height is 0. Height must be a non-zero value.");
+
+		m_Data.Width = width;
+		m_Data.Height = height;
+
+		if (!glfwInit())
+			NB_ASSERT(false, "Failed to initialize GLFW.");
+
+		glfwSetErrorCallback(GLFWErrorCallback);
+		
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		#ifdef NB_APPLE
+			glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
+		#endif
+
+		m_Window = glfwCreateWindow((int)m_Data.Width, (int)m_Data.Height, m_WindowName.c_str(), nullptr, nullptr);
+		NB_ASSERT(m_Window, "Failed to create GLFW window");
+		NB_INFO("Created Window {0}, size: {1}, {2}", m_WindowName, m_Data.Width, m_Data.Height);
+		// Set data that can be accessed when calling glfwGetWindowUserPointer
+		glfwSetWindowUserPointer(m_Window, &m_Data);
+
+		if (maximize)
+			glfwMaximizeWindow(m_Window);
+
+		// Vulkan extensions
+		uint32_t extensionCount = 0;
+		const char** extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
+		for (size_t i = 0; i < extensionCount; i++)
+			m_VulkanExtensions.push_back(extensions[i]);
+		
+		RegisterCallbacks();
 	}
 
 	Window::~Window()
@@ -29,57 +62,11 @@ namespace NodeBrain
 		glfwTerminate();
 	}
 
-	bool Window::Init()
-	{
-		NB_PROFILE_FN();
-
-		if (!glfwInit())
-			return false;
-
-		glfwSetErrorCallback(GLFWErrorCallback);
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_WindowName.c_str(), NULL, NULL);
-		NB_ASSERT(m_Window, "Failed to create GLFW window");
-		NB_INFO("Created Window {0}, size: {1}, {2}", m_WindowName, m_Data.Width, m_Data.Height);
-		// Set data when calling glfwGetWindowUserPointer
-		glfwSetWindowUserPointer(m_Window, &m_Data);
-		glfwMakeContextCurrent(m_Window);
-
-		// Vulkan extensions
-		uint32_t extensionCount = 0;
-		const char** extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
-		for (size_t i = 0; i < extensionCount; i++)
-			m_Extensions.push_back(extensions[i]);
-
-		m_RenderContext = RenderContext::Create(this);
-
-		RegisterCallbacks();
-
-		return true;
-	}
-
-	void Window::SwapBuffers()
-	{
-		NB_PROFILE_FN();
-
-		m_RenderContext->SwapBuffers();
-	}
-
 	void Window::PollEvents()
 	{
 		NB_PROFILE_FN();
 
 		glfwPollEvents();
-	}
-
-	glm::vec2 Window::GetFramebufferSize() const
-	{
-		NB_PROFILE_FN();
-
-		int width, height;
-		glfwGetFramebufferSize(m_Window, &width, &height);
-
-		return { width, height };
 	}
 
 	void Window::RegisterCallbacks()
@@ -96,13 +83,20 @@ namespace NodeBrain
 
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 			{
-				WindowResizeEvent event(width, height);
+				WindowResizedEvent event(width, height);
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				data.Width = width;
 				data.Height = height;
 				data.EventCallback(event);
 			});
-		
+
+		glfwSetWindowIconifyCallback(m_Window, [](GLFWwindow* window, int iconified)
+		{
+			WindowMinimizedEvent event(iconified);
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			data.EventCallback(event);
+		});
+
 		// Key events
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods) 
 			{
@@ -146,6 +140,7 @@ namespace NodeBrain
 				MouseMovedEvent event((float)xpos, (float)ypos);
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				data.EventCallback(event);
+				Input::SetMousePosition({ xpos, ypos });
 			});
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset)
@@ -154,5 +149,10 @@ namespace NodeBrain
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				data.EventCallback(event);
 			});
+	}
+
+	double Window::GetTime()
+	{
+		return glfwGetTime();
 	}
 }

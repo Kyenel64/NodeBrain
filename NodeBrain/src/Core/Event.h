@@ -7,7 +7,7 @@ namespace NodeBrain
 	enum class EventType
 	{ 
 		None = 0, 
-		WindowClosedEvent, WindowResizeEvent, 
+		WindowClosedEvent, WindowResizedEvent, WindowMinimizedEvent,
 		KeyPressedEvent, KeyReleasedEvent,
 		MousePressedEvent, MouseReleasedEvent, MouseMovedEvent, MouseScrolledEvent
 	};
@@ -16,9 +16,9 @@ namespace NodeBrain
 	{
 	public:
 		Event() = default;
-		Event(EventType type) : m_Type(type) {}
+		explicit Event(EventType type) : m_Type(type) {}
 
-		EventType GetType() const { return m_Type; }
+		[[nodiscard]] EventType GetType() const { return m_Type; }
 
 		template<typename T>
 		bool AttachEventFunction(std::function<void(T&)> func)
@@ -47,18 +47,30 @@ namespace NodeBrain
 		static EventType GetStaticType() { return EventType::WindowClosedEvent; }
 	};
 
-	class WindowResizeEvent : public Event
+	class WindowResizedEvent : public Event
 	{
 	public:
-		WindowResizeEvent(uint32_t width, uint32_t height) : Event(EventType::WindowResizeEvent), m_Width(width), m_Height(height) {}
+		WindowResizedEvent(uint32_t width, uint32_t height) : Event(EventType::WindowResizedEvent), m_Width(width), m_Height(height) {}
 
-		uint32_t GetWidth() const { return m_Width; }
-		uint32_t GetHeight() const { return m_Height; }
-		static EventType GetStaticType() { return EventType::WindowResizeEvent; }
+		[[nodiscard]] uint32_t GetWidth() const { return m_Width; }
+		[[nodiscard]] uint32_t GetHeight() const { return m_Height; }
+		static EventType GetStaticType() { return EventType::WindowResizedEvent; }
 
 	private:
 		uint32_t m_Width;
 		uint32_t m_Height;
+	};
+
+	class WindowMinimizedEvent : public Event
+	{
+	public:
+		explicit WindowMinimizedEvent(bool minimized) : Event(EventType::WindowMinimizedEvent), m_Minimized(minimized) {}
+
+		[[nodiscard]] bool IsMinimized() const { return m_Minimized; }
+		static EventType GetStaticType() { return EventType::WindowMinimizedEvent; }
+
+	private:
+		bool m_Minimized;
 	};
 
 
@@ -67,9 +79,9 @@ namespace NodeBrain
 	class KeyPressedEvent : public Event
 	{
 	public:
-		KeyPressedEvent(Key key) : Event(EventType::KeyPressedEvent), m_Key(key) {}
+		explicit KeyPressedEvent(Key key) : Event(EventType::KeyPressedEvent), m_Key(key) {}
 
-		Key GetKey() const { return m_Key; }
+		[[nodiscard]] Key GetKey() const { return m_Key; }
 
 		static EventType GetStaticType() { return EventType::KeyPressedEvent; }
 	private:
@@ -81,9 +93,9 @@ namespace NodeBrain
 	class KeyReleasedEvent : public Event
 	{
 	public:
-		KeyReleasedEvent(Key key) : Event(EventType::KeyReleasedEvent), m_Key(key) {}
+		explicit KeyReleasedEvent(Key key) : Event(EventType::KeyReleasedEvent), m_Key(key) {}
 
-		Key GetKey() const { return m_Key; }
+		[[nodiscard]] Key GetKey() const { return m_Key; }
 
 		static EventType GetStaticType() { return EventType::KeyReleasedEvent; }
 	private:
@@ -96,9 +108,9 @@ namespace NodeBrain
 	class MousePressedEvent : public Event
 	{
 	public:
-		MousePressedEvent(MouseButton mouseButton) : Event(EventType::MousePressedEvent), m_MouseButton(mouseButton) {}
+		explicit MousePressedEvent(MouseButton mouseButton) : Event(EventType::MousePressedEvent), m_MouseButton(mouseButton) {}
 
-		MouseButton GetMouseButton() const { return m_MouseButton; }
+		[[nodiscard]] MouseButton GetMouseButton() const { return m_MouseButton; }
 
 		static EventType GetStaticType() { return EventType::MousePressedEvent; }
 	private:
@@ -108,9 +120,9 @@ namespace NodeBrain
 	class MouseReleasedEvent : public Event
 	{
 	public:
-		MouseReleasedEvent(MouseButton mouseButton) : Event(EventType::MouseReleasedEvent), m_MouseButton(mouseButton) {}
+		explicit MouseReleasedEvent(MouseButton mouseButton) : Event(EventType::MouseReleasedEvent), m_MouseButton(mouseButton) {}
 
-		MouseButton GetMouseButton() const { return m_MouseButton; }
+		[[nodiscard]] MouseButton GetMouseButton() const { return m_MouseButton; }
 
 		static EventType GetStaticType() { return EventType::MouseReleasedEvent; }
 	private:
@@ -122,8 +134,8 @@ namespace NodeBrain
 	public:
 		MouseMovedEvent(float xpos, float ypos) : Event(EventType::MouseMovedEvent), m_XPos(xpos), m_YPos(ypos) {}
 
-		float GetXPos() const { return m_XPos; }
-		float GetYPos() const { return m_YPos; }
+		[[nodiscard]] float GetXPos() const { return m_XPos; }
+		[[nodiscard]] float GetYPos() const { return m_YPos; }
 
 		static EventType GetStaticType() { return EventType::MouseMovedEvent; }
 	private:
@@ -136,8 +148,8 @@ namespace NodeBrain
 	public:
 		MouseScrolledEvent(float xOffset, float yOffset) : Event(EventType::MouseScrolledEvent), m_XOffset(xOffset), m_YOffset(yOffset) {}
 
-		float GetXOffset() const { return m_XOffset; }
-		float GetYOffset() const { return m_YOffset; }
+		[[nodiscard]] float GetXOffset() const { return m_XOffset; }
+		[[nodiscard]] float GetYOffset() const { return m_YOffset; }
 
 		static EventType GetStaticType() { return EventType::MouseScrolledEvent; }
 	private:

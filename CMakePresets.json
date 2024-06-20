@@ -4,7 +4,6 @@
         {
             "name": "x64-Debug",
             "displayName": "x64-Debug",
-            "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "installDir": "${sourceDir}/out/install/${presetName}",
             "architecture": {
@@ -26,7 +25,6 @@
         {
             "name": "arm64-Debug",
             "displayName": "arm64-Debug",
-            "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "installDir": "${sourceDir}/out/install/${presetName}",
             "architecture": {
