@@ -144,7 +144,9 @@ namespace NodeBrain
 
 		m_Device.reset();
 
-		DestroyDebugUtilsMessenger();
+		#ifdef NB_DEBUG
+			DestroyDebugUtilsMessenger();
+		#endif
 
 		vkDestroySurfaceKHR(m_VkInstance, m_VkSurface, nullptr);
 		m_VkSurface = VK_NULL_HANDLE;
