@@ -1,5 +1,7 @@
 #include "BrainEditor.h"
 
+#define NB_TEST_SCENE
+
 namespace NodeBrain
 {
 	BrainEditor::BrainEditor(Renderer& renderer)
@@ -15,6 +17,16 @@ namespace NodeBrain
 
 		m_EditorCamera = std::make_shared<EditorCamera>(45.0f, m_ViewportImage->GetConfiguration().Width / m_ViewportImage->GetConfiguration().Height, 0.01f, 1000.0f);
 		m_EditorScene = std::make_shared<Scene>(m_Renderer);
+
+	#ifdef NB_TEST_SCENE
+
+		for (size_t i = 0; i < 1000; i++)
+		{
+			Entity entity = m_EditorScene->CreateEntity("Test Entity");
+			m_EditorScene->AddComponent<SpriteComponent>(entity);
+			m_EditorScene->GetComponent<TransformComponent>(entity).Position = { (float)i, 0.0f, 0.0f };
+		}
+	#endif
 	}
 
 	void BrainEditor::OnEvent(Event& event)
