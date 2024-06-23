@@ -4,6 +4,8 @@ namespace NodeBrain
 {
 	void SceneGraphPanel::Draw(const std::shared_ptr<Scene>& scene)
 	{
+		NB_PROFILE_FN();
+
 		m_ActiveScene = scene;
 
 		ImGui::Begin("Scene Graph");

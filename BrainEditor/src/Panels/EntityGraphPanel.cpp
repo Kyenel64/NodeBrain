@@ -8,6 +8,8 @@ namespace NodeBrain
 	{
 		static float Distance(const ImVec2& p1, const ImVec2& p2)
 		{
+			NB_PROFILE_FN();
+
 			float dx = p2.x - p1.x;
 			float dy = p2.y - p1.y;
 			return sqrt((dx * dx) + (dy * dy));
@@ -16,6 +18,8 @@ namespace NodeBrain
 
 	void EntityGraphPanel::Draw(const std::shared_ptr<Scene>& activeScene, Entity selectedEntity)
 	{
+		NB_PROFILE_FN();
+
 		m_SelectedEntity = selectedEntity;
 		m_ActiveScene = activeScene;
 
@@ -153,6 +157,8 @@ namespace NodeBrain
 
 	void EntityGraphPanel::DrawNodeUI(Node& node, const std::function<void()>& uiFunction)
 	{
+		NB_PROFILE_FN();
+
 		NodeUI& nodeUI = m_NodeUIs[m_SelectedEntity].at(&node);
 
 		ImGui::PushID(&node);
@@ -265,6 +271,8 @@ namespace NodeBrain
 
 	void EntityGraphPanel::ProcessNodeMenuPopup()
 	{
+		NB_PROFILE_FN();
+
 		if (ImGui::BeginPopup("Node Menu"))
 		{
 			if (ImGui::MenuItem("Delete"))
@@ -275,6 +283,8 @@ namespace NodeBrain
 
 	void EntityGraphPanel::ProcessAddNodePopup()
 	{
+		NB_PROFILE_FN();
+
 		if (ImGui::BeginPopup("Add Node"))
 		{
 			const ImVec2 addNodePos = { ImGui::GetMousePosOnOpeningCurrentPopup().x - m_GridOrigin.x, ImGui::GetMousePosOnOpeningCurrentPopup().y - m_GridOrigin.y };

@@ -29,6 +29,7 @@ namespace NodeBrain
 
 		// --- Entity Graph ---
 		{
+			NB_PROFILE_SCOPE("Entity Graph");
 			auto view = m_Registry.view<TransformComponent>();
 			for (const auto& entity : view)
 				m_EntityGraphs[(Entity)entity].Evaluate();
@@ -40,6 +41,7 @@ namespace NodeBrain
 
 		// Draw Sprites
 		{
+			NB_PROFILE_SCOPE("Draw Sprites");
 			auto view = m_Registry.view<TransformComponent, SpriteComponent>();
 			for (const auto& entity : view)
 				m_Renderer.SubmitQuad(m_Registry.get<TransformComponent>(entity).GetTransform(), m_Registry.get<SpriteComponent>(entity).Color);
