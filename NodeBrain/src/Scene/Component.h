@@ -30,7 +30,7 @@ namespace NodeBrain
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
 
-		[[nodiscard]] glm::mat4 GetTransform()
+		[[nodiscard]] glm::mat4 GetTransform() const
 		{
 			NB_PROFILE_FN();
 
