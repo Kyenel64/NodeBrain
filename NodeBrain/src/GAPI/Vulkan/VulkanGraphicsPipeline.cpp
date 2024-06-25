@@ -16,6 +16,9 @@ namespace NodeBrain
 				case PolygonFillMode::Line: return VK_POLYGON_MODE_LINE;
 				case PolygonFillMode::Fill: return VK_POLYGON_MODE_FILL;
 			}
+
+			NB_ASSERT(false, "Invalid PolygonFillMode. fillMode must be a valid PolygonFillMode value.");
+			return VK_POLYGON_MODE_MAX_ENUM;
 		}
 
 		static VkPrimitiveTopology TopologyTypeToVkPrimitiveTopology(TopologyType type)
@@ -28,6 +31,9 @@ namespace NodeBrain
 				case TopologyType::TriangleList: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 				case TopologyType::TriangleStrip: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
 			}
+
+			NB_ASSERT(false, "Invalid TopologyType. type must be a valid TopologyType value.");
+			return VK_PRIMITIVE_TOPOLOGY_MAX_ENUM;
 		}
 	}
 

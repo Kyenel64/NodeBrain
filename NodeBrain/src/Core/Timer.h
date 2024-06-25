@@ -34,6 +34,9 @@ namespace NodeBrain
 					return static_cast<double>(elapsedTime.count());
 				}
 			}
+
+			NB_ASSERT(false, "Invalid TimerUnit. unit must be a valid TimerUnit value.");
+			return 0.0f;
 		}
 
 		[[nodiscard]] long long GetStartTime(TimerUnit unit)
@@ -56,6 +59,9 @@ namespace NodeBrain
 					return static_cast<long long>(elapsedTime.count());
 				}
 			}
+
+			NB_ASSERT(false, "Invalid TimerUnit. unit must be a valid TimerUnit value.");
+			return 0;
 		}
 
 	private:
