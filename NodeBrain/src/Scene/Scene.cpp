@@ -29,9 +29,16 @@ namespace NodeBrain
 
 		// --- Entity Graph ---
 		{
+			NB_PROFILE_SCOPE("Entity Graph");
 			auto view = m_Registry.view<TransformComponent>();
-			for (const auto& entity : view)
-				m_EntityGraphs[(Entity)entity].Evaluate();
+
+			std::unordered_map<Entity, EntityGraph>& entityGraphs = m_EntityGraphs;
+
+			// TODO: Parallelize. Apple clang does not support std::execution::par so figure something out.
+			std::for_each(view.begin(), view.end(), [&view, &entityGraphs](auto entity)
+				{
+					entityGraphs[(Entity)entity].Evaluate();
+				});
 		}
 
 
@@ -40,9 +47,16 @@ namespace NodeBrain
 
 		// Draw Sprites
 		{
+			NB_PROFILE_SCOPE("Draw Sprites");
 			auto view = m_Registry.view<TransformComponent, SpriteComponent>();
-			for (const auto& entity : view)
-				m_Renderer.SubmitQuad(m_Registry.get<TransformComponent>(entity).GetTransform(), m_Registry.get<SpriteComponent>(entity).Color);
+			Renderer& renderer = m_Renderer;
+			entt::registry& reg = m_Registry;
+
+			// TODO: Parallelize. Apple clang does not support std::execution::par so figure something out.
+			std::for_each(view.begin(), view.end(), [&view, &renderer, &reg](auto entity)
+				{
+					renderer.SubmitQuad(std::as_const(reg).get<TransformComponent>(entity).GetTransform(), std::as_const(reg).get<SpriteComponent>(entity).Color);
+				});
 		}
 
 		m_Renderer.EndScene();

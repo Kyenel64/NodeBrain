@@ -10,11 +10,15 @@ namespace NodeBrain
 		explicit TagComponentNode(TagComponent& tagComp)
 				: m_TagComponent(tagComp), Node(NodeType::TagComponent)
 		{
+			NB_PROFILE_FN();
+
 			m_InputPorts.emplace_back(*this, PortDataType::String, std::string());
 		}
 
 		void Evaluate() override
 		{
+			NB_PROFILE_FN();
+
 			m_TagComponent.Tag = std::get<std::string>(m_InputPorts[0].GetValue());
 		}
 
@@ -30,6 +34,8 @@ namespace NodeBrain
 		explicit TransformComponentNode(TransformComponent& transformComp)
 				: m_TransformComponent(transformComp), Node(NodeType::TransformComponent)
 		{
+			NB_PROFILE_FN();
+
 			m_InputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(0.0f));
 			m_InputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(0.0f));
 			m_InputPorts.emplace_back(*this, PortDataType::Vec3, glm::vec3(1.0f));
@@ -37,6 +43,8 @@ namespace NodeBrain
 
 		void Evaluate() override
 		{
+			NB_PROFILE_FN();
+
 			m_TransformComponent.Position = std::get<glm::vec3>(m_InputPorts[0].GetValue());
 			m_TransformComponent.SetEulerRotation(std::get<glm::vec3>(m_InputPorts[1].GetValue()));
 			m_TransformComponent.Scale = std::get<glm::vec3>(m_InputPorts[2].GetValue());
@@ -54,11 +62,15 @@ namespace NodeBrain
 		explicit SpriteComponentNode(SpriteComponent& spriteComp)
 				: m_SpriteComponent(spriteComp), Node(NodeType::SpriteComponent)
 		{
+			NB_PROFILE_FN();
+
 			m_InputPorts.emplace_back(*this, PortDataType::Color, glm::vec4(1.0f));
 		}
 
 		void Evaluate() override
 		{
+			NB_PROFILE_FN();
+
 			m_SpriteComponent.Color = std::get<glm::vec4>(m_InputPorts[0].GetValue());
 		}
 

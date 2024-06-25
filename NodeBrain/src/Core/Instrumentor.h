@@ -22,8 +22,10 @@ namespace NodeBrain
 		static void BeginTrace(const std::string& name = "Trace", const std::filesystem::path& path = "Trace.log");
 		static void EndTrace();
 
-		static void WriteEvent(const TraceEventData& eventData);
+		static void PushEventData(const std::string& eventData);
 	};
+
+
 
 	class InstrumentorEvent
 	{

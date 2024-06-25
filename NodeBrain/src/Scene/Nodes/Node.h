@@ -68,6 +68,8 @@ namespace NodeBrain
 
 		[[nodiscard]] const PortData& GetValue() const
 		{
+			NB_PROFILE_FN();
+
 			if (m_LinkedOutputPort)
 				return m_LinkedOutputPort->Value;
 			else
@@ -104,12 +106,16 @@ namespace NodeBrain
 
 		InputPort& GetInputPort(uint32_t index)
 		{
+			NB_PROFILE_FN();
+
 			NB_ASSERT(index < m_InputPorts.size(), "Index must be less than the total input count.");
 			return m_InputPorts[index];
 		}
 
 		OutputPort& GetOutputPort(uint32_t index)
 		{
+			NB_PROFILE_FN();
+
 			NB_ASSERT(index < m_OutputPorts.size(), "Index must be less than the total output count.");
 			return m_OutputPorts[index];
 		}

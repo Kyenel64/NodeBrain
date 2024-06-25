@@ -7,6 +7,8 @@ namespace NodeBrain
 	BrainEditor::BrainEditor(Renderer& renderer)
 		: m_Renderer(renderer), m_RendererAPI(renderer.GetAPI()), m_Context(renderer.GetContext()), m_Window(renderer.GetContext().GetWindow())
 	{
+		NB_PROFILE_FN();
+
 		NB_INFO("Attached Brain Editor layer");
 
 		ImageConfiguration config = {};
@@ -24,19 +26,23 @@ namespace NodeBrain
 		{
 			Entity entity = m_EditorScene->CreateEntity("Test Entity");
 			m_EditorScene->AddComponent<SpriteComponent>(entity);
-			m_EditorScene->GetComponent<TransformComponent>(entity).Position = { (float)i, 0.0f, 0.0f };
+			m_EditorScene->GetComponent<TransformComponent>(entity).Position = { (float)i + 1, 0.0f, 0.0f };
 		}
 	#endif
 	}
 
 	void BrainEditor::OnEvent(Event& event)
 	{
+		NB_PROFILE_FN();
+
 		event.AttachEventFunction<KeyPressedEvent>([this](KeyPressedEvent& event) { OnKeyPressed(event); });
 		event.AttachEventFunction<MousePressedEvent>([this](MousePressedEvent& event) { OnMousePressed(event); });
 	}
 
 	void BrainEditor::OnUpdate(float deltaTime)
 	{
+		NB_PROFILE_FN();
+
 		// On Viewport resize
 		if ((m_ViewportSize.x != 0.0f && m_ViewportSize.y != 0.0f) &&
 				((float)m_ViewportImage->GetConfiguration().Width != m_ViewportSize.x || (float)m_ViewportImage->GetConfiguration().Height != m_ViewportSize.y))
@@ -52,6 +58,8 @@ namespace NodeBrain
 
 	void BrainEditor::OnUpdateGUI()
 	{
+		NB_PROFILE_FN();
+
 		// --- Dockspace ---
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar |
@@ -87,6 +95,8 @@ namespace NodeBrain
 
 	void BrainEditor::DrawViewportWindow()
 	{
+		NB_PROFILE_FN();
+
 		ImGui::Begin("Viewport");
 
 		m_ViewportSize = ImGui::GetContentRegionAvail();

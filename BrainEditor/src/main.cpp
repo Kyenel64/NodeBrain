@@ -4,7 +4,7 @@
 
 int main()
 {
-	NB_PROFILE_BEGIN("Startup", "Startup.log");
+	NB_PROFILE_BEGIN("Profile", "Profile.log");
 
 	auto* window = new NodeBrain::Window("NodeBrain", 1280, 720);
 	auto* renderContext = new NodeBrain::VulkanRenderContext(*window);
@@ -16,17 +16,10 @@ int main()
 	auto* app = new NodeBrain::App("NodeBrain", *window, *renderer, gui);
 	app->PushLayer(*brainEditor);
 
-	NB_PROFILE_END();
-
-
-	NB_PROFILE_BEGIN("Runtime", "Runtime.log");
 
 	app->Run();
 
-	NB_PROFILE_END();
 
-
-	NB_PROFILE_BEGIN("Shutdown", "Shutdown.log");
 
 	delete app;
 	delete brainEditor;
@@ -37,6 +30,7 @@ int main()
 	delete window;
 
 	NB_PROFILE_END();
+
 
 	return 0;
 }

@@ -8,6 +8,8 @@ namespace NodeBrain
 	public:
 		MultiplyNode() : Node(NodeType::Multiply)
 		{
+			NB_PROFILE_FN();
+
 			m_InputPorts.emplace_back(*this, PortDataType::Int, 1);
 			m_InputPorts.emplace_back(*this, PortDataType::Int, 1);
 
@@ -16,7 +18,10 @@ namespace NodeBrain
 
 		~MultiplyNode() override = default;
 
-		void Evaluate() override {
+		void Evaluate() override
+		{
+			NB_PROFILE_FN();
+
 			m_OutputPorts[0].Value = std::get<int>(m_InputPorts[0].GetValue()) * std::get<int>(m_InputPorts[1].GetValue());
 		}
 	};

@@ -9,6 +9,8 @@ namespace NodeBrain
 	public:
 		IntNode() : Node(NodeType::Int)
 		{
+			NB_PROFILE_FN();
+
 			m_OutputPorts.emplace_back(*this, PortDataType::Int, 0);
 		}
 		~IntNode() override = default;
@@ -23,6 +25,8 @@ namespace NodeBrain
 	public:
 		FloatNode() : Node(NodeType::Float)
 		{
+			NB_PROFILE_FN();
+
 			m_OutputPorts.emplace_back(*this, PortDataType::Float, 0.0f);
 		}
 		~FloatNode() override = default;
@@ -37,6 +41,8 @@ namespace NodeBrain
 	public:
 		BoolNode() : Node(NodeType::Bool)
 		{
+			NB_PROFILE_FN();
+
 			m_OutputPorts.emplace_back(*this, PortDataType::Bool, true);
 		}
 		~BoolNode() override = default;
@@ -51,6 +57,8 @@ namespace NodeBrain
 	public:
 		StringNode() : Node(NodeType::String)
 		{
+			NB_PROFILE_FN();
+
 			m_OutputPorts.emplace_back(*this, PortDataType::String, std::string());
 		}
 		~StringNode() override = default;
@@ -65,6 +73,8 @@ namespace NodeBrain
 	public:
 		Vec3Node() : Node(NodeType::Vec3)
 		{
+			NB_PROFILE_FN();
+
 			m_InputPorts.emplace_back(*this, PortDataType::Float, 0.0f);
 			m_InputPorts.emplace_back(*this, PortDataType::Float, 0.0f);
 			m_InputPorts.emplace_back(*this, PortDataType::Float, 0.0f);
@@ -76,6 +86,8 @@ namespace NodeBrain
 
 		void Evaluate() override
 		{
+			NB_PROFILE_FN();
+
 			m_OutputPorts[0].Value = glm::vec3(std::get<float>(m_InputPorts[0].GetValue()),
 					std::get<float>(m_InputPorts[1].GetValue()),
 					std::get<float>(m_InputPorts[2].GetValue()));
@@ -89,6 +101,8 @@ namespace NodeBrain
 	public:
 		Vec4Node() : Node(NodeType::Vec4)
 		{
+			NB_PROFILE_FN();
+
 			m_InputPorts.emplace_back(*this, PortDataType::Float, 0.0f);
 			m_InputPorts.emplace_back(*this, PortDataType::Float, 0.0f);
 			m_InputPorts.emplace_back(*this, PortDataType::Float, 0.0f);
@@ -101,6 +115,8 @@ namespace NodeBrain
 
 		void Evaluate() override
 		{
+			NB_PROFILE_FN();
+
 			m_OutputPorts[0].Value = glm::vec4(std::get<float>(m_InputPorts[0].GetValue()),
 					std::get<float>(m_InputPorts[1].GetValue()),
 					std::get<float>(m_InputPorts[2].GetValue()),
@@ -115,6 +131,8 @@ namespace NodeBrain
 	public:
 		ColorNode() : Node(NodeType::Color)
 		{
+			NB_PROFILE_FN();
+
 			m_OutputPorts.emplace_back(*this, PortDataType::Color, glm::vec4(1.0f));
 		}
 
