@@ -56,6 +56,8 @@ namespace NodeBrain
 
 		glm::vec3 QuadVertexPositions[4];
 
+		std::shared_ptr<Image> WhiteTexture;
+
 
 		TestUniformData TestUniformDataBuffer;
 		std::shared_ptr<UniformBuffer> TestUniformBuffer;

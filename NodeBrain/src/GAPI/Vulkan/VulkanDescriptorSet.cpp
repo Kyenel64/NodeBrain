@@ -113,4 +113,35 @@ namespace NodeBrain
 			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
 		}
 	}
+
+	void VulkanDescriptorSet::WriteSampler(const std::shared_ptr<Image>& image, uint32_t binding)
+	{
+		NB_PROFILE_FN();
+
+		NB_ASSERT(image, "Invalid uniform buffer");
+		for (auto& layout : m_Layout)
+		{
+			if (layout.Binding == binding)
+			NB_ASSERT(layout.Type == BindingType::ImageSampler, "Invalid binding type. Binding must be of type ImageSampler.");
+		}
+
+		const std::shared_ptr<VulkanImage>& vulkanImage = dynamic_pointer_cast<VulkanImage>(image);
+
+		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+		{
+			VkDescriptorImageInfo imageinfo = {};
+			imageinfo.imageView = vulkanImage->m_VkImageView[i];
+			imageinfo.sampler = vulkanImage->m_VkSampler[i];
+			imageinfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+			VkWriteDescriptorSet write = {};
+			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			write.dstBinding = binding;
+			write.descriptorCount = 1;
+			write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			write.dstSet = m_VkDescriptorSet[i];
+			write.pImageInfo = &imageinfo;
+			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+		}
+	}
 }

@@ -66,6 +66,25 @@ namespace NodeBrain
 				return result;
 
 
+			// --- Create Staging Buffer ---
+			VkBufferCreateInfo bufferCreateInfo = {};
+			bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+			bufferCreateInfo.size = m_Configuration.Width * m_Configuration.Height * 4;
+			bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+
+			VmaAllocationCreateInfo stagingAllocInfo = {};
+			stagingAllocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+			stagingAllocInfo.flags = 0;
+
+			result = vmaCreateBuffer(m_Context.GetVMAAllocator(), &bufferCreateInfo, &stagingAllocInfo, &m_VkStagingBuffer[i], &m_VmaStagingAllocation[i], nullptr);
+			if (result != VK_SUCCESS)
+				return result;
+
+			result = vmaMapMemory(m_Context.GetVMAAllocator(), m_VmaStagingAllocation[i], &m_StagingMappedData[i]);
+			if (result != VK_SUCCESS)
+				return result;
+
+
 			// --- Create Image View ---
 			VkImageViewCreateInfo imageViewCreateInfo = {};
 			imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -126,6 +145,12 @@ namespace NodeBrain
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
+			vmaUnmapMemory(m_Context.GetVMAAllocator(), m_VmaStagingAllocation[i]);
+			m_StagingMappedData[i] = nullptr;
+			vmaDestroyBuffer(m_Context.GetVMAAllocator(), m_VkStagingBuffer[i], m_VmaStagingAllocation[i]);
+			m_VkStagingBuffer[i] = VK_NULL_HANDLE;
+			m_VmaStagingAllocation[i] = VK_NULL_HANDLE;
+
 			vkDestroySampler(m_Context.GetVkDevice(), m_VkSampler[i], nullptr);
 			m_VkSampler[i] = VK_NULL_HANDLE;
 
@@ -138,6 +163,7 @@ namespace NodeBrain
 		}
 	}
 
+	// TODO: Put in framebuffer
 	void VulkanImage::Resize(uint32_t width, uint32_t height)
 	{
 		m_Context.WaitForGPU();
@@ -149,6 +175,34 @@ namespace NodeBrain
 		m_Address = 0;
 
 		VK_CHECK(CreateImage());
+	}
+
+	void VulkanImage::SetData(const void* data, uint32_t size)
+	{
+		m_Context.ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
+		{
+			for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+			{
+				memcpy(m_StagingMappedData[i], data, size);
+				Utils::TransitionImage(cmdBuffer, m_VkImage[i], VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+				VkBufferImageCopy copyRegion = {};
+				copyRegion.bufferOffset = 0;
+				copyRegion.bufferRowLength = 0;
+				copyRegion.bufferImageHeight = 0;
+
+				copyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+				copyRegion.imageSubresource.mipLevel = 0;
+				copyRegion.imageSubresource.baseArrayLayer = 0;
+				copyRegion.imageSubresource.layerCount = 1;
+				copyRegion.imageExtent = { m_Configuration.Width, m_Configuration.Height, 1 };
+
+				// copy the buffer into the image
+				vkCmdCopyBufferToImage(cmdBuffer, m_VkStagingBuffer[i], m_VkImage[i], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
+
+				Utils::TransitionImage(cmdBuffer, m_VkImage[i], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			}
+		});
 	}
 
 	uint64_t VulkanImage::GetAddress()

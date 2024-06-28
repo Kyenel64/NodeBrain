@@ -59,6 +59,7 @@ namespace NodeBrain
 	struct SpriteComponent
 	{
 		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		std::shared_ptr<Image> Image;
 
 		SpriteComponent() = default;
 		SpriteComponent(const SpriteComponent&) = default;

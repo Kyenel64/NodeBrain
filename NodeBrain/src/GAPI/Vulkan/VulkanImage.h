@@ -15,6 +15,7 @@ namespace NodeBrain
 		~VulkanImage() override;
 
 		void Resize(uint32_t width, uint32_t height) override;
+		void SetData(const void* data, uint32_t size) override;
 
 		uint64_t GetAddress() override;
 		[[nodiscard]] const ImageConfiguration& GetConfiguration() const override { return m_Configuration; }
@@ -30,10 +31,15 @@ namespace NodeBrain
 	private:
 		VulkanRenderContext& m_Context;
 		
-		VkImage m_VkImage[FRAMES_IN_FLIGHT]{};
-		VkImageView m_VkImageView[FRAMES_IN_FLIGHT]{};
-		VkSampler m_VkSampler[FRAMES_IN_FLIGHT]{};
-		VmaAllocation m_VmaAllocation[FRAMES_IN_FLIGHT]{};
+		VkImage m_VkImage[FRAMES_IN_FLIGHT];
+		VkImageView m_VkImageView[FRAMES_IN_FLIGHT];
+		VkSampler m_VkSampler[FRAMES_IN_FLIGHT];
+		VmaAllocation m_VmaAllocation[FRAMES_IN_FLIGHT];
+
+		// Staging buffer
+		VkBuffer m_VkStagingBuffer[FRAMES_IN_FLIGHT];
+		VmaAllocation m_VmaStagingAllocation[FRAMES_IN_FLIGHT];
+		void* m_StagingMappedData[FRAMES_IN_FLIGHT];
 
 		ImageConfiguration m_Configuration;
 

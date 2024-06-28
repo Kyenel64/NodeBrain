@@ -87,6 +87,7 @@ namespace NodeBrain::Utils
 		{
 			case BindingType::StorageImage: return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 			case BindingType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			case BindingType::ImageSampler: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		}
 
 		NB_ASSERT(false, "Unavailable binding type");

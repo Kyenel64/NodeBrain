@@ -13,9 +13,21 @@ namespace NodeBrain
 		// --- Uniforms ---
 		m_Data.TestUniformBuffer = UniformBuffer::Create(m_Context, nullptr, sizeof(TestUniformData));
 
+		// --- Textures ---
+		ImageConfiguration whiteTextureConfig = {};
+		whiteTextureConfig.Width = 1;
+		whiteTextureConfig.Height = 1;
+		whiteTextureConfig.Format = ImageFormat::RGBA8;
+		uint32_t whiteTextureData = 0xFFFFFFFF;
+		m_Data.WhiteTexture = Image::Create(m_Context, whiteTextureConfig);
+		m_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+
+		// --- Descriptor Sets ---
 		m_Data.GlobalDescriptorSet = DescriptorSet::Create(m_Context, {
-			{ BindingType::UniformBuffer, 0 }});
+			{ BindingType::UniformBuffer, 0 },
+			{ BindingType::ImageSampler, 1 }});
 		m_Data.GlobalDescriptorSet->WriteBuffer(m_Data.TestUniformBuffer, 0);
+		m_Data.GlobalDescriptorSet->WriteSampler(m_Data.WhiteTexture, 1);
 
 		
 		// --- Quads ---
