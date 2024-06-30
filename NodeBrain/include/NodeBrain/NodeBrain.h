@@ -22,6 +22,7 @@
 #include "Renderer/UniformBuffer.h"
 #include "Renderer/DescriptorSet.h"
 #include "Renderer/EditorCamera.h"
+#include "Renderer/Framebuffer.h"
 
 // Graphics API
 #include "GAPI/Vulkan/VulkanRenderContext.h"

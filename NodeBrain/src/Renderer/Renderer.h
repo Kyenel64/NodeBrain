@@ -12,6 +12,7 @@
 #include "Renderer/DescriptorSet.h"
 #include "Renderer/Image.h"
 #include "Renderer/EditorCamera.h"
+#include "Renderer/Framebuffer.h"
 
 namespace NodeBrain
 {
@@ -73,7 +74,7 @@ namespace NodeBrain
 		void BeginFrame();
 		void EndFrame();
 
-		void BeginScene(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage = nullptr);
+		void BeginScene(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Framebuffer>& targetFramebuffer = nullptr);
 		void EndScene();
 
 		void RenderSubmitted();

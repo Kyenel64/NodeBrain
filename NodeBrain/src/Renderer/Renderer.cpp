@@ -96,13 +96,13 @@ namespace NodeBrain
 		m_RendererAPI.EndFrame();
 	}
 
-	void Renderer::BeginScene(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage)
+	void Renderer::BeginScene(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Framebuffer>& targetFramebuffer)
 	{
 		NB_PROFILE_FN();
 
-		m_Data.QuadPipeline->SetTargetImage(targetImage);
+		m_Data.QuadPipeline->SetTargetFramebuffer(targetFramebuffer);
 
-		m_RendererAPI.ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetImage);
+		m_RendererAPI.ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetFramebuffer);
 
 		m_Data.PushConstantBuffer.ViewProjectionMatrix = editorCamera->GetProjectionMatrix() * editorCamera->GetViewMatrix();
 

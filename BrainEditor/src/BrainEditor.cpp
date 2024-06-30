@@ -11,13 +11,13 @@ namespace NodeBrain
 
 		NB_INFO("Attached Brain Editor layer");
 
-		ImageConfiguration config = {};
+		FramebufferConfiguration config = {};
 		config.Width = 1280 / 2;
 		config.Height = 720 / 2;
 		config.Format = ImageFormat::RGBA16;
-		m_ViewportImage = Image::Create(m_Context, config);
+		m_ViewportFramebuffer = Framebuffer::Create(m_Context, config);
 
-		m_EditorCamera = std::make_shared<EditorCamera>(45.0f, m_ViewportImage->GetConfiguration().Width / m_ViewportImage->GetConfiguration().Height, 0.01f, 1000.0f);
+		m_EditorCamera = std::make_shared<EditorCamera>(45.0f, m_ViewportFramebuffer->GetConfiguration().Width / m_ViewportFramebuffer->GetConfiguration().Height, 0.01f, 1000.0f);
 		m_EditorScene = std::make_shared<Scene>(m_Renderer);
 
 	#ifdef NB_TEST_SCENE
@@ -45,15 +45,15 @@ namespace NodeBrain
 
 		// On Viewport resize
 		if ((m_ViewportSize.x != 0.0f && m_ViewportSize.y != 0.0f) &&
-				((float)m_ViewportImage->GetConfiguration().Width != m_ViewportSize.x || (float)m_ViewportImage->GetConfiguration().Height != m_ViewportSize.y))
+				((float)m_ViewportFramebuffer->GetConfiguration().Width != m_ViewportSize.x || (float)m_ViewportFramebuffer->GetConfiguration().Height != m_ViewportSize.y))
 		{
 			NB_INFO("Resizing Viewport");
-			m_ViewportImage->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_ViewportFramebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
 		m_EditorCamera->OnUpdate(deltaTime);
-		m_EditorScene->OnEditorUpdate(m_EditorCamera, m_ViewportImage);
+		m_EditorScene->OnEditorUpdate(m_EditorCamera, m_ViewportFramebuffer);
 	}
 
 	void BrainEditor::OnUpdateGUI()
@@ -101,7 +101,7 @@ namespace NodeBrain
 
 		m_ViewportSize = ImGui::GetContentRegionAvail();
 
-		ImGui::Image((ImTextureID)m_ViewportImage->GetAddress(), { (float)m_ViewportImage->GetConfiguration().Width, (float)m_ViewportImage->GetConfiguration().Height});
+		ImGui::Image((ImTextureID)m_ViewportFramebuffer->GetAddress(), { (float)m_ViewportFramebuffer->GetConfiguration().Width, (float)m_ViewportFramebuffer->GetConfiguration().Height});
 
 		ImGui::End();
 	}

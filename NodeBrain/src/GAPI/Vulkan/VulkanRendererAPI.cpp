@@ -6,6 +6,7 @@
 #include "GAPI/Vulkan/VulkanComputePipeline.h"
 #include "GAPI/Vulkan/VulkanImage.h"
 #include "GAPI/Vulkan/VulkanIndexBuffer.h"
+#include "GAPI/Vulkan/VulkanFramebuffer.h"
 
 namespace NodeBrain
 {
@@ -78,6 +79,18 @@ namespace NodeBrain
 		vkCmdClearColorImage(m_ActiveCmdBuffer, vkImage, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
 	}
 
+	void VulkanRendererAPI::ClearColor(const glm::vec4& color, const std::shared_ptr<Framebuffer>& framebuffer)
+	{
+		NB_PROFILE_FN();
+
+		VkImage vkImage = framebuffer ? dynamic_pointer_cast<VulkanFramebuffer>(framebuffer)->GetVkImage() : m_Swapchain.GetCurrentDrawImage().Image;
+
+		VkClearColorValue clearValue = { { color.x, color.y, color.z, color.w }};
+		VkImageSubresourceRange clearRange = Utils::ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
+		vkCmdClearColorImage(m_ActiveCmdBuffer, vkImage, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+	}
+
+
 	void VulkanRendererAPI::BeginRenderPass(const std::shared_ptr<GraphicsPipeline>& pipeline)
 	{
 		NB_PROFILE_FN();
@@ -87,12 +100,12 @@ namespace NodeBrain
 		VkImage vkImage = VK_NULL_HANDLE;
 		VkImageView vkImageView = VK_NULL_HANDLE;
 		VkExtent2D extent = {};
-		if (pipeline->GetTargetImage())
+		if (pipeline->GetTargetFramebuffer())
 		{
-			std::shared_ptr<VulkanImage> vulkanImage = dynamic_pointer_cast<VulkanImage>(pipeline->GetTargetImage());
-			vkImage = vulkanImage->GetVkImage();
-			vkImageView = vulkanImage->GetVkImageView();
-			extent = { vulkanImage->GetConfiguration().Width, vulkanImage->GetConfiguration().Height };
+			std::shared_ptr<VulkanFramebuffer> vulkanFramebuffer = dynamic_pointer_cast<VulkanFramebuffer>(pipeline->GetTargetFramebuffer());
+			vkImage = vulkanFramebuffer->GetVkImage();
+			vkImageView = vulkanFramebuffer->GetVkImageView();
+			extent = { vulkanFramebuffer->GetConfiguration().Width, vulkanFramebuffer->GetConfiguration().Height };
 		}
 		else
 		{
@@ -145,7 +158,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		VkImage vkImage = pipeline->GetTargetImage() ? dynamic_pointer_cast<VulkanImage>(pipeline->GetTargetImage())->GetVkImage() : m_Swapchain.GetCurrentDrawImage().Image;
+		VkImage vkImage = pipeline->GetTargetFramebuffer() ? dynamic_pointer_cast<VulkanFramebuffer>(pipeline->GetTargetFramebuffer())->GetVkImage() : m_Swapchain.GetCurrentDrawImage().Image;
 		
 		m_vkCmdEndRenderingKHR(m_ActiveCmdBuffer);
 
@@ -183,7 +196,7 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		std::shared_ptr<VulkanComputePipeline> vulkanPipeline = dynamic_pointer_cast<VulkanComputePipeline>(pipeline);
-		VkImage vkImage = pipeline->GetTargetImage() ? dynamic_pointer_cast<VulkanImage>(pipeline->GetTargetImage())->GetVkImage() : m_Swapchain.GetCurrentDrawImage().Image;
+		VkImage vkImage = pipeline->GetTargetFramebuffer() ? dynamic_pointer_cast<VulkanFramebuffer>(pipeline->GetTargetFramebuffer())->GetVkImage() : m_Swapchain.GetCurrentDrawImage().Image;
 
 		vkCmdBindPipeline(m_ActiveCmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vulkanPipeline->GetVkPipeline());
 

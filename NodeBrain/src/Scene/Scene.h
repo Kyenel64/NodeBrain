@@ -62,7 +62,7 @@ namespace NodeBrain
 			return m_Registry.view<T...>();
 		}
 
-		void OnEditorUpdate(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage = nullptr);
+		void OnEditorUpdate(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Framebuffer>& targetFramebuffer = nullptr);
 		//void OnRuntimeUpdate(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Image>& targetImage = nullptr);
 
 		EntityGraph& GetEntityGraph(Entity entity)

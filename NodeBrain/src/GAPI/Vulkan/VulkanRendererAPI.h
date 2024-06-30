@@ -22,6 +22,7 @@ namespace NodeBrain
 		void EndFrame() override;
 
 		void ClearColor(const glm::vec4& color, const std::shared_ptr<Image>& image) override;
+		void ClearColor(const glm::vec4& color, const std::shared_ptr<Framebuffer>& framebuffer) override;
 
 		void BeginRenderPass(const std::shared_ptr<GraphicsPipeline>& pipeline) override;
 		void EndRenderPass(const std::shared_ptr<GraphicsPipeline>& pipeline) override;

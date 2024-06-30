@@ -6,6 +6,7 @@
 #include "Renderer/ComputePipeline.h"
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/Image.h"
+#include "Renderer/Framebuffer.h"
 
 namespace NodeBrain
 {
@@ -18,6 +19,7 @@ namespace NodeBrain
 		virtual void EndFrame() = 0;
 
 		virtual void ClearColor(const glm::vec4& color, const std::shared_ptr<Image>& image = nullptr) = 0;
+		virtual void ClearColor(const glm::vec4& color, const std::shared_ptr<Framebuffer>& framebuffer = nullptr) = 0;
 
 		virtual void BeginRenderPass(const std::shared_ptr<GraphicsPipeline>& pipeline) = 0;
 		virtual void EndRenderPass(const std::shared_ptr<GraphicsPipeline>& pipeline) = 0;

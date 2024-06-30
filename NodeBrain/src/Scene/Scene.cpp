@@ -23,7 +23,7 @@ namespace NodeBrain
 		return entity;
 	}
 
-	void Scene::OnEditorUpdate(const std::shared_ptr<EditorCamera> &editorCamera, const std::shared_ptr<Image> &targetImage)
+	void Scene::OnEditorUpdate(const std::shared_ptr<EditorCamera> &editorCamera, const std::shared_ptr<Framebuffer> &targetFramebuffer)
 	{
 		NB_PROFILE_FN();
 
@@ -43,7 +43,7 @@ namespace NodeBrain
 
 
 		// --- Rendering ---
-		m_Renderer.BeginScene(editorCamera, targetImage);
+		m_Renderer.BeginScene(editorCamera, targetFramebuffer);
 
 		// Draw Sprites
 		{

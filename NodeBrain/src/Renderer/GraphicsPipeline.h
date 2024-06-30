@@ -4,6 +4,7 @@
 #include "Renderer/Shader.h"
 #include "Renderer/Image.h"
 #include "Renderer/DescriptorSet.h"
+#include "Renderer/Framebuffer.h"
 
 namespace NodeBrain
 {
@@ -15,7 +16,7 @@ namespace NodeBrain
 		std::shared_ptr<Shader> VertexShader;
 		std::shared_ptr<Shader> FragmentShader;
 
-		std::shared_ptr<Image> TargetImage = nullptr;
+		std::shared_ptr<Framebuffer> TargetFramebuffer = nullptr;
 
 		TopologyType Topology = TopologyType::TriangleList;
 		PolygonFillMode FillMode = PolygonFillMode::Fill;
@@ -41,11 +42,11 @@ namespace NodeBrain
 		virtual ~GraphicsPipeline() = default;
 
 		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) = 0;
-		virtual void SetTargetImage(std::shared_ptr<Image> targetImage) = 0;
+		virtual void SetTargetFramebuffer(std::shared_ptr<Framebuffer> targetFramebuffer) = 0;
 
 		virtual void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet) = 0;
 
-		[[nodiscard]] virtual std::shared_ptr<Image> GetTargetImage() const = 0;
+		[[nodiscard]] virtual std::shared_ptr<Framebuffer> GetTargetFramebuffer() const = 0;
 
 		static std::shared_ptr<GraphicsPipeline> Create(RenderContext& context, const GraphicsPipelineConfiguration& configuration);
 	};

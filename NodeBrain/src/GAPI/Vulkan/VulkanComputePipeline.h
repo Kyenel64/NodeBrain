@@ -14,11 +14,11 @@ namespace NodeBrain
 		~VulkanComputePipeline() override;
 
 		void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) override;
-		void SetTargetImage(std::shared_ptr<Image> targetImage) override { m_Configuration.TargetImage = targetImage; }
+		void SetTargetFramebuffer(std::shared_ptr<Framebuffer> targetFramebuffer) override { m_Configuration.TargetFramebuffer = targetFramebuffer; }
 
 		void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet) override;
 
-		[[nodiscard]] std::shared_ptr<Image> GetTargetImage() const override { return m_Configuration.TargetImage; }
+		[[nodiscard]] std::shared_ptr<Framebuffer> GetTargetFramebuffer() const override { return m_Configuration.TargetFramebuffer; }
 		[[nodiscard]] VkPipeline GetVkPipeline() const { return m_VkPipeline; }
 
 	private:
