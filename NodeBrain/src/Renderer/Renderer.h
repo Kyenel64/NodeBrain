@@ -10,9 +10,9 @@
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/UniformBuffer.h"
 #include "Renderer/DescriptorSet.h"
-#include "Renderer/Image.h"
 #include "Renderer/EditorCamera.h"
 #include "Renderer/Framebuffer.h"
+#include "Renderer/Texture2D.h"
 
 namespace NodeBrain
 {
@@ -57,7 +57,7 @@ namespace NodeBrain
 
 		glm::vec3 QuadVertexPositions[4];
 
-		std::shared_ptr<Image> WhiteTexture;
+		std::shared_ptr<Texture2D> WhiteTexture;
 
 
 		TestUniformData TestUniformDataBuffer;

@@ -2,7 +2,6 @@
 
 #include "Renderer/RenderContext.h"
 #include "Renderer/Shader.h"
-#include "Renderer/Image.h"
 #include "Renderer/DescriptorSet.h"
 #include "Renderer/Framebuffer.h"
 

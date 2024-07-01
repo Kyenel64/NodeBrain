@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Renderer/DescriptorSet.h"
-#include "Renderer/Image.h"
+#include "Renderer/Texture2D.h"
 #include "GAPI/Vulkan/VulkanShader.h"
 
 

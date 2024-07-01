@@ -4,6 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include "Renderer/Texture2D.h"
+
 namespace NodeBrain
 {
 	struct TagComponent
@@ -59,7 +61,7 @@ namespace NodeBrain
 	struct SpriteComponent
 	{
 		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-		std::shared_ptr<Image> Image;
+		std::shared_ptr<Texture2D> Texture = nullptr;
 
 		SpriteComponent() = default;
 		SpriteComponent(const SpriteComponent&) = default;

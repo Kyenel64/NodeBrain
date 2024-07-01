@@ -3,7 +3,7 @@
 
 #include "GAPI/Vulkan/VulkanUtils.h"
 #include "GAPI/Vulkan/VulkanUniformBuffer.h"
-#include "GAPI/Vulkan/VulkanImage.h"
+#include "GAPI/Vulkan/VulkanTexture2D.h"
 
 namespace NodeBrain
 {
@@ -83,7 +83,7 @@ namespace NodeBrain
 		}
 	}
 
-	void VulkanDescriptorSet::WriteImage(const std::shared_ptr<Image>& image, uint32_t binding)
+	void VulkanDescriptorSet::WriteImage(const std::shared_ptr<Texture2D>& image, uint32_t binding)
 	{
 		NB_PROFILE_FN();
 
@@ -94,13 +94,13 @@ namespace NodeBrain
 				NB_ASSERT(layout.Type == BindingType::StorageImage, "Invalid binding type at index {0}. Binding must be of type StorageImage.", binding);
 		}
 		
-		std::shared_ptr<VulkanImage> vulkanImage = dynamic_pointer_cast<VulkanImage>(image);
+		std::shared_ptr<VulkanTexture2D> vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(image);
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
 			VkDescriptorImageInfo imageinfo = {};
-			imageinfo.imageView = vulkanImage->m_VkImageView[i];
-			imageinfo.sampler = vulkanImage->m_VkSampler[i];
+			imageinfo.imageView = vulkanTexture->m_VkImageView[i];
+			imageinfo.sampler = vulkanTexture->m_VkSampler[i];
 			imageinfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
 			VkWriteDescriptorSet write = {};
@@ -114,7 +114,7 @@ namespace NodeBrain
 		}
 	}
 
-	void VulkanDescriptorSet::WriteSampler(const std::shared_ptr<Image>& image, uint32_t binding)
+	void VulkanDescriptorSet::WriteSampler(const std::shared_ptr<Texture2D>& image, uint32_t binding)
 	{
 		NB_PROFILE_FN();
 
@@ -125,13 +125,13 @@ namespace NodeBrain
 			NB_ASSERT(layout.Type == BindingType::ImageSampler, "Invalid binding type. Binding must be of type ImageSampler.");
 		}
 
-		const std::shared_ptr<VulkanImage>& vulkanImage = dynamic_pointer_cast<VulkanImage>(image);
+		const std::shared_ptr<VulkanTexture2D>& vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(image);
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
 			VkDescriptorImageInfo imageinfo = {};
-			imageinfo.imageView = vulkanImage->m_VkImageView[i];
-			imageinfo.sampler = vulkanImage->m_VkSampler[i];
+			imageinfo.imageView = vulkanTexture->m_VkImageView[i];
+			imageinfo.sampler = vulkanTexture->m_VkSampler[i];
 			imageinfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 			VkWriteDescriptorSet write = {};

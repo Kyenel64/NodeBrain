@@ -1,35 +1,18 @@
 #include "NBpch.h"
-#include "VulkanFramebuffer.h"
+#include "VulkanTexture2D.h"
 
 #include <ImGui/backends/imgui_impl_vulkan.h>
 
 namespace NodeBrain
 {
-	VulkanFramebuffer::VulkanFramebuffer(VulkanRenderContext& context, const FramebufferConfiguration& configuration)
+	VulkanTexture2D::VulkanTexture2D(VulkanRenderContext& context, const Texture2DConfiguration& configuration)
 		: m_Context(context), m_Configuration(configuration)
-	{
-		NB_PROFILE_FN();
-
-		VK_CHECK(Create());
-	}
-
-	VulkanFramebuffer::~VulkanFramebuffer()
-	{
-		NB_PROFILE_FN();
-
-		m_Context.WaitForGPU(); // Needed?
-		Destroy();
-	}
-
-	VkResult VulkanFramebuffer::Create()
 	{
 		NB_PROFILE_FN();
 
 		NB_ASSERT(m_Configuration.Width, "Image width 0. Image width must be a non-zero value.");
 		NB_ASSERT(m_Configuration.Height, "Image height 0. Image height must be a non-zero value.");
 		NB_ASSERT(m_Configuration.Format != ImageFormat::None, "Invalid image format. Image format must be a valid formar.");
-
-		VkResult result;
 
 		// --- Create Image ---
 		VkImageCreateInfo imageCreateInfo = {};
@@ -42,17 +25,30 @@ namespace NodeBrain
 		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 
+		// Usage flags
 		VkImageUsageFlags usage = {};
 		//usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 		usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		usage |= VK_IMAGE_USAGE_STORAGE_BIT;
-		usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		//usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 		usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
 		imageCreateInfo.usage = usage;
 
+		// Allocation
 		VmaAllocationCreateInfo allocationCreateInfo = {};
 		allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 		allocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+
+
+		// --- Create Staging Buffer ---
+		VkBufferCreateInfo bufferCreateInfo = {};
+		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferCreateInfo.size = m_Configuration.Width * m_Configuration.Height * 4; // TODO: 4 for RGBA8 8 for RGBA16?
+		bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+
+		VmaAllocationCreateInfo stagingAllocInfo = {};
+		stagingAllocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+		stagingAllocInfo.flags = 0;
 
 
 		// --- Create Image View ---
@@ -93,38 +89,35 @@ namespace NodeBrain
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
-			// Image
-			result = vmaCreateImage(m_Context.GetVMAAllocator(), &imageCreateInfo, &allocationCreateInfo, &m_VkImage[i], &m_VmaAllocation[i], nullptr);
-			if (result != VK_SUCCESS)
-				return result;
-
-			// Image View
+			VK_CHECK(vmaCreateImage(m_Context.GetVMAAllocator(), &imageCreateInfo, &allocationCreateInfo, &m_VkImage[i], &m_VmaAllocation[i], nullptr));
 			imageViewCreateInfo.image = m_VkImage[i];
-			result = vkCreateImageView(m_Context.GetVkDevice(), &imageViewCreateInfo, nullptr, &m_VkImageView[i]);
-			if (result != VK_SUCCESS)
-				return result;
+			VK_CHECK(vkCreateImageView(m_Context.GetVkDevice(), &imageViewCreateInfo, nullptr, &m_VkImageView[i]));
 
-			// Sampler
-			result = vkCreateSampler(m_Context.GetVkDevice(), &samplerCreateInfo, nullptr, &m_VkSampler[i]);
-			if (result != VK_SUCCESS)
-				return result;
-
+			VK_CHECK(vmaCreateBuffer(m_Context.GetVMAAllocator(), &bufferCreateInfo, &stagingAllocInfo, &m_VkStagingBuffer[i], &m_VmaStagingAllocation[i], nullptr));
+			VK_CHECK(vmaMapMemory(m_Context.GetVMAAllocator(), m_VmaStagingAllocation[i], &m_StagingMappedData[i]));
+			VK_CHECK(vkCreateSampler(m_Context.GetVkDevice(), &samplerCreateInfo, nullptr, &m_VkSampler[i]));
 
 			m_Context.ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
 			{
-				Utils::TransitionImage(cmdBuffer, m_VkImage[i], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+				Utils::TransitionImage(cmdBuffer, m_VkImage[i], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 			});
 		}
-
-		return VK_SUCCESS;
 	}
 
-	void VulkanFramebuffer::Destroy()
+	VulkanTexture2D::~VulkanTexture2D()
 	{
 		NB_PROFILE_FN();
 
+		m_Context.WaitForGPU();
+
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
+			vmaUnmapMemory(m_Context.GetVMAAllocator(), m_VmaStagingAllocation[i]);
+			m_StagingMappedData[i] = nullptr;
+			vmaDestroyBuffer(m_Context.GetVMAAllocator(), m_VkStagingBuffer[i], m_VmaStagingAllocation[i]);
+			m_VkStagingBuffer[i] = VK_NULL_HANDLE;
+			m_VmaStagingAllocation[i] = VK_NULL_HANDLE;
+
 			vkDestroySampler(m_Context.GetVkDevice(), m_VkSampler[i], nullptr);
 			m_VkSampler[i] = VK_NULL_HANDLE;
 
@@ -137,20 +130,35 @@ namespace NodeBrain
 		}
 	}
 
-	void VulkanFramebuffer::Resize(uint32_t width, uint32_t height)
+	void VulkanTexture2D::SetData(const void* data, uint32_t size)
 	{
-		m_Context.WaitForGPU();
+		m_Context.ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
+		{
+			for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+			{
+				memcpy(m_StagingMappedData[i], data, size);
+				Utils::TransitionImage(cmdBuffer, m_VkImage[i], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-		m_Configuration.Width = width;
-		m_Configuration.Height = height;
+				VkBufferImageCopy copyRegion = {};
+				copyRegion.bufferOffset = 0;
+				copyRegion.bufferRowLength = 0;
+				copyRegion.bufferImageHeight = 0;
 
-		Destroy();
-		m_Address = 0;
+				copyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+				copyRegion.imageSubresource.mipLevel = 0;
+				copyRegion.imageSubresource.baseArrayLayer = 0;
+				copyRegion.imageSubresource.layerCount = 1;
+				copyRegion.imageExtent = { m_Configuration.Width, m_Configuration.Height, 1 };
 
-		VK_CHECK(Create());
+				// copy the buffer into the image
+				vkCmdCopyBufferToImage(cmdBuffer, m_VkStagingBuffer[i], m_VkImage[i], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
+
+				Utils::TransitionImage(cmdBuffer, m_VkImage[i], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			}
+		});
 	}
 
-	uint64_t VulkanFramebuffer::GetAddress()
+	uint64_t VulkanTexture2D::GetAddress()
 	{
 		NB_PROFILE_FN();
 

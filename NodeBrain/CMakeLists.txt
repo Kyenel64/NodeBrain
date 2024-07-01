@@ -26,7 +26,6 @@ set (VulkanFiles
 "src/GAPI/Vulkan/VulkanDevice.h" "src/GAPI/Vulkan/VulkanDevice.cpp"
 "src/GAPI/Vulkan/VulkanSwapchain.h" "src/GAPI/Vulkan/VulkanSwapchain.cpp" 
 "src/GAPI/Vulkan/VulkanRenderContext.h" "src/GAPI/Vulkan/VulkanRenderContext.cpp"
-"src/GAPI/Vulkan/VulkanImage.h" "src/GAPI/Vulkan/VulkanImage.cpp"
 "src/GAPI/Vulkan/VulkanShader.h" "src/GAPI/Vulkan/VulkanShader.cpp"
 "src/GAPI/Vulkan/VulkanGraphicsPipeline.h" "src/GAPI/Vulkan/VulkanGraphicsPipeline.cpp"
 "src/GAPI/Vulkan/VulkanUtils.h" "src/GAPI/Vulkan/VulkanUtils.cpp"
@@ -36,8 +35,8 @@ set (VulkanFiles
 "src/GAPI/Vulkan/VulkanIndexBuffer.h" "src/GAPI/Vulkan/VulkanIndexBuffer.cpp"
 "src/GAPI/Vulkan/VulkanUniformBuffer.h" "src/GAPI/Vulkan/VulkanUniformBuffer.cpp"
 "src/GAPI/Vulkan/VulkanDescriptorSet.h" "src/GAPI/Vulkan/VulkanDescriptorSet.cpp"
-        src/GAPI/Vulkan/VulkanFramebuffer.cpp
-        src/GAPI/Vulkan/VulkanFramebuffer.h)
+"src/GAPI/Vulkan/VulkanFramebuffer.h" "src/GAPI/Vulkan/VulkanFramebuffer.cpp"
+"src/GAPI/Vulkan/VulkanTexture2D.h" "src/GAPI/Vulkan/VulkanTexture2D.cpp")
 
 set (RendererFiles 
 "src/Renderer/Renderer.h" "src/Renderer/Renderer.cpp"
@@ -45,14 +44,14 @@ set (RendererFiles
 "src/Renderer/RenderContext.h"
 "src/Renderer/Shader.h" "src/Renderer/Shader.cpp"
 "src/Renderer/GraphicsPipeline.h" "src/Renderer/GraphicsPipeline.cpp"
-"src/Renderer/Image.h" "src/Renderer/Image.cpp"
 "src/Renderer/ComputePipeline.h" "src/Renderer/ComputePipeline.cpp"
 "src/Renderer/VertexBuffer.h" "src/Renderer/VertexBuffer.cpp"
 "src/Renderer/IndexBuffer.h" "src/Renderer/IndexBuffer.cpp"
 "src/Renderer/UniformBuffer.h" "src/Renderer/UniformBuffer.cpp"
 "src/Renderer/DescriptorSet.h" "src/Renderer/DescriptorSet.cpp"
 "src/Renderer/EditorCamera.h" "src/Renderer/EditorCamera.cpp"
-"src/Renderer/Framebuffer.h" "src/Renderer/Framebuffer.cpp")
+"src/Renderer/Framebuffer.h" "src/Renderer/Framebuffer.cpp"
+"src/Renderer/Texture2D.h" "src/Renderer/Texture2D.cpp")
 
 set (SceneFiles
 "src/Scene/Scene.h" "src/Scene/Scene.cpp"

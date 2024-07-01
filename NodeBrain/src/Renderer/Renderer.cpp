@@ -14,12 +14,12 @@ namespace NodeBrain
 		m_Data.TestUniformBuffer = UniformBuffer::Create(m_Context, nullptr, sizeof(TestUniformData));
 
 		// --- Textures ---
-		ImageConfiguration whiteTextureConfig = {};
+		Texture2DConfiguration whiteTextureConfig = {};
 		whiteTextureConfig.Width = 1;
 		whiteTextureConfig.Height = 1;
 		whiteTextureConfig.Format = ImageFormat::RGBA8;
 		uint32_t whiteTextureData = 0xFFFFFFFF;
-		m_Data.WhiteTexture = Image::Create(m_Context, whiteTextureConfig);
+		m_Data.WhiteTexture = Texture2D::Create(m_Context, whiteTextureConfig);
 		m_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 
 		// --- Descriptor Sets ---

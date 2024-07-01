@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Renderer/Texture2D.h"
 #include "Renderer/DescriptorSet.h"
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 
@@ -14,8 +15,8 @@ namespace NodeBrain
 		~VulkanDescriptorSet() override;
 
 		void WriteBuffer(const std::shared_ptr<UniformBuffer>& buffer, uint32_t binding) override;
-		void WriteImage(const std::shared_ptr<Image>& image, uint32_t binding) override;
-		void WriteSampler(const std::shared_ptr<Image>& image, uint32_t binding) override;
+		void WriteImage(const std::shared_ptr<Texture2D>& image, uint32_t binding) override;
+		void WriteSampler(const std::shared_ptr<Texture2D>& image, uint32_t binding) override;
 
 		[[nodiscard]] VkDescriptorSetLayout GetVkDescriptorSetLayout() const { return m_VkDescriptorSetLayout; }
 		[[nodiscard]] VkDescriptorSet GetVkDescriptorSet() const { return m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()]; }

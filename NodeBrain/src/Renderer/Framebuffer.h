@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Renderer/RenderContext.h"
-#include "Renderer/Image.h"
+#include "Renderer/Texture2D.h"
 
 namespace NodeBrain
 {

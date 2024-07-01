@@ -4,7 +4,7 @@
 #include "GAPI/Vulkan/VulkanRenderContext.h"
 #include "GAPI/Vulkan/VulkanGraphicsPipeline.h"
 #include "GAPI/Vulkan/VulkanComputePipeline.h"
-#include "GAPI/Vulkan/VulkanImage.h"
+#include "GAPI/Vulkan/VulkanTexture2D.h"
 #include "GAPI/Vulkan/VulkanIndexBuffer.h"
 #include "GAPI/Vulkan/VulkanFramebuffer.h"
 
@@ -68,11 +68,11 @@ namespace NodeBrain
 		VK_CHECK(vkQueueSubmit(m_Context.GetDevice().GetGraphicsQueue(), 1, &submitInfo, frameData.InFlightFence));
 	}
 
-	void VulkanRendererAPI::ClearColor(const glm::vec4& color, const std::shared_ptr<Image>& image)
+	void VulkanRendererAPI::ClearColor(const glm::vec4& color, const std::shared_ptr<Texture2D>& texture)
 	{
 		NB_PROFILE_FN();
 
-		VkImage vkImage = image ? dynamic_pointer_cast<VulkanImage>(image)->GetVkImage() : m_Swapchain.GetCurrentDrawImage().Image;
+		VkImage vkImage = texture ? dynamic_pointer_cast<VulkanTexture2D>(texture)->GetVkImage() : m_Swapchain.GetCurrentDrawImage().Image;
 
 		VkClearColorValue clearValue = { { color.x, color.y, color.z, color.w }};
 		VkImageSubresourceRange clearRange = Utils::ImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
