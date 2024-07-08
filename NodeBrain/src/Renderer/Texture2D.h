@@ -8,8 +8,6 @@ namespace NodeBrain
 	{
 		uint32_t Width, Height;
 		ImageFormat Format;
-
-		std::filesystem::path Path = std::filesystem::path();
 	};
 
 	class Texture2D
@@ -23,6 +21,7 @@ namespace NodeBrain
 		virtual uint64_t GetAddress() = 0;
 		[[nodiscard]] virtual const Texture2DConfiguration& GetConfiguration() const = 0;
 
-		static std::shared_ptr<Texture2D> Create(RenderContext& renderContext, const Texture2DConfiguration& configuration);
+		static std::shared_ptr<Texture2D> Create(RenderContext& context, const Texture2DConfiguration& configuration);
+		static std::shared_ptr<Texture2D> Create(RenderContext& context, std::filesystem::path path);
 	};
 }

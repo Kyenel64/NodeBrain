@@ -17,4 +17,16 @@ namespace NodeBrain
 		NB_ASSERT(false, "Graphics API not detected!");
 		return nullptr;
 	}
+
+	std::shared_ptr<Texture2D> Texture2D::Create(RenderContext& context, std::filesystem::path path)
+	{
+		switch (context.GetGraphicsAPI())
+		{
+		case GAPI::None: NB_ERROR("Graphics API not detected"); return nullptr;
+		case GAPI::Vulkan: return std::make_shared<VulkanTexture2D>(dynamic_cast<VulkanRenderContext&>(context), std::move(path));
+		}
+
+		NB_ASSERT(false, "Graphics API not detected!");
+		return nullptr;
+	}
 }

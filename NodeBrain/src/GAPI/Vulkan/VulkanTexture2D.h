@@ -9,6 +9,7 @@ namespace NodeBrain
 	{
 	public:
 		VulkanTexture2D(VulkanRenderContext& context, const Texture2DConfiguration& configuration);
+		VulkanTexture2D(VulkanRenderContext& context, std::filesystem::path path);
 		~VulkanTexture2D() override;
 
 		void SetData(const void* data, uint32_t size) override;
@@ -22,9 +23,15 @@ namespace NodeBrain
 		[[nodiscard]] VkSampler GetVkSampler() const { return m_VkSampler[m_Context.GetSwapchain().GetFrameIndex()]; }
 
 	private:
+		VkResult Create(uint32_t width, uint32_t height, ImageFormat format);
+		void Destroy();
+		
+
+	private:
 		VulkanRenderContext& m_Context;
 
 		Texture2DConfiguration m_Configuration;
+		std::filesystem::path m_Path;
 
 		VkImage m_VkImage[FRAMES_IN_FLIGHT];
 		VkImageView m_VkImageView[FRAMES_IN_FLIGHT];

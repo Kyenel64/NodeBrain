@@ -71,7 +71,8 @@ add_library ( ${PROJECT_NAME}
     ${ImGuiSrcFiles}
     ${SceneFiles}
     "thirdparty/VMA/vk_mem_alloc.h" "thirdparty/VMA/vk_mem_alloc.cpp"
-    "src/Utils/FileUtils.h" "src/Utils/FileUtils.cpp")
+    "src/Utils/FileUtils.h" "src/Utils/FileUtils.cpp"
+    "thirdparty/stb/stb_impl.cpp")
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 
@@ -88,6 +89,7 @@ add_subdirectory("thirdparty/EnTT")
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ImGui/)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/stb/)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/EnTT/single_include)
 
 # Libraries

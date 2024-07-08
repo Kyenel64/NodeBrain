@@ -1,6 +1,6 @@
 #include "BrainEditor.h"
 
-#define NB_TEST_SCENE
+//#define NB_TEST_SCENE
 
 namespace NodeBrain
 {

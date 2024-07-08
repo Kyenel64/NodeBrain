@@ -42,6 +42,8 @@ namespace NodeBrain
 		const uint32_t MaxVertices = MaxQuads * 4;
 		const uint32_t MaxIndices = MaxQuads * 6;
 
+		const uint32_t MaxTextures = 16; // TODO: depends on maxPerStageDescriptorSampledImages
+
 		PushConstantData PushConstantBuffer;
 
 		// --- Quad ---
@@ -58,6 +60,7 @@ namespace NodeBrain
 		glm::vec3 QuadVertexPositions[4];
 
 		std::shared_ptr<Texture2D> WhiteTexture;
+		std::vector<std::shared_ptr<Texture2D>> Textures; // MaxTextures
 
 
 		TestUniformData TestUniformDataBuffer;

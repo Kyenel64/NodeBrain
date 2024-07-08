@@ -17,3 +17,6 @@
 [submodule "NodeBrain/thirdparty/EnTT"]
 	path = NodeBrain/thirdparty/EnTT
 	url = https://github.com/skypjack/entt
+[submodule "NodeBrain/thirdparty/stb/stb"]
+	path = NodeBrain/thirdparty/stb/stb
+	url = https://github.com/nothings/stb

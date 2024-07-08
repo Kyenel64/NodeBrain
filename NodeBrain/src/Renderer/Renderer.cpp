@@ -21,13 +21,15 @@ namespace NodeBrain
 		uint32_t whiteTextureData = 0xFFFFFFFF;
 		m_Data.WhiteTexture = Texture2D::Create(m_Context, whiteTextureConfig);
 		m_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+		m_Data.Textures.resize(1); // temp
+		m_Data.Textures[0] = m_Data.WhiteTexture;
 
 		// --- Descriptor Sets ---
 		m_Data.GlobalDescriptorSet = DescriptorSet::Create(m_Context, {
-			{ BindingType::UniformBuffer, 0 },
-			{ BindingType::ImageSampler, 1 }});
+			{ BindingType::UniformBuffer, 0, 1 },
+			{ BindingType::ImageSampler, 1, 1 }});
 		m_Data.GlobalDescriptorSet->WriteBuffer(m_Data.TestUniformBuffer, 0);
-		m_Data.GlobalDescriptorSet->WriteSampler(m_Data.WhiteTexture, 1);
+		m_Data.GlobalDescriptorSet->WriteSamplers(m_Data.Textures, 1);
 
 		
 		// --- Quads ---

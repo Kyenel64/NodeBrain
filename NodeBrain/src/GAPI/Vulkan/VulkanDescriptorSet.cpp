@@ -20,7 +20,7 @@ namespace NodeBrain
 		{
 			VkDescriptorSetLayoutBinding setLayoutBinding = {};
 			setLayoutBinding.binding = binding.Binding;
-			setLayoutBinding.descriptorCount = 1;
+			setLayoutBinding.descriptorCount = binding.Count;
 			setLayoutBinding.descriptorType = Utils::BindingTypeToVkDescriptorType(binding.Type);
 			setLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
 			setLayoutbindings.push_back(setLayoutBinding);
@@ -83,18 +83,18 @@ namespace NodeBrain
 		}
 	}
 
-	void VulkanDescriptorSet::WriteImage(const std::shared_ptr<Texture2D>& image, uint32_t binding)
+	void VulkanDescriptorSet::WriteImage(const std::shared_ptr<Texture2D>& texture, uint32_t binding)
 	{
 		NB_PROFILE_FN();
 
-		NB_ASSERT(image, "Invalid uniform buffer");
+		NB_ASSERT(texture, "Invalid texture");
 		for (auto& layout : m_Layout)
 		{
 			if (layout.Binding == binding)
 				NB_ASSERT(layout.Type == BindingType::StorageImage, "Invalid binding type at index {0}. Binding must be of type StorageImage.", binding);
 		}
 		
-		std::shared_ptr<VulkanTexture2D> vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(image);
+		std::shared_ptr<VulkanTexture2D> vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(texture);
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
@@ -114,18 +114,18 @@ namespace NodeBrain
 		}
 	}
 
-	void VulkanDescriptorSet::WriteSampler(const std::shared_ptr<Texture2D>& image, uint32_t binding)
+	void VulkanDescriptorSet::WriteSampler(const std::shared_ptr<Texture2D>& texture, uint32_t binding)
 	{
 		NB_PROFILE_FN();
 
-		NB_ASSERT(image, "Invalid uniform buffer");
+		NB_ASSERT(texture, "Invalid texture");
 		for (auto& layout : m_Layout)
 		{
 			if (layout.Binding == binding)
 			NB_ASSERT(layout.Type == BindingType::ImageSampler, "Invalid binding type. Binding must be of type ImageSampler.");
 		}
 
-		const std::shared_ptr<VulkanTexture2D>& vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(image);
+		const std::shared_ptr<VulkanTexture2D>& vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(texture);
 
 		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
 		{
@@ -141,6 +141,46 @@ namespace NodeBrain
 			write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			write.dstSet = m_VkDescriptorSet[i];
 			write.pImageInfo = &imageinfo;
+			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+		}
+	}
+
+	void VulkanDescriptorSet::WriteSamplers(const std::vector<std::shared_ptr<Texture2D>>& textures, uint32_t binding)
+	{
+		NB_PROFILE_FN();
+
+		NB_ASSERT(!textures.empty(), "textures is empty.");
+		for (auto& layout : m_Layout)
+		{
+			if (layout.Binding == binding)
+				NB_ASSERT(layout.Type == BindingType::ImageSampler, "Invalid binding type. Binding must be of type ImageSampler.");
+		}
+
+		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+		{
+			std::vector<VkDescriptorImageInfo> imageInfos;
+			for (auto& texture : textures)
+			{
+				if (texture)
+				{
+					const std::shared_ptr<VulkanTexture2D>& vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(texture);
+
+					VkDescriptorImageInfo imageInfo = {};
+					imageInfo.imageView = vulkanTexture->m_VkImageView[i];
+					imageInfo.sampler = vulkanTexture->m_VkSampler[i];
+					imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+					imageInfos.push_back(imageInfo);
+				}
+			}
+
+			VkWriteDescriptorSet write = {};
+			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			write.dstBinding = binding;
+			write.descriptorCount = textures.size();
+			write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			write.dstSet = m_VkDescriptorSet[i];
+			write.pImageInfo = &imageInfos[0];
 			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
 		}
 	}
