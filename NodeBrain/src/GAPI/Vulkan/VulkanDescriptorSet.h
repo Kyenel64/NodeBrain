@@ -5,6 +5,7 @@
 #include "Renderer/Texture2D.h"
 #include "Renderer/DescriptorSet.h"
 #include "GAPI/Vulkan/VulkanRenderContext.h"
+#include "GAPI/Vulkan/VulkanTexture2D.h"
 
 namespace NodeBrain
 {
@@ -29,5 +30,7 @@ namespace NodeBrain
 		VkDescriptorSet m_VkDescriptorSet[FRAMES_IN_FLIGHT];
 
 		std::vector<LayoutBinding> m_Layout;
+
+		std::shared_ptr<VulkanTexture2D> m_BlankTexture;
 	};
 }

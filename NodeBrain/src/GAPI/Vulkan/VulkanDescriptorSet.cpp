@@ -40,6 +40,14 @@ namespace NodeBrain
 		descriptorAllocateInfo.descriptorSetCount = FRAMES_IN_FLIGHT;
 		descriptorAllocateInfo.pSetLayouts = &layouts[0];
 		VK_CHECK(vkAllocateDescriptorSets(m_Context.GetVkDevice(), &descriptorAllocateInfo, &m_VkDescriptorSet[0]));
+
+
+		// --- Empty Texture ---
+		Texture2DConfiguration emptyTextureConfig = {};
+		emptyTextureConfig.Width = 1;
+		emptyTextureConfig.Height = 1;
+		emptyTextureConfig.Format = ImageFormat::RGBA8;
+		m_BlankTexture = std::make_shared<VulkanTexture2D>(m_Context, emptyTextureConfig);
 	}
 
 	VulkanDescriptorSet::~VulkanDescriptorSet()
@@ -168,6 +176,15 @@ namespace NodeBrain
 					VkDescriptorImageInfo imageInfo = {};
 					imageInfo.imageView = vulkanTexture->m_VkImageView[i];
 					imageInfo.sampler = vulkanTexture->m_VkSampler[i];
+					imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+					imageInfos.push_back(imageInfo);
+				}
+				else
+				{
+					VkDescriptorImageInfo imageInfo = {};
+					imageInfo.imageView = m_BlankTexture->m_VkImageView[i];
+					imageInfo.sampler = m_BlankTexture->m_VkSampler[i];
 					imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 					imageInfos.push_back(imageInfo);

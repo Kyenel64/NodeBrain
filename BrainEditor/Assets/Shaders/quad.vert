@@ -3,6 +3,7 @@
 
 layout (location = 0) out vec4 outColor;
 layout (location = 1) out vec2 outUV;
+layout (location = 2) out flat int outTextureIndex;
 
 struct Vertex
 {
@@ -13,7 +14,7 @@ struct Vertex
     vec4 Color;
 };
 
-layout (buffer_reference, std430) readonly buffer VertexBuffer
+layout (std430, buffer_reference, buffer_reference_align = 16) readonly buffer VertexBuffer
 {
     Vertex vertices[];
 };
@@ -36,4 +37,5 @@ void main()
     gl_Position = PushConstants.ViewMatrix * vec4(v.Position, 1.0f);
     outColor = v.Color;
     outUV = vec2(v.UVX, v.UVY);
+    outTextureIndex = int(v.Normal.x);
 }

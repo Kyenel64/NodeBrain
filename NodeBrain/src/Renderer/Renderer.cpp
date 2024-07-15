@@ -21,13 +21,13 @@ namespace NodeBrain
 		uint32_t whiteTextureData = 0xFFFFFFFF;
 		m_Data.WhiteTexture = Texture2D::Create(m_Context, whiteTextureConfig);
 		m_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
-		m_Data.Textures.resize(1); // temp
+		m_Data.Textures.resize(m_Data.MaxTextures); // temp
 		m_Data.Textures[0] = m_Data.WhiteTexture;
 
 		// --- Descriptor Sets ---
 		m_Data.GlobalDescriptorSet = DescriptorSet::Create(m_Context, {
 			{ BindingType::UniformBuffer, 0, 1 },
-			{ BindingType::ImageSampler, 1, 1 }});
+			{ BindingType::ImageSampler, 1, 16 }});
 		m_Data.GlobalDescriptorSet->WriteBuffer(m_Data.TestUniformBuffer, 0);
 		m_Data.GlobalDescriptorSet->WriteSamplers(m_Data.Textures, 1);
 
@@ -67,6 +67,11 @@ namespace NodeBrain
 		m_Data.QuadVertexPositions[2] = {  0.5f, -0.5f,  0.0f };
 		m_Data.QuadVertexPositions[3] = {  0.5f,  0.5f,  0.0f };
 
+		m_Data.QuadTextureCoords[0] = { 0.0f, 1.0f };
+		m_Data.QuadTextureCoords[1] = { 0.0f, 0.0f };
+		m_Data.QuadTextureCoords[2] = { 1.0f, 0.0f };
+		m_Data.QuadTextureCoords[3] = { 1.0f, 1.0f };
+
 
 		NB_INFO("Initialized renderer");
 	}
@@ -91,6 +96,7 @@ namespace NodeBrain
 
 		// Bind per frame descriptors
 		m_Data.QuadPipeline->BindDescriptorSet(m_Data.GlobalDescriptorSet);
+		m_Data.GlobalDescriptorSet->WriteSamplers(m_Data.Textures, 1); // TODO: WriteSamplers() should write for current command buffer.
 	}
 
 	void Renderer::EndFrame()
@@ -117,6 +123,8 @@ namespace NodeBrain
 
 		m_Data.QuadIndexCount = 0;
 		m_Data.QuadVertexBufferPtr = m_Data.QuadVertexBufferBase;
+
+		m_Data.TextureIndex = 1;
 	}
 
 	void Renderer::EndScene()
@@ -144,13 +152,46 @@ namespace NodeBrain
 			m_Data.QuadVertexBufferPtr->Position = transform * glm::vec4(m_Data.QuadVertexPositions[i], 1.0f);
 			m_Data.QuadVertexBufferPtr->Color = color;
 			m_Data.QuadVertexBufferPtr->Normal = glm::vec3(1.0f);
-			m_Data.QuadVertexBufferPtr->UVX = 0; // temp
-			m_Data.QuadVertexBufferPtr->UVY = 0;
+			m_Data.QuadVertexBufferPtr->UVX = m_Data.QuadTextureCoords[i].x;
+			m_Data.QuadVertexBufferPtr->UVY = m_Data.QuadTextureCoords[i].y;
 
 			m_Data.QuadVertexBufferPtr++;
 		}
 
 		m_Data.QuadIndexCount += 6;
+	}
+
+	void Renderer::SubmitQuad(const glm::mat4& transform, const glm::vec4& color, const std::shared_ptr<Texture2D>& texture)
+	{
+		NB_PROFILE_FN();
+
+		// New batch
+		if (m_Data.QuadIndexCount >= m_Data.MaxIndices)
+		{
+			RenderSubmitted();
+			m_Data.QuadIndexCount = 0;
+			m_Data.QuadVertexBufferPtr = m_Data.QuadVertexBufferBase;
+
+			m_Data.TextureIndex = 1;
+		}
+
+		// Temp
+		m_Data.Textures[m_Data.TextureIndex] = texture;
+
+
+		for (size_t i = 0; i < 4; i++)
+		{
+			m_Data.QuadVertexBufferPtr->Position = transform * glm::vec4(m_Data.QuadVertexPositions[i], 1.0f);
+			m_Data.QuadVertexBufferPtr->Color = color;
+			m_Data.QuadVertexBufferPtr->Normal = { m_Data.TextureIndex, 1.0f, 1.0f };
+			m_Data.QuadVertexBufferPtr->UVX = m_Data.QuadTextureCoords[i].x;
+			m_Data.QuadVertexBufferPtr->UVY = m_Data.QuadTextureCoords[i].y;
+
+			m_Data.QuadVertexBufferPtr++;
+		}
+
+		m_Data.QuadIndexCount += 6;
+		m_Data.TextureIndex++;
 	}
 
 	void Renderer::RenderSubmitted()

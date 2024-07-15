@@ -55,7 +55,7 @@ namespace NodeBrain
 			// TODO: Parallelize. Apple clang does not support std::execution::par so figure something out.
 			std::for_each(view.begin(), view.end(), [&view, &renderer, &reg](auto entity)
 				{
-					renderer.SubmitQuad(std::as_const(reg).get<TransformComponent>(entity).GetTransform(), std::as_const(reg).get<SpriteComponent>(entity).Color);
+					renderer.SubmitQuad(std::as_const(reg).get<TransformComponent>(entity).GetTransform(), std::as_const(reg).get<SpriteComponent>(entity).Color, std::as_const(reg).get<SpriteComponent>(entity).Texture);
 				});
 		}
 

@@ -42,5 +42,9 @@ namespace NodeBrain
 		ImVec2 m_ViewportSize = { 0.0f, 0.0f };
 
 		Entity m_SelectedEntity;
+
+		// Temp
+		std::shared_ptr<Texture2D> m_TestTexture;
+		std::shared_ptr<Texture2D> m_BrickTexture;
 	};
 }

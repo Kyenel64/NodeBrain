@@ -18,13 +18,18 @@ namespace NodeBrain
 		VK_CHECK(Create(m_Configuration.Width, m_Configuration.Height, m_Configuration.Format));
 	}
 
-	VulkanTexture2D::VulkanTexture2D(VulkanRenderContext& context, std::filesystem::path  path)
+	VulkanTexture2D::VulkanTexture2D(VulkanRenderContext& context, std::filesystem::path path)
 		: m_Context(context), m_Path(std::move(path))
 	{
 		int width, height, channels;
-		const unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 4);
+		const unsigned char* data = stbi_load(m_Path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+		NB_ASSERT(data, "Failed to load image");
 
-		VK_CHECK(Create(width, height, ImageFormat::RGBA8));
+		m_Configuration.Format = ImageFormat::RGBA8;
+		m_Configuration.Width = width;
+		m_Configuration.Height = height;
+
+		VK_CHECK(Create(m_Configuration.Width, m_Configuration.Height, ImageFormat::RGBA8));
 
 		m_Context.ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
 		{
@@ -58,7 +63,7 @@ namespace NodeBrain
 		VkImageCreateInfo imageCreateInfo = {};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageCreateInfo.format = Utils::ImageFormatToVkFormat(format);
+		imageCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB; // TODO: Figure out proper color format
 		imageCreateInfo.extent = { width, height, 1 };
 		imageCreateInfo.mipLevels = 1;
 		imageCreateInfo.arrayLayers = 1;
@@ -94,7 +99,7 @@ namespace NodeBrain
 		VkImageViewCreateInfo imageViewCreateInfo = {};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D; // TODO: parameterize
-		imageViewCreateInfo.format = Utils::ImageFormatToVkFormat(format);
+		imageViewCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB; // TODO: Figure out proper color format
 
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;

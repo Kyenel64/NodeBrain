@@ -1,6 +1,6 @@
 #include "BrainEditor.h"
 
-//#define NB_TEST_SCENE
+#define NB_TEST_SCENE
 
 namespace NodeBrain
 {
@@ -22,12 +22,17 @@ namespace NodeBrain
 
 	#ifdef NB_TEST_SCENE
 
-		for (size_t i = 0; i < 1000; i++)
-		{
-			Entity entity = m_EditorScene->CreateEntity("Test Entity");
-			m_EditorScene->AddComponent<SpriteComponent>(entity);
-			m_EditorScene->GetComponent<TransformComponent>(entity).Position = { (float)i + 1, 0.0f, 0.0f };
-		}
+		m_TestTexture = Texture2D::Create(m_Context, "Assets/Textures/TestTexture.png");
+		Entity entity = m_EditorScene->CreateEntity("Color Texture");
+		SpriteComponent& sprite = m_EditorScene->AddComponent<SpriteComponent>(entity);
+		sprite.Texture = m_TestTexture;
+
+		m_BrickTexture = Texture2D::Create(m_Context, "Assets/Textures/Brick.jpg");
+		Entity entity2 = m_EditorScene->CreateEntity("Brick Texture");
+		SpriteComponent& sprite2 = m_EditorScene->AddComponent<SpriteComponent>(entity2);
+		sprite2.Texture = m_BrickTexture;
+		m_EditorScene->GetComponent<TransformComponent>(entity2).Position = { 1.5f, 0.0f, 0.0f };
+
 	#endif
 	}
 

@@ -38,7 +38,7 @@ namespace NodeBrain
 
 	struct RendererData
 	{
-		const uint32_t MaxQuads = 20000;
+		const uint32_t MaxQuads = 10000;
 		const uint32_t MaxVertices = MaxQuads * 4;
 		const uint32_t MaxIndices = MaxQuads * 6;
 
@@ -58,9 +58,11 @@ namespace NodeBrain
 		QuadVertex* QuadVertexBufferPtr = nullptr;
 
 		glm::vec3 QuadVertexPositions[4];
+		glm::vec2 QuadTextureCoords[4];
 
 		std::shared_ptr<Texture2D> WhiteTexture;
 		std::vector<std::shared_ptr<Texture2D>> Textures; // MaxTextures
+		uint32_t TextureIndex = 1;
 
 
 		TestUniformData TestUniformDataBuffer;
@@ -83,6 +85,7 @@ namespace NodeBrain
 		void RenderSubmitted();
 
 		void SubmitQuad(const glm::mat4& transform, const glm::vec4& color);
+		void SubmitQuad(const glm::mat4& transform, const glm::vec4& color, const std::shared_ptr<Texture2D>& texture);
 
 		[[nodiscard]] RenderContext& GetContext() const { return m_RendererAPI.GetContext(); };
 		[[nodiscard]] RendererAPI& GetAPI() const { return m_RendererAPI; }
