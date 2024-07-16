@@ -73,22 +73,19 @@ namespace NodeBrain
 
 		std::shared_ptr<VulkanUniformBuffer> vulkanUBO = dynamic_pointer_cast<VulkanUniformBuffer>(buffer);
 
-		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
-		{
-			VkDescriptorBufferInfo bufferInfo = {};
-			bufferInfo.buffer = vulkanUBO->m_VkBuffers[i];
-			bufferInfo.offset = 0;
-			bufferInfo.range = vulkanUBO->GetSize();
+		VkDescriptorBufferInfo bufferInfo = {};
+		bufferInfo.buffer = vulkanUBO->GetVkBuffer();
+		bufferInfo.offset = 0;
+		bufferInfo.range = vulkanUBO->GetSize();
 
-			VkWriteDescriptorSet write = {};
-			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			write.dstBinding = binding;
-			write.descriptorCount = 1;
-			write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			write.dstSet = m_VkDescriptorSet[i];
-			write.pBufferInfo = &bufferInfo;
-			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
-		}
+		VkWriteDescriptorSet write = {};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstBinding = binding;
+		write.descriptorCount = 1;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		write.dstSet = m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()];
+		write.pBufferInfo = &bufferInfo;
+		vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
 	}
 
 	void VulkanDescriptorSet::WriteImage(const std::shared_ptr<Texture2D>& texture, uint32_t binding)
@@ -104,22 +101,20 @@ namespace NodeBrain
 		
 		std::shared_ptr<VulkanTexture2D> vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(texture);
 
-		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
-		{
-			VkDescriptorImageInfo imageinfo = {};
-			imageinfo.imageView = vulkanTexture->m_VkImageView[i];
-			imageinfo.sampler = vulkanTexture->m_VkSampler[i];
-			imageinfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		VkDescriptorImageInfo imageinfo = {};
+		imageinfo.imageView = vulkanTexture->GetVkImageView();
+		imageinfo.sampler = vulkanTexture->GetVkSampler();
+		imageinfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
-			VkWriteDescriptorSet write = {};
-			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			write.dstBinding = binding;
-			write.descriptorCount = 1;
-			write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-			write.dstSet = m_VkDescriptorSet[i];
-			write.pImageInfo = &imageinfo;
-			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
-		}
+		VkWriteDescriptorSet write = {};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstBinding = binding;
+		write.descriptorCount = 1;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		write.dstSet = m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()];
+		write.pImageInfo = &imageinfo;
+		vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+
 	}
 
 	void VulkanDescriptorSet::WriteSampler(const std::shared_ptr<Texture2D>& texture, uint32_t binding)
@@ -135,22 +130,19 @@ namespace NodeBrain
 
 		const std::shared_ptr<VulkanTexture2D>& vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(texture);
 
-		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
-		{
-			VkDescriptorImageInfo imageinfo = {};
-			imageinfo.imageView = vulkanTexture->m_VkImageView[i];
-			imageinfo.sampler = vulkanTexture->m_VkSampler[i];
-			imageinfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		VkDescriptorImageInfo imageinfo = {};
+		imageinfo.imageView = vulkanTexture->GetVkImageView();
+		imageinfo.sampler = vulkanTexture->GetVkSampler();
+		imageinfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-			VkWriteDescriptorSet write = {};
-			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			write.dstBinding = binding;
-			write.descriptorCount = 1;
-			write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			write.dstSet = m_VkDescriptorSet[i];
-			write.pImageInfo = &imageinfo;
-			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
-		}
+		VkWriteDescriptorSet write = {};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstBinding = binding;
+		write.descriptorCount = 1;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		write.dstSet = m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()];
+		write.pImageInfo = &imageinfo;
+		vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
 	}
 
 	void VulkanDescriptorSet::WriteSamplers(const std::vector<std::shared_ptr<Texture2D>>& textures, uint32_t binding)
@@ -164,41 +156,38 @@ namespace NodeBrain
 				NB_ASSERT(layout.Type == BindingType::ImageSampler, "Invalid binding type. Binding must be of type ImageSampler.");
 		}
 
-		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+		std::vector<VkDescriptorImageInfo> imageInfos;
+		for (auto& texture : textures)
 		{
-			std::vector<VkDescriptorImageInfo> imageInfos;
-			for (auto& texture : textures)
+			if (texture)
 			{
-				if (texture)
-				{
-					const std::shared_ptr<VulkanTexture2D>& vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(texture);
+				const std::shared_ptr<VulkanTexture2D>& vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(texture);
 
-					VkDescriptorImageInfo imageInfo = {};
-					imageInfo.imageView = vulkanTexture->m_VkImageView[i];
-					imageInfo.sampler = vulkanTexture->m_VkSampler[i];
-					imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				VkDescriptorImageInfo imageInfo = {};
+				imageInfo.imageView = vulkanTexture->GetVkImageView();
+				imageInfo.sampler = vulkanTexture->GetVkSampler();
+				imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-					imageInfos.push_back(imageInfo);
-				}
-				else
-				{
-					VkDescriptorImageInfo imageInfo = {};
-					imageInfo.imageView = m_BlankTexture->m_VkImageView[i];
-					imageInfo.sampler = m_BlankTexture->m_VkSampler[i];
-					imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-					imageInfos.push_back(imageInfo);
-				}
+				imageInfos.push_back(imageInfo);
 			}
+			else
+			{
+				VkDescriptorImageInfo imageInfo = {};
+				imageInfo.imageView = m_BlankTexture->GetVkImageView();
+				imageInfo.sampler = m_BlankTexture->GetVkSampler();
+				imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-			VkWriteDescriptorSet write = {};
-			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			write.dstBinding = binding;
-			write.descriptorCount = textures.size();
-			write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			write.dstSet = m_VkDescriptorSet[i];
-			write.pImageInfo = &imageInfos[0];
-			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+				imageInfos.push_back(imageInfo);
+			}
 		}
+
+		VkWriteDescriptorSet write = {};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstBinding = binding;
+		write.descriptorCount = textures.size();
+		write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		write.dstSet = m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()];
+		write.pImageInfo = &imageInfos[0];
+		vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
 	}
 }

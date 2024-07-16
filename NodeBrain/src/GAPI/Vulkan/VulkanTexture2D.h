@@ -44,8 +44,5 @@ namespace NodeBrain
 		void* m_StagingMappedData[FRAMES_IN_FLIGHT];
 
 		uint64_t m_Address = 0;
-
-	public:
-		friend class VulkanDescriptorSet;
 	};
 }
