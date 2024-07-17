@@ -23,6 +23,7 @@ namespace NodeBrain
 		glm::vec3 Normal;
 		float UVY;
 		glm::vec4 Color;
+		glm::ivec4 TexIndex; // TODO: int + vec3 doesn't work for some reason.
 	};
 
 	struct PushConstantData

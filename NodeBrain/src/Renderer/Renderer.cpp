@@ -96,7 +96,7 @@ namespace NodeBrain
 
 		// Bind per frame descriptors
 		m_Data.QuadPipeline->BindDescriptorSet(m_Data.GlobalDescriptorSet);
-		m_Data.GlobalDescriptorSet->WriteSamplers(m_Data.Textures, 1); // TODO: WriteSamplers() should write for current command buffer.
+		m_Data.GlobalDescriptorSet->WriteSamplers(m_Data.Textures, 1); // TODO: Should be in separate descriptor set
 	}
 
 	void Renderer::EndFrame()
@@ -186,6 +186,7 @@ namespace NodeBrain
 			m_Data.QuadVertexBufferPtr->Normal = { m_Data.TextureIndex, 1.0f, 1.0f };
 			m_Data.QuadVertexBufferPtr->UVX = m_Data.QuadTextureCoords[i].x;
 			m_Data.QuadVertexBufferPtr->UVY = m_Data.QuadTextureCoords[i].y;
+			m_Data.QuadVertexBufferPtr->TexIndex.x = m_Data.TextureIndex;
 
 			m_Data.QuadVertexBufferPtr++;
 		}
