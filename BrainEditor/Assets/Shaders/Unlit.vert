@@ -1,6 +1,7 @@
 #version 450
 #extension GL_EXT_buffer_reference : require
 
+
 layout (location = 0) out vec4 outColor;
 layout (location = 1) out vec2 outUV;
 layout (location = 2) out flat int outTextureIndex;
@@ -19,11 +20,6 @@ layout (std430, buffer_reference, buffer_reference_align = 16) readonly buffer V
 {
     Vertex vertices[];
 };
-
-layout (set = 0, binding = 0) uniform GlobalUBO1
-{
-    vec4 Color1;
-} globalUBO1;
 
 layout (push_constant) uniform constants
 {

@@ -30,7 +30,5 @@ namespace NodeBrain
 		VkDescriptorSet m_VkDescriptorSet[FRAMES_IN_FLIGHT];
 
 		std::vector<LayoutBinding> m_Layout;
-
-		std::shared_ptr<VulkanTexture2D> m_BlankTexture;
 	};
 }

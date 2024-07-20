@@ -40,14 +40,6 @@ namespace NodeBrain
 		descriptorAllocateInfo.descriptorSetCount = FRAMES_IN_FLIGHT;
 		descriptorAllocateInfo.pSetLayouts = &layouts[0];
 		VK_CHECK(vkAllocateDescriptorSets(m_Context.GetVkDevice(), &descriptorAllocateInfo, &m_VkDescriptorSet[0]));
-
-
-		// --- Empty Texture ---
-		Texture2DConfiguration emptyTextureConfig = {};
-		emptyTextureConfig.Width = 1;
-		emptyTextureConfig.Height = 1;
-		emptyTextureConfig.Format = ImageFormat::RGBA8;
-		m_BlankTexture = std::make_shared<VulkanTexture2D>(m_Context, emptyTextureConfig);
 	}
 
 	VulkanDescriptorSet::~VulkanDescriptorSet()
@@ -159,26 +151,14 @@ namespace NodeBrain
 		std::vector<VkDescriptorImageInfo> imageInfos;
 		for (auto& texture : textures)
 		{
-			if (texture)
-			{
-				const std::shared_ptr<VulkanTexture2D>& vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(texture);
+			const std::shared_ptr<VulkanTexture2D>& vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(texture);
 
-				VkDescriptorImageInfo imageInfo = {};
-				imageInfo.imageView = vulkanTexture->GetVkImageView();
-				imageInfo.sampler = vulkanTexture->GetVkSampler();
-				imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			VkDescriptorImageInfo imageInfo = {};
+			imageInfo.imageView = vulkanTexture->GetVkImageView();
+			imageInfo.sampler = vulkanTexture->GetVkSampler();
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-				imageInfos.push_back(imageInfo);
-			}
-			else
-			{
-				VkDescriptorImageInfo imageInfo = {};
-				imageInfo.imageView = m_BlankTexture->GetVkImageView();
-				imageInfo.sampler = m_BlankTexture->GetVkSampler();
-				imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-				imageInfos.push_back(imageInfo);
-			}
+			imageInfos.push_back(imageInfo);
 		}
 
 		VkWriteDescriptorSet write = {};
