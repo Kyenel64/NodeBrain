@@ -58,12 +58,22 @@ namespace NodeBrain
 		[[nodiscard]] const glm::quat& GetQuatRotation() const { return QuatRotation; }
 	};
 
-	struct SpriteComponent
+	struct MaterialComponent
 	{
 		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		std::shared_ptr<Texture2D> Texture = nullptr;
 
-		SpriteComponent() = default;
-		SpriteComponent(const SpriteComponent&) = default;
+		MaterialComponent() = default;
+		MaterialComponent(const MaterialComponent&) = default;
+	};
+
+	enum class MeshType { None = 0, Plane = 1, Cube = 2 }; // TODO: temp until mesh class is implemented.
+
+	struct MeshComponent
+	{
+		MeshType Type = MeshType::None;
+
+		MeshComponent() = default;
+		MeshComponent(const MeshComponent&) = default;
 	};
 }

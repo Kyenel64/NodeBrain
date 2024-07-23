@@ -44,8 +44,8 @@ namespace NodeBrain
 
 		if (Input::IsMouseButtonHeld(MouseButton::Right))
 		{
-			m_Yaw += delta.x * speed * deltaTime;
-			m_Pitch += delta.y * speed * deltaTime;
+			m_Yaw -= delta.x * speed * deltaTime;
+			m_Pitch -= delta.y * speed * deltaTime;
 			if (m_Pitch > 89.0f)
 				m_Pitch = 89.0f;
 			if (m_Pitch < -89.0f)

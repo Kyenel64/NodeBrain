@@ -143,8 +143,8 @@ namespace NodeBrain
 		while (!m_DeletionQueue.empty())
 		{
 			Node* node = m_DeletionQueue.front();
-			if (node->GetType() == NodeType::SpriteComponent)
-				m_ActiveScene->RemoveComponent<SpriteComponent>(m_SelectedEntity);
+			if (node->GetType() == NodeType::MeshComponent)
+				m_ActiveScene->RemoveComponent<MeshComponent>(m_SelectedEntity);
 			m_NodeUIs[m_SelectedEntity].erase(node);
 			m_EntityGraph->RemoveNode(*node);
 
@@ -306,14 +306,13 @@ namespace NodeBrain
 				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(2), InputPortUI("Scale"));
 			}
 
-			if (ImGui::MenuItem("Sprite Component"))
+			if (ImGui::MenuItem("Mesh Component"))
 			{
-				if (!m_ActiveScene->HasComponent<SpriteComponent>(m_SelectedEntity))
-					m_ActiveScene->AddComponent<SpriteComponent>(m_SelectedEntity);
+				if (!m_ActiveScene->HasComponent<MeshComponent>(m_SelectedEntity))
+					m_ActiveScene->AddComponent<MeshComponent>(m_SelectedEntity);
 
-				auto& node = m_EntityGraph->AddNode<SpriteComponentNode>(m_ActiveScene->GetComponent<SpriteComponent>(m_SelectedEntity));
-				m_NodeUIs[m_SelectedEntity].emplace(&node, NodeUI("Sprite Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 60.0f }, addNodePos));
-				m_InputPortUIs[m_SelectedEntity].emplace(&node.GetInputPort(0), InputPortUI("Color"));
+				auto& node = m_EntityGraph->AddNode<MeshComponentNode>(m_ActiveScene->GetComponent<MeshComponent>(m_SelectedEntity));
+				m_NodeUIs[m_SelectedEntity].emplace(&node, NodeUI("Mesh Component", { 0.6f, 0.3f, 0.3f, 1.0f }, { 200.0f, 60.0f }, addNodePos));
 			}
 
 			// --- Type Nodes ---

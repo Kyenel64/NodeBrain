@@ -13,6 +13,7 @@
 #include "Renderer/EditorCamera.h"
 #include "Renderer/Framebuffer.h"
 #include "Renderer/Texture2D.h"
+#include "Scene/Component.h"
 
 namespace NodeBrain
 {
@@ -77,8 +78,8 @@ namespace NodeBrain
 		VertexData* CubeVertexBufferPtr = nullptr;
 
 		glm::vec3 CubeVertexPositions[36];
-		glm::vec3 CubeNormals[6];
-		glm::vec2 CubeTexCoords[6];
+		glm::vec3 CubeNormals[36];
+		glm::vec2 CubeTexCoords[36];
 
 
 		std::shared_ptr<Texture2D> BlankTexture;
@@ -101,10 +102,13 @@ namespace NodeBrain
 
 		void RenderSubmitted();
 
-		void SubmitQuad(const glm::mat4& transform, const glm::vec4& color);
 		void SubmitQuad(const glm::mat4& transform, const std::shared_ptr<Texture2D>& texture, const glm::vec4& tint);
+		void SubmitQuad(const glm::mat4& transform, const glm::vec4& color);
+		void SubmitQuad(const glm::mat4& transform, const MaterialComponent& material);
 
 		void SubmitCube(const glm::mat4& transform, const std::shared_ptr<Texture2D>& texture, const glm::vec4& tint);
+		void SubmitCube(const glm::mat4& transform, const MaterialComponent& material);
+
 
 		[[nodiscard]] RenderContext& GetContext() const { return m_RendererAPI.GetContext(); };
 		[[nodiscard]] RendererAPI& GetAPI() const { return m_RendererAPI; }

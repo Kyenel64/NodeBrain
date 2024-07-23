@@ -45,23 +45,26 @@ namespace NodeBrain
 		// --- Rendering ---
 		m_Renderer.BeginScene(editorCamera, targetFramebuffer);
 
-		{ // Draw Sprites
+		{
 			NB_PROFILE_SCOPE("Draw Sprites");
-			auto view = m_Registry.view<TransformComponent, SpriteComponent>();
+			auto view = m_Registry.view<TransformComponent, MeshComponent, MaterialComponent>();
 			Renderer& renderer = m_Renderer;
 			entt::registry& reg = m_Registry;
 
 			// TODO: Parallelize. Apple clang does not support std::execution::par so figure something out.
 			std::for_each(view.begin(), view.end(), [&view, &renderer, &reg](auto entity)
 				{
-					renderer.SubmitQuad(std::as_const(reg).get<TransformComponent>(entity).GetTransform(), std::as_const(reg).get<SpriteComponent>(entity).Texture, std::as_const(reg).get<SpriteComponent>(entity).Color);
+					const glm::mat4& transform = std::as_const(reg).get<TransformComponent>(entity).GetTransform();
+					const MaterialComponent& material = std::as_const(reg).get<MaterialComponent>(entity);
+
+					// temp until mesh class is implemented.
+					switch (std::as_const(reg).get<MeshComponent>(entity).Type)
+					{
+						case MeshType::Plane: renderer.SubmitQuad(transform, material); break;
+						case MeshType::Cube: renderer.SubmitCube(transform, material); break;
+						case MeshType::None: break;
+					}
 				});
-		}
-
-		{ // Draw Cubes
-			NB_PROFILE_SCOPE("Draw Cubes");
-
-			m_Renderer.SubmitCube(glm::translate(glm::mat4(1.0f), { -1.0f, 0.0f, 0.0f }), nullptr, { 0.8f, 0.3f, 0.8f, 1.0f });
 		}
 
 		m_Renderer.EndScene();

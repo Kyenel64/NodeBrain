@@ -27,16 +27,16 @@ namespace NodeBrain
 		glm::mat4 m_ViewMatrix{};
 		glm::mat4 m_ProjectionMatrix{};
 
-		glm::vec3 m_Position = { 0.0f, 0.0f, 5.0f };
-		glm::vec3 m_Direction = { 0.0f, 0.0f, -1.0f };
+		glm::vec3 m_Position = { 0.0f, 0.0f, -5.0f };
+		glm::vec3 m_Direction = { 0.0f, 0.0f, 1.0f };
 
-		glm::vec3 m_Front = { 0.0f, 0.0f, -1.0f };
-		glm::vec3 m_Right = { -1.0f, 0.0f, 0.0f };
-		glm::vec3 m_Up = { 0.0f, 1.0f, 0.0f };
+		glm::vec3 m_Front = { 0.0f, 0.0f, 1.0f };
+		glm::vec3 m_Right = { 1.0f, 0.0f, 0.0f };
+		glm::vec3 m_Up = { 0.0f, -1.0f, 0.0f };
 
 		glm::vec2 m_MousePosition = { 0.0f, 0.0f };
 
-		float m_Pitch = 0.0f, m_Yaw = -90.0f;
+		float m_Pitch = 0.0f, m_Yaw = 90.0f;
 
 		float m_FOV;
 		float m_AspectRatio;

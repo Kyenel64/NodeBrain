@@ -56,11 +56,35 @@ namespace NodeBrain
 
 
 
-	class SpriteComponentNode : public Node
+	class MeshComponentNode : public Node
 	{
 	public:
-		explicit SpriteComponentNode(SpriteComponent& spriteComp)
-				: m_SpriteComponent(spriteComp), Node(NodeType::SpriteComponent)
+		explicit MeshComponentNode(MeshComponent& meshComp)
+				: m_MeshComponent(meshComp), Node(NodeType::MeshComponent)
+		{
+			NB_PROFILE_FN();
+
+			m_InputPorts.emplace_back(*this, PortDataType::Int, 0);
+		}
+
+		void Evaluate() override
+		{
+			NB_PROFILE_FN();
+
+			m_MeshComponent.Type = MeshType(std::get<int>(m_InputPorts[0].GetValue()));
+		}
+
+	private:
+		MeshComponent& m_MeshComponent;
+	};
+
+
+
+	class MaterialComponentNode : public Node
+	{
+	public:
+		explicit MaterialComponentNode(MaterialComponent& matComp)
+				: m_MaterialComponent(matComp), Node(NodeType::MaterialComponent)
 		{
 			NB_PROFILE_FN();
 
@@ -71,10 +95,10 @@ namespace NodeBrain
 		{
 			NB_PROFILE_FN();
 
-			m_SpriteComponent.Color = std::get<glm::vec4>(m_InputPorts[0].GetValue());
+			m_MaterialComponent.Color = std::get<glm::vec4>(m_InputPorts[0].GetValue());
 		}
 
 	private:
-		SpriteComponent& m_SpriteComponent;
+		MaterialComponent& m_MaterialComponent;
 	};
 }

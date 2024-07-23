@@ -19,7 +19,8 @@ namespace NodeBrain
 		None = 0,
 		TagComponent,
 		TransformComponent,
-		SpriteComponent,
+		MeshComponent,
+		MaterialComponent,
 
 		Int,
 		Float,

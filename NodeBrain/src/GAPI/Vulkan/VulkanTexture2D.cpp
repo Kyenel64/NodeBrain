@@ -22,6 +22,7 @@ namespace NodeBrain
 		: m_Context(context), m_Path(std::move(path))
 	{
 		int width, height, channels;
+		stbi_set_flip_vertically_on_load(true);
 		const unsigned char* data = stbi_load(m_Path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 		NB_ASSERT(data, "Failed to load image");
 
