@@ -13,11 +13,11 @@
 #include "Renderer/EditorCamera.h"
 #include "Renderer/Framebuffer.h"
 #include "Renderer/Texture2D.h"
-#include "Scene/Component.h"
 
 namespace NodeBrain
 {
 	class Mesh;
+	class MaterialComponent;
 
 	struct VertexData
 	{
@@ -111,7 +111,7 @@ namespace NodeBrain
 		void SubmitCube(const glm::mat4& transform, const std::shared_ptr<Texture2D>& texture, const glm::vec4& tint);
 		void SubmitCube(const glm::mat4& transform, const MaterialComponent& material);
 
-		void DrawMesh(const glm::mat4& transform, const std::shared_ptr<Mesh>& mesh);
+		void DrawMesh(const glm::mat4& transform, const std::shared_ptr<Mesh>& mesh); // TODO: Use material class instead.
 
 
 		[[nodiscard]] RenderContext& GetContext() const { return m_RendererAPI.GetContext(); };

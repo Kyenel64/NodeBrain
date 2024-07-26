@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Renderer/Mesh.h"
+#include "Scene/Component.h"
 
 namespace NodeBrain
 {

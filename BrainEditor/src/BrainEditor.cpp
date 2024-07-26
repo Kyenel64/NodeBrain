@@ -38,6 +38,13 @@ namespace NodeBrain
 		material2.Color = { 0.0f, 1.0f, 0.0f, 1.0f };
 		mesh2.Type = MeshType::Plane;
 
+		m_TestMesh = std::make_shared<Mesh>(m_Context, "Assets/Models/teapot.obj");
+		Entity entity3 = m_EditorScene->CreateEntity("Test Mesh");
+		MeshComponent& mesh3 = m_EditorScene->AddComponent<MeshComponent>(entity3);
+		MaterialComponent& material3 = m_EditorScene->AddComponent<MaterialComponent>(entity3);
+		mesh3.Type = MeshType::Custom;
+		mesh3.Mesh = m_TestMesh;
+
 	#endif
 	}
 

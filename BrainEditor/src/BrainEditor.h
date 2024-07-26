@@ -46,5 +46,7 @@ namespace NodeBrain
 		// Temp
 		std::shared_ptr<Texture2D> m_TestTexture;
 		std::shared_ptr<Texture2D> m_BrickTexture;
+
+		std::shared_ptr<Mesh> m_TestMesh;
 	};
 }

@@ -5,6 +5,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include "Renderer/Texture2D.h"
+#include "Renderer/Mesh.h"
 
 namespace NodeBrain
 {
@@ -67,11 +68,12 @@ namespace NodeBrain
 		MaterialComponent(const MaterialComponent&) = default;
 	};
 
-	enum class MeshType { None = 0, Plane = 1, Cube = 2 }; // TODO: temp until mesh class is implemented.
+	enum class MeshType { None = 0, Plane = 1, Cube = 2, Custom = 3 }; // TODO: temp until mesh class is implemented.
 
 	struct MeshComponent
 	{
 		MeshType Type = MeshType::None;
+		std::shared_ptr<Mesh> Mesh = nullptr;
 
 		MeshComponent() = default;
 		MeshComponent(const MeshComponent&) = default;

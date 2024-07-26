@@ -80,8 +80,18 @@ namespace NodeBrain
 
         ProcessNode(scene->mRootNode, scene);
 
-        m_VertexBuffer = VertexBuffer::Create(m_Context, m_SubMeshes[0].m_Vertices.data(), sizeof(VertexData) * m_SubMeshes[0].m_Vertices.size());
-        m_IndexBuffer = IndexBuffer::Create(m_Context, m_SubMeshes[0].m_Indices.data(), sizeof(uint32_t) * m_SubMeshes[0].m_Indices.size());
+        // Create vertex buffer and index buffer for entire mesh
+        std::vector<VertexData> vertices;
+        std::vector<uint32_t> indices;
+
+        for (auto& subMesh : m_SubMeshes)
+        {
+            vertices.insert(vertices.end(), subMesh.m_Vertices.begin(), subMesh.m_Vertices.end());
+            indices.insert(indices.end(), subMesh.m_Indices.begin(), subMesh.m_Indices.end());
+        }
+
+        m_VertexBuffer = VertexBuffer::Create(m_Context, vertices.data(), sizeof(VertexData) * vertices.size());
+        m_IndexBuffer = IndexBuffer::Create(m_Context, indices.data(), sizeof(uint32_t) * indices.size());
     }
 
     void Mesh::ProcessNode(const aiNode* node, const aiScene* scene)

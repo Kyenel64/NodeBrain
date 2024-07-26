@@ -5,13 +5,10 @@
 
 namespace NodeBrain
 {
-	static std::shared_ptr<Mesh> testMesh;
-
 	Scene::Scene(Renderer& renderer)
 		: m_Renderer(renderer)
 	{
-		// temp
-		testMesh = std::make_shared<Mesh>(m_Renderer.GetContext(), "Assets/Models/teapot.obj");
+
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
@@ -67,13 +64,10 @@ namespace NodeBrain
 					{
 						case MeshType::Plane: renderer.SubmitQuad(transform, material); break;
 						case MeshType::Cube: renderer.SubmitCube(transform, material); break;
+						case MeshType::Custom: renderer.DrawMesh(transform, std::as_const(reg).get<MeshComponent>(entity).Mesh);
 						case MeshType::None: break;
 					}
 				});
-		}
-
-		{ // test draw mesh
-			m_Renderer.DrawMesh(glm::mat4(1.0f), testMesh);
 		}
 
 		m_Renderer.EndScene();
