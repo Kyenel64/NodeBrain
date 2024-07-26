@@ -51,7 +51,8 @@ set (RendererFiles
 "src/Renderer/DescriptorSet.h" "src/Renderer/DescriptorSet.cpp"
 "src/Renderer/EditorCamera.h" "src/Renderer/EditorCamera.cpp"
 "src/Renderer/Framebuffer.h" "src/Renderer/Framebuffer.cpp"
-"src/Renderer/Texture2D.h" "src/Renderer/Texture2D.cpp")
+"src/Renderer/Texture2D.h" "src/Renderer/Texture2D.cpp"
+"src/Renderer/Mesh.h" "src/Renderer/Mesh.cpp")
 
 set (SceneFiles
 "src/Scene/Scene.h" "src/Scene/Scene.cpp"
@@ -84,6 +85,7 @@ add_subdirectory("thirdparty/glm")
 add_subdirectory("thirdparty/glfw")
 add_subdirectory("thirdparty/spdlog")
 add_subdirectory("thirdparty/EnTT")
+add_subdirectory("thirdparty/assimp")
 
 # Include Paths
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -91,9 +93,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/th
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ImGui/)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/stb/)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/EnTT/single_include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/assimp/include)
 
 # Libraries
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw Vulkan::Vulkan EnTT spdlog glm)
+target_link_libraries(${PROJECT_NAME} PUBLIC glfw Vulkan::Vulkan EnTT spdlog glm assimp)
 
 # Defines
 target_compile_definitions(${PROJECT_NAME} PUBLIC $<$<CONFIG:Debug>:NB_DEBUG>)

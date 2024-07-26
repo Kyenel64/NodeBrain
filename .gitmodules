@@ -20,3 +20,6 @@
 [submodule "NodeBrain/thirdparty/stb/stb"]
 	path = NodeBrain/thirdparty/stb/stb
 	url = https://github.com/nothings/stb
+[submodule "NodeBrain/thirdparty/assimp"]
+	path = NodeBrain/thirdparty/assimp
+	url = https://github.com/assimp/assimp

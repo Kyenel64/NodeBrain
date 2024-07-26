@@ -3,6 +3,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Renderer/Mesh.h"
+
 namespace NodeBrain
 {
 	Renderer::Renderer(RendererAPI& rendererAPI)
@@ -356,5 +358,15 @@ namespace NodeBrain
 			m_RendererAPI.Draw(m_Data.CubeVertexCount);
 			m_RendererAPI.EndRenderPass(m_Data.UnlitPipeline);
 		}
+	}
+
+	void Renderer::DrawMesh(const glm::mat4& transform, const std::shared_ptr<Mesh>& mesh)
+	{
+		m_Data.PushConstantBuffer.Address = mesh->GetVertexBuffer()->GetAddress();
+		m_Data.UnlitPipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
+
+		m_RendererAPI.BeginRenderPass(m_Data.UnlitPipeline);
+		m_RendererAPI.DrawIndexed(mesh->GetIndexBuffer(), mesh->GetIndexBuffer()->GetSize(), 0);
+		m_RendererAPI.EndRenderPass(m_Data.UnlitPipeline);
 	}
 }

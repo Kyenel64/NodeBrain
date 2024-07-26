@@ -4,7 +4,7 @@
 namespace NodeBrain
 {
 	VulkanIndexBuffer::VulkanIndexBuffer(VulkanRenderContext& context, const uint32_t* data, uint32_t size)
-		: m_Context(context), m_Size(size)
+		: m_Context(context), m_Size(size / sizeof(uint32_t))
 	{
 		NB_PROFILE_FN();
 
@@ -45,7 +45,8 @@ namespace NodeBrain
 
 		NB_ASSERT(data, "Invalid data. Provided data must not be null.");
 		NB_ASSERT(size <= m_Size, "Buffer overflow. The size of data being set must be less than the allocated buffer size.");
-		
+
 		memcpy(m_MappedData, data, size);
+		m_Size = size / sizeof(uint32_t); // m_Size should not be in bytes to be more clear.
 	}
 }
