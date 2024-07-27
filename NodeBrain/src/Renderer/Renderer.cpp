@@ -219,7 +219,6 @@ namespace NodeBrain
 		m_RendererAPI.ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetFramebuffer);
 
 		m_Data.PushConstantBuffer.ViewProjectionMatrix = editorCamera->GetProjectionMatrix() * editorCamera->GetViewMatrix();
-		m_Data.PushConstantBuffer2.ViewProjectionMatrix = editorCamera->GetProjectionMatrix() * editorCamera->GetViewMatrix();
 
 		m_Data.QuadIndexCount = 0;
 		m_Data.QuadVertexBufferPtr = m_Data.QuadVertexBufferBase;
@@ -352,8 +351,8 @@ namespace NodeBrain
 			uint32_t size = (uint32_t)((uint8_t*)m_Data.CubeVertexBufferPtr - (uint8_t*)m_Data.CubeVertexBufferBase);
 			m_Data.CubeVertexBuffer->SetData(m_Data.CubeVertexBufferBase, size);
 
-			m_Data.PushConstantBuffer2.Address = m_Data.CubeVertexBuffer->GetAddress();
-			m_Data.UnlitPipeline->SetPushConstantData(&m_Data.PushConstantBuffer2, sizeof(PushConstantData), 0);
+			m_Data.PushConstantBuffer.Address = m_Data.CubeVertexBuffer->GetAddress();
+			m_Data.UnlitPipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
 
 			m_RendererAPI.BeginRenderPass(m_Data.UnlitPipeline);
 			m_RendererAPI.Draw(m_Data.CubeVertexCount);

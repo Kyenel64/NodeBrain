@@ -43,7 +43,14 @@ namespace NodeBrain
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 
 		if (maximize)
+		{
 			glfwMaximizeWindow(m_Window);
+
+			int fcWidth, fcHeight;
+			glfwGetWindowSize(m_Window, &fcWidth, &fcHeight);
+			m_Data.Width = fcWidth;
+			m_Data.Height = fcHeight;
+		}
 
 		// Vulkan extensions
 		uint32_t extensionCount = 0;

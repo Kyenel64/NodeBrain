@@ -1,11 +1,12 @@
 project ("BrainEditor")
 
 # Source files
-add_executable(${PROJECT_NAME} "src/main.cpp" "src/BrainEditor.h" "src/BrainEditor.cpp"
-        src/Panels/EntityGraphPanel.cpp
-        src/Panels/EntityGraphPanel.h
-        src/Panels/SceneGraphPanel.cpp
-        src/Panels/SceneGraphPanel.h)
+add_executable(${PROJECT_NAME}
+"src/main.cpp"
+"src/BrainEditor.h" "src/BrainEditor.cpp"
+"src/Panels/EntityGraphPanel.h" "src/Panels/EntityGraphPanel.cpp"
+"src/Panels/SceneGraphPanel.h" "src/Panels/SceneGraphPanel.cpp"
+"src/TestEditor.h" "src/TestEditor.cpp")
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 

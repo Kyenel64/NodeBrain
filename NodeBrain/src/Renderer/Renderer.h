@@ -55,12 +55,7 @@ namespace NodeBrain
 		std::shared_ptr<Shader> UnlitFragmentShader;
 		std::shared_ptr<GraphicsPipeline> UnlitPipeline;
 
-
-
-
-
 		PushConstantData PushConstantBuffer;
-		PushConstantData PushConstantBuffer2;
 
 		// --- Quad ---
 		uint32_t QuadIndexCount = 0;
@@ -111,7 +106,7 @@ namespace NodeBrain
 		void SubmitCube(const glm::mat4& transform, const std::shared_ptr<Texture2D>& texture, const glm::vec4& tint);
 		void SubmitCube(const glm::mat4& transform, const MaterialComponent& material);
 
-		void DrawMesh(const glm::mat4& transform, const std::shared_ptr<Mesh>& mesh); // TODO: Use material class instead.
+		void DrawMesh(const glm::mat4& transform, const std::shared_ptr<Mesh>& mesh);
 
 
 		[[nodiscard]] RenderContext& GetContext() const { return m_RendererAPI.GetContext(); };
