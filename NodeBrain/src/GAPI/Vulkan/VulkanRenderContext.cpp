@@ -127,6 +127,8 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		m_IsInRuntime = false;
+
 		vkDeviceWaitIdle(m_Device->GetVkDevice());
 
 		for (int i = 0; i < FRAMES_IN_FLIGHT; i++)
@@ -153,6 +155,11 @@ namespace NodeBrain
 
 		vkDestroyInstance(m_VkInstance, nullptr);
 		m_VkInstance = VK_NULL_HANDLE;
+	}
+
+	void VulkanRenderContext::OnFirstFrame()
+	{
+		m_IsInRuntime = true;
 	}
 
 	void VulkanRenderContext::AcquireNextImage()

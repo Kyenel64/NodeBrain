@@ -55,6 +55,7 @@ namespace NodeBrain
 		NB_ASSERT(data, "data null. Data must not be null.");
 		NB_ASSERT(size <= m_Size, "Buffer overflow. The size of data being set must be less than the allocated buffer size.");
 
-		memcpy(m_MappedData[m_Context.GetSwapchain().GetFrameIndex()], data, size);
+		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+			memcpy(m_MappedData[i], data, size);
 	}
 }

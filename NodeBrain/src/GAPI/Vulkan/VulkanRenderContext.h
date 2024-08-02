@@ -17,13 +17,16 @@ namespace NodeBrain
 		explicit VulkanRenderContext(Window& window);
 		~VulkanRenderContext() override;
 
+		void OnFirstFrame() override;
+
 		void AcquireNextImage() override;
 		void SwapBuffers() override;
 
 		void WaitForGPU() override;
 
-		GAPI GetGraphicsAPI() const override { return GAPI::Vulkan; }
-		Window& GetWindow() const override { return m_Window; }
+		[[nodiscard]] bool IsInRuntime() const override { return m_IsInRuntime; }
+		[[nodiscard]] GAPI GetGraphicsAPI() const override { return GAPI::Vulkan; }
+		[[nodiscard]] Window& GetWindow() const override { return m_Window; }
 
 		void ImmediateSubmit(const std::function<void(VkCommandBuffer cmdBuffer)>& func);
 
@@ -56,6 +59,8 @@ namespace NodeBrain
 		VmaAllocator m_VMAAllocator = VK_NULL_HANDLE;
 		VkDescriptorPool m_VkDescriptorPools[FRAMES_IN_FLIGHT];
 		VkDebugUtilsMessengerEXT m_DebugMessenger = VK_NULL_HANDLE;
+
+		bool m_IsInRuntime = false;
 
 		std::unique_ptr<VulkanPhysicalDevice> m_PhysicalDevice;
 		std::unique_ptr<VulkanDevice> m_Device;

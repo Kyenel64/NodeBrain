@@ -11,11 +11,14 @@ namespace NodeBrain
 	public:
 		virtual ~RenderContext() = default;
 
+		virtual void OnFirstFrame() = 0;
+
 		virtual void AcquireNextImage() = 0;
 		virtual void SwapBuffers() = 0;
 
 		virtual void WaitForGPU() = 0;
 
+		[[nodisacrd]] virtual bool IsInRuntime() const = 0;
 		[[nodiscard]] virtual GAPI GetGraphicsAPI() const = 0;
 		[[nodiscard]] virtual Window& GetWindow() const = 0;
 	};

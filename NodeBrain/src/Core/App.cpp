@@ -24,6 +24,8 @@ namespace NodeBrain
 
 	void App::Run()
 	{
+		m_Renderer.GetContext().OnFirstFrame();
+
 		while (m_Running)
 		{
 			NB_PROFILE_SCOPE("Frame");

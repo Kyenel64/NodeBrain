@@ -75,9 +75,22 @@ namespace NodeBrain
 		write.dstBinding = binding;
 		write.descriptorCount = 1;
 		write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		write.dstSet = m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()];
 		write.pBufferInfo = &bufferInfo;
-		vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+
+		if (m_Context.IsInRuntime())
+		{
+			write.dstSet = m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()];
+			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+		}
+		else
+		{
+			for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+			{
+				write.dstSet = m_VkDescriptorSet[i];
+				vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+			}
+		}
+
 	}
 
 	void VulkanDescriptorSet::WriteImage(const std::shared_ptr<Texture2D>& texture, uint32_t binding)
@@ -103,9 +116,21 @@ namespace NodeBrain
 		write.dstBinding = binding;
 		write.descriptorCount = 1;
 		write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		write.dstSet = m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()];
 		write.pImageInfo = &imageinfo;
-		vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+
+		if (m_Context.IsInRuntime())
+		{
+			write.dstSet = m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()];
+			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+		}
+		else
+		{
+			for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+			{
+				write.dstSet = m_VkDescriptorSet[i];
+				vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+			}
+		}
 
 	}
 
@@ -132,9 +157,21 @@ namespace NodeBrain
 		write.dstBinding = binding;
 		write.descriptorCount = 1;
 		write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		write.dstSet = m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()];
 		write.pImageInfo = &imageinfo;
-		vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+
+		if (m_Context.IsInRuntime())
+		{
+			write.dstSet = m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()];
+			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+		}
+		else
+		{
+			for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+			{
+				write.dstSet = m_VkDescriptorSet[i];
+				vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+			}
+		}
 	}
 
 	void VulkanDescriptorSet::WriteSamplers(const std::vector<std::shared_ptr<Texture2D>>& textures, uint32_t binding)
@@ -166,8 +203,20 @@ namespace NodeBrain
 		write.dstBinding = binding;
 		write.descriptorCount = textures.size();
 		write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		write.dstSet = m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()];
 		write.pImageInfo = &imageInfos[0];
-		vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+
+		if (m_Context.IsInRuntime())
+		{
+			write.dstSet = m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()];
+			vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+		}
+		else
+		{
+			for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+			{
+				write.dstSet = m_VkDescriptorSet[i];
+				vkUpdateDescriptorSets(m_Context.GetVkDevice(), 1, &write, 0, nullptr);
+			}
+		}
 	}
 }
