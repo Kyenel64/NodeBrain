@@ -30,7 +30,7 @@ _deps
 *.slo
 *.lo
 *.o
-*.obj
+out/*.obj
 
 # Executables
 *.exe
