@@ -8,14 +8,14 @@ namespace NodeBrain
 {
     static SubMesh ProcessSubMesh(const aiMesh* mesh, const aiScene* scene)
     {
-        std::vector<VertexData> vertices;
+        std::vector<MeshVertexData> vertices;
         std::vector<uint32_t> indices;
         std::vector<std::shared_ptr<Texture2D>> textures;
 
         // Iterate through each mesh vertex
         for (size_t i = 0; i < mesh->mNumVertices; i++)
         {
-            VertexData vertex = {};
+            MeshVertexData vertex = {};
 
             // Position
             vertex.Position.x = mesh->mVertices[i].x;
@@ -42,8 +42,6 @@ namespace NodeBrain
                 vertex.UVY = 0.0f;
             }
 
-            vertex.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-
             vertices.push_back(vertex);
         }
 
@@ -60,7 +58,7 @@ namespace NodeBrain
         return { vertices, indices, textures };
     }
 
-    SubMesh::SubMesh(std::vector<VertexData> vertices, std::vector<uint32_t> indices, std::vector<std::shared_ptr<Texture2D>> textures)
+    SubMesh::SubMesh(std::vector<MeshVertexData> vertices, std::vector<uint32_t> indices, std::vector<std::shared_ptr<Texture2D>> textures)
         : m_Vertices(std::move(vertices)), m_Indices(std::move(indices)), m_Textures(std::move(textures))
     {
 
@@ -73,7 +71,7 @@ namespace NodeBrain
         Assimp::Importer importer;
 
         const aiScene* scene = importer.ReadFile(path.string().c_str(),
-            aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType);
+            aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType | aiProcess_FlipWindingOrder);
 
         NB_ASSERT(scene, importer.GetErrorString());
         NB_ASSERT(scene->mRootNode, importer.GetErrorString());
@@ -81,7 +79,7 @@ namespace NodeBrain
         ProcessNode(scene->mRootNode, scene);
 
         // Create vertex buffer and index buffer for entire mesh
-        std::vector<VertexData> vertices;
+        std::vector<MeshVertexData> vertices;
         std::vector<uint32_t> indices;
 
         for (auto& subMesh : m_SubMeshes)
@@ -90,7 +88,7 @@ namespace NodeBrain
             indices.insert(indices.end(), subMesh.m_Indices.begin(), subMesh.m_Indices.end());
         }
 
-        m_VertexBuffer = VertexBuffer::Create(m_Context, vertices.data(), sizeof(VertexData) * vertices.size());
+        m_VertexBuffer = VertexBuffer::Create(m_Context, vertices.data(), sizeof(MeshVertexData) * vertices.size());
         m_IndexBuffer = IndexBuffer::Create(m_Context, indices.data(), sizeof(uint32_t) * indices.size());
     }
 

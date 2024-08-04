@@ -57,14 +57,15 @@ namespace NodeBrain
 			std::for_each(view.begin(), view.end(), [&view, &renderer, &reg](auto entity)
 				{
 					const glm::mat4& transform = std::as_const(reg).get<TransformComponent>(entity).GetTransform();
-					const MaterialComponent& material = std::as_const(reg).get<MaterialComponent>(entity);
+					const std::shared_ptr<Material>& material = std::as_const(reg).get<MaterialComponent>(entity).Material;
+					const std::shared_ptr<Mesh>& mesh = std::as_const(reg).get<MeshComponent>(entity).Mesh;
 
 					// temp until mesh class is implemented.
 					switch (std::as_const(reg).get<MeshComponent>(entity).Type)
 					{
-						case MeshType::Plane: renderer.SubmitQuad(transform, material); break;
-						case MeshType::Cube: renderer.SubmitCube(transform, material); break;
-						case MeshType::Custom: renderer.DrawMesh(transform, std::as_const(reg).get<MeshComponent>(entity).Mesh);
+						//case MeshType::Plane: renderer.SubmitQuad(transform, material); break;
+						//case MeshType::Cube: renderer.SubmitCube(transform, material); break;
+						case MeshType::Custom: renderer.DrawMesh(transform, mesh, material);
 						case MeshType::None: break;
 					}
 				});

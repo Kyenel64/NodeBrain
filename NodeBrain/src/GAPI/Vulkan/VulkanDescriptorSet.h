@@ -20,6 +20,7 @@ namespace NodeBrain
 		void WriteSampler(const std::shared_ptr<Texture2D>& texture, uint32_t binding) override;
 		void WriteSamplers(const std::vector<std::shared_ptr<Texture2D>>& textures, uint32_t binding) override;
 
+		[[nodiscard]] const std::vector<LayoutBinding>& GetLayout() const override { return m_Layout; }
 		[[nodiscard]] VkDescriptorSetLayout GetVkDescriptorSetLayout() const { return m_VkDescriptorSetLayout; }
 		[[nodiscard]] VkDescriptorSet GetVkDescriptorSet() const { return m_VkDescriptorSet[m_Context.GetSwapchain().GetFrameIndex()]; }
 

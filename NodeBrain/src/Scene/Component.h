@@ -63,6 +63,7 @@ namespace NodeBrain
 	{
 		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		std::shared_ptr<Texture2D> Texture = nullptr;
+		std::shared_ptr<Material> Material = nullptr;
 
 		MaterialComponent() = default;
 		MaterialComponent(const MaterialComponent&) = default;

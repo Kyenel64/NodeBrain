@@ -52,7 +52,9 @@ set (RendererFiles
 "src/Renderer/EditorCamera.h" "src/Renderer/EditorCamera.cpp"
 "src/Renderer/Framebuffer.h" "src/Renderer/Framebuffer.cpp"
 "src/Renderer/Texture2D.h" "src/Renderer/Texture2D.cpp"
-"src/Renderer/Mesh.h" "src/Renderer/Mesh.cpp")
+"src/Renderer/Mesh.h" "src/Renderer/Mesh.cpp"
+        src/Renderer/Material.cpp
+        src/Renderer/Material.h)
 
 set (SceneFiles
 "src/Scene/Scene.h" "src/Scene/Scene.cpp"

@@ -10,7 +10,7 @@ namespace NodeBrain
 	class VulkanGraphicsPipeline : public GraphicsPipeline
 	{
 	public:
-		VulkanGraphicsPipeline(VulkanRenderContext& context, GraphicsPipelineConfiguration  config);
+		VulkanGraphicsPipeline(VulkanRenderContext& context, GraphicsPipelineConfiguration config);
 		~VulkanGraphicsPipeline() override;
 
 		void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) override;
@@ -19,6 +19,7 @@ namespace NodeBrain
 		void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet) override;
 
 		[[nodiscard]] std::shared_ptr<Framebuffer> GetTargetFramebuffer() const override { return m_Configuration.TargetFramebuffer; }
+		[[nodiscard]] const GraphicsPipelineConfiguration& GetConfiguration() const override { return m_Configuration; }
 		[[nodiscard]] VkPipeline GetVkPipeline() const { return m_VkPipeline; }
 
 	private:

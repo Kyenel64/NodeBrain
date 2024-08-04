@@ -2,6 +2,7 @@
 #include "Renderer.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Renderer/Mesh.h"
 #include "Scene/Component.h"
@@ -13,18 +14,37 @@ namespace NodeBrain
 	{		
 		NB_PROFILE_FN();
 
-		// --- Uniforms + Descriptors ---
-		m_Data.TextureDescriptorSet = DescriptorSet::Create(m_Context, { { BindingType::ImageSampler, 0, 16 }});
+		// --- Globals ---
+		m_Data.TextureDescriptorSet = DescriptorSet::Create(m_Context, { { "Textures", BindingType::ImageSampler, 0, 16 }});
+		m_Data.PerObjectUBO = UniformBuffer::Create(m_Context, nullptr, sizeof(PerObjectUniformData));
 
 
 		// --- Shaders ---
-		m_Data.UnlitVertexShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/Unlit.vert.spv", ShaderType::Vertex);
-		m_Data.UnlitFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/Unlit.frag.spv", ShaderType::Fragment);
-		GraphicsPipelineConfiguration unlitPipelineConfig = {};
-		unlitPipelineConfig.VertexShader = m_Data.UnlitVertexShader;
-		unlitPipelineConfig.FragmentShader = m_Data.UnlitFragmentShader;
-		unlitPipelineConfig.AddDescriptorSet(m_Data.TextureDescriptorSet, 0);
-		m_Data.UnlitPipeline = GraphicsPipeline::Create(m_Context, unlitPipelineConfig);
+		// Unlit Color
+		m_Data.UnlitColorVertexShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitColor.vert.spv", ShaderType::Vertex);
+		m_Data.UnlitColorFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitColor.frag.spv", ShaderType::Fragment);
+		m_Data.UnlitColorDescriptorSet = DescriptorSet::Create(m_Context, {
+			{ "PerObjectUBO", BindingType::UniformBuffer, 0, 1, { { "ModelMatrix", sizeof(glm::mat4), 0 } } },
+			{ "MaterialUBO", BindingType::UniformBuffer, 1, 1, { { "Color", sizeof(glm::vec4), 0 } } }
+		});
+		GraphicsPipelineConfiguration unlitColorPipelineConfig = {};
+		unlitColorPipelineConfig.VertexShader = m_Data.UnlitColorVertexShader;
+		unlitColorPipelineConfig.FragmentShader = m_Data.UnlitColorFragmentShader;
+		unlitColorPipelineConfig.AddDescriptorSet(m_Data.UnlitColorDescriptorSet, 0);
+		m_Data.UnlitColorPipeline = GraphicsPipeline::Create(m_Context, unlitColorPipelineConfig);
+
+		// Unlit Texture
+		m_Data.UnlitTextureVertexShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitTexture.vert.spv", ShaderType::Vertex);
+		m_Data.UnlitTextureFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitTexture.frag.spv", ShaderType::Fragment);
+		m_Data.UnlitTextureDescriptorSet = DescriptorSet::Create(m_Context, {
+			{ "PerObjectUBO", BindingType::UniformBuffer, 0, 1, { { "ModelMatrix", sizeof(glm::mat4), 0 } } },
+			{ "Albedo", BindingType::ImageSampler,  1, 1, }
+		});
+		GraphicsPipelineConfiguration unlitTexturePipelineConfig = {};
+		unlitTexturePipelineConfig.VertexShader = m_Data.UnlitTextureVertexShader;
+		unlitTexturePipelineConfig.FragmentShader = m_Data.UnlitTextureFragmentShader;
+		unlitTexturePipelineConfig.AddDescriptorSet(m_Data.UnlitTextureDescriptorSet, 0);
+		m_Data.UnlitTexturePipeline = GraphicsPipeline::Create(m_Context, unlitTexturePipelineConfig);
 
 
 		// --- Quad ---
@@ -202,7 +222,7 @@ namespace NodeBrain
 
 		// Bind per frame descriptors
 		m_Data.TextureDescriptorSet->WriteSamplers(m_Data.Textures, 0); // TODO: Should be in separate descriptor set
-		m_Data.UnlitPipeline->BindDescriptorSet(m_Data.TextureDescriptorSet);
+		//m_Data.UnlitPipeline->BindDescriptorSet(m_Data.TextureDescriptorSet);
 	}
 
 	void Renderer::EndFrame()
@@ -214,7 +234,7 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		m_Data.UnlitPipeline->SetTargetFramebuffer(targetFramebuffer);
+		m_Data.UnlitColorPipeline->SetTargetFramebuffer(targetFramebuffer);
 
 		m_RendererAPI.ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetFramebuffer);
 
@@ -339,11 +359,11 @@ namespace NodeBrain
 			m_Data.QuadVertexBuffer->SetData(m_Data.QuadVertexBufferBase, size);
 
 			m_Data.PushConstantBuffer.Address = m_Data.QuadVertexBuffer->GetAddress();
-			m_Data.UnlitPipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
+			m_Data.UnlitColorPipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
 
-			m_RendererAPI.BeginRenderPass(m_Data.UnlitPipeline);
+			m_RendererAPI.BeginRenderPass(m_Data.UnlitColorPipeline);
 			m_RendererAPI.DrawIndexed(m_Data.QuadIndexBuffer, m_Data.QuadIndexCount, 0);
-			m_RendererAPI.EndRenderPass(m_Data.UnlitPipeline);
+			m_RendererAPI.EndRenderPass(m_Data.UnlitColorPipeline);
 		}
 
 		if (m_Data.CubeVertexCount)
@@ -352,21 +372,41 @@ namespace NodeBrain
 			m_Data.CubeVertexBuffer->SetData(m_Data.CubeVertexBufferBase, size);
 
 			m_Data.PushConstantBuffer.Address = m_Data.CubeVertexBuffer->GetAddress();
-			m_Data.UnlitPipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
+			m_Data.UnlitColorPipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
 
-			m_RendererAPI.BeginRenderPass(m_Data.UnlitPipeline);
+			m_RendererAPI.BeginRenderPass(m_Data.UnlitColorPipeline);
 			m_RendererAPI.Draw(m_Data.CubeVertexCount);
-			m_RendererAPI.EndRenderPass(m_Data.UnlitPipeline);
+			m_RendererAPI.EndRenderPass(m_Data.UnlitColorPipeline);
 		}
 	}
 
-	void Renderer::DrawMesh(const glm::mat4& transform, const std::shared_ptr<Mesh>& mesh)
+	void Renderer::DrawMesh(const glm::mat4& transform, const std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Material>& material)
 	{
-		m_Data.PushConstantBuffer.Address = mesh->GetVertexBuffer()->GetAddress();
-		m_Data.UnlitPipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
+		const std::shared_ptr<GraphicsPipeline>& pipeline = material->GetPipeline();
+		const std::shared_ptr<DescriptorSet>& descriptorSet = pipeline->GetConfiguration().GetDescriptorSets()[0]; // temp
 
-		m_RendererAPI.BeginRenderPass(m_Data.UnlitPipeline);
+		m_Data.PerObjectUBO->SetData(glm::value_ptr(transform), sizeof(PerObjectUniformData));
+		descriptorSet->WriteBuffer(m_Data.PerObjectUBO, 0);
+
+		pipeline->BindDescriptorSet(descriptorSet);
+
+		m_Data.PushConstantBuffer.Address = mesh->GetVertexBuffer()->GetAddress();
+		m_Data.UnlitColorPipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
+
+		m_RendererAPI.BeginRenderPass(pipeline);
 		m_RendererAPI.DrawIndexed(mesh->GetIndexBuffer(), mesh->GetIndexBuffer()->GetSize(), 0);
-		m_RendererAPI.EndRenderPass(m_Data.UnlitPipeline);
+		m_RendererAPI.EndRenderPass(pipeline);
+	}
+
+	std::shared_ptr<GraphicsPipeline> Renderer::GetPipelineByName(const std::string& name) const
+	{
+		if (name == "UnlitColor")
+			return m_Data.UnlitColorPipeline;
+		else if (name == "UnlitTexture")
+			return m_Data.UnlitTexturePipeline;
+
+		NB_ASSERT(false, "Unable to find pipeline from provided name.");
+
+		return nullptr;
 	}
 }

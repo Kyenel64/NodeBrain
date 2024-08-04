@@ -13,6 +13,7 @@
 #include "Renderer/EditorCamera.h"
 #include "Renderer/Framebuffer.h"
 #include "Renderer/Texture2D.h"
+#include "Renderer/Material.h"
 
 namespace NodeBrain
 {
@@ -35,6 +36,11 @@ namespace NodeBrain
 		uint64_t Address;
 	};
 
+	struct PerObjectUniformData
+	{
+		glm::mat4 ModelMatrix;
+	};
+
 
 	struct RendererData
 	{
@@ -51,9 +57,18 @@ namespace NodeBrain
 		std::shared_ptr<DescriptorSet> TextureDescriptorSet;
 
 		// --- Built-in Shaders ---
-		std::shared_ptr<Shader> UnlitVertexShader;
-		std::shared_ptr<Shader> UnlitFragmentShader;
-		std::shared_ptr<GraphicsPipeline> UnlitPipeline;
+		std::shared_ptr<Shader> UnlitColorVertexShader;
+		std::shared_ptr<Shader> UnlitColorFragmentShader;
+		std::shared_ptr<GraphicsPipeline> UnlitColorPipeline;
+		std::shared_ptr<DescriptorSet> UnlitColorDescriptorSet;
+
+		std::shared_ptr<Shader> UnlitTextureVertexShader;
+		std::shared_ptr<Shader> UnlitTextureFragmentShader;
+		std::shared_ptr<GraphicsPipeline> UnlitTexturePipeline;
+		std::shared_ptr<DescriptorSet> UnlitTextureDescriptorSet;
+
+		// --- Built-in Uniforms ---
+		std::shared_ptr<UniformBuffer> PerObjectUBO;
 
 		PushConstantData PushConstantBuffer;
 
@@ -106,11 +121,13 @@ namespace NodeBrain
 		void SubmitCube(const glm::mat4& transform, const std::shared_ptr<Texture2D>& texture, const glm::vec4& tint);
 		void SubmitCube(const glm::mat4& transform, const MaterialComponent& material);
 
-		void DrawMesh(const glm::mat4& transform, const std::shared_ptr<Mesh>& mesh);
+		void DrawMesh(const glm::mat4& transform, const std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Material>& material);
 
 
 		[[nodiscard]] RenderContext& GetContext() const { return m_RendererAPI.GetContext(); };
 		[[nodiscard]] RendererAPI& GetAPI() const { return m_RendererAPI; }
+
+		[[nodiscard]] std::shared_ptr<GraphicsPipeline> GetPipelineByName(const std::string& name) const;
 
 	private:
 		RendererAPI& m_RendererAPI;

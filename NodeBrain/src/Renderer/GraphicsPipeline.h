@@ -46,6 +46,7 @@ namespace NodeBrain
 		virtual void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet) = 0;
 
 		[[nodiscard]] virtual std::shared_ptr<Framebuffer> GetTargetFramebuffer() const = 0;
+		[[nodiscard]] virtual const GraphicsPipelineConfiguration& GetConfiguration() const = 0;
 
 		static std::shared_ptr<GraphicsPipeline> Create(RenderContext& context, const GraphicsPipelineConfiguration& configuration);
 	};

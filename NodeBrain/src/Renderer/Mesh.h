@@ -10,13 +10,21 @@
 
 namespace NodeBrain
 {
+    struct MeshVertexData
+    {
+        glm::vec3 Position;
+        float UVX;
+        glm::vec3 Normal;
+        float UVY;
+    };
+
     class SubMesh
     {
     public:
-        SubMesh(std::vector<VertexData> vertices, std::vector<uint32_t> indices, std::vector<std::shared_ptr<Texture2D>> textures);
+        SubMesh(std::vector<MeshVertexData> vertices, std::vector<uint32_t> indices, std::vector<std::shared_ptr<Texture2D>> textures);
 
     private:
-        std::vector<VertexData> m_Vertices;
+        std::vector<MeshVertexData> m_Vertices;
         std::vector<uint32_t> m_Indices;
         std::vector<std::shared_ptr<Texture2D>> m_Textures;
 
