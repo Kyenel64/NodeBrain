@@ -52,29 +52,35 @@ namespace NodeBrain
 		m_VkDescriptorSetLayout = VK_NULL_HANDLE;
 	}
 
-	void VulkanDescriptorSet::WriteBuffer(const std::shared_ptr<UniformBuffer>& buffer, uint32_t binding)
+	void VulkanDescriptorSet::WriteBuffer(const std::shared_ptr<UniformBuffer>& buffer, uint32_t binding, uint32_t size, uint32_t offset)
 	{
 		NB_PROFILE_FN();
 
 		NB_ASSERT(buffer, "Invalid uniform buffer");
+		bool isDynamic = false;
 		for (auto& layout : m_Layout)
 		{
 			if (layout.Binding == binding)
-				NB_ASSERT(layout.Type == BindingType::UniformBuffer, "Invalid binding type at index {0}. Binding must be of type UniformBuffer.", binding);
+			{
+				if (layout.Type == BindingType::UniformBufferDynamic)
+					isDynamic = true;
+				NB_ASSERT(layout.Type == BindingType::UniformBuffer || layout.Type == BindingType::UniformBufferDynamic,
+					"Invalid binding type at index {0}. Binding must be of type UniformBuffer.", binding);
+			}
 		}
 
 		std::shared_ptr<VulkanUniformBuffer> vulkanUBO = dynamic_pointer_cast<VulkanUniformBuffer>(buffer);
 
 		VkDescriptorBufferInfo bufferInfo = {};
 		bufferInfo.buffer = vulkanUBO->GetVkBuffer();
-		bufferInfo.offset = 0;
-		bufferInfo.range = vulkanUBO->GetSize();
+		bufferInfo.offset = offset;
+		bufferInfo.range = size;
 
 		VkWriteDescriptorSet write = {};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		write.dstBinding = binding;
 		write.descriptorCount = 1;
-		write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			write.descriptorType = isDynamic ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		write.pBufferInfo = &bufferInfo;
 
 		if (m_Context.IsInRuntime())

@@ -268,6 +268,7 @@ namespace NodeBrain
 			{
 				{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          maxSets },
 				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         maxSets },
+				{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, maxSets },
 				{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         maxSets },
 				{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, maxSets }
 			};

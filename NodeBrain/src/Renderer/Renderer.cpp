@@ -16,7 +16,7 @@ namespace NodeBrain
 
 		// --- Globals ---
 		m_Data.TextureDescriptorSet = DescriptorSet::Create(m_Context, { { "Textures", BindingType::ImageSampler, 0, 16 }});
-		m_Data.PerObjectUBO = UniformBuffer::Create(m_Context, nullptr, sizeof(PerObjectUniformData));
+		m_Data.PerObjectUBO = UniformBuffer::Create(m_Context, nullptr, m_Data.MaxCubes * sizeof(glm::mat4));
 
 
 		// --- Shaders ---
@@ -247,6 +247,8 @@ namespace NodeBrain
 		m_Data.CubeVertexBufferPtr = m_Data.CubeVertexBufferBase;
 
 		m_Data.TextureIndex = 1;
+
+		m_Data.ObjectCount = 0;
 	}
 
 	void Renderer::EndScene()
@@ -385,8 +387,8 @@ namespace NodeBrain
 		const std::shared_ptr<GraphicsPipeline>& pipeline = material->GetPipeline();
 		const std::shared_ptr<DescriptorSet>& descriptorSet = pipeline->GetConfiguration().GetDescriptorSets()[0]; // temp
 
-		m_Data.PerObjectUBO->SetData(glm::value_ptr(transform), sizeof(PerObjectUniformData));
-		descriptorSet->WriteBuffer(m_Data.PerObjectUBO, 0);
+		m_Data.PerObjectUBO->SetData(glm::value_ptr(transform), sizeof(glm::mat4), m_Data.ObjectCount * sizeof(glm::mat4));
+		descriptorSet->WriteBuffer(m_Data.PerObjectUBO, 0, sizeof(glm::mat4), m_Data.ObjectCount * sizeof(glm::mat4));
 
 		pipeline->BindDescriptorSet(descriptorSet);
 
@@ -396,6 +398,8 @@ namespace NodeBrain
 		m_RendererAPI.BeginRenderPass(pipeline);
 		m_RendererAPI.DrawIndexed(mesh->GetIndexBuffer(), mesh->GetIndexBuffer()->GetSize(), 0);
 		m_RendererAPI.EndRenderPass(pipeline);
+
+		m_Data.ObjectCount++;
 	}
 
 	std::shared_ptr<GraphicsPipeline> Renderer::GetPipelineByName(const std::string& name) const

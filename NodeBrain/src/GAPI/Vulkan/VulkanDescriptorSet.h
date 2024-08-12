@@ -15,7 +15,7 @@ namespace NodeBrain
 		VulkanDescriptorSet(VulkanRenderContext& context, const std::vector<LayoutBinding>& layout);
 		~VulkanDescriptorSet() override;
 
-		void WriteBuffer(const std::shared_ptr<UniformBuffer>& buffer, uint32_t binding) override;
+		void WriteBuffer(const std::shared_ptr<UniformBuffer>& buffer, uint32_t binding, uint32_t size, uint32_t offset = 0) override;
 		void WriteImage(const std::shared_ptr<Texture2D>& texture, uint32_t binding) override;
 		void WriteSampler(const std::shared_ptr<Texture2D>& texture, uint32_t binding) override;
 		void WriteSamplers(const std::vector<std::shared_ptr<Texture2D>>& textures, uint32_t binding) override;

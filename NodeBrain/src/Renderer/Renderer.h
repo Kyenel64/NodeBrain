@@ -36,10 +36,6 @@ namespace NodeBrain
 		uint64_t Address;
 	};
 
-	struct PerObjectUniformData
-	{
-		glm::mat4 ModelMatrix;
-	};
 
 
 	struct RendererData
@@ -69,6 +65,7 @@ namespace NodeBrain
 
 		// --- Built-in Uniforms ---
 		std::shared_ptr<UniformBuffer> PerObjectUBO;
+		uint32_t ObjectCount = 0;
 
 		PushConstantData PushConstantBuffer;
 

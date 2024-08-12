@@ -23,14 +23,14 @@ namespace NodeBrain
         material1.Material = std::make_shared<Material>(m_Context, m_Renderer.GetPipelineByName("UnlitColor"));
         material1.Material->SetData("Color", { 1.0f, 0.0f, 0.0f, 1.0f });
 
-        //Entity entity2 = m_EditorScene->CreateEntity("Test Mesh 2");
-        //m_EditorScene->GetComponent<TransformComponent>(entity2).Position = { 5.0f, 0.0f, 0.0f };
-        //MeshComponent& mesh2 = m_EditorScene->AddComponent<MeshComponent>(entity2);
-        //MaterialComponent& material2 = m_EditorScene->AddComponent<MaterialComponent>(entity2);
-        //mesh2.Type = MeshType::Custom;
-        //mesh2.Mesh = m_TestMesh;
-        //material2.Material = std::make_shared<Material>(m_Context, m_Renderer.GetPipelineByName("UnlitTexture"));
-        //material2.Material->SetData("Albedo", m_BrickTexture);
+        Entity entity2 = m_EditorScene->CreateEntity("Test Mesh 2");
+        m_EditorScene->GetComponent<TransformComponent>(entity2).Position = { 5.0f, 0.0f, 0.0f };
+        MeshComponent& mesh2 = m_EditorScene->AddComponent<MeshComponent>(entity2);
+        MaterialComponent& material2 = m_EditorScene->AddComponent<MaterialComponent>(entity2);
+        mesh2.Type = MeshType::Custom;
+        mesh2.Mesh = m_TestMesh;
+        material2.Material = std::make_shared<Material>(m_Context, m_Renderer.GetPipelineByName("UnlitTexture"));
+        material2.Material->SetData("Albedo", m_BrickTexture);
     }
 
     TestEditor::~TestEditor()

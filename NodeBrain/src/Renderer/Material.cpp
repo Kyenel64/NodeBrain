@@ -28,7 +28,7 @@ namespace NodeBrain
             if (var.Name == varName)
             {
                 m_UBO->SetData(glm::value_ptr(value), sizeof(value), var.Offset);
-                m_DescriptorSet->WriteBuffer(m_UBO, 1);
+                m_DescriptorSet->WriteBuffer(m_UBO, 1, sizeof(value), var.Offset);
                 found = true;
             }
         }
