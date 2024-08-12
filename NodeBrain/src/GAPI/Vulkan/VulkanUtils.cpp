@@ -11,7 +11,7 @@ namespace NodeBrain::Utils
 		{
 			case ImageFormat::None: return VK_FORMAT_UNDEFINED;
 			case ImageFormat::RGBA16: return VK_FORMAT_R16G16B16A16_SFLOAT;
-			case ImageFormat::RGBA8: return VK_FORMAT_B8G8R8A8_SRGB;
+			case ImageFormat::RGBA8: return VK_FORMAT_R8G8B8A8_UNORM; // TODO: Figure out proper formatting
 		}
 
 		return VK_FORMAT_UNDEFINED;

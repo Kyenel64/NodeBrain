@@ -23,7 +23,7 @@ namespace NodeBrain
 	{
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(true);
-		const unsigned char* data = stbi_load(m_Path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+		const unsigned char* data = stbi_load(m_Path.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
 		NB_ASSERT(data, "Failed to load image");
 
 		m_Configuration.Format = ImageFormat::RGBA8;
@@ -64,7 +64,7 @@ namespace NodeBrain
 		VkImageCreateInfo imageCreateInfo = {};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB; // TODO: Figure out proper color format
+		imageCreateInfo.format = Utils::ImageFormatToVkFormat(format);
 		imageCreateInfo.extent = { width, height, 1 };
 		imageCreateInfo.mipLevels = 1;
 		imageCreateInfo.arrayLayers = 1;
@@ -100,7 +100,7 @@ namespace NodeBrain
 		VkImageViewCreateInfo imageViewCreateInfo = {};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D; // TODO: parameterize
-		imageViewCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB; // TODO: Figure out proper color format
+		imageViewCreateInfo.format = Utils::ImageFormatToVkFormat(format);
 
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
