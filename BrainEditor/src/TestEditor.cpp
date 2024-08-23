@@ -46,7 +46,7 @@ namespace NodeBrain
 
     void TestEditor::OnEvent(Event& event)
     {
-        event.AttachEventFunction<WindowResizedEvent>([this](WindowResizedEvent& event) { OnWindowResize(event); });
+        event.AttachEventFunction<WindowResizedEvent>(NB_BIND_EVENT_FN(&TestEditor::OnWindowResize, this));
     }
 
     void TestEditor::OnWindowResize(WindowResizedEvent& event)

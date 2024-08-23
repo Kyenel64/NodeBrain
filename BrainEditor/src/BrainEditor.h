@@ -10,15 +10,15 @@
 
 namespace NodeBrain
 {
-	class BrainEditor : public Layer
+	class BrainEditor
 	{
 	public:
 		explicit BrainEditor(Renderer& renderer);
-		~BrainEditor() override = default;
+		~BrainEditor() = default;
 
-		void OnEvent(Event& event) override;
-		void OnUpdate(float deltaTime) override;
-		void OnUpdateGUI() override;
+		void OnEvent(Event& event);
+		void OnUpdate(float deltaTime);
+		void OnUpdateGUI();
 
 	private:
 		void OnKeyPressed(KeyPressedEvent& event);
