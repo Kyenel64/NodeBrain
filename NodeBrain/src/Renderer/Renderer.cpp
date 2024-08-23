@@ -25,7 +25,7 @@ namespace NodeBrain
 		m_Data.UnlitColorFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitColor.frag.spv", ShaderType::Fragment);
 		m_Data.UnlitColorDescriptorSet = DescriptorSet::Create(m_Context, {
 			{ "PerObjectUBO", BindingType::UniformBuffer, 0, 1, { { "ModelMatrix", sizeof(glm::mat4), 0 } } },
-			{ "MaterialUBO",  BindingType::UniformBuffer, 1, 1, { { "Color", sizeof(glm::vec4), 0 } } }
+			{ "MaterialUBO", BindingType::UniformBuffer, 1, 1, { { "Color", sizeof(glm::vec4), 0 } } }
 		});
 		GraphicsPipelineConfiguration unlitColorPipelineConfig = {};
 		unlitColorPipelineConfig.VertexShader = m_Data.UnlitColorVertexShader;
@@ -38,7 +38,7 @@ namespace NodeBrain
 		m_Data.UnlitTextureFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitTexture.frag.spv", ShaderType::Fragment);
 		m_Data.UnlitTextureDescriptorSet = DescriptorSet::Create(m_Context, {
 			{ "PerObjectUBO", BindingType::UniformBuffer, 0, 1, { { "ModelMatrix", sizeof(glm::mat4), 0 } } },
-			{ "Albedo",       BindingType::ImageSampler,  1, 1, }
+			{ "Albedo", BindingType::ImageSampler,  1, 1, }
 		});
 		GraphicsPipelineConfiguration unlitTexturePipelineConfig = {};
 		unlitTexturePipelineConfig.VertexShader = m_Data.UnlitTextureVertexShader;

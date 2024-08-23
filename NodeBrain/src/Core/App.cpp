@@ -7,8 +7,6 @@
 
 namespace NodeBrain
 {
-	static bool firstFrame = true;
-
 	App::App(std::string applicationName, Window& window, Renderer& renderer, ImGuiLayer* imGuiLayer)
 		: m_ApplicationName(std::move(applicationName)), m_Window(window), m_Renderer(renderer), m_ImGuiLayer(imGuiLayer)
 	{
@@ -24,49 +22,56 @@ namespace NodeBrain
 		NB_INFO("Shutdown Application");
 	}
 
-	void App::BeginFrame()
+	void App::Run()
 	{
-		// Mainly to switch buffers from updating both frames during startup to current frame during runtime.
-		if (firstFrame)
+		m_Renderer.GetContext().OnFirstFrame();
+
+		while (m_Running)
 		{
-			m_Renderer.GetContext().OnFirstFrame();
-			firstFrame = false;
+			NB_PROFILE_SCOPE("Frame");
+
+			m_Window.PollEvents();
+
+			// Calculate deltaTime
+			double time = m_Timer.GetElapsedTime(TimerUnit::Seconds);
+			auto deltaTime = static_cast<float>(time - m_LastFrameTime);
+			m_LastFrameTime = time;
+
+			m_Renderer.GetContext().AcquireNextImage();
+
+			m_Renderer.BeginFrame();
+
+			if (!m_Minimized)
+			{
+				// Update
+				for (Layer* layer : m_Layers)
+					layer->OnUpdate(deltaTime);
+
+				// Update GUI
+				m_ImGuiLayer->BeginFrame();
+				for (Layer* layer : m_Layers)
+					layer->OnUpdateGUI();
+				m_ImGuiLayer->EndFrame();
+			}
+
+			m_Renderer.EndFrame();
+
+			Input::ProcessPollStates();
+
+			m_Renderer.GetContext().SwapBuffers();
 		}
-
-		m_Window.PollEvents();
-
-		// Calculate deltaTime
-		double time = m_Timer.GetElapsedTime(TimerUnit::Seconds);
-		m_DeltaTime = static_cast<float>(time - m_LastFrameTime);
-		m_LastFrameTime = time;
-
-		m_Renderer.GetContext().AcquireNextImage();
-		m_Renderer.BeginFrame();
-
-		m_ImGuiLayer->BeginFrame();
-	}
-
-	void App::EndFrame()
-	{
-		m_ImGuiLayer->EndFrame();
-
-		m_Renderer.EndFrame();
-
-		Input::ProcessPollStates();
-
-		m_Renderer.GetContext().SwapBuffers();
 	}
 
 	void App::OnEvent(Event& event)
 	{
 		NB_PROFILE_FN();
 
-		for (auto& func : m_EventFunctions)
-			func(event);
+		for (Layer* layer : m_Layers)
+			layer->OnEvent(event);
 
 		// Bind our functions to an event
-		event.AttachEventFunction<WindowClosedEvent>(NB_BIND_EVENT_FN(&App::OnWindowClose, this));
-		event.AttachEventFunction<WindowMinimizedEvent>(NB_BIND_EVENT_FN(&App::OnMinimized, this));
+		event.AttachEventFunction<WindowClosedEvent>([this](WindowClosedEvent& event) { OnWindowClose(event); });
+		event.AttachEventFunction<WindowMinimizedEvent>([this](WindowMinimizedEvent& event) { OnMinimized(event); });
 	}
 
 	void App::OnWindowClose(WindowClosedEvent& e)

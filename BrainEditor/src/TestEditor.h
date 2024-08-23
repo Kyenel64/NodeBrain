@@ -4,15 +4,15 @@
 
 namespace NodeBrain
 {
-    class TestEditor
+    class TestEditor : public Layer
     {
     public:
         TestEditor(Renderer& renderer);
-        ~TestEditor();
+        ~TestEditor() override;
 
-        void OnUpdate(float deltaTime);
-        void OnEvent(Event& e);
-        void OnUpdateGUI() {}
+        void OnUpdate(float deltaTime) override;
+        void OnEvent(Event& e) override;
+        void OnUpdateGUI() override {}
 
     private:
         void OnWindowResize(WindowResizedEvent& event);

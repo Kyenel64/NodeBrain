@@ -9,25 +9,36 @@ int main()
 {
 	NB_PROFILE_BEGIN("Profile", "Profile.log");
 
-	NodeBrain::Window window("NodeBrain", 1280, 720);
-	NodeBrain::VulkanRenderContext renderContext(window);
-	NodeBrain::VulkanRendererAPI rendererAPI(renderContext);
-	NodeBrain::VulkanImGuiLayer gui(renderContext);
-	NodeBrain::Renderer renderer(rendererAPI);
-	NodeBrain::App app("NodeBrain", window, renderer, &gui);
-	NodeBrain::TestEditor editor(renderer);
+	auto* window = new NodeBrain::Window("NodeBrain", 1280, 720);
+	auto* renderContext = new NodeBrain::VulkanRenderContext(*window);
+	auto* rendererAPI = new NodeBrain::VulkanRendererAPI(*renderContext);
+	auto* gui = new NodeBrain::VulkanImGuiLayer(*renderContext);
+	auto* renderer = new NodeBrain::Renderer(*rendererAPI);
+#ifdef NB_TEST_EDITOR
+	NodeBrain::Layer* testEditor = new NodeBrain::TestEditor(*renderer);
+	auto* app = new NodeBrain::App("NodeBrain", *window, *renderer, gui);
+	app->PushLayer(*testEditor);
+#else
+	NodeBrain::Layer* brainEditor = new NodeBrain::BrainEditor(*renderer);
+	auto* app = new NodeBrain::App("NodeBrain", *window, *renderer, gui);
+	app->PushLayer(*brainEditor);
+#endif
 
-	app.AddEventFunction(NB_BIND_EVENT_FN(&NodeBrain::TestEditor::OnEvent, &editor));
 
-	while (app.IsRunning())
-	{
-		app.BeginFrame();
+	app->Run();
 
-		editor.OnUpdate(app.GetDeltaTime());
-		editor.OnUpdateGUI();
 
-		app.EndFrame();
-	}
+	delete app;
+#ifdef NB_TEST_EDITOR
+	delete testEditor;
+#else
+	delete brainEditor;
+#endif
+	delete renderer;
+	delete gui;
+	delete rendererAPI;
+	delete renderContext;
+	delete window;
 
 	NB_PROFILE_END();
 

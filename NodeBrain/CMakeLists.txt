@@ -9,7 +9,8 @@ set (ImGuiSrcFiles
 
 set (CoreFiles 
 "src/Core/App.h" "src/Core/App.cpp"
-        "src/Core/Timer.h"
+"src/Core/Layer.h"
+"src/Core/Timer.h"
 "src/Core/Window.h" "src/Core/Window.cpp"
 "src/Core/Log.h" "src/Core/Log.cpp"
 "src/Core/Event.h"
