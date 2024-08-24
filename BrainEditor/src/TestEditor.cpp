@@ -24,13 +24,20 @@ namespace NodeBrain
         material1.Material->SetData("Color", { 1.0f, 0.0f, 0.0f, 1.0f });
 
         Entity entity2 = m_EditorScene->CreateEntity("Test Mesh 2");
-        m_EditorScene->GetComponent<TransformComponent>(entity2).Position = { 5.0f, 0.0f, 0.0f };
+        m_EditorScene->GetComponent<TransformComponent>(entity2).Position = { 0.0f, 0.0f, 0.0f };
         MeshComponent& mesh2 = m_EditorScene->AddComponent<MeshComponent>(entity2);
         MaterialComponent& material2 = m_EditorScene->AddComponent<MaterialComponent>(entity2);
-        mesh2.Type = MeshType::Custom;
-        mesh2.Mesh = m_TestMesh;
+        mesh2.Type = MeshType::Quad;
+        //mesh2.Mesh = m_TestMesh;
         material2.Material = std::make_shared<Material>(m_Context, m_Renderer.GetPipelineByName("UnlitTexture"));
-        material2.Material->SetData("Albedo", m_BrickTexture);
+        material2.Material->SetData("Albedo", m_TestTexture);
+
+        Entity entity3 = m_EditorScene->CreateEntity("Test Mesh 3");
+        m_EditorScene->GetComponent<TransformComponent>(entity3).Position = { 2.0f, 0.0f, 0.0f };
+        MeshComponent& mesh3 = m_EditorScene->AddComponent<MeshComponent>(entity3);
+        MaterialComponent& material3 = m_EditorScene->AddComponent<MaterialComponent>(entity3);
+        mesh3.Type = MeshType::Quad;
+        material3.Material = material2.Material;
     }
 
     TestEditor::~TestEditor()

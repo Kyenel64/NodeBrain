@@ -4,7 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include "Renderer/Texture2D.h"
+#include "Renderer/Material.h"
 #include "Renderer/Mesh.h"
 
 namespace NodeBrain
@@ -61,15 +61,13 @@ namespace NodeBrain
 
 	struct MaterialComponent
 	{
-		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-		std::shared_ptr<Texture2D> Texture = nullptr;
 		std::shared_ptr<Material> Material = nullptr;
 
 		MaterialComponent() = default;
 		MaterialComponent(const MaterialComponent&) = default;
 	};
 
-	enum class MeshType { None = 0, Plane = 1, Cube = 2, Custom = 3 }; // TODO: temp until mesh class is implemented.
+	enum class MeshType { None = 0, Quad = 1, Cube = 2, Custom = 3 }; // TODO: temp until mesh class is implemented.
 
 	struct MeshComponent
 	{

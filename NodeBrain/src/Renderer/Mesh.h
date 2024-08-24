@@ -3,7 +3,6 @@
 #include <assimp/scene.h>
 #include <glm/glm.hpp>
 
-#include "Renderer/Renderer.h"
 #include "Renderer/RenderContext.h"
 #include "Renderer/VertexBuffer.h"
 #include "Renderer/IndexBuffer.h"

@@ -12,7 +12,7 @@ namespace NodeBrain
 	class App
 	{
 	public:
-		App(std::string applicationName, Window& window, Renderer& renderer, ImGuiLayer* imGuiLayer);
+		App(std::string applicationName, Window& window, Renderer& renderer, ImGuiLayer* imGuiLayer = nullptr);
 		~App();
 
 		void Run();
@@ -28,7 +28,7 @@ namespace NodeBrain
 		std::string m_ApplicationName;
 		Window& m_Window;
 		Renderer& m_Renderer;
-		ImGuiLayer* m_ImGuiLayer = nullptr;
+		ImGuiLayer* m_ImGuiLayer;
 
 		bool m_Running = true;
 		bool m_Minimized = false;

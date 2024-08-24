@@ -14,20 +14,16 @@
 #include "Renderer/Framebuffer.h"
 #include "Renderer/Texture2D.h"
 #include "Renderer/Material.h"
+#include "Renderer/Mesh.h"
 
 namespace NodeBrain
 {
-	class Mesh;
-	class MaterialComponent;
-
 	struct VertexData
 	{
 		glm::vec3 Position;
 		float UVX;
 		glm::vec3 Normal;
 		float UVY;
-		glm::vec4 Color;
-		glm::ivec4 TexIndex; // TODO: int + vec3 doesn't work for some reason.
 	};
 
 	struct PushConstantData
@@ -95,6 +91,7 @@ namespace NodeBrain
 		std::vector<std::shared_ptr<Texture2D>> Textures; // MaxTextures
 		uint32_t TextureIndex = 1;
 
+		std::unordered_map<std::shared_ptr<Material>, std::vector<VertexData>> MaterialBatches;
 	};
 
 	class Renderer
@@ -113,10 +110,10 @@ namespace NodeBrain
 
 		void SubmitQuad(const glm::mat4& transform, const std::shared_ptr<Texture2D>& texture, const glm::vec4& tint);
 		void SubmitQuad(const glm::mat4& transform, const glm::vec4& color);
-		void SubmitQuad(const glm::mat4& transform, const MaterialComponent& material);
+		void SubmitQuad(const glm::mat4& transform, const std::shared_ptr<Material>& material);
 
 		void SubmitCube(const glm::mat4& transform, const std::shared_ptr<Texture2D>& texture, const glm::vec4& tint);
-		void SubmitCube(const glm::mat4& transform, const MaterialComponent& material);
+		void SubmitCube(const glm::mat4& transform, const std::shared_ptr<Material>& material);
 
 		void DrawMesh(const glm::mat4& transform, const std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Material>& material);
 

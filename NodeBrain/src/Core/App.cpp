@@ -48,10 +48,13 @@ namespace NodeBrain
 					layer->OnUpdate(deltaTime);
 
 				// Update GUI
-				m_ImGuiLayer->BeginFrame();
-				for (Layer* layer : m_Layers)
-					layer->OnUpdateGUI();
-				m_ImGuiLayer->EndFrame();
+				if (m_ImGuiLayer)
+				{
+					m_ImGuiLayer->BeginFrame();
+					for (Layer* layer : m_Layers)
+						layer->OnUpdateGUI();
+					m_ImGuiLayer->EndFrame();
+				}
 			}
 
 			m_Renderer.EndFrame();

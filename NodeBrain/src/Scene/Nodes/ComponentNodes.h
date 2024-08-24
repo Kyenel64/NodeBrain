@@ -88,14 +88,12 @@ namespace NodeBrain
 		{
 			NB_PROFILE_FN();
 
-			m_InputPorts.emplace_back(*this, PortDataType::Color, glm::vec4(1.0f));
 		}
 
 		void Evaluate() override
 		{
 			NB_PROFILE_FN();
 
-			m_MaterialComponent.Color = std::get<glm::vec4>(m_InputPorts[0].GetValue());
 		}
 
 	private:

@@ -15,7 +15,7 @@ int main()
 	NodeBrain::VulkanImGuiLayer gui(renderContext);
 	NodeBrain::Renderer renderer(rendererAPI);
 
-	NodeBrain::App app("NodeBrain", window, renderer, &gui);
+	NodeBrain::App app("NodeBrain", window, renderer);
 	NodeBrain::TestEditor testEditor(renderer);
 	app.PushLayer(testEditor);
 

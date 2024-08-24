@@ -19,33 +19,6 @@ namespace NodeBrain
 
 		m_EditorCamera = std::make_shared<EditorCamera>(45.0f, m_ViewportFramebuffer->GetConfiguration().Width / m_ViewportFramebuffer->GetConfiguration().Height, 0.01f, 1000.0f);
 		m_EditorScene = std::make_shared<Scene>(m_Renderer);
-
-	#ifdef NB_TEST_SCENE
-
-		m_TestTexture = Texture2D::Create(m_Context, "Assets/Textures/TestTexture.png");
-		Entity entity = m_EditorScene->CreateEntity("Test Cube");
-		MeshComponent& mesh = m_EditorScene->AddComponent<MeshComponent>(entity);
-		MaterialComponent& material = m_EditorScene->AddComponent<MaterialComponent>(entity);
-		material.Texture = m_TestTexture;
-		mesh.Type = MeshType::Cube;
-
-		m_BrickTexture = Texture2D::Create(m_Context, "Assets/Textures/BrickTexture.jpg");
-		Entity entity2 = m_EditorScene->CreateEntity("Test Plane");
-		MeshComponent& mesh2 = m_EditorScene->AddComponent<MeshComponent>(entity2);
-		m_EditorScene->GetComponent<TransformComponent>(entity2).Position = { 1.5f, 0.0f, 0.0f };
-		MaterialComponent& material2 = m_EditorScene->AddComponent<MaterialComponent>(entity2);
-		material2.Texture = m_BrickTexture;
-		material2.Color = { 0.0f, 1.0f, 0.0f, 1.0f };
-		mesh2.Type = MeshType::Plane;
-
-		m_TestMesh = std::make_shared<Mesh>(m_Context, "Assets/Models/teapot.obj");
-		Entity entity3 = m_EditorScene->CreateEntity("Test Mesh");
-		MeshComponent& mesh3 = m_EditorScene->AddComponent<MeshComponent>(entity3);
-		MaterialComponent& material3 = m_EditorScene->AddComponent<MaterialComponent>(entity3);
-		mesh3.Type = MeshType::Custom;
-		mesh3.Mesh = m_TestMesh;
-
-	#endif
 	}
 
 	void BrainEditor::OnEvent(Event& event)
