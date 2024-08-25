@@ -16,7 +16,7 @@ namespace NodeBrain
 		void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) override;
 		void SetTargetFramebuffer(std::shared_ptr<Framebuffer> targetFramebuffer) override { m_Configuration.TargetFramebuffer = targetFramebuffer; }
 
-		void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet) override;
+		void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet, uint32_t index) override;
 
 		[[nodiscard]] std::shared_ptr<Framebuffer> GetTargetFramebuffer() const override { return m_Configuration.TargetFramebuffer; }
 		[[nodiscard]] const GraphicsPipelineConfiguration& GetConfiguration() const override { return m_Configuration; }

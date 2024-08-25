@@ -137,7 +137,7 @@ namespace NodeBrain
 		VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo = {};
 		pipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
 		pipelineRenderingCreateInfo.colorAttachmentCount = 1;
-		std::vector<VkFormat> formats = { VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_B8G8R8A8_SRGB };
+		std::vector<VkFormat> formats = { VK_FORMAT_R16G16B16A16_SFLOAT };
 		pipelineRenderingCreateInfo.pColorAttachmentFormats = &formats[0];
 
 
@@ -147,17 +147,33 @@ namespace NodeBrain
 		pushConstantRange.size = 128;
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 
-		std::vector<VkDescriptorSetLayout> layouts;
-		for (auto& set : m_Configuration.GetDescriptorSets())
+		std::vector<VkDescriptorSetLayoutBinding> setLayoutbindings;
+		std::vector<VkDescriptorSetLayout> setLayouts;
+		for (auto& descriptorLayout : m_Configuration.GetDescriptorLayouts())
 		{
-			std::shared_ptr<VulkanDescriptorSet> vulkanSet = dynamic_pointer_cast<VulkanDescriptorSet>(set);
-			layouts.push_back(vulkanSet->GetVkDescriptorSetLayout());
+			for (auto& binding : descriptorLayout)
+			{
+				VkDescriptorSetLayoutBinding setLayoutBinding = {};
+				setLayoutBinding.binding = binding.Binding;
+				setLayoutBinding.descriptorCount = binding.Count;
+				setLayoutBinding.descriptorType = Utils::BindingTypeToVkDescriptorType(binding.Type);
+				setLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
+				setLayoutbindings.push_back(setLayoutBinding);
+			}
+
+			VkDescriptorSetLayout layout = VK_NULL_HANDLE;
+			VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo = {};
+			descriptorLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+			descriptorLayoutCreateInfo.bindingCount = (uint32_t)setLayoutbindings.size();
+			descriptorLayoutCreateInfo.pBindings = &setLayoutbindings[0];
+			VK_CHECK(vkCreateDescriptorSetLayout(m_Context.GetVkDevice(), &descriptorLayoutCreateInfo, nullptr, &layout));
+			setLayouts.push_back(layout);
 		}
 
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
 		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutCreateInfo.setLayoutCount = (uint32_t)layouts.size();;
-		pipelineLayoutCreateInfo.pSetLayouts = &layouts[0];
+		pipelineLayoutCreateInfo.setLayoutCount = (uint32_t)setLayouts.size();;
+		pipelineLayoutCreateInfo.pSetLayouts = &setLayouts[0];
 		pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
 		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
 		VK_CHECK(vkCreatePipelineLayout(m_Context.GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
@@ -211,16 +227,12 @@ namespace NodeBrain
 		vkCmdPushConstants(m_Context.GetSwapchain().GetCurrentFrameData().CommandBuffer, m_VkPipelineLayout, VK_SHADER_STAGE_ALL_GRAPHICS, 0, 128, buffer);
 	}
 
-	void VulkanGraphicsPipeline::BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet)
+	void VulkanGraphicsPipeline::BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet, uint32_t index)
 	{
 		NB_PROFILE_FN();
 
-		const std::vector<std::shared_ptr<DescriptorSet>>& descriptorSets = m_Configuration.GetDescriptorSets();
-		NB_ASSERT(std::find(descriptorSets.begin(), descriptorSets.end(), descriptorSet) != descriptorSets.end(), "Descriptor set not found. Descriptor set being bound must exist during pipeline creation.")
-
-		uint32_t setIndex = std::find(descriptorSets.begin(), descriptorSets.end(), descriptorSet) - descriptorSets.begin();
 		std::shared_ptr<VulkanDescriptorSet> vulkanSet = dynamic_pointer_cast<VulkanDescriptorSet>(descriptorSet);
 		VkDescriptorSet vkDescriptorSet = vulkanSet->GetVkDescriptorSet();
-		vkCmdBindDescriptorSets(m_Context.GetSwapchain().GetCurrentFrameData().CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_VkPipelineLayout, setIndex, 1, &vkDescriptorSet, 0, nullptr);
+		vkCmdBindDescriptorSets(m_Context.GetSwapchain().GetCurrentFrameData().CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_VkPipelineLayout, index, 1, &vkDescriptorSet, 0, nullptr);
 	}
 }

@@ -13,6 +13,7 @@ namespace NodeBrain
         Material(RenderContext& context, const std::shared_ptr<GraphicsPipeline>& pipeline);
 
         [[nodiscard]] std::shared_ptr<GraphicsPipeline> GetPipeline() const { return m_Pipeline; }
+        [[nodiscard]] std::shared_ptr<DescriptorSet> GetDescriptorSet() const { return m_DescriptorSet; }
 
         void SetData(const std::string& varName, const glm::vec4& value);
         void SetData(const std::string& varName, const std::shared_ptr<Texture2D>& texture);

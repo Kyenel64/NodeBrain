@@ -9,7 +9,7 @@ namespace NodeBrain
         : m_Context(context), m_Pipeline(pipeline)
     {
         // Per object will always be at set index 0.
-        m_DescriptorSet = m_Pipeline->GetConfiguration().GetDescriptorSets()[0];
+        m_DescriptorSet = DescriptorSet::Create(m_Context, pipeline->GetConfiguration().GetDescriptorLayouts()[0]);
 
         // Calculate total size of material uniform buffer. Material uniform will always be at binding index 1.
         uint32_t size = 0;

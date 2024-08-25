@@ -24,15 +24,15 @@ namespace NodeBrain
 		// ColorBlendingMode
 
 
-		void AddDescriptorSet(const std::shared_ptr<DescriptorSet>& descriptorSet, uint32_t setIndex)
+		void AddDescriptorLayout(const std::vector<LayoutBinding>& bindings)
 		{
-			DescriptorSets.insert(DescriptorSets.begin() + setIndex, descriptorSet);
+			DescriptorLayouts.push_back(bindings);
 		}
 
-		[[nodiscard]] const std::vector<std::shared_ptr<DescriptorSet>>& GetDescriptorSets() const { return DescriptorSets; }
+		[[nodiscard]] const std::vector<std::vector<LayoutBinding>>& GetDescriptorLayouts() const { return DescriptorLayouts; }
 
 	private:
-		std::vector<std::shared_ptr<DescriptorSet>> DescriptorSets;
+		std::vector<std::vector<LayoutBinding>> DescriptorLayouts;
 	};
 
 	class GraphicsPipeline
@@ -43,7 +43,7 @@ namespace NodeBrain
 		virtual void SetPushConstantData(const void* buffer, uint32_t size, uint32_t offset) = 0;
 		virtual void SetTargetFramebuffer(std::shared_ptr<Framebuffer> targetFramebuffer) = 0;
 
-		virtual void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet) = 0;
+		virtual void BindDescriptorSet(std::shared_ptr<DescriptorSet> descriptorSet, uint32_t index) = 0;
 
 		[[nodiscard]] virtual std::shared_ptr<Framebuffer> GetTargetFramebuffer() const = 0;
 		[[nodiscard]] virtual const GraphicsPipelineConfiguration& GetConfiguration() const = 0;

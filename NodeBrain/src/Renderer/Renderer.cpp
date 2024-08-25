@@ -15,35 +15,31 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		// --- Globals ---
-		m_Data.TextureDescriptorSet = DescriptorSet::Create(m_Context, { { "Textures", BindingType::ImageSampler, 0, 16 }});
 		m_Data.PerObjectUBO = UniformBuffer::Create(m_Context, nullptr, m_Data.MaxCubes * sizeof(glm::mat4));
-
 
 		// --- Shaders ---
 		// Unlit Color
 		m_Data.UnlitColorVertexShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitColor.vert.spv", ShaderType::Vertex);
 		m_Data.UnlitColorFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitColor.frag.spv", ShaderType::Fragment);
-		m_Data.UnlitColorDescriptorSet = DescriptorSet::Create(m_Context, {
-			{ "PerObjectUBO", BindingType::UniformBuffer, 0, 1, { { "ModelMatrix", sizeof(glm::mat4), 0 } } },
-			{ "MaterialUBO", BindingType::UniformBuffer, 1, 1, { { "Color", sizeof(glm::vec4), 0 } } }
-		});
 		GraphicsPipelineConfiguration unlitColorPipelineConfig = {};
 		unlitColorPipelineConfig.VertexShader = m_Data.UnlitColorVertexShader;
 		unlitColorPipelineConfig.FragmentShader = m_Data.UnlitColorFragmentShader;
-		unlitColorPipelineConfig.AddDescriptorSet(m_Data.UnlitColorDescriptorSet, 0);
+		unlitColorPipelineConfig.AddDescriptorLayout({
+			{ "PerObjectUBO", BindingType::UniformBuffer, 0, 1, { { "ModelMatrix", sizeof(glm::mat4), 0 } } },
+			{ "MaterialUBO", BindingType::UniformBuffer, 1, 1, { { "Color", sizeof(glm::vec4), 0 } } }
+		});
 		m_Data.UnlitColorPipeline = GraphicsPipeline::Create(m_Context, unlitColorPipelineConfig);
 
 		// Unlit Texture
 		m_Data.UnlitTextureVertexShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitTexture.vert.spv", ShaderType::Vertex);
 		m_Data.UnlitTextureFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitTexture.frag.spv", ShaderType::Fragment);
-		m_Data.UnlitTextureDescriptorSet = DescriptorSet::Create(m_Context, {
-			{ "PerObjectUBO", BindingType::UniformBuffer, 0, 1, { { "ModelMatrix", sizeof(glm::mat4), 0 } } },
-			{ "Albedo", BindingType::ImageSampler,  1, 1, }
-		});
 		GraphicsPipelineConfiguration unlitTexturePipelineConfig = {};
 		unlitTexturePipelineConfig.VertexShader = m_Data.UnlitTextureVertexShader;
 		unlitTexturePipelineConfig.FragmentShader = m_Data.UnlitTextureFragmentShader;
-		unlitTexturePipelineConfig.AddDescriptorSet(m_Data.UnlitTextureDescriptorSet, 0);
+		unlitTexturePipelineConfig.AddDescriptorLayout( {
+			{ "PerObjectUBO", BindingType::UniformBuffer, 0, 1, { { "ModelMatrix", sizeof(glm::mat4), 0 } } },
+			{ "Albedo", BindingType::ImageSampler,  1, 1, }
+		});
 		m_Data.UnlitTexturePipeline = GraphicsPipeline::Create(m_Context, unlitTexturePipelineConfig);
 
 
@@ -219,10 +215,6 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		m_RendererAPI.BeginFrame();
-
-		// Bind per frame descriptors
-		m_Data.TextureDescriptorSet->WriteSamplers(m_Data.Textures, 0); // TODO: Should be in separate descriptor set
-		//m_Data.UnlitPipeline->BindDescriptorSet(m_Data.TextureDescriptorSet);
 	}
 
 	void Renderer::EndFrame()
@@ -359,19 +351,6 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
-		//if (m_Data.QuadIndexCount)
-		//{
-		//	uint32_t size = (uint32_t)((uint8_t*)m_Data.QuadVertexBufferPtr - (uint8_t*)m_Data.QuadVertexBufferBase);
-		//	m_Data.QuadVertexBuffer->SetData(m_Data.QuadVertexBufferBase, size);
-
-		//	m_Data.PushConstantBuffer.Address = m_Data.QuadVertexBuffer->GetAddress();
-		//	m_Data.UnlitColorPipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
-
-		//	m_RendererAPI.BeginRenderPass(m_Data.UnlitColorPipeline);
-		//	m_RendererAPI.DrawIndexed(m_Data.QuadIndexBuffer, m_Data.QuadIndexCount, 0);
-		//	m_RendererAPI.EndRenderPass(m_Data.UnlitColorPipeline);
-		//}
-
 		if (m_Data.CubeVertexCount)
 		{
 			uint32_t size = (uint32_t)((uint8_t*)m_Data.CubeVertexBufferPtr - (uint8_t*)m_Data.CubeVertexBufferBase);
@@ -385,17 +364,17 @@ namespace NodeBrain
 			m_RendererAPI.EndRenderPass(m_Data.UnlitColorPipeline);
 		}
 
-		for (auto& [mat, vertices] : m_Data.MaterialBatches)
+		for (auto& [material, vertices] : m_Data.MaterialBatches)
 		{
-			std::shared_ptr<GraphicsPipeline> pipeline = mat->GetPipeline();
-			const std::shared_ptr<DescriptorSet>& descriptorSet = pipeline->GetConfiguration().GetDescriptorSets()[0]; // temp
+			std::shared_ptr<GraphicsPipeline> pipeline = material->GetPipeline();
+			const std::shared_ptr<DescriptorSet>& descriptorSet = material->GetDescriptorSet();
 
 			m_Data.QuadVertexBuffer->SetData(vertices.data(), sizeof(VertexData) * vertices.size());
 
 			m_Data.PerObjectUBO->SetData(glm::value_ptr(glm::mat4(1.0f)), sizeof(glm::mat4), m_Data.ObjectCount * sizeof(glm::mat4));
-			pipeline->GetConfiguration().GetDescriptorSets()[0]->WriteBuffer(m_Data.PerObjectUBO, 0, sizeof(glm::mat4));
+			descriptorSet->WriteBuffer(m_Data.PerObjectUBO, 0, sizeof(glm::mat4));
 
-			pipeline->BindDescriptorSet(descriptorSet);
+			pipeline->BindDescriptorSet(descriptorSet, 0);
 
 			m_Data.PushConstantBuffer.Address = m_Data.QuadVertexBuffer->GetAddress();
 			pipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
@@ -409,12 +388,12 @@ namespace NodeBrain
 	void Renderer::DrawMesh(const glm::mat4& transform, const std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Material>& material)
 	{
 		const std::shared_ptr<GraphicsPipeline>& pipeline = material->GetPipeline();
-		const std::shared_ptr<DescriptorSet>& descriptorSet = pipeline->GetConfiguration().GetDescriptorSets()[0]; // temp
+		const std::shared_ptr<DescriptorSet>& descriptorSet = material->GetDescriptorSet();
 
 		m_Data.PerObjectUBO->SetData(glm::value_ptr(transform), sizeof(glm::mat4), m_Data.ObjectCount * sizeof(glm::mat4));
 		descriptorSet->WriteBuffer(m_Data.PerObjectUBO, 0, sizeof(glm::mat4), m_Data.ObjectCount * sizeof(glm::mat4));
 
-		pipeline->BindDescriptorSet(descriptorSet);
+		pipeline->BindDescriptorSet(descriptorSet, 0);
 
 		m_Data.PushConstantBuffer.Address = mesh->GetVertexBuffer()->GetAddress();
 		m_Data.UnlitColorPipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);

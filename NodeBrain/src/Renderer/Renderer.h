@@ -45,9 +45,6 @@ namespace NodeBrain
 
 		const uint32_t MaxTextures = 16; // TODO: depends on maxPerStageDescriptorSampledImages
 
-		// --- Built-in Descriptors ---
-		std::shared_ptr<DescriptorSet> TextureDescriptorSet;
-
 		// --- Built-in Shaders ---
 		std::shared_ptr<Shader> UnlitColorVertexShader;
 		std::shared_ptr<Shader> UnlitColorFragmentShader;
