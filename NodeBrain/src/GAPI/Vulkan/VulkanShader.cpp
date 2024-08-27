@@ -30,11 +30,20 @@ namespace NodeBrain
 	}
 
 
-	VulkanShader::VulkanShader(VulkanRenderContext& context, const std::filesystem::path& path, ShaderType shaderType)
-		: m_Context(context), m_ShaderPath(path), m_ShaderType(shaderType)
+	VulkanShader::VulkanShader(VulkanRenderContext& context, const std::filesystem::path& path)
+		: m_Context(context), m_ShaderPath(path)
 	{
 		NB_PROFILE_FN();
 
+		NB_ASSERT(path.extension() == ".spv", "Path must point to a valid .spv file");
+
+		// Set shader type
+		if (path.stem().extension() == ".vert")
+			m_ShaderType = ShaderType::Vertex;
+		else if (path.stem().extension() == ".frag")
+			m_ShaderType = ShaderType::Fragment;
+
+		// Create shader module
 		std::vector<char> buffer = Utils::ReadFile(m_ShaderPath);
 
 		VkShaderModuleCreateInfo createInfo = {};
@@ -64,6 +73,8 @@ namespace NodeBrain
 
 	void VulkanShader::Reflect(SpvReflectShaderModule& module)
 	{
+		NB_PROFILE_FN();
+
 		uint32_t bindingCount = 0;
 		SpvReflectResult result = spvReflectEnumerateDescriptorBindings(&module, &bindingCount, nullptr);
 		NB_ASSERT(result == SPV_REFLECT_RESULT_SUCCESS, result);

@@ -12,7 +12,7 @@ namespace NodeBrain
 	class VulkanShader : public Shader
 	{
 	public:
-		VulkanShader(VulkanRenderContext& context, const std::filesystem::path& path, ShaderType shaderType);
+		VulkanShader(VulkanRenderContext& context, const std::filesystem::path& path);
 		~VulkanShader() override;
 
 		[[nodiscard]] const std::filesystem::path& GetShaderPath() const override { return m_ShaderPath; }

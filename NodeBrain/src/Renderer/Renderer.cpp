@@ -19,16 +19,16 @@ namespace NodeBrain
 
 		// --- Shaders ---
 		// Unlit Color
-		m_Data.UnlitColorVertexShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitColor.vert.spv", ShaderType::Vertex);
-		m_Data.UnlitColorFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitColor.frag.spv", ShaderType::Fragment);
+		m_Data.UnlitColorVertexShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitColor.vert.spv");
+		m_Data.UnlitColorFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitColor.frag.spv");
 		GraphicsPipelineConfiguration unlitColorPipelineConfig = {};
 		unlitColorPipelineConfig.VertexShader = m_Data.UnlitColorVertexShader;
 		unlitColorPipelineConfig.FragmentShader = m_Data.UnlitColorFragmentShader;
 		m_Data.UnlitColorPipeline = GraphicsPipeline::Create(m_Context, unlitColorPipelineConfig);
 
 		// Unlit Texture
-		m_Data.UnlitTextureVertexShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitTexture.vert.spv", ShaderType::Vertex);
-		m_Data.UnlitTextureFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitTexture.frag.spv", ShaderType::Fragment);
+		m_Data.UnlitTextureVertexShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitTexture.vert.spv");
+		m_Data.UnlitTextureFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitTexture.frag.spv");
 		GraphicsPipelineConfiguration unlitTexturePipelineConfig = {};
 		unlitTexturePipelineConfig.VertexShader = m_Data.UnlitTextureVertexShader;
 		unlitTexturePipelineConfig.FragmentShader = m_Data.UnlitTextureFragmentShader;

@@ -18,6 +18,6 @@ namespace NodeBrain
 		[[nodiscard]] virtual ShaderType GetShaderType() const = 0;
 		[[nodiscard]] virtual std::vector<LayoutBinding> GetLayout() const = 0;
 		
-		static std::shared_ptr<Shader> Create(RenderContext& context, const std::filesystem::path& path, ShaderType shaderType);
+		static std::shared_ptr<Shader> Create(RenderContext& context, const std::filesystem::path& path);
 	};
 }
