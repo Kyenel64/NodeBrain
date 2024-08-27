@@ -2,6 +2,8 @@
 
 #include <chrono>
 
+#include "Core/Log.h"
+
 namespace NodeBrain
 {
 	enum class TimerUnit { Seconds, Milliseconds, Microseconds };

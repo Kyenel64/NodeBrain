@@ -22,17 +22,6 @@ namespace NodeBrain
 		float LineWidth = 1.0f;
 		// TODO:
 		// ColorBlendingMode
-
-
-		void AddDescriptorLayout(const std::vector<LayoutBinding>& bindings)
-		{
-			DescriptorLayouts.push_back(bindings);
-		}
-
-		[[nodiscard]] const std::vector<std::vector<LayoutBinding>>& GetDescriptorLayouts() const { return DescriptorLayouts; }
-
-	private:
-		std::vector<std::vector<LayoutBinding>> DescriptorLayouts;
 	};
 
 	class GraphicsPipeline

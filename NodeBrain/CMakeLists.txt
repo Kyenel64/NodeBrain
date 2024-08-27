@@ -53,8 +53,7 @@ set (RendererFiles
 "src/Renderer/Framebuffer.h" "src/Renderer/Framebuffer.cpp"
 "src/Renderer/Texture2D.h" "src/Renderer/Texture2D.cpp"
 "src/Renderer/Mesh.h" "src/Renderer/Mesh.cpp"
-        src/Renderer/Material.cpp
-        src/Renderer/Material.h)
+"src/Renderer/Material.h" "src/Renderer/Material.cpp")
 
 set (SceneFiles
 "src/Scene/Scene.h" "src/Scene/Scene.cpp"
@@ -75,11 +74,13 @@ add_library ( ${PROJECT_NAME}
     ${SceneFiles}
     "thirdparty/VMA/vk_mem_alloc.h" "thirdparty/VMA/vk_mem_alloc.cpp"
     "src/Utils/FileUtils.h" "src/Utils/FileUtils.cpp"
-    "thirdparty/stb/stb_impl.cpp")
+    "thirdparty/stb/stb_impl.cpp"
+    "thirdparty/SPIRV-Reflect/spirv_reflect.h" "thirdparty/SPIRV-Reflect/spirv_reflect.cpp"
+    "src/NBpch.h")
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 
-target_precompile_headers(${PROJECT_NAME} PUBLIC "src/NBpch.h")
+target_precompile_headers(${PROJECT_NAME} PRIVATE "src/NBpch.h")
 
 # Dependencies
 find_package(Vulkan REQUIRED)

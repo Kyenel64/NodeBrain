@@ -64,7 +64,7 @@ namespace NodeBrain
 					switch (std::as_const(reg).get<MeshComponent>(entity).Type)
 					{
 						case MeshType::Quad: renderer.SubmitQuad(transform, material); break;
-						//case MeshType::Cube: renderer.SubmitCube(transform, material); break;
+						case MeshType::Cube: renderer.SubmitCube(transform, material); break;
 						case MeshType::Custom: renderer.DrawMesh(transform, mesh, material);
 						case MeshType::None: break;
 					}

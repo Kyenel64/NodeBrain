@@ -6,7 +6,21 @@
 
 namespace NodeBrain
 {
-	enum class BindingType { StorageImage, UniformBuffer, UniformBufferDynamic, ImageSampler };
+	enum class BindingType
+	{
+		Sampler = 0,
+		ImageSampler,
+		SampledImage,
+		StorageImage,
+		UniformTexelBuffer,
+		StorageTexelBuffer,
+		UniformBuffer,
+		StorageBuffer,
+		UniformBufferDynamic,
+		StorageBufferDynamic,
+		InputAttachment,
+		AccelerationStructure
+	};
 
 	struct UniformVariable
 	{
@@ -20,6 +34,7 @@ namespace NodeBrain
 		std::string Name;
 		BindingType Type;
 		uint32_t Binding;
+		uint32_t Set;
 		uint32_t Count;
 
 		// Temporary used to store variable information in uniform buffer. TODO: Use vulkan reflect.

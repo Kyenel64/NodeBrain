@@ -30,7 +30,7 @@ namespace NodeBrain
         mesh2.Type = MeshType::Quad;
         //mesh2.Mesh = m_TestMesh;
         material2.Material = std::make_shared<Material>(m_Context, m_Renderer.GetPipelineByName("UnlitTexture"));
-        material2.Material->SetData("Albedo", m_TestTexture);
+        material2.Material->SetData("albedoTex", m_TestTexture);
 
         Entity entity3 = m_EditorScene->CreateEntity("Test Mesh 3");
         m_EditorScene->GetComponent<TransformComponent>(entity3).Position = { 2.0f, 0.0f, 0.0f };

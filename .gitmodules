@@ -23,3 +23,6 @@
 [submodule "NodeBrain/thirdparty/assimp"]
 	path = NodeBrain/thirdparty/assimp
 	url = https://github.com/assimp/assimp
+[submodule "NodeBrain/thirdparty/SPIRV-Reflect"]
+	path = NodeBrain/thirdparty/SPIRV-Reflect
+	url = https://github.com/KhronosGroup/SPIRV-Reflect

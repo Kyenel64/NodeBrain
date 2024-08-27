@@ -24,10 +24,6 @@ namespace NodeBrain
 		GraphicsPipelineConfiguration unlitColorPipelineConfig = {};
 		unlitColorPipelineConfig.VertexShader = m_Data.UnlitColorVertexShader;
 		unlitColorPipelineConfig.FragmentShader = m_Data.UnlitColorFragmentShader;
-		unlitColorPipelineConfig.AddDescriptorLayout({
-			{ "PerObjectUBO", BindingType::UniformBuffer, 0, 1, { { "ModelMatrix", sizeof(glm::mat4), 0 } } },
-			{ "MaterialUBO", BindingType::UniformBuffer, 1, 1, { { "Color", sizeof(glm::vec4), 0 } } }
-		});
 		m_Data.UnlitColorPipeline = GraphicsPipeline::Create(m_Context, unlitColorPipelineConfig);
 
 		// Unlit Texture
@@ -36,10 +32,6 @@ namespace NodeBrain
 		GraphicsPipelineConfiguration unlitTexturePipelineConfig = {};
 		unlitTexturePipelineConfig.VertexShader = m_Data.UnlitTextureVertexShader;
 		unlitTexturePipelineConfig.FragmentShader = m_Data.UnlitTextureFragmentShader;
-		unlitTexturePipelineConfig.AddDescriptorLayout( {
-			{ "PerObjectUBO", BindingType::UniformBuffer, 0, 1, { { "ModelMatrix", sizeof(glm::mat4), 0 } } },
-			{ "Albedo", BindingType::ImageSampler,  1, 1, }
-		});
 		m_Data.UnlitTexturePipeline = GraphicsPipeline::Create(m_Context, unlitTexturePipelineConfig);
 
 
@@ -350,19 +342,6 @@ namespace NodeBrain
 	void Renderer::RenderSubmitted()
 	{
 		NB_PROFILE_FN();
-
-		if (m_Data.CubeVertexCount)
-		{
-			uint32_t size = (uint32_t)((uint8_t*)m_Data.CubeVertexBufferPtr - (uint8_t*)m_Data.CubeVertexBufferBase);
-			m_Data.CubeVertexBuffer->SetData(m_Data.CubeVertexBufferBase, size);
-
-			m_Data.PushConstantBuffer.Address = m_Data.CubeVertexBuffer->GetAddress();
-			m_Data.UnlitColorPipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
-
-			m_RendererAPI.BeginRenderPass(m_Data.UnlitColorPipeline);
-			m_RendererAPI.Draw(m_Data.CubeVertexCount);
-			m_RendererAPI.EndRenderPass(m_Data.UnlitColorPipeline);
-		}
 
 		for (auto& [material, vertices] : m_Data.MaterialBatches)
 		{

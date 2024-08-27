@@ -82,10 +82,18 @@ namespace NodeBrain::Utils
 
 		switch (type)
 		{
-			case BindingType::StorageImage: return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-			case BindingType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			case BindingType::UniformBufferDynamic: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-			case BindingType::ImageSampler: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		case BindingType::Sampler: return VK_DESCRIPTOR_TYPE_SAMPLER;
+		case BindingType::ImageSampler: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		case BindingType::SampledImage: return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+		case BindingType::StorageImage: return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		case BindingType::UniformTexelBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
+		case BindingType::StorageTexelBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
+		case BindingType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		case BindingType::StorageBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		case BindingType::UniformBufferDynamic: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+		case BindingType::StorageBufferDynamic: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+		case BindingType::InputAttachment: return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+		case BindingType::AccelerationStructure: return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
 		}
 
 		NB_ASSERT(false, "Unavailable binding type");

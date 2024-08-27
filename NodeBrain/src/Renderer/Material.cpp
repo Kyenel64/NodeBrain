@@ -9,7 +9,28 @@ namespace NodeBrain
         : m_Context(context), m_Pipeline(pipeline)
     {
         // Per object will always be at set index 0.
-        m_DescriptorSet = DescriptorSet::Create(m_Context, pipeline->GetConfiguration().GetDescriptorLayouts()[0]);
+        std::vector<LayoutBinding> layout;
+        for (auto& binding : pipeline->GetConfiguration().VertexShader->GetLayout())
+        {
+            if (binding.Set == 0)
+                layout.push_back(binding);
+        }
+
+        for (auto& binding : pipeline->GetConfiguration().FragmentShader->GetLayout())
+        {
+            // Check for duplicates from vertex shader
+            bool duplicate = false;
+            for (auto& existingBinding : layout)
+            {
+                if (existingBinding.Binding == binding.Binding)
+                    duplicate = true;
+            }
+            if (!duplicate && binding.Set == 0)
+                layout.push_back(binding);
+        }
+
+        // TODO: Should create a descriptor set from the pipeline descriptor layout. Currently creating a layout for each material.
+        m_DescriptorSet = DescriptorSet::Create(m_Context, layout);
 
         // Calculate total size of material uniform buffer. Material uniform will always be at binding index 1.
         uint32_t size = 0;
@@ -27,8 +48,8 @@ namespace NodeBrain
         {
             if (var.Name == varName)
             {
-                m_UBO->SetData(glm::value_ptr(value), sizeof(value), var.Offset);
-                m_DescriptorSet->WriteBuffer(m_UBO, 1, sizeof(value), var.Offset);
+                m_UBO->SetData(glm::value_ptr(value), var.Size, var.Offset);
+                m_DescriptorSet->WriteBuffer(m_UBO, 1, var.Size, var.Offset);
                 found = true;
             }
         }

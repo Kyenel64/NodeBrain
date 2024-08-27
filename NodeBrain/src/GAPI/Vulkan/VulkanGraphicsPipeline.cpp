@@ -147,28 +147,50 @@ namespace NodeBrain
 		pushConstantRange.size = 128;
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 
-		std::vector<VkDescriptorSetLayoutBinding> setLayoutbindings;
+		std::unordered_map<uint32_t, std::vector<VkDescriptorSetLayoutBinding>> setLayoutBindings;
 		std::vector<VkDescriptorSetLayout> setLayouts;
-		for (auto& descriptorLayout : m_Configuration.GetDescriptorLayouts())
+		for (auto& binding : m_Configuration.VertexShader->GetLayout())
 		{
-			for (auto& binding : descriptorLayout)
+			VkDescriptorSetLayoutBinding setLayoutBinding = {};
+			setLayoutBinding.binding = binding.Binding;
+			setLayoutBinding.descriptorCount = binding.Count;
+			setLayoutBinding.descriptorType = Utils::BindingTypeToVkDescriptorType(binding.Type);
+			setLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+			setLayoutBindings[binding.Set].push_back(setLayoutBinding);
+		}
+
+		for (auto& binding : m_Configuration.FragmentShader->GetLayout())
+		{
+			// Check if there are duplicates from vertex shader
+			bool duplicate = false;
+			for (auto& existingBinding : setLayoutBindings[binding.Set])
+			{
+				if (existingBinding.binding == binding.Binding)
+					duplicate = true;
+			}
+
+			if (!duplicate)
 			{
 				VkDescriptorSetLayoutBinding setLayoutBinding = {};
 				setLayoutBinding.binding = binding.Binding;
 				setLayoutBinding.descriptorCount = binding.Count;
 				setLayoutBinding.descriptorType = Utils::BindingTypeToVkDescriptorType(binding.Type);
-				setLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
-				setLayoutbindings.push_back(setLayoutBinding);
+				setLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+				setLayoutBindings[binding.Set].push_back(setLayoutBinding);
 			}
+		}
 
+		for (auto& [set, layoutBindings] : setLayoutBindings)
+		{
 			VkDescriptorSetLayout layout = VK_NULL_HANDLE;
 			VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo = {};
 			descriptorLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			descriptorLayoutCreateInfo.bindingCount = (uint32_t)setLayoutbindings.size();
-			descriptorLayoutCreateInfo.pBindings = &setLayoutbindings[0];
+			descriptorLayoutCreateInfo.bindingCount = (uint32_t)layoutBindings.size();
+			descriptorLayoutCreateInfo.pBindings = &layoutBindings[0];
 			VK_CHECK(vkCreateDescriptorSetLayout(m_Context.GetVkDevice(), &descriptorLayoutCreateInfo, nullptr, &layout));
 			setLayouts.push_back(layout);
 		}
+
 
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
 		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -178,6 +200,9 @@ namespace NodeBrain
 		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
 		VK_CHECK(vkCreatePipelineLayout(m_Context.GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &m_VkPipelineLayout));
 
+		// TODO: Shouldn't delete set layout.
+		for (auto& descriptorLayout : setLayouts)
+			vkDestroyDescriptorSetLayout(m_Context.GetVkDevice(), descriptorLayout, nullptr);
 
 		// --- Pipeline ---
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};

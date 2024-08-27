@@ -22,7 +22,7 @@ namespace NodeBrain
 			setLayoutBinding.binding = binding.Binding;
 			setLayoutBinding.descriptorCount = binding.Count;
 			setLayoutBinding.descriptorType = Utils::BindingTypeToVkDescriptorType(binding.Type);
-			setLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
+			setLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 			setLayoutbindings.push_back(setLayoutBinding);
 		}
 		VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo = {};
