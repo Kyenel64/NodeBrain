@@ -34,7 +34,7 @@ namespace NodeBrain
 
         // Calculate total size of material uniform buffer. Material uniform will always be at binding index 1.
         uint32_t size = 0;
-        for (auto& var : m_DescriptorSet->GetLayout()[1].UniformVariables)
+        for (auto& var : m_DescriptorSet->GetLayout()[0].UniformVariables)
             size += var.Size;
 
         if (size)
@@ -44,12 +44,12 @@ namespace NodeBrain
     void Material::SetData(const std::string& varName, const glm::vec4& value)
     {
         bool found = false;
-        for (const auto& var : m_DescriptorSet->GetLayout()[1].UniformVariables)
+        for (const auto& var : m_DescriptorSet->GetLayout()[0].UniformVariables)
         {
             if (var.Name == varName)
             {
                 m_UBO->SetData(glm::value_ptr(value), var.Size, var.Offset);
-                m_DescriptorSet->WriteBuffer(m_UBO, 1, var.Size, var.Offset);
+                m_DescriptorSet->WriteBuffer(m_UBO, 0, var.Size, var.Offset);
                 found = true;
             }
         }

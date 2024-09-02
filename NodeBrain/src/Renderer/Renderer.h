@@ -21,40 +21,37 @@ namespace NodeBrain
 	struct VertexData
 	{
 		glm::vec3 Position;
-		float UVX;
+		glm::vec2 UV;
 		glm::vec3 Normal;
-		float UVY;
 	};
 
 	struct PushConstantData
 	{
 		glm::mat4 ViewProjectionMatrix;
-		uint64_t Address;
+		glm::mat4 ModelMatrix;;
 	};
 
 
 
 	struct RendererData
 	{
-		const uint32_t MaxQuads = 10000;
+		const uint32_t MaxQuads = 1000000;
 		const uint32_t MaxQuadVertices = MaxQuads * 4;
 		const uint32_t MaxQuadIndices = MaxQuads * 6;
 
-		const uint32_t MaxCubes = 5000;
+		const uint32_t MaxCubes = 1000000;
 		const uint32_t MaxCubeVertices = MaxCubes * 36;
 
-		const uint32_t MaxTextures = 16; // TODO: depends on maxPerStageDescriptorSampledImages
+		const uint32_t MaxMesh = 1000000;
 
 		// --- Built-in Shaders ---
 		std::shared_ptr<Shader> UnlitColorVertexShader;
 		std::shared_ptr<Shader> UnlitColorFragmentShader;
 		std::shared_ptr<GraphicsPipeline> UnlitColorPipeline;
-		std::shared_ptr<DescriptorSet> UnlitColorDescriptorSet;
 
 		std::shared_ptr<Shader> UnlitTextureVertexShader;
 		std::shared_ptr<Shader> UnlitTextureFragmentShader;
 		std::shared_ptr<GraphicsPipeline> UnlitTexturePipeline;
-		std::shared_ptr<DescriptorSet> UnlitTextureDescriptorSet;
 
 		// --- Built-in Uniforms ---
 		std::shared_ptr<UniformBuffer> PerObjectUBO;
@@ -66,18 +63,16 @@ namespace NodeBrain
 		uint32_t QuadIndexCount = 0;
 		std::shared_ptr<VertexBuffer> QuadVertexBuffer;
 		std::shared_ptr<IndexBuffer> QuadIndexBuffer;
-		VertexData* QuadVertexBufferBase = nullptr;
-		VertexData* QuadVertexBufferPtr = nullptr;
+		std::unordered_map<std::shared_ptr<Material>, std::vector<VertexData>> QuadVertexData;
 
 		glm::vec3 QuadVertexPositions[4];
-		glm::vec2 QuadTextureCoords[4];
+		glm::vec2 QuadTexCoords[4];
 
 
 		// --- Cube ---
 		uint32_t CubeVertexCount = 0;
 		std::shared_ptr<VertexBuffer> CubeVertexBuffer;
-		VertexData* CubeVertexBufferBase = nullptr;
-		VertexData* CubeVertexBufferPtr = nullptr;
+		std::unordered_map<std::shared_ptr<Material>, std::vector<VertexData>> CubeVertexData;
 
 		glm::vec3 CubeVertexPositions[36];
 		glm::vec3 CubeNormals[36];
@@ -85,10 +80,6 @@ namespace NodeBrain
 
 
 		std::shared_ptr<Texture2D> BlankTexture;
-		std::vector<std::shared_ptr<Texture2D>> Textures; // MaxTextures
-		uint32_t TextureIndex = 1;
-
-		std::unordered_map<std::shared_ptr<Material>, std::vector<VertexData>> MaterialBatches;
 	};
 
 	class Renderer

@@ -12,9 +12,8 @@ namespace NodeBrain
     struct MeshVertexData
     {
         glm::vec3 Position;
-        float UVX;
+        glm::vec2 UV;
         glm::vec3 Normal;
-        float UVY;
     };
 
     class SubMesh

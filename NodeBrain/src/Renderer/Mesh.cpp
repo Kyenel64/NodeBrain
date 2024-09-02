@@ -33,13 +33,13 @@ namespace NodeBrain
             // TexCoords
             if (mesh->mTextureCoords[0])
             {
-                vertex.UVX = mesh->mTextureCoords[0][i].x;
-                vertex.UVY = mesh->mTextureCoords[0][i].y;
+                vertex.UV.x = mesh->mTextureCoords[0][i].x;
+                vertex.UV.y = mesh->mTextureCoords[0][i].y;
             }
             else
             {
-                vertex.UVX = 0.0f;
-                vertex.UVY = 0.0f;
+                vertex.UV.x = 0.0f;
+                vertex.UV.y = 0.0f;
             }
 
             vertices.push_back(vertex);

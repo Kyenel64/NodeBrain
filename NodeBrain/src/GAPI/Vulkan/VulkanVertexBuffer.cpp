@@ -14,7 +14,7 @@ namespace NodeBrain
 		VkBufferCreateInfo gpuBufferCreateInfo = {};
 		gpuBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		gpuBufferCreateInfo.size = size;
-		gpuBufferCreateInfo.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+		gpuBufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
 		VmaAllocationCreateInfo gpuAllocationCreateInfo = {};
 		gpuAllocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
@@ -34,11 +34,6 @@ namespace NodeBrain
 		{
 			VK_CHECK(vmaCreateBuffer(m_Context.GetVMAAllocator(), &gpuBufferCreateInfo, &gpuAllocationCreateInfo, &m_GPUBuffer[i], &m_GPUAllocation[i], nullptr));
 			VK_CHECK(vmaCreateBuffer(m_Context.GetVMAAllocator(), &stagingBufferCreateInfo, &stagingAllocationCreateInfo, &m_StagingBuffer[i], &m_StagingAllocation[i], nullptr));
-
-			VkBufferDeviceAddressInfo deviceAddressInfo = {};
-			deviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
-			deviceAddressInfo.buffer = m_GPUBuffer[i];
-			m_VkDeviceAddress[i] = vkGetBufferDeviceAddress(m_Context.GetVkDevice(), &deviceAddressInfo);
 
 			VK_CHECK(vmaMapMemory(m_Context.GetVMAAllocator(), m_StagingAllocation[i], &m_StagingMappedData[i]));
 
@@ -79,22 +74,47 @@ namespace NodeBrain
 		}
 	}
 
-	void VulkanVertexBuffer::SetData(const void* data, uint32_t size)
+	void VulkanVertexBuffer::SetData(const void* data, uint32_t size, uint32_t offset)
 	{
 		NB_PROFILE_FN();
 
 		NB_ASSERT(data, "data null. Data must not be null.");
 		NB_ASSERT(size <= m_Size, "Buffer overflow. The size of data being set must be less than the allocated buffer size.");
 		
-		for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+		if (m_Context.IsInRuntime())
 		{
-			memcpy(m_StagingMappedData[i], data, size);
+			uint32_t index = m_Context.GetSwapchain().GetFrameIndex();
+			memcpy((char*)m_StagingMappedData[index] + offset, data, size);
 
 			VkBufferCopy copy = {};
-			copy.dstOffset = 0;
-			copy.srcOffset = 0;
+			copy.dstOffset = offset;
+			copy.srcOffset = offset;
 			copy.size = size;
-			vkCmdCopyBuffer(m_Context.GetSwapchain().GetCurrentFrameData().CommandBuffer, m_StagingBuffer[i], m_GPUBuffer[i], 1, &copy);
+			vkCmdCopyBuffer(m_Context.GetSwapchain().GetCurrentFrameData().CommandBuffer, m_StagingBuffer[index], m_GPUBuffer[index], 1, &copy);
 		}
+		else
+		{
+			m_Context.ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
+			{
+				for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+				{
+					memcpy((char*)m_StagingMappedData[i] + offset, data, size);
+
+					VkBufferCopy copy = {};
+					copy.dstOffset = offset;
+					copy.srcOffset = offset;
+					copy.size = size;
+					vkCmdCopyBuffer(cmdBuffer, m_StagingBuffer[i], m_GPUBuffer[i], 1, &copy);
+				}
+			});
+		}
+	}
+
+	void VulkanVertexBuffer::Bind()
+	{
+		NB_PROFILE_FN();
+
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(m_Context.GetSwapchain().GetCurrentFrameData().CommandBuffer, 0, 1, m_GPUBuffer, offsets);
 	}
 }

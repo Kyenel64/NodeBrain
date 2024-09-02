@@ -25,10 +25,19 @@ namespace NodeBrain
 			setLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 			setLayoutbindings.push_back(setLayoutBinding);
 		}
+
+		VkDescriptorBindingFlags flags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+		VkDescriptorSetLayoutBindingFlagsCreateInfo flagsCreateInfo = {};
+		flagsCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+		flagsCreateInfo.bindingCount = 1;
+		flagsCreateInfo.pBindingFlags = &flags;
+
 		VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo = {};
 		descriptorLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		descriptorLayoutCreateInfo.bindingCount = (uint32_t)setLayoutbindings.size();
 		descriptorLayoutCreateInfo.pBindings = &setLayoutbindings[0];
+		descriptorLayoutCreateInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
+		descriptorLayoutCreateInfo.pNext = &flagsCreateInfo;
 		VK_CHECK(vkCreateDescriptorSetLayout(m_Context.GetVkDevice(), &descriptorLayoutCreateInfo, nullptr, &m_VkDescriptorSetLayout));
 
 

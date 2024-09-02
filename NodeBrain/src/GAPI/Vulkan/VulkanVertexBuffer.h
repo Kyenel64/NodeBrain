@@ -14,9 +14,9 @@ namespace NodeBrain
 		VulkanVertexBuffer(VulkanRenderContext& context, const void* data, uint32_t size);
 		~VulkanVertexBuffer() override;
 
-		void SetData(const void* data, uint32_t size) override;
+		void SetData(const void* data, uint32_t size, uint32_t offset = 0) override;
+		void Bind() override;
 		
-		[[nodiscard]] uint64_t GetAddress() const override { return m_VkDeviceAddress[m_Context.GetSwapchain().GetFrameIndex()]; }
 		[[nodiscard]] VkBuffer GetVkBuffer() const { return m_StagingBuffer[m_Context.GetSwapchain().GetFrameIndex()]; }
 
 	private:
@@ -26,7 +26,6 @@ namespace NodeBrain
 		VkBuffer m_GPUBuffer[FRAMES_IN_FLIGHT];
 		VmaAllocation m_StagingAllocation[FRAMES_IN_FLIGHT];
 		VmaAllocation m_GPUAllocation[FRAMES_IN_FLIGHT];
-		VkDeviceAddress m_VkDeviceAddress[FRAMES_IN_FLIGHT];
 		void* m_StagingMappedData[FRAMES_IN_FLIGHT];
 
 		uint32_t m_Size;

@@ -275,7 +275,7 @@ namespace NodeBrain
 
 			VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
 			descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-			descriptorPoolCreateInfo.flags = 0;
+			descriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
 			descriptorPoolCreateInfo.maxSets = maxSets; // TODO: Double check
 			descriptorPoolCreateInfo.poolSizeCount = (uint32_t)poolSizes.size();;
 			descriptorPoolCreateInfo.pPoolSizes = &poolSizes[0];

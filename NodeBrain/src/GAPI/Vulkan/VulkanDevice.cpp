@@ -32,6 +32,9 @@ namespace NodeBrain
 		vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 		vulkan12Features.bufferDeviceAddress = VK_TRUE;
 		vulkan12Features.descriptorIndexing = VK_TRUE;
+		vulkan12Features.descriptorBindingPartiallyBound = VK_TRUE;
+		vulkan12Features.descriptorBindingUniformBufferUpdateAfterBind = VK_TRUE;
+		vulkan12Features.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
 
 		VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures = {};
 		dynamicRenderingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;

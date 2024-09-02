@@ -68,12 +68,22 @@ namespace NodeBrain
 		VkPipelineShaderStageCreateInfo shaderStages[2] = { vertShaderStageCreateInfo, fragShaderStageCreateInfo };
 
 		// Vertex Input
+		VkVertexInputBindingDescription bindingDescription = {};
+		bindingDescription.binding = 0;
+		bindingDescription.stride = 8 * sizeof(float);
+		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+		std::vector<VkVertexInputAttributeDescription> attributes;
+		attributes.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 });
+		attributes.push_back({ 1, 0, VK_FORMAT_R32G32_SFLOAT, 3 * sizeof(float)});
+		attributes.push_back({ 2, 0, VK_FORMAT_R32G32B32_SFLOAT, 5 * sizeof(float)});
+
 		VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = {};
 		vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputStateCreateInfo.vertexBindingDescriptionCount = 0;
-		vertexInputStateCreateInfo.pVertexBindingDescriptions = nullptr; // TODO: Set buffer layout
-		vertexInputStateCreateInfo.vertexAttributeDescriptionCount = 0;
-		vertexInputStateCreateInfo.pVertexAttributeDescriptions = nullptr;
+		vertexInputStateCreateInfo.vertexBindingDescriptionCount = 1;
+		vertexInputStateCreateInfo.pVertexBindingDescriptions = &bindingDescription; // TODO: Set buffer layout
+		vertexInputStateCreateInfo.vertexAttributeDescriptionCount = 3;
+		vertexInputStateCreateInfo.pVertexAttributeDescriptions = &attributes[0];
 
 		// Input Assembly
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = {};
@@ -182,11 +192,19 @@ namespace NodeBrain
 
 		for (auto& [set, layoutBindings] : setLayoutBindings)
 		{
+			VkDescriptorBindingFlags flags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+			VkDescriptorSetLayoutBindingFlagsCreateInfo flagsCreateInfo = {};
+			flagsCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+			flagsCreateInfo.bindingCount = 1;
+			flagsCreateInfo.pBindingFlags = &flags;
+
 			VkDescriptorSetLayout layout = VK_NULL_HANDLE;
 			VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo = {};
 			descriptorLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 			descriptorLayoutCreateInfo.bindingCount = (uint32_t)layoutBindings.size();
 			descriptorLayoutCreateInfo.pBindings = &layoutBindings[0];
+			descriptorLayoutCreateInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
+			descriptorLayoutCreateInfo.pNext = &flagsCreateInfo;
 			VK_CHECK(vkCreateDescriptorSetLayout(m_Context.GetVkDevice(), &descriptorLayoutCreateInfo, nullptr, &layout));
 			setLayouts.push_back(layout);
 		}
