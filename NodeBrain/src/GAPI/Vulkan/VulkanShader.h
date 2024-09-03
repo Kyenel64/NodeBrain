@@ -18,6 +18,7 @@ namespace NodeBrain
 		[[nodiscard]] const std::filesystem::path& GetShaderPath() const override { return m_ShaderPath; }
 		[[nodiscard]] ShaderType GetShaderType() const override { return m_ShaderType; }
 		[[nodiscard]] std::vector<LayoutBinding> GetLayout() const override { return m_Layout; }
+		[[nodiscard]] std::vector<InputVariable> GetInputVariables() const override { return m_InputVariables; }
 		[[nodiscard]] VkShaderModule GetVkShaderModule() const { return m_VkShaderModule; }
 
 	private:
@@ -31,5 +32,6 @@ namespace NodeBrain
 		ShaderType m_ShaderType;
 
 		std::vector<LayoutBinding> m_Layout;
+		std::vector<InputVariable> m_InputVariables;
 	};
 }

@@ -27,6 +27,18 @@ namespace NodeBrain
 			case SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR: return BindingType::AccelerationStructure;
 			}
 		}
+
+		static InputFormat SpvFormatToInputFormat(SpvReflectFormat format)
+		{
+			switch (format)
+			{
+			case SPV_REFLECT_FORMAT_R32_SFLOAT: return InputFormat::R32;
+			case SPV_REFLECT_FORMAT_R32G32_SFLOAT: return InputFormat::R32G32;
+			case SPV_REFLECT_FORMAT_R32G32B32_SFLOAT: return InputFormat::R32G32B32;
+			case SPV_REFLECT_FORMAT_R32G32B32A32_SFLOAT: return InputFormat::R32G32B32A32;
+			default: return InputFormat::None;
+			}
+		}
 	}
 
 
@@ -57,6 +69,7 @@ namespace NodeBrain
 		SpvReflectResult result = spvReflectCreateShaderModule(buffer.size(), buffer.data(), &module);
 		NB_ASSERT(result == SPV_REFLECT_RESULT_SUCCESS, result);
 		Reflect(module);
+		spvReflectDestroyShaderModule(&module);
 
 		NB_INFO("Created shader module of size: {0}", buffer.size());
 	}
@@ -98,10 +111,40 @@ namespace NodeBrain
 				binding.UniformVariables.push_back({ variable.name, variable.size, variable.offset });
 			}
 
-			m_Layout.push_back(binding);
+			m_Layout.emplace_back(binding);
 		}
 
-		spvReflectDestroyShaderModule(&module);
 		delete[] bindings;
+
+		uint32_t layoutCount = 0;
+		result = spvReflectEnumerateInputVariables(&module, &layoutCount, nullptr);
+		NB_ASSERT(result == SPV_REFLECT_RESULT_SUCCESS, result);
+		SpvReflectInterfaceVariable** inputs = (SpvReflectInterfaceVariable**)malloc(layoutCount * sizeof(SpvReflectInterfaceVariable*));
+		result = spvReflectEnumerateInputVariables(&module, &layoutCount, inputs);
+		NB_ASSERT(result == SPV_REFLECT_RESULT_SUCCESS, result);
+
+		uint32_t offset = 0;
+		for (size_t i = 0; i < layoutCount; i++)
+		{
+			const SpvReflectInterfaceVariable& inputVariable = *(inputs[i]);
+			InputVariable variable;
+			variable.Name = inputVariable.name;
+			variable.Location = inputVariable.location;
+			variable.Format = Utils::SpvFormatToInputFormat(inputVariable.format);
+			variable.Offset = offset;
+
+			switch (variable.Format)
+			{
+			case InputFormat::R32: offset += 4; break;
+			case InputFormat::R32G32: offset += 8; break;
+			case InputFormat::R32G32B32: offset += 12; break;
+			case InputFormat::R32G32B32A32: offset += 16; break;
+			default: break;
+			}
+
+			m_InputVariables.emplace_back(variable);
+		}
+
+		delete[] inputs;
 	}
 }

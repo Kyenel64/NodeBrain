@@ -1,6 +1,7 @@
 #include "NBpch.h"
 #include "VulkanGraphicsPipeline.h"
 
+#include "Core/Input.h"
 #include "GAPI/Vulkan/VulkanShader.h"
 #include "GAPI/Vulkan/VulkanDescriptorSet.h"
 
@@ -35,6 +36,19 @@ namespace NodeBrain
 			NB_ASSERT(false, "Invalid TopologyType. type must be a valid TopologyType value.");
 			return VK_PRIMITIVE_TOPOLOGY_MAX_ENUM;
 		}
+
+		static VkFormat InputFormatToVkFormat(InputFormat format)
+		{
+			switch (format)
+			{
+			case InputFormat::None: return VK_FORMAT_UNDEFINED;
+			case InputFormat::R32: return VK_FORMAT_R32_SFLOAT;
+			case InputFormat::R32G32: return VK_FORMAT_R32G32_SFLOAT;
+			case InputFormat::R32G32B32: return VK_FORMAT_R32G32B32_SFLOAT;
+			case InputFormat::R32G32B32A32: return VK_FORMAT_R32G32B32A32_SFLOAT;
+			default: return VK_FORMAT_UNDEFINED;
+			}
+		}
 	}
 
 	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanRenderContext& context, GraphicsPipelineConfiguration  configuration)
@@ -68,15 +82,27 @@ namespace NodeBrain
 		VkPipelineShaderStageCreateInfo shaderStages[2] = { vertShaderStageCreateInfo, fragShaderStageCreateInfo };
 
 		// Vertex Input
-		VkVertexInputBindingDescription bindingDescription = {};
-		bindingDescription.binding = 0;
-		bindingDescription.stride = 8 * sizeof(float);
-		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
+		uint32_t stride = 0;
 		std::vector<VkVertexInputAttributeDescription> attributes;
-		attributes.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 });
-		attributes.push_back({ 1, 0, VK_FORMAT_R32G32_SFLOAT, 3 * sizeof(float)});
-		attributes.push_back({ 2, 0, VK_FORMAT_R32G32B32_SFLOAT, 5 * sizeof(float)});
+
+		for (auto& inputVar : m_Configuration.VertexShader->GetInputVariables())
+		{
+			attributes.push_back({ inputVar.Location, 0, Utils::InputFormatToVkFormat(inputVar.Format), inputVar.Offset });
+			switch (inputVar.Format)
+			{
+			case InputFormat::None: break;
+			case InputFormat::R32: stride += 4; break;
+			case InputFormat::R32G32: stride += 8; break;
+			case InputFormat::R32G32B32: stride += 12; break;
+			case InputFormat::R32G32B32A32: stride += 16; break;
+			}
+		}
+
+		VkVertexInputBindingDescription bindingDescription = {};
+		bindingDescription.binding = 0; // TODO
+		bindingDescription.stride = stride;
+		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 		VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = {};
 		vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
