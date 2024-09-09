@@ -46,9 +46,9 @@ namespace NodeBrain
 	public:
 		virtual ~DescriptorSet() = default;
 
-		virtual void WriteBuffer(const std::shared_ptr<UniformBuffer>& buffer, uint32_t binding, uint32_t size, uint32_t offset = 0) = 0;
-		virtual void WriteImage(const std::shared_ptr<Texture2D>& image, uint32_t binding) = 0;
-		virtual void WriteSampler(const std::shared_ptr<Texture2D>& image, uint32_t binding) = 0;
+		virtual void WriteBuffer(const std::shared_ptr<UniformBuffer>& ubo, uint32_t binding, uint32_t size, uint32_t offset = 0) = 0;
+		virtual void WriteImage(const std::shared_ptr<Texture2D>& texture, uint32_t binding) = 0;
+		virtual void WriteSampler(const std::shared_ptr<Texture2D>& texture, uint32_t binding) = 0;
 		virtual void WriteSamplers(const std::vector<std::shared_ptr<Texture2D>>& textures, uint32_t binding) = 0;
 
 		[[nodiscard]] virtual const std::vector<LayoutBinding>& GetLayout() const = 0;

@@ -17,7 +17,7 @@ namespace NodeBrain
 		// --- Globals ---
 		m_Data.PerObjectUBO = UniformBuffer::Create(m_Context, nullptr, m_Data.MaxMesh * sizeof(glm::mat4));
 
-		// --- Shaders ---
+		// --- Built-in Shaders ---
 		// Unlit Color
 		m_Data.UnlitColorVertexShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitColor.vert.spv");
 		m_Data.UnlitColorFragmentShader = Shader::Create(m_Context, "Assets/Shaders/Compiled/UnlitColor.frag.spv");
@@ -50,7 +50,7 @@ namespace NodeBrain
 
 			offset += 4;
 		}
-		m_Data.QuadIndexBuffer = IndexBuffer::Create(m_Context, quadIndices, sizeof(uint32_t) * m_Data.MaxQuadIndices);
+		m_Data.QuadIndexBuffer = IndexBuffer::Create(m_Context, quadIndices, m_Data.MaxQuadIndices);
 		delete[] quadIndices;
 
 #pragma region Quad Vertex Definitions
@@ -201,19 +201,18 @@ namespace NodeBrain
 		m_RendererAPI.EndFrame();
 	}
 
+	// TODO: Change editor camera to a camera base class
 	void Renderer::BeginScene(const std::shared_ptr<EditorCamera>& editorCamera, const std::shared_ptr<Framebuffer>& targetFramebuffer)
 	{
 		NB_PROFILE_FN();
 
 		m_Data.UnlitColorPipeline->SetTargetFramebuffer(targetFramebuffer);
+		m_Data.UnlitTexturePipeline->SetTargetFramebuffer(targetFramebuffer);
 
 		m_RendererAPI.ClearColor({ 0.3f, 0.3f, 0.8f, 1.0f }, targetFramebuffer);
 
 		m_Data.PushConstantBuffer.ViewProjectionMatrix = editorCamera->GetProjectionMatrix() * editorCamera->GetViewMatrix();
 
-		m_Data.QuadIndexCount = 0;
-		m_Data.CubeVertexCount = 0;
-		m_Data.ObjectCount = 0;
 		m_Data.QuadVertexData.clear();
 		m_Data.CubeVertexData.clear();
 	}
@@ -241,11 +240,9 @@ namespace NodeBrain
 
 		for (size_t i = 0; i < 4; i++)
 		{
-			m_Data.QuadVertexData[material].push_back({ transform * glm::vec4(m_Data.QuadVertexPositions[i], 1.0f),
-				m_Data.QuadTexCoords[i], glm::vec3(1.0f, 1.0f, 1.0f)});
+			m_Data.QuadVertexData[material].emplace_back(transform * glm::vec4(m_Data.QuadVertexPositions[i], 1.0f),
+				m_Data.QuadTexCoords[i], glm::vec3(1.0f, 1.0f, 1.0f));
 		}
-
-		m_Data.QuadIndexCount += 6;
 	}
 
 	void Renderer::SubmitCube(const glm::mat4& transform, const std::shared_ptr<Texture2D>& texture, const glm::vec4& tint)
@@ -261,13 +258,11 @@ namespace NodeBrain
 		{
 			for (size_t j = 0; j < 6; j++)
 			{
-				const int index = (i * 6) + j;
-				m_Data.CubeVertexData[material].push_back({ transform * glm::vec4(m_Data.CubeVertexPositions[index], 1.0f),
-					m_Data.CubeTexCoords[index], glm::vec3(1.0f, 1.0f, 1.0f) });
+				const uint32_t index = (i * 6) + j;
+				m_Data.CubeVertexData[material].emplace_back(transform * glm::vec4(m_Data.CubeVertexPositions[index], 1.0f),
+					m_Data.CubeTexCoords[index], glm::vec3(1.0f, 1.0f, 1.0f));
 			}
 		}
-
-		m_Data.QuadIndexCount += 6;
 	}
 
 	void Renderer::RenderSubmitted()
@@ -282,15 +277,15 @@ namespace NodeBrain
 			std::shared_ptr<GraphicsPipeline> pipeline = material->GetPipeline();
 			const std::shared_ptr<DescriptorSet>& descriptorSet = material->GetDescriptorSet();
 
-			uint32_t indexCount = (vertices.size() / 4.0f) * 6.0f;
+			const uint32_t indexCount = (vertices.size() / 4.0f) * 6.0f;
 
+			// Set Data
 			m_Data.PushConstantBuffer.ModelMatrix = glm::mat4(1.0f);
 			pipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
-
 			m_Data.QuadVertexBuffer->SetData(vertices.data(), sizeof(VertexData) * vertices.size(), sizeof(VertexData) * vertexOffset);
 
+			// Render pass
 			pipeline->BindDescriptorSet(descriptorSet, 0);
-
 			m_RendererAPI.BeginRenderPass(pipeline);
 			m_Data.QuadVertexBuffer->Bind();
 			m_RendererAPI.DrawIndexed(m_Data.QuadIndexBuffer, indexCount, indexOffset);
@@ -307,13 +302,13 @@ namespace NodeBrain
 			std::shared_ptr<GraphicsPipeline> pipeline = material->GetPipeline();
 			const std::shared_ptr<DescriptorSet>& descriptorSet = material->GetDescriptorSet();
 
+			// Set Data
 			m_Data.PushConstantBuffer.ModelMatrix = glm::mat4(1.0f);
 			pipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
-
 			m_Data.CubeVertexBuffer->SetData(vertices.data(), sizeof(VertexData) * vertices.size(), sizeof(VertexData) * vertexOffset);
 
+			// Render pass
 			pipeline->BindDescriptorSet(descriptorSet, 0);
-
 			m_RendererAPI.BeginRenderPass(pipeline);
 			m_Data.CubeVertexBuffer->Bind();
 			m_RendererAPI.Draw(vertices.size(), vertexOffset);
@@ -328,17 +323,16 @@ namespace NodeBrain
 		const std::shared_ptr<GraphicsPipeline>& pipeline = material->GetPipeline();
 		const std::shared_ptr<DescriptorSet>& descriptorSet = material->GetDescriptorSet();
 
+		// Set data
 		m_Data.PushConstantBuffer.ModelMatrix = transform;
 		pipeline->SetPushConstantData(&m_Data.PushConstantBuffer, sizeof(PushConstantData), 0);
 
+		// Render pass
 		pipeline->BindDescriptorSet(descriptorSet, 0);
-
 		m_RendererAPI.BeginRenderPass(pipeline);
 		mesh->GetVertexBuffer()->Bind();
-		m_RendererAPI.DrawIndexed(mesh->GetIndexBuffer(), mesh->GetIndexBuffer()->GetSize(), 0);
+		m_RendererAPI.DrawIndexed(mesh->GetIndexBuffer(), mesh->GetIndexBuffer()->GetIndexCount(), 0);
 		m_RendererAPI.EndRenderPass(pipeline);
-
-		m_Data.ObjectCount++;
 	}
 
 	std::shared_ptr<GraphicsPipeline> Renderer::GetPipelineByName(const std::string& name) const

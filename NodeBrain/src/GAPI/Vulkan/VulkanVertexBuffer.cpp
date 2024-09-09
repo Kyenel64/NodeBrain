@@ -21,6 +21,7 @@ namespace NodeBrain
 		gpuAllocationCreateInfo.flags = 0;
 
 		// --- Staging Buffer ---
+		// TODO: Profile staging vs mapped vertex buffer since we set data every frame.
 		VkBufferCreateInfo stagingBufferCreateInfo = {};
 		stagingBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		stagingBufferCreateInfo.size = size;
@@ -79,7 +80,7 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		NB_ASSERT(data, "data null. Data must not be null.");
-		NB_ASSERT(size <= m_Size, "Buffer overflow. The size of data being set must be less than the allocated buffer size.");
+		NB_ASSERT(size + offset <= m_Size, "Buffer overflow. Size + offset must not exceed the size of the allocated buffer.");
 		
 		if (m_Context.IsInRuntime())
 		{

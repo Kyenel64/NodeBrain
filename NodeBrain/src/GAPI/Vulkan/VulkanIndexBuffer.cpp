@@ -3,16 +3,16 @@
 
 namespace NodeBrain
 {
-	VulkanIndexBuffer::VulkanIndexBuffer(VulkanRenderContext& context, const uint32_t* data, uint32_t size)
-		: m_Context(context), m_Size(size / sizeof(uint32_t))
+	VulkanIndexBuffer::VulkanIndexBuffer(VulkanRenderContext& context, const uint32_t* data, uint32_t indexCount)
+		: m_Context(context), m_IndexCount(indexCount)
 	{
 		NB_PROFILE_FN();
 
-		NB_ASSERT(size, "size is 0. Size must be a non-zero value in bytes.");
+		NB_ASSERT(indexCount, "indexCount is 0. Index count  must be a non-zero value in bytes.");
 
 		VkBufferCreateInfo bufferCreateInfo = {};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferCreateInfo.size = size;
+		bufferCreateInfo.size = m_IndexCount * sizeof(uint32_t);
 		bufferCreateInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
 		VmaAllocationCreateInfo allocationCreateInfo = {};
@@ -24,7 +24,7 @@ namespace NodeBrain
 
 		// Set initial data if provided
 		if (data)
-			memcpy(m_MappedData, data, size);
+			memcpy(m_MappedData, data, m_IndexCount * sizeof(uint32_t));
 	}
 
 	VulkanIndexBuffer::~VulkanIndexBuffer()
@@ -39,14 +39,13 @@ namespace NodeBrain
 		m_VmaAllocation = VK_NULL_HANDLE;
 	}
 
-	void VulkanIndexBuffer::SetData(const uint32_t* data, uint32_t size)
+	void VulkanIndexBuffer::SetData(const uint32_t* data, uint32_t indexCount)
 	{
 		NB_PROFILE_FN();
 
 		NB_ASSERT(data, "Invalid data. Provided data must not be null.");
-		NB_ASSERT(size <= m_Size, "Buffer overflow. The size of data being set must be less than the allocated buffer size.");
+		NB_ASSERT(indexCount <= m_IndexCount, "Buffer overflow. The size of data being set must be less than the allocated buffer size.");
 
-		memcpy(m_MappedData, data, size);
-		m_Size = size / sizeof(uint32_t); // m_Size should not be in bytes to be more clear.
+		memcpy(m_MappedData, data, indexCount * sizeof(uint32_t));
 	}
 }

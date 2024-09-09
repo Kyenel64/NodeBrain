@@ -53,8 +53,19 @@ namespace NodeBrain
 		NB_PROFILE_FN();
 
 		NB_ASSERT(data, "data null. Data must not be null.");
-		NB_ASSERT(size <= m_Size, "Buffer overflow. The size of data being set must be less than the allocated buffer size.");
+		NB_ASSERT(size + offset <= m_Size, "Buffer overflow. Size + offset must not exceed the size of the allocated buffer.");
 
-		memcpy((uint8_t*)m_MappedData[m_Context.GetSwapchain().GetFrameIndex()] + offset, data, size);
+		if (m_Context.IsInRuntime())
+		{
+			memcpy((uint8_t*)m_MappedData[m_Context.GetSwapchain().GetFrameIndex()] + offset, data, size);
+		}
+		else
+		{
+			m_Context.ImmediateSubmit([&](VkCommandBuffer cmdBuffer)
+			{
+				for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+					memcpy((uint8_t*)m_MappedData[i] + offset, data, size);
+			});
+		}
 	}
 }

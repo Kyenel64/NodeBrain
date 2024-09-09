@@ -23,6 +23,9 @@ namespace NodeBrain
 		glm::vec3 Position;
 		glm::vec2 UV;
 		glm::vec3 Normal;
+
+		VertexData(const glm::vec3& position, const glm::vec2& uv, const glm::vec3& normal)
+			: Position(position), UV(uv), Normal(normal) {}
 	};
 
 	struct PushConstantData
@@ -53,27 +56,22 @@ namespace NodeBrain
 		std::shared_ptr<Shader> UnlitTextureFragmentShader;
 		std::shared_ptr<GraphicsPipeline> UnlitTexturePipeline;
 
-		// --- Built-in Uniforms ---
-		std::shared_ptr<UniformBuffer> PerObjectUBO;
-		uint32_t ObjectCount = 0;
 
+		std::shared_ptr<UniformBuffer> PerObjectUBO;
 		PushConstantData PushConstantBuffer;
 
+
 		// --- Quad ---
-		uint32_t QuadIndexCount = 0;
 		std::shared_ptr<VertexBuffer> QuadVertexBuffer;
 		std::shared_ptr<IndexBuffer> QuadIndexBuffer;
-		std::unordered_map<std::shared_ptr<Material>, std::vector<VertexData>> QuadVertexData;
-
+		std::unordered_map<std::shared_ptr<Material>, std::vector<VertexData>> QuadVertexData; // TODO: Slow to use vector
 		glm::vec3 QuadVertexPositions[4];
 		glm::vec2 QuadTexCoords[4];
 
 
 		// --- Cube ---
-		uint32_t CubeVertexCount = 0;
 		std::shared_ptr<VertexBuffer> CubeVertexBuffer;
 		std::unordered_map<std::shared_ptr<Material>, std::vector<VertexData>> CubeVertexData;
-
 		glm::vec3 CubeVertexPositions[36];
 		glm::vec3 CubeNormals[36];
 		glm::vec2 CubeTexCoords[36];

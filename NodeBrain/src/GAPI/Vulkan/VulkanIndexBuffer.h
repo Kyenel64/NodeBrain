@@ -11,11 +11,12 @@ namespace NodeBrain
 	class VulkanIndexBuffer : public IndexBuffer
 	{
 	public:
-		VulkanIndexBuffer(VulkanRenderContext& context, const uint32_t* data, uint32_t size);
+		VulkanIndexBuffer(VulkanRenderContext& context, const uint32_t* data, uint32_t indexCount);
 		~VulkanIndexBuffer() override;
 
-		void SetData(const uint32_t* data, uint32_t size) override;
-		[[nodiscard]] uint32_t GetSize() const override { return m_Size; }
+		void SetData(const uint32_t* data, uint32_t indexCount) override;
+		[[nodiscard]] uint32_t GetSize() const override { return m_IndexCount * sizeof(uint32_t); }
+		[[nodiscard]] uint32_t GetIndexCount() const override { return m_IndexCount; }
 
 		[[nodiscard]] VkBuffer GetVkBuffer() const { return m_VkBuffer; }
 
@@ -27,6 +28,6 @@ namespace NodeBrain
 
 		void* m_MappedData = nullptr;
 
-		uint32_t m_Size;
+		uint32_t m_IndexCount;
 	};
 }

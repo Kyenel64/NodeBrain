@@ -51,14 +51,13 @@ namespace NodeBrain
 		}
 	}
 
-	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanRenderContext& context, GraphicsPipelineConfiguration  configuration)
+	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanRenderContext& context, GraphicsPipelineConfiguration configuration)
 		: m_Context(context), m_Configuration(std::move(configuration))
 	{
 		NB_PROFILE_FN();
 
 		NB_ASSERT(m_Configuration.VertexShader, "VertexShader null. Graphics pipeline must contain a valid vertex shader.");
 		NB_ASSERT(m_Configuration.VertexShader->GetShaderType() == ShaderType::Vertex, "Shader type invalid. Graphics pipeline must contain a vertex shader.")
-
 		NB_ASSERT(m_Configuration.FragmentShader, "FragmentShader null. Graphics pipeline must contain a valid fragment shader.");
 		NB_ASSERT(m_Configuration.FragmentShader->GetShaderType() == ShaderType::Fragment, "Shader type invalid. Graphics pipeline must contain a fragment shader.")
 
@@ -82,21 +81,12 @@ namespace NodeBrain
 		VkPipelineShaderStageCreateInfo shaderStages[2] = { vertShaderStageCreateInfo, fragShaderStageCreateInfo };
 
 		// Vertex Input
-
 		uint32_t stride = 0;
 		std::vector<VkVertexInputAttributeDescription> attributes;
-
 		for (auto& inputVar : m_Configuration.VertexShader->GetInputVariables())
 		{
 			attributes.push_back({ inputVar.Location, 0, Utils::InputFormatToVkFormat(inputVar.Format), inputVar.Offset });
-			switch (inputVar.Format)
-			{
-			case InputFormat::None: break;
-			case InputFormat::R32: stride += 4; break;
-			case InputFormat::R32G32: stride += 8; break;
-			case InputFormat::R32G32B32: stride += 12; break;
-			case InputFormat::R32G32B32A32: stride += 16; break;
-			}
+			stride += inputVar.Offset;
 		}
 
 		VkVertexInputBindingDescription bindingDescription = {};

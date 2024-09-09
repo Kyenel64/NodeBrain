@@ -22,7 +22,7 @@ namespace NodeBrain
 		[[nodiscard]] VkShaderModule GetVkShaderModule() const { return m_VkShaderModule; }
 
 	private:
-		void Reflect(SpvReflectShaderModule& module);
+		void Reflect(const SpvReflectShaderModule& module);
 
 	private:
 		VulkanRenderContext& m_Context;

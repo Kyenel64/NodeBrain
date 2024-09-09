@@ -89,7 +89,7 @@ namespace NodeBrain
         }
 
         m_VertexBuffer = VertexBuffer::Create(m_Context, vertices.data(), sizeof(MeshVertexData) * vertices.size());
-        m_IndexBuffer = IndexBuffer::Create(m_Context, indices.data(), sizeof(uint32_t) * indices.size());
+        m_IndexBuffer = IndexBuffer::Create(m_Context, indices.data(), indices.size());
     }
 
     void Mesh::ProcessNode(const aiNode* node, const aiScene* scene)

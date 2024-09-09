@@ -56,7 +56,7 @@ namespace NodeBrain
 			m_ShaderType = ShaderType::Fragment;
 
 		// Create shader module
-		std::vector<char> buffer = Utils::ReadFile(m_ShaderPath);
+		const std::vector<char> buffer = Utils::ReadFile(m_ShaderPath);
 
 		VkShaderModuleCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -84,40 +84,13 @@ namespace NodeBrain
 		m_VkShaderModule = VK_NULL_HANDLE;
 	}
 
-	void VulkanShader::Reflect(SpvReflectShaderModule& module)
+	void VulkanShader::Reflect(const SpvReflectShaderModule& module)
 	{
 		NB_PROFILE_FN();
 
-		uint32_t bindingCount = 0;
-		SpvReflectResult result = spvReflectEnumerateDescriptorBindings(&module, &bindingCount, nullptr);
-		NB_ASSERT(result == SPV_REFLECT_RESULT_SUCCESS, result);
-		SpvReflectDescriptorBinding** bindings = (SpvReflectDescriptorBinding**)malloc(bindingCount * sizeof(SpvReflectDescriptorBinding*));
-		result = spvReflectEnumerateDescriptorBindings(&module, &bindingCount, bindings);
-		NB_ASSERT(result == SPV_REFLECT_RESULT_SUCCESS, result);
-
-		for (size_t i = 0; i < bindingCount; i++)
-		{
-			const SpvReflectDescriptorBinding& spvBinding = *(bindings[i]);
-			LayoutBinding binding = {};
-			binding.Binding = spvBinding.binding;
-			binding.Set = spvBinding.set;
-			binding.Count = spvBinding.count;
-			binding.Name = spvBinding.name;
-			binding.Type = Utils::SpvBindingTypeToBindingType(spvBinding.descriptor_type);
-
-			for (size_t j = 0; j < spvBinding.block.member_count; j++)
-			{
-				const SpvReflectBlockVariable& variable = spvBinding.block.members[j];
-				binding.UniformVariables.push_back({ variable.name, variable.size, variable.offset });
-			}
-
-			m_Layout.emplace_back(binding);
-		}
-
-		delete[] bindings;
-
+		// Input variables
 		uint32_t layoutCount = 0;
-		result = spvReflectEnumerateInputVariables(&module, &layoutCount, nullptr);
+		SpvReflectResult result = spvReflectEnumerateInputVariables(&module, &layoutCount, nullptr);
 		NB_ASSERT(result == SPV_REFLECT_RESULT_SUCCESS, result);
 		SpvReflectInterfaceVariable** inputs = (SpvReflectInterfaceVariable**)malloc(layoutCount * sizeof(SpvReflectInterfaceVariable*));
 		result = spvReflectEnumerateInputVariables(&module, &layoutCount, inputs);
@@ -146,5 +119,35 @@ namespace NodeBrain
 		}
 
 		delete[] inputs;
+
+
+		// Descriptors
+		uint32_t bindingCount = 0;
+		result = spvReflectEnumerateDescriptorBindings(&module, &bindingCount, nullptr);
+		NB_ASSERT(result == SPV_REFLECT_RESULT_SUCCESS, result);
+		SpvReflectDescriptorBinding** bindings = (SpvReflectDescriptorBinding**)malloc(bindingCount * sizeof(SpvReflectDescriptorBinding*));
+		result = spvReflectEnumerateDescriptorBindings(&module, &bindingCount, bindings);
+		NB_ASSERT(result == SPV_REFLECT_RESULT_SUCCESS, result);
+
+		for (size_t i = 0; i < bindingCount; i++)
+		{
+			const SpvReflectDescriptorBinding& spvBinding = *(bindings[i]);
+			LayoutBinding binding = {};
+			binding.Binding = spvBinding.binding;
+			binding.Set = spvBinding.set;
+			binding.Count = spvBinding.count;
+			binding.Name = spvBinding.name;
+			binding.Type = Utils::SpvBindingTypeToBindingType(spvBinding.descriptor_type);
+
+			for (size_t j = 0; j < spvBinding.block.member_count; j++)
+			{
+				const SpvReflectBlockVariable& variable = spvBinding.block.members[j];
+				binding.UniformVariables.push_back({ variable.name, variable.size, variable.offset });
+			}
+
+			m_Layout.emplace_back(binding);
+		}
+
+		delete[] bindings;
 	}
 }

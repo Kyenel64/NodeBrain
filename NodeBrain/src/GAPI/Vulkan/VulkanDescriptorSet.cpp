@@ -26,6 +26,7 @@ namespace NodeBrain
 			setLayoutbindings.push_back(setLayoutBinding);
 		}
 
+		// Flags
 		VkDescriptorBindingFlags flags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
 		VkDescriptorSetLayoutBindingFlagsCreateInfo flagsCreateInfo = {};
 		flagsCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
@@ -61,24 +62,26 @@ namespace NodeBrain
 		m_VkDescriptorSetLayout = VK_NULL_HANDLE;
 	}
 
-	void VulkanDescriptorSet::WriteBuffer(const std::shared_ptr<UniformBuffer>& buffer, uint32_t binding, uint32_t size, uint32_t offset)
+	void VulkanDescriptorSet::WriteBuffer(const std::shared_ptr<UniformBuffer>& ubo, uint32_t binding, uint32_t size, uint32_t offset)
 	{
 		NB_PROFILE_FN();
 
-		NB_ASSERT(buffer, "Invalid uniform buffer");
+		// Validate descriptor at provided binding
+		NB_ASSERT(ubo, "Invalid uniform buffer");
 		bool isDynamic = false;
 		for (auto& layout : m_Layout)
 		{
 			if (layout.Binding == binding)
 			{
-				if (layout.Type == BindingType::UniformBufferDynamic)
-					isDynamic = true;
 				NB_ASSERT(layout.Type == BindingType::UniformBuffer || layout.Type == BindingType::UniformBufferDynamic,
 					"Invalid binding type at index {0}. Binding must be of type UniformBuffer.", binding);
+
+				if (layout.Type == BindingType::UniformBufferDynamic)
+					isDynamic = true;
 			}
 		}
 
-		std::shared_ptr<VulkanUniformBuffer> vulkanUBO = dynamic_pointer_cast<VulkanUniformBuffer>(buffer);
+		std::shared_ptr<VulkanUniformBuffer> vulkanUBO = dynamic_pointer_cast<VulkanUniformBuffer>(ubo);
 
 		VkDescriptorBufferInfo bufferInfo = {};
 		bufferInfo.buffer = vulkanUBO->GetVkBuffer();
@@ -89,7 +92,7 @@ namespace NodeBrain
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		write.dstBinding = binding;
 		write.descriptorCount = 1;
-			write.descriptorType = isDynamic ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		write.descriptorType = isDynamic ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		write.pBufferInfo = &bufferInfo;
 
 		if (m_Context.IsInRuntime())
@@ -112,11 +115,12 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		// Validate descriptor at provided binding
 		NB_ASSERT(texture, "Invalid texture");
 		for (auto& layout : m_Layout)
 		{
 			if (layout.Binding == binding)
-				NB_ASSERT(layout.Type == BindingType::StorageImage, "Invalid binding type at index {0}. Binding must be of type StorageImage.", binding);
+				NB_ASSERT(layout.Type == BindingType::StorageImage, "Invalid descriptor type. Descriptor at binding must be of type StorageImage.");
 		}
 		
 		std::shared_ptr<VulkanTexture2D> vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(texture);
@@ -153,11 +157,12 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		// Validate descriptor at provided binding
 		NB_ASSERT(texture, "Invalid texture");
 		for (auto& layout : m_Layout)
 		{
 			if (layout.Binding == binding)
-			NB_ASSERT(layout.Type == BindingType::ImageSampler, "Invalid binding type. Binding must be of type ImageSampler.");
+			NB_ASSERT(layout.Type == BindingType::ImageSampler, "Invalid descriptor type. Descriptor at binding must be of type ImageSampler.");
 		}
 
 		const std::shared_ptr<VulkanTexture2D>& vulkanTexture = dynamic_pointer_cast<VulkanTexture2D>(texture);
@@ -193,11 +198,12 @@ namespace NodeBrain
 	{
 		NB_PROFILE_FN();
 
+		// Validate descriptor at provided binding
 		NB_ASSERT(!textures.empty(), "textures is empty.");
 		for (auto& layout : m_Layout)
 		{
 			if (layout.Binding == binding)
-				NB_ASSERT(layout.Type == BindingType::ImageSampler, "Invalid binding type. Binding must be of type ImageSampler.");
+				NB_ASSERT(layout.Type == BindingType::ImageSampler, "Invalid descriptor type. Descriptor at binding must be of type ImageSampler.");
 		}
 
 		std::vector<VkDescriptorImageInfo> imageInfos;

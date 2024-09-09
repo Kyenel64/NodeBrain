@@ -23,8 +23,8 @@ namespace NodeBrain
 		VulkanRenderContext& m_Context;
 
 		VkBuffer m_StagingBuffer[FRAMES_IN_FLIGHT];
-		VkBuffer m_GPUBuffer[FRAMES_IN_FLIGHT];
 		VmaAllocation m_StagingAllocation[FRAMES_IN_FLIGHT];
+		VkBuffer m_GPUBuffer[FRAMES_IN_FLIGHT];
 		VmaAllocation m_GPUAllocation[FRAMES_IN_FLIGHT];
 		void* m_StagingMappedData[FRAMES_IN_FLIGHT];
 
